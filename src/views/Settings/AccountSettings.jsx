@@ -1,5 +1,10 @@
 import { Capacitor } from '@capacitor/core'
-import { Box, Button, Typography } from '@mui/joy'
+import {
+  DeleteOutlineRounded,
+  LockOutlined,
+  WorkspacePremiumRounded,
+} from '@mui/icons-material'
+import { Box, Button, Chip, Sheet, Typography } from '@mui/joy'
 import { Purchases } from '@revenuecat/purchases-capacitor'
 import { useQueryClient } from '@tanstack/react-query'
 import moment from 'moment'
@@ -11,10 +16,18 @@ import { useLocalization } from '../../contexts/LocalizationContext'
 import { useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { CancelSubscription, UpdatePassword } from '../../utils/Fetcher'
+import LoadingComponent from '../components/Loading'
 import NativeCancelSubscriptionModal from '../Modals/Inputs/NativeCancelSubscriptionModal'
 import PassowrdChangeModal from '../Modals/Inputs/PasswordChangeModal'
 import UserDeletionModal from '../Modals/Inputs/UserDeletionModal'
 import SettingsLayout from './SettingsLayout'
+
+const surfaceSx = {
+  bgcolor: 'background.surface',
+  border: '1px solid',
+  borderColor: 'divider',
+  borderRadius: 'xl',
+}
 
 const AccountSettings = () => {
   const { t } = useTranslation('settings')
@@ -27,244 +40,364 @@ const AccountSettings = () => {
   const [subscriptionModal, setSubscriptionModal] = useState(false)
   const [userDeletionModal, setUserDeletionModal] = useState(false)
   const [nativeCancelModal, setNativeCancelModal] = useState(false)
+  const [isPurchasing, setIsPurchasing] = useState(false)
 
   useEffect(() => {
-    async function configurePurchases() {
-      if (Capacitor.isNativePlatform() && userProfile) {
-        await Purchases.configure({
-          apiKey:
-            Capacitor.getPlatform() === 'ios'
-              ? import.meta.env.VITE_REACT_APP_REVENUECAT_API_KEY_IOS
-              : import.meta.env.VITE_REACT_APP_REVENUECAT_API_KEY_ANDROID,
-          appUserID: String(userProfile?.id),
-        })
-      }
-    }
-    configurePurchases()
+    if (!Capacitor.isNativePlatform() || !userProfile) return
+
+    Purchases.configure({
+      apiKey:
+        Capacitor.getPlatform() === 'ios'
+          ? import.meta.env.VITE_REACT_APP_REVENUECAT_API_KEY_IOS
+          : import.meta.env.VITE_REACT_APP_REVENUECAT_API_KEY_ANDROID,
+      appUserID: String(userProfile.id),
+    }).catch(error => console.error('Failed to configure purchases:', error))
   }, [userProfile])
 
-  const getSubscriptionDetails = () => {
-    if (userProfile?.subscription === 'active') {
-      return t('accountSettings.activeDescription', {
-        date: fmt.date(userProfile?.expiration),
+  if (!userProfile) return <LoadingComponent />
+
+  const subscriptionIsActive = userProfile.subscription === 'active'
+  const subscriptionIsCancelled = userProfile.subscription === 'cancelled'
+  const expirationIsFuture = moment(userProfile.expiration).isAfter(moment())
+  const hasPlusAccess =
+    subscriptionIsActive || (subscriptionIsCancelled && expirationIsFuture)
+
+  const subscriptionStatus = subscriptionIsActive
+    ? t('accountSettings.plus')
+    : subscriptionIsCancelled && expirationIsFuture
+      ? t('accountSettings.plusUntil', {
+          date: fmt.date(userProfile.expiration),
+        })
+      : t('accountSettings.free')
+
+  const subscriptionDetails = subscriptionIsActive
+    ? t('accountSettings.activeDescription', {
+        date: fmt.date(userProfile.expiration),
       })
-    } else if (userProfile?.subscription === 'cancelled') {
-      return t('accountSettings.cancelledDescription', {
-        date: fmt.date(userProfile?.expiration),
-      })
-    } else {
-      return t('accountSettings.freeDescription')
+    : subscriptionIsCancelled
+      ? t('accountSettings.cancelledDescription', {
+          date: fmt.date(userProfile.expiration),
+        })
+      : t('accountSettings.freeDescription')
+
+  const showPurchaseError = error => {
+    if (error?.code === '1') return
+
+    const errorKeys = {
+      2: 'storeConnection',
+      3: 'notAllowed',
+      4: 'unavailable',
+      5: 'alreadyProcessed',
+      6: 'receiptMissing',
+      7: 'networkError',
+      8: 'invalidReceipt',
+      9: 'pending',
     }
+    const key = errorKeys[error?.code]
+    showNotification({
+      type: error?.code === '9' ? 'warning' : 'error',
+      message: key
+        ? t(`accountSettings.purchase.${key}`)
+        : t('accountSettings.purchase.failed', {
+            error: error?.message || t('accountSettings.purchase.unknownError'),
+          }),
+    })
   }
 
-  const getSubscriptionStatus = () => {
-    if (userProfile?.subscription === 'active') {
-      return t('accountSettings.plus')
-    } else if (userProfile?.subscription === 'cancelled') {
-      if (moment().isBefore(userProfile?.expiration)) {
-        return t('accountSettings.plusUntil', {
-          date: fmt.date(userProfile?.expiration),
+  const handleUpgrade = async () => {
+    if (!Capacitor.isNativePlatform()) {
+      setSubscriptionModal(true)
+      return
+    }
+
+    setIsPurchasing(true)
+    try {
+      const { RevenueCatUI } =
+        await import('@revenuecat/purchases-capacitor-ui')
+      const offering = await Purchases.getOfferings()
+      await RevenueCatUI.presentPaywall({ offering: offering.current })
+
+      const { customerInfo } = await Purchases.getCustomerInfo()
+      if (customerInfo.entitlements.active['Donetick Plus']) {
+        await queryClient.invalidateQueries({ queryKey: ['userProfile'] })
+        showNotification({
+          type: 'success',
+          message: t('accountSettings.purchase.success'),
         })
       }
-      return t('accountSettings.free')
-    } else {
-      return t('accountSettings.free')
+    } catch (error) {
+      showPurchaseError(error)
+    } finally {
+      setIsPurchasing(false)
     }
   }
 
-  if (!userProfile) {
-    return (
-      <SettingsLayout title={t('accountSettings.title')}>
-        <div>{t('common.loading')}</div>
-      </SettingsLayout>
-    )
+  const handlePasswordChange = async password => {
+    setChangePasswordModal(false)
+    if (!password) return
+
+    const response = await UpdatePassword(password)
+    showNotification({
+      type: response.ok ? 'success' : 'error',
+      message: response.ok
+        ? t('accountSettings.passwordChanged')
+        : t('accountSettings.passwordChangeFailed'),
+    })
+  }
+
+  const handleCancelSubscription = async action => {
+    setNativeCancelModal(false)
+    if (action !== 'desktop') return
+
+    const response = await CancelSubscription()
+    if (response.ok) {
+      showNotification({
+        type: 'success',
+        message: t('accountSettings.subscriptionCancelled'),
+      })
+      await queryClient.invalidateQueries({ queryKey: ['userProfile'] })
+      window.location.reload()
+    } else {
+      showNotification({
+        type: 'error',
+        message: t('accountSettings.subscriptionCancelFailed'),
+      })
+    }
   }
 
   return (
     <SettingsLayout title={t('accountSettings.title')}>
-      <div className='grid gap-4'>
-        <Typography level='body-md'>
+      <Box sx={{ maxWidth: 720, pb: 4 }}>
+        <Typography
+          level='body-md'
+          textColor='text.secondary'
+          sx={{ maxWidth: 600, mb: 3, mt: -1, textWrap: 'pretty' }}
+        >
           {t('accountSettings.description')}
         </Typography>
-        <Typography level='title-md' mb={-1}>
-          {t('accountSettings.accountType', { type: getSubscriptionStatus() })}
-        </Typography>
-        <Typography level='body-sm'>{getSubscriptionDetails()}</Typography>
-        <Box>
-          <Button
+
+        <Sheet
+          sx={{
+            ...surfaceSx,
+            overflow: 'hidden',
+            position: 'relative',
+            p: { xs: 2, sm: 2.5 },
+            '&::after': {
+              bgcolor: hasPlusAccess ? 'primary.softBg' : 'neutral.softBg',
+              borderRadius: '50%',
+              content: '""',
+              height: 180,
+              opacity: 0.7,
+              position: 'absolute',
+              right: -70,
+              top: -100,
+              width: 180,
+            },
+          }}
+        >
+          <Box
             sx={{
-              width: '110px',
-              mb: 1,
-            }}
-            disabled={
-              userProfile?.subscription === 'active' ||
-              (moment(userProfile?.expiration).isAfter(moment()) &&
-                userProfile?.subscription !== 'cancelled')
-            }
-            onClick={async () => {
-              if (Capacitor.isNativePlatform()) {
-                try {
-                  const { RevenueCatUI } =
-                    await import('@revenuecat/purchases-capacitor-ui')
-
-                  const offering = await Purchases.getOfferings()
-                  await RevenueCatUI.presentPaywall({
-                    offering: offering.current,
-                  })
-
-                  const { customerInfo } = await Purchases.getCustomerInfo()
-                  if (customerInfo.entitlements.active['Donetick Plus']) {
-                    queryClient.invalidateQueries({ queryKey: ['userProfile'] })
-                    queryClient.refetchQueries({ queryKey: ['userProfile'] })
-                    showNotification({
-                      type: 'success',
-                      message: t('accountSettings.purchase.success'),
-                    })
-                  }
-                } catch (error) {
-                  console.log('Purchase error:', error)
-
-                  if (error.code === '1') {
-                    return
-                  } else if (error.code === '2') {
-                    showNotification({
-                      type: 'error',
-                      message: t('accountSettings.purchase.storeConnection'),
-                    })
-                  } else if (error.code === '3') {
-                    showNotification({
-                      type: 'error',
-                      message: t('accountSettings.purchase.notAllowed'),
-                    })
-                  } else if (error.code === '4') {
-                    showNotification({
-                      type: 'error',
-                      message: t('accountSettings.purchase.unavailable'),
-                    })
-                  } else if (error.code === '5') {
-                    showNotification({
-                      type: 'error',
-                      message: t('accountSettings.purchase.alreadyProcessed'),
-                    })
-                  } else if (error.code === '6') {
-                    showNotification({
-                      type: 'error',
-                      message: t('accountSettings.purchase.receiptMissing'),
-                    })
-                  } else if (error.code === '7') {
-                    showNotification({
-                      type: 'error',
-                      message: t('accountSettings.purchase.networkError'),
-                    })
-                  } else if (error.code === '8') {
-                    showNotification({
-                      type: 'error',
-                      message: t('accountSettings.purchase.invalidReceipt'),
-                    })
-                  } else if (error.code === '9') {
-                    showNotification({
-                      type: 'warning',
-                      message: t('accountSettings.purchase.pending'),
-                    })
-                  } else {
-                    console.error('Unexpected purchase error:', error)
-                    console.error('Error occurred in purchase flow')
-                    showNotification({
-                      type: 'error',
-                      message: t('accountSettings.purchase.failed', {
-                        error:
-                          error.message ||
-                          t('accountSettings.purchase.unknownError'),
-                      }),
-                    })
-                  }
-                }
-              } else {
-                setSubscriptionModal(true)
-              }
+              alignItems: 'flex-start',
+              display: 'flex',
+              gap: 1.5,
+              mb: 2,
+              position: 'relative',
+              zIndex: 1,
             }}
           >
-            {t('accountSettings.upgrade')}
-          </Button>
-
-          {userProfile?.subscription === 'active' && (
-            <Button
+            <Box
               sx={{
-                width: '110px',
-                mb: 1,
-                ml: 1,
-              }}
-              variant='outlined'
-              color='danger'
-              onClick={() => {
-                setNativeCancelModal(true)
+                bgcolor: hasPlusAccess ? 'primary.softBg' : 'background.level2',
+                borderRadius: '50%',
+                color: hasPlusAccess ? 'primary.plainColor' : 'text.secondary',
+                display: 'grid',
+                flex: '0 0 auto',
+                height: 48,
+                placeItems: 'center',
+                width: 48,
               }}
             >
-              {t('accountSettings.cancel')}
-            </Button>
-          )}
-        </Box>
+              <WorkspacePremiumRounded />
+            </Box>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Box
+                sx={{
+                  alignItems: 'center',
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: 1,
+                  mb: 0.5,
+                }}
+              >
+                <Typography level='title-lg' sx={{ fontWeight: 650 }}>
+                  {t('accountSettings.accountType', {
+                    type: subscriptionStatus,
+                  })}
+                </Typography>
+                <Chip
+                  size='sm'
+                  variant='soft'
+                  color={
+                    subscriptionIsActive
+                      ? 'primary'
+                      : subscriptionIsCancelled && expirationIsFuture
+                        ? 'warning'
+                        : 'neutral'
+                  }
+                >
+                  {hasPlusAccess
+                    ? t('accountSettings.plus')
+                    : t('accountSettings.free')}
+                </Chip>
+              </Box>
+              <Typography
+                level='body-sm'
+                textColor='text.secondary'
+                sx={{ maxWidth: 540, textWrap: 'pretty' }}
+              >
+                {subscriptionDetails}
+              </Typography>
+            </Box>
+          </Box>
+
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
+              gap: 1,
+              position: 'relative',
+              zIndex: 1,
+            }}
+          >
+            {!subscriptionIsActive && (
+              <Button
+                loading={isPurchasing}
+                onClick={handleUpgrade}
+                startDecorator={<WorkspacePremiumRounded />}
+                sx={{ minWidth: 128 }}
+              >
+                {t('accountSettings.upgrade')}
+              </Button>
+            )}
+            {subscriptionIsActive && (
+              <Button
+                variant='outlined'
+                color='neutral'
+                onClick={() => setNativeCancelModal(true)}
+              >
+                {t('accountSettings.cancel')}
+              </Button>
+            )}
+          </Box>
+        </Sheet>
+
         {import.meta.env.VITE_IS_SELF_HOSTED === 'true' && (
-          <Box>
-            <Typography level='title-md' mb={1}>
+          <Box component='section' sx={{ mt: 3.5 }}>
+            <Typography
+              level='title-md'
+              sx={{ fontWeight: 650, letterSpacing: '-0.01em', mb: 1.25 }}
+            >
               {t('accountSettings.password')}
             </Typography>
-            <Typography mb={1} level='body-sm'></Typography>
-            <Button
-              variant='soft'
-              onClick={() => {
-                setChangePasswordModal(true)
+            <Sheet
+              sx={{
+                ...surfaceSx,
+                alignItems: { xs: 'flex-start', sm: 'center' },
+                display: 'flex',
+                flexDirection: { xs: 'column', sm: 'row' },
+                gap: 1.5,
+                justifyContent: 'space-between',
+                p: 2,
               }}
             >
-              {t('accountSettings.changePassword')}
-            </Button>
-            {changePasswordModal ? (
-              <PassowrdChangeModal
-                isOpen={changePasswordModal}
-                onClose={password => {
-                  if (password) {
-                    UpdatePassword(password).then(resp => {
-                      if (resp.ok) {
-                        showNotification({
-                          type: 'success',
-                          message: t('accountSettings.passwordChanged'),
-                        })
-                      } else {
-                        showNotification({
-                          type: 'error',
-                          message: t('accountSettings.passwordChangeFailed'),
-                        })
-                      }
-                    })
-                  }
-                  setChangePasswordModal(false)
-                }}
-              />
-            ) : null}
+              <Box sx={{ alignItems: 'center', display: 'flex', gap: 1.5 }}>
+                <Box
+                  sx={{
+                    bgcolor: 'background.level2',
+                    borderRadius: '50%',
+                    color: 'text.secondary',
+                    display: 'grid',
+                    flex: '0 0 auto',
+                    height: 42,
+                    placeItems: 'center',
+                    width: 42,
+                  }}
+                >
+                  <LockOutlined />
+                </Box>
+                <Typography level='body-md'>••••••••••••</Typography>
+              </Box>
+              <Button
+                variant='soft'
+                startDecorator={<LockOutlined />}
+                onClick={() => setChangePasswordModal(true)}
+                sx={{ width: { xs: '100%', sm: 'auto' } }}
+              >
+                {t('accountSettings.changePassword')}
+              </Button>
+            </Sheet>
           </Box>
         )}
 
-        <Box>
-          <Typography level='title-md' mb={1} color='danger'>
-            {t('accountSettings.dangerZone')}
-          </Typography>
-          <Typography level='body-sm' mb={2} color='neutral'>
-            {t('accountSettings.dangerZoneDescription')}
-          </Typography>
-          <Button
+        <Box component='section' sx={{ mt: 4 }}>
+          <Sheet
             variant='outlined'
             color='danger'
-            onClick={() => setUserDeletionModal(true)}
+            sx={{
+              borderRadius: 'xl',
+              p: { xs: 2, sm: 2.5 },
+            }}
           >
-            {t('accountSettings.deleteAccount')}
-          </Button>
+            <Box
+              sx={{
+                alignItems: { xs: 'stretch', sm: 'center' },
+                display: 'flex',
+                flexDirection: { xs: 'column', sm: 'row' },
+                gap: 2,
+                justifyContent: 'space-between',
+              }}
+            >
+              <Box>
+                <Typography
+                  level='title-md'
+                  textColor='danger.plainColor'
+                  sx={{ fontWeight: 650, mb: 0.5 }}
+                >
+                  {t('accountSettings.dangerZone')}
+                </Typography>
+                <Typography
+                  level='body-sm'
+                  textColor='text.secondary'
+                  sx={{ maxWidth: 480, textWrap: 'pretty' }}
+                >
+                  {t('accountSettings.dangerZoneDescription')}
+                </Typography>
+              </Box>
+              <Button
+                variant='outlined'
+                color='danger'
+                startDecorator={<DeleteOutlineRounded />}
+                onClick={() => setUserDeletionModal(true)}
+                sx={{ flexShrink: 0 }}
+              >
+                {t('accountSettings.deleteAccount')}
+              </Button>
+            </Box>
+          </Sheet>
         </Box>
-      </div>
+      </Box>
 
       <SubscriptionModal
         open={subscriptionModal}
         onClose={() => setSubscriptionModal(false)}
       />
+
+      {changePasswordModal && (
+        <PassowrdChangeModal
+          isOpen={changePasswordModal}
+          onClose={handlePasswordChange}
+        />
+      )}
 
       <UserDeletionModal
         isOpen={userDeletionModal}
@@ -282,25 +415,7 @@ const AccountSettings = () => {
 
       <NativeCancelSubscriptionModal
         isOpen={nativeCancelModal}
-        onClose={action => {
-          setNativeCancelModal(false)
-          if (action === 'desktop') {
-            CancelSubscription().then(resp => {
-              if (resp.ok) {
-                showNotification({
-                  type: 'success',
-                  message: t('accountSettings.subscriptionCancelled'),
-                })
-                window.location.reload()
-              } else {
-                showNotification({
-                  type: 'error',
-                  message: t('accountSettings.subscriptionCancelFailed'),
-                })
-              }
-            })
-          }
-        }}
+        onClose={handleCancelSubscription}
       />
     </SettingsLayout>
   )

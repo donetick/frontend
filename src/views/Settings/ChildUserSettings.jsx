@@ -1,14 +1,21 @@
-import DeleteIcon from '@mui/icons-material/Delete'
-import EditIcon from '@mui/icons-material/Edit'
-import PersonAddIcon from '@mui/icons-material/PersonAdd'
+import {
+  DeleteOutlineRounded,
+  EditRounded,
+  InfoOutlined,
+  LockResetRounded,
+  PeopleOutlineRounded,
+  PersonAddRounded,
+  WorkspacePremiumRounded,
+} from '@mui/icons-material'
 import {
   Avatar,
   Box,
   Button,
-  Card,
-  CardContent,
+  Chip,
+  CircularProgress,
   Divider,
   IconButton,
+  Sheet,
   Typography,
 } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
@@ -30,6 +37,13 @@ import CreateChildUserModal from '../Modals/Inputs/CreateChildUserModal'
 import PasswordChangeModal from '../Modals/Inputs/PasswordChangeModal'
 import SettingsLayout from './SettingsLayout'
 
+const surfaceSx = {
+  bgcolor: 'background.surface',
+  border: '1px solid',
+  borderColor: 'divider',
+  borderRadius: 'xl',
+}
+
 const ChildUserSettings = () => {
   const { t } = useTranslation('settings')
   const { fmt } = useLocalization()
@@ -44,8 +58,12 @@ const ChildUserSettings = () => {
   const [selectedChildId, setSelectedChildId] = useState(null)
   const [deletingChildId, setDeletingChildId] = useState(null)
 
-  // Check if user is a parent (not a child user)
   const isParentUser = userProfile?.userType === 0 && !userProfile?.parentUserId
+
+  const refreshChildren = async () => {
+    await queryClient.invalidateQueries({ queryKey: ['childUsers'] })
+    await refetch()
+  }
 
   const handleCreateChild = async childData => {
     try {
@@ -54,21 +72,19 @@ const ChildUserSettings = () => {
         childData.displayName,
         childData.password,
       )
-
-      if (response.ok) {
-        const result = await response.json()
-        showNotification({
-          type: 'success',
-          message: t('subaccounts.createdSuccess', {
-            name: result.res.displayName,
-          }),
-        })
-        refetch()
-        queryClient.invalidateQueries({ queryKey: ['childUsers'] })
-      } else {
+      if (!response.ok) {
         const error = await response.json()
         throw new Error(error.error || t('subaccounts.createFailedGeneric'))
       }
+
+      const result = await response.json()
+      showNotification({
+        type: 'success',
+        message: t('subaccounts.createdSuccess', {
+          name: result.res.displayName,
+        }),
+      })
+      await refreshChildren()
     } catch (error) {
       showNotification({
         type: 'error',
@@ -80,21 +96,18 @@ const ChildUserSettings = () => {
 
   const handleUpdatePassword = async newPassword => {
     if (!selectedChildId || !newPassword) return
-
     try {
       const response = await UpdateChildPassword(selectedChildId, newPassword)
-
-      if (response.ok) {
-        showNotification({
-          type: 'success',
-          message: t('subaccounts.passwordUpdated'),
-        })
-      } else {
+      if (!response.ok) {
         const error = await response.json()
         throw new Error(
           error.error || t('subaccounts.passwordUpdateFailedGeneric'),
         )
       }
+      showNotification({
+        type: 'success',
+        message: t('subaccounts.passwordUpdated'),
+      })
     } catch (error) {
       showNotification({
         type: 'error',
@@ -105,7 +118,7 @@ const ChildUserSettings = () => {
     }
   }
 
-  const handleDeleteChild = async (childId, childName) => {
+  const handleDeleteChild = (childId, childName) => {
     showConfirmation(
       t('subaccounts.deleteConfirmMessage', { name: childName }),
       t('subaccounts.deleteConfirmTitle'),
@@ -113,18 +126,15 @@ const ChildUserSettings = () => {
         setDeletingChildId(childId)
         try {
           const response = await DeleteChildUser(childId)
-
-          if (response.ok) {
-            showNotification({
-              type: 'success',
-              message: t('subaccounts.deleted', { name: childName }),
-            })
-            refetch()
-            queryClient.invalidateQueries({ queryKey: ['childUsers'] })
-          } else {
+          if (!response.ok) {
             const error = await response.json()
             throw new Error(error.error || t('subaccounts.deleteFailedGeneric'))
           }
+          showNotification({
+            type: 'success',
+            message: t('subaccounts.deleted', { name: childName }),
+          })
+          await refreshChildren()
         } catch (error) {
           showNotification({
             type: 'error',
@@ -143,141 +153,263 @@ const ChildUserSettings = () => {
   if (!isParentUser) {
     return (
       <SettingsLayout title={t('subaccounts.notParentTitle')}>
-        <Typography level='body-md' color='warning'>
-          {t('subaccounts.notParentMessage')}
-        </Typography>
+        <Sheet
+          variant='soft'
+          color='warning'
+          sx={{
+            alignItems: 'center',
+            borderRadius: 'xl',
+            display: 'flex',
+            gap: 1.5,
+            maxWidth: 600,
+            p: 2,
+          }}
+        >
+          <InfoOutlined />
+          <Typography level='body-md'>
+            {t('subaccounts.notParentMessage')}
+          </Typography>
+        </Sheet>
       </SettingsLayout>
     )
   }
 
+  const children = childUsers || []
+  const howItWorks = [
+    t('subaccounts.howItWorks1'),
+    t('subaccounts.howItWorks2'),
+    t('subaccounts.howItWorks3'),
+    t('subaccounts.howItWorks4'),
+  ]
+
   return (
     <SettingsLayout title={t('subaccounts.title')}>
-      <div className='grid gap-4'>
-        <Typography level='body-md'>{t('subaccounts.description')}</Typography>
-        {!isPlusAccount(userProfile) && (
-          <Typography level='body-sm' color='warning' sx={{ mt: 1 }}>
-            {t('subaccounts.freePlanNotice')}
-          </Typography>
-        )}
+      <Box sx={{ maxWidth: 760, pb: 4 }}>
         <Box
           sx={{
+            alignItems: { xs: 'flex-start', sm: 'center' },
             display: 'flex',
+            flexDirection: { xs: 'column', sm: 'row' },
+            gap: 2,
             justifyContent: 'space-between',
-            alignItems: 'center',
+            mb: 3,
+            mt: -1,
           }}
         >
-          <Typography level='title-lg'>
-            {t('subaccounts.count', { count: childUsers?.length || 0 })}
+          <Typography
+            level='body-md'
+            textColor='text.secondary'
+            sx={{ maxWidth: 560, textWrap: 'pretty' }}
+          >
+            {t('subaccounts.description')}
           </Typography>
           <Button
-            startDecorator={<PersonAddIcon />}
+            startDecorator={<PersonAddRounded />}
             onClick={() => setCreateModalOpen(true)}
+            sx={{ flexShrink: 0, width: { xs: '100%', sm: 'auto' } }}
           >
             {t('subaccounts.add')}
           </Button>
         </Box>
 
-        {isLoading ? (
-          <Typography>{t('subaccounts.loading')}</Typography>
-        ) : childUsers?.length === 0 ? (
-          <Card variant='soft' sx={{ textAlign: 'center', py: 4 }}>
-            <CardContent>
-              <Typography level='title-md' mb={1}>
+        {!isPlusAccount(userProfile) && (
+          <Sheet
+            variant='soft'
+            color='warning'
+            sx={{
+              alignItems: 'flex-start',
+              borderRadius: 'lg',
+              display: 'flex',
+              gap: 1.25,
+              mb: 2.5,
+              p: 1.5,
+            }}
+          >
+            <WorkspacePremiumRounded sx={{ flex: '0 0 auto' }} />
+            <Typography level='body-sm'>
+              {t('subaccounts.freePlanNotice')}
+            </Typography>
+          </Sheet>
+        )}
+
+        <Box component='section'>
+          <Typography
+            level='title-md'
+            sx={{ fontWeight: 650, letterSpacing: '-0.01em', mb: 1.25 }}
+          >
+            {t('subaccounts.count', { count: children.length })}
+          </Typography>
+
+          {isLoading ? (
+            <Sheet
+              sx={{
+                ...surfaceSx,
+                display: 'grid',
+                gap: 1,
+                minHeight: 160,
+                placeContent: 'center',
+                textAlign: 'center',
+              }}
+            >
+              <CircularProgress size='sm' sx={{ mx: 'auto' }} />
+              <Typography level='body-sm' textColor='text.secondary'>
+                {t('subaccounts.loading')}
+              </Typography>
+            </Sheet>
+          ) : children.length === 0 ? (
+            <Sheet
+              variant='soft'
+              sx={{
+                borderRadius: 'xl',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                px: 2,
+                py: 4.5,
+                textAlign: 'center',
+              }}
+            >
+              <Box
+                sx={{
+                  bgcolor: 'primary.softBg',
+                  borderRadius: '50%',
+                  color: 'primary.plainColor',
+                  display: 'grid',
+                  height: 64,
+                  mb: 2,
+                  placeItems: 'center',
+                  width: 64,
+                }}
+              >
+                <PeopleOutlineRounded sx={{ fontSize: 30 }} />
+              </Box>
+              <Typography level='title-md' sx={{ mb: 0.5 }}>
                 {t('subaccounts.emptyTitle')}
               </Typography>
-              <Typography level='body-sm' mb={3}>
+              <Typography
+                level='body-sm'
+                textColor='text.secondary'
+                sx={{ maxWidth: 420, mb: 2.25, textWrap: 'pretty' }}
+              >
                 {t('subaccounts.emptyDescription')}
               </Typography>
               <Button
-                startDecorator={<PersonAddIcon />}
+                startDecorator={<PersonAddRounded />}
                 onClick={() => setCreateModalOpen(true)}
               >
                 {t('subaccounts.addFirst')}
               </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className='grid gap-3'>
-            {childUsers?.map(child => (
-              <Card key={child.id} variant='outlined'>
-                <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Avatar size='lg'>
-                      {child.displayName?.[0]?.toUpperCase() ||
-                        child.username?.[0]?.toUpperCase()}
-                    </Avatar>
-
-                    <Box sx={{ flex: 1 }}>
-                      <Typography level='title-md'>
-                        {child.displayName || child.username}
-                      </Typography>
-                      <Typography level='body-sm' color='neutral'>
-                        {t('subaccounts.username', {
-                          username: child.username,
-                        })}
-                      </Typography>
-                      <Typography level='body-xs' color='neutral'>
-                        {t('subaccounts.created', {
-                          date: fmt.date(child.createdAt),
-                        })}
-                      </Typography>
-                    </Box>
-
-                    <Box sx={{ display: 'flex', gap: 1 }}>
-                      <IconButton
-                        size='sm'
-                        variant='soft'
-                        onClick={() => {
-                          setSelectedChildId(child.id)
-                          setPasswordModalOpen(true)
+            </Sheet>
+          ) : (
+            <Sheet sx={{ ...surfaceSx, overflow: 'hidden' }}>
+              {children.map((child, index) => {
+                const name = child.displayName || child.username
+                return (
+                  <Box key={child.id}>
+                    {index > 0 && <Divider />}
+                    <Box
+                      sx={{
+                        alignItems: 'center',
+                        display: 'flex',
+                        gap: 1.5,
+                        p: { xs: 1.5, sm: 2 },
+                      }}
+                    >
+                      <Avatar
+                        size='lg'
+                        sx={{
+                          bgcolor: 'primary.softBg',
+                          color: 'primary.softColor',
+                          flex: '0 0 auto',
+                          fontWeight: 650,
                         }}
-                        title={t('subaccounts.changePassword')}
                       >
-                        <EditIcon />
-                      </IconButton>
-                      <IconButton
-                        size='sm'
-                        variant='soft'
-                        color='danger'
-                        onClick={() =>
-                          handleDeleteChild(
-                            child.id,
-                            child.displayName || child.username,
-                          )
-                        }
-                        loading={deletingChildId === child.id}
-                        title={t('subaccounts.deleteAccount')}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
+                        {name?.[0]?.toUpperCase()}
+                      </Avatar>
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Typography level='title-sm' noWrap>
+                          {name}
+                        </Typography>
+                        <Typography
+                          level='body-sm'
+                          textColor='text.secondary'
+                          noWrap
+                        >
+                          {t('subaccounts.username', {
+                            username: child.username,
+                          })}
+                        </Typography>
+                        <Typography level='body-xs' textColor='text.tertiary'>
+                          {t('subaccounts.created', {
+                            date: fmt.date(child.createdAt),
+                          })}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', gap: 0.5 }}>
+                        <IconButton
+                          size='sm'
+                          variant='plain'
+                          color='neutral'
+                          onClick={() => {
+                            setSelectedChildId(child.id)
+                            setPasswordModalOpen(true)
+                          }}
+                          aria-label={`${t('subaccounts.changePassword')}: ${name}`}
+                        >
+                          <EditRounded />
+                        </IconButton>
+                        <IconButton
+                          size='sm'
+                          variant='plain'
+                          color='danger'
+                          onClick={() => handleDeleteChild(child.id, name)}
+                          loading={deletingChildId === child.id}
+                          aria-label={`${t('subaccounts.deleteAccount')}: ${name}`}
+                        >
+                          <DeleteOutlineRounded />
+                        </IconButton>
+                      </Box>
                     </Box>
                   </Box>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-
-        <Divider sx={{ my: 2 }} />
-
-        <Box>
-          <Typography level='title-md' mb={2}>
-            {t('subaccounts.howItWorksTitle')}
-          </Typography>
-          <Typography level='body-sm' mb={1}>
-            • {t('subaccounts.howItWorks1')}
-          </Typography>
-          <Typography level='body-sm' mb={1}>
-            • {t('subaccounts.howItWorks2')}
-          </Typography>
-          <Typography level='body-sm' mb={1}>
-            • {t('subaccounts.howItWorks3')}
-          </Typography>
-          <Typography level='body-sm'>
-            • {t('subaccounts.howItWorks4')}
-          </Typography>
+                )
+              })}
+            </Sheet>
+          )}
         </Box>
-      </div>
+
+        <Sheet
+          component='section'
+          variant='soft'
+          sx={{ borderRadius: 'xl', mt: 3.5, p: { xs: 2, sm: 2.5 } }}
+        >
+          <Box sx={{ alignItems: 'center', display: 'flex', gap: 1, mb: 2 }}>
+            <LockResetRounded color='primary' />
+            <Typography level='title-md' sx={{ fontWeight: 650 }}>
+              {t('subaccounts.howItWorksTitle')}
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'grid', gap: 1.5 }}>
+            {howItWorks.map((item, index) => (
+              <Box
+                key={item}
+                sx={{ alignItems: 'flex-start', display: 'flex', gap: 1.25 }}
+              >
+                <Chip
+                  size='sm'
+                  variant='solid'
+                  color='neutral'
+                  sx={{ flex: '0 0 auto', mt: 0.1 }}
+                >
+                  {index + 1}
+                </Chip>
+                <Typography level='body-sm' textColor='text.secondary'>
+                  {item}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        </Sheet>
+      </Box>
 
       <CreateChildUserModal
         isOpen={createModalOpen}
@@ -288,9 +420,7 @@ const ChildUserSettings = () => {
       <PasswordChangeModal
         isOpen={passwordModalOpen}
         onClose={newPassword => {
-          if (newPassword) {
-            handleUpdatePassword(newPassword)
-          }
+          if (newPassword) handleUpdatePassword(newPassword)
           setPasswordModalOpen(false)
           setSelectedChildId(null)
         }}
