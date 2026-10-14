@@ -33,8 +33,9 @@ import {
   getSidepanelConfig,
   saveSidepanelConfig,
 } from '../../utils/SidepanelConfig'
-import SettingsLayout from './SettingsLayout'
 
+// A section rather than a page of its own: it is composed into
+// LayoutSettings, which supplies the heading and the desktop-only gating.
 const SidepanelSettings = () => {
   const { t } = useTranslation('settings')
   const [config, setConfig] = useState(getSidepanelConfig())
@@ -102,147 +103,136 @@ const SidepanelSettings = () => {
   }
 
   return (
-    <SettingsLayout title={t('sidepanel.title')}>
-      <div className='grid gap-4'>
-        <Box>
-          <Typography level='h4' sx={{ mb: 2 }}>
-            {t('sidepanel.heading')}
-          </Typography>
-          <Typography level='body-md' sx={{ mb: 3 }}>
-            {t('sidepanel.description')}
-          </Typography>
+    <Box>
+      <Typography level='body-md' sx={{ mb: 3 }}>
+        {t('sidepanel.description')}
+      </Typography>
 
-          <DragDropContext onDragEnd={handleDragEnd}>
-            <Droppable droppableId='sidepanel-cards'>
-              {provided => (
-                <List
-                  {...provided.droppableProps}
-                  ref={provided.innerRef}
-                  sx={{ gap: 1 }}
-                >
-                  {config.map((item, index) => (
-                    <Draggable
-                      key={item.id}
-                      draggableId={item.id}
-                      index={index}
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <Droppable droppableId='sidepanel-cards'>
+          {provided => (
+            <List
+              {...provided.droppableProps}
+              ref={provided.innerRef}
+              sx={{ gap: 1 }}
+            >
+              {config.map((item, index) => (
+                <Draggable key={item.id} draggableId={item.id} index={index}>
+                  {(provided, snapshot) => (
+                    <ListItem
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      sx={{
+                        p: 0,
+                        backgroundColor: snapshot.isDragging
+                          ? 'var(--joy-palette-neutral-softBg)'
+                          : 'transparent',
+                        borderRadius: 'var(--joy-radius-md)',
+                      }}
                     >
-                      {(provided, snapshot) => (
-                        <ListItem
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          sx={{
-                            p: 0,
-                            backgroundColor: snapshot.isDragging
-                              ? 'var(--joy-palette-neutral-softBg)'
-                              : 'transparent',
-                            borderRadius: 'var(--joy-radius-md)',
-                          }}
-                        >
-                          <Card
+                      <Card
+                        sx={{
+                          width: '100%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          flexDirection: 'row',
+                          gap: 2,
+                          p: 2,
+                          opacity: item.enabled ? 1 : 0.6,
+                          border: snapshot.isDragging
+                            ? '2px solid var(--joy-palette-primary-400)'
+                            : '1px solid var(--joy-palette-divider)',
+                        }}
+                      >
+                        <ListItemDecorator>
+                          <IconButton
+                            {...provided.dragHandleProps}
+                            variant='plain'
+                            size='sm'
                             sx={{
-                              width: '100%',
-                              display: 'flex',
-                              alignItems: 'center',
-                              flexDirection: 'row',
-                              gap: 2,
-                              p: 2,
-                              opacity: item.enabled ? 1 : 0.6,
-                              border: snapshot.isDragging
-                                ? '2px solid var(--joy-palette-primary-400)'
-                                : '1px solid var(--joy-palette-divider)',
+                              cursor: 'grab',
+                              '&:active': { cursor: 'grabbing' },
                             }}
                           >
-                            <ListItemDecorator>
-                              <IconButton
-                                {...provided.dragHandleProps}
-                                variant='plain'
-                                size='sm'
-                                sx={{
-                                  cursor: 'grab',
-                                  '&:active': { cursor: 'grabbing' },
-                                }}
-                              >
-                                <DragIndicator />
-                              </IconButton>
-                            </ListItemDecorator>
+                            <DragIndicator />
+                          </IconButton>
+                        </ListItemDecorator>
 
-                            <IconButton
-                              sx={{ color: 'var(--joy-palette-primary-500)' }}
+                        <IconButton
+                          sx={{ color: 'var(--joy-palette-primary-500)' }}
+                        >
+                          {getIcon(item.iconName)}
+                        </IconButton>
+
+                        <ListItemContent sx={{ flex: 1 }}>
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 2,
+                            }}
+                          >
+                            <Typography
+                              level='title-sm'
+                              sx={{ fontWeight: 600 }}
                             >
-                              {getIcon(item.iconName)}
-                            </IconButton>
+                              {cardName(item)}
+                            </Typography>
+                            <Typography
+                              level='body-xs'
+                              sx={{
+                                color: 'var(--joy-palette-text-tertiary)',
+                              }}
+                            >
+                              - {cardDescription(item)}
+                            </Typography>
+                          </Box>
+                        </ListItemContent>
 
-                            <ListItemContent sx={{ flex: 1 }}>
-                              <Box
-                                sx={{
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: 2,
-                                }}
-                              >
-                                <Typography
-                                  level='title-sm'
-                                  sx={{ fontWeight: 600 }}
-                                >
-                                  {cardName(item)}
-                                </Typography>
-                                <Typography
-                                  level='body-xs'
-                                  sx={{
-                                    color: 'var(--joy-palette-text-tertiary)',
-                                  }}
-                                >
-                                  - {cardDescription(item)}
-                                </Typography>
-                              </Box>
-                            </ListItemContent>
+                        <FormControl>
+                          <Checkbox
+                            checked={item.enabled}
+                            onChange={e =>
+                              handleToggleEnabled(item.id, e.target.checked)
+                            }
+                            overlay
+                            variant='plain'
+                            size='lg'
+                            checkedIcon={<Visibility />}
+                            uncheckedIcon={<VisibilityOff />}
+                          />
+                        </FormControl>
+                      </Card>
+                    </ListItem>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
+            </List>
+          )}
+        </Droppable>
+      </DragDropContext>
 
-                            <FormControl>
-                              <Checkbox
-                                checked={item.enabled}
-                                onChange={e =>
-                                  handleToggleEnabled(item.id, e.target.checked)
-                                }
-                                overlay
-                                variant='plain'
-                                size='lg'
-                                checkedIcon={<Visibility />}
-                                uncheckedIcon={<VisibilityOff />}
-                              />
-                            </FormControl>
-                          </Card>
-                        </ListItem>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </List>
-              )}
-            </Droppable>
-          </DragDropContext>
-
-          <Box
-            sx={{
-              mt: 3,
-              pt: 2,
-              borderTop: '1px solid var(--joy-palette-divider)',
-            }}
-          >
-            <Button
-              variant='outlined'
-              color='neutral'
-              onClick={resetToDefaults}
-              size='sm'
-            >
-              {t('sidepanel.resetToDefaults')}
-            </Button>
-            <FormHelperText sx={{ mt: 1 }}>
-              {t('sidepanel.resetHelper')}
-            </FormHelperText>
-          </Box>
-        </Box>
-      </div>
-    </SettingsLayout>
+      <Box
+        sx={{
+          mt: 3,
+          pt: 2,
+          borderTop: '1px solid var(--joy-palette-divider)',
+        }}
+      >
+        <Button
+          variant='outlined'
+          color='neutral'
+          onClick={resetToDefaults}
+          size='sm'
+        >
+          {t('sidepanel.resetToDefaults')}
+        </Button>
+        <FormHelperText sx={{ mt: 1 }}>
+          {t('sidepanel.resetHelper')}
+        </FormHelperText>
+      </Box>
+    </Box>
   )
 }
 

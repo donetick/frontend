@@ -2,10 +2,13 @@ import {
   Add,
   Bolt,
   CalendarMonth,
+  Check,
   CloudOff,
   EditCalendar,
   ExpandCircleDown,
+  Person,
   PriorityHigh,
+  Remove,
   SearchOff,
   Style,
 } from '@mui/icons-material'
@@ -22,13 +25,14 @@ import {
 } from '@mui/joy'
 import { useMediaQuery } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import EmptyState from '../../components/common/EmptyState'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
+import { useNavBarTitle } from '../../contexts/NavBarTitleContext'
 import { useFilter } from '../../hooks/useFilter'
 import { useChores } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
@@ -47,6 +51,7 @@ import CalendarMonthly from '../components/CalendarMonthly.jsx'
 import FeedbackPrompt from '../components/FeedbackPrompt.jsx'
 import LoadingComponent from '../components/Loading'
 import PolicyUpdatePrompt from '../components/PolicyUpdatePrompt.jsx'
+import ScrollHideFab from '../components/ScrollHideFab'
 import { useLabels } from '../Labels/LabelQueries'
 import AdvancedFilterBuilder from '../Modals/Inputs/AdvancedFilterBuilder'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
@@ -59,7 +64,6 @@ import {
   selectionsToConditions,
 } from './components/FilterBuilderContent'
 import MultiSelectToolbar from './components/MultiSelectToolbar'
-import MyChoreHeader from './components/MyChoreHeader'
 import { useChoreActions } from './hooks/useChoreActions'
 import { useChoreFilters } from './hooks/useChoreFilters'
 import { useChoreModals } from './hooks/useChoreModals'
@@ -81,6 +85,8 @@ import { INSIGHT_FILTER_DEFS } from './SmartInsightsCard'
 // copy for each lives under `chores:empty.assignee.*` as a whole sentence,
 // since the fragment ("assigned to you") cannot be slotted mid-sentence in
 // every language.
+const EMPTY_PROJECTS = []
+
 const ASSIGNEE_FILTER_KEYS = [
   'assigned_to_me',
   'available_for_me',
@@ -88,6 +94,33 @@ const ASSIGNEE_FILTER_KEYS = [
   'assigned_to_me_tasks',
   'created_by_me',
 ]
+
+const sortChores = (a, b, sortBy, direction) => {
+  const multiplier = direction === 'desc' ? -1 : 1
+
+  if (sortBy === 'smart') return ChoreSorter(a, b) * multiplier
+
+  if (sortBy === 'priority') {
+    const priorityA = a.priority ?? Number.MAX_SAFE_INTEGER
+    const priorityB = b.priority ?? Number.MAX_SAFE_INTEGER
+    return (priorityA - priorityB) * multiplier
+  }
+
+  const dateField =
+    sortBy === 'due_date'
+      ? 'nextDueDate'
+      : sortBy === 'created_date'
+        ? 'createdAt'
+        : 'updatedAt'
+  const dateA = a[dateField] || a[`${dateField.replace('At', '')}_at`]
+  const dateB = b[dateField] || b[`${dateField.replace('At', '')}_at`]
+
+  // Unscheduled/unknown dates remain at the end in either direction.
+  if (!dateA && !dateB) return 0
+  if (!dateA) return 1
+  if (!dateB) return -1
+  return (new Date(dateA).getTime() - new Date(dateB).getTime()) * multiplier
+}
 
 const MyChores = () => {
   const { data: userProfile, isLoading: isUserProfileLoading } =
@@ -100,7 +133,8 @@ const MyChores = () => {
   const Navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const { data: userLabels, isLoading: userLabelsLoading } = useLabels()
-  const { data: projects = [], isLoading: projectsLoading } = useProjects()
+  const { data: projects = EMPTY_PROJECTS, isLoading: projectsLoading } =
+    useProjects()
   const {
     data: choresData,
     error: choresErrorDetails,
@@ -121,6 +155,12 @@ const MyChores = () => {
   const searchInputRef = useRef(null)
   const [selectedChoreSection, setSelectedChoreSection] = useState(
     localStorage.getItem('selectedChoreSection') || 'default',
+  )
+  const [choreSortBy, setChoreSortBy] = useState(
+    () => localStorage.getItem('choreSortBy') || 'smart',
+  )
+  const [choreSortDirection, setChoreSortDirection] = useState(
+    () => localStorage.getItem('choreSortDirection') || 'asc',
   )
   const [openChoreSections, setOpenChoreSections] = useState(() => {
     try {
@@ -169,6 +209,7 @@ const MyChores = () => {
     selectedChores,
     toggleChoreSelection,
     toggleMultiSelectMode,
+    toggleSectionSelection,
   } = useMultiSelect()
 
   const { activeModal, closeModal, modalChore, modalData, openModal } =
@@ -196,6 +237,123 @@ const MyChores = () => {
     membersData?.res,
     userLabels,
     projectsWithDefault,
+  )
+
+  const handleProjectSelect = useCallback(
+    project => {
+      setSelectedProjectWithCache(project)
+      clearActiveFilter()
+    },
+    [clearActiveFilter, setSelectedProjectWithCache],
+  )
+
+  const hasCustomProjects = projectsWithDefault.some(
+    project => project.id !== 'default',
+  )
+  const isDefaultProject = !selectedProject || selectedProject.id === 'default'
+  const handleSavedFilterSelect = useCallback(
+    filter => {
+      setSearchTerm('')
+      setSelectedChoreFilterWithCache('anyone')
+      if (filter.conditions?.some(condition => condition.type === 'project')) {
+        setSelectedProjectWithCache(null)
+      }
+      applyCustomFilter(filter.id)
+      setSearchParams(
+        params => {
+          params.delete('filter')
+          params.delete('filter_id')
+          params.set('filterId', String(filter.id))
+          return params
+        },
+        { replace: true },
+      )
+    },
+    [
+      applyCustomFilter,
+      setSearchParams,
+      setSearchTerm,
+      setSelectedChoreFilterWithCache,
+      setSelectedProjectWithCache,
+    ],
+  )
+
+  const handleLabelSelect = useCallback(
+    label => {
+      clearActiveFilter()
+      setSearchTerm('')
+      applyTempFilter(
+        {
+          conditions: [{ type: 'label', operator: 'is', value: [label.id] }],
+          operator: 'AND',
+        },
+        { name: label.name },
+      )
+    },
+    [applyTempFilter, clearActiveFilter, setSearchTerm],
+  )
+
+  const choreViewTitle = tempFilter
+    ? tempFilterMeta?.name || t('common:navigation.filters')
+    : activeFilterId
+      ? activeFilter?.name || t('common:navigation.filters')
+      : !isDefaultProject
+        ? selectedProject.name
+        : hasCustomProjects
+          ? t('toolbar.defaultProject')
+          : t('common:navigation.allTasks')
+  const projectSelector = useMemo(
+    () =>
+      hasCustomProjects && !activeFilterId && !tempFilter
+        ? {
+            items: projectsWithDefault,
+            onSelect: handleProjectSelect,
+            selectedId: isDefaultProject ? 'default' : selectedProject.id,
+            type: 'project',
+          }
+        : null,
+    [
+      activeFilterId,
+      handleProjectSelect,
+      hasCustomProjects,
+      isDefaultProject,
+      projectsWithDefault,
+      selectedProject?.id,
+      tempFilter,
+    ],
+  )
+  const labelSelector = useMemo(() => {
+    const conditions = tempFilter?.conditions || []
+    const condition = conditions.length === 1 ? conditions[0] : null
+    const values = Array.isArray(condition?.value)
+      ? condition.value
+      : condition?.value != null
+        ? [condition.value]
+        : []
+    if (condition?.type !== 'label' || values.length !== 1) return null
+
+    return {
+      items: userLabels || [],
+      onSelect: handleLabelSelect,
+      selectedId: values[0],
+      type: 'label',
+    }
+  }, [handleLabelSelect, tempFilter?.conditions, userLabels])
+  const filterSelector = useMemo(
+    () =>
+      activeFilterId && savedFilters.length > 0
+        ? {
+            items: savedFilters,
+            onSelect: handleSavedFilterSelect,
+            selectedId: activeFilterId,
+            type: 'filter',
+          }
+        : null,
+    [activeFilterId, handleSavedFilterSelect, savedFilters],
+  )
+  useNavBarTitle(
+    choreViewTitle,
+    filterSelector || labelSelector || projectSelector,
   )
 
   const [showAdvancedFilterBuilder, setShowAdvancedFilterBuilder] =
@@ -354,9 +512,15 @@ const MyChores = () => {
       ChoreFilters(impersonatedUser?.userId || userProfile?.id)[
         selectedChoreFilter
       ],
+      choreSortDirection,
     )
 
-    return sections
+    return sections.map(section => ({
+      ...section,
+      content: [...section.content].sort((a, b) =>
+        sortChores(a, b, choreSortBy, choreSortDirection),
+      ),
+    }))
   }, [
     chores,
     quickFilteredChores,
@@ -366,6 +530,8 @@ const MyChores = () => {
     hasQuickFilters,
     selectedChoreSection,
     selectedChoreFilter,
+    choreSortBy,
+    choreSortDirection,
     selectedProject,
     impersonatedUser?.userId,
     userProfile?.id,
@@ -502,6 +668,43 @@ const MyChores = () => {
       return
     }
 
+    // Deep link from a member's avatar/search result (e.g. filterId=assignedTo:42)
+    // — the assignee condition already exists in FilterEngine, so this just
+    // wires a member id straight into a temp filter, the same way an insight does.
+    if (
+      typeof filterId === 'string' &&
+      filterId.startsWith('assignedTo:') &&
+      urlFilterIdChanged &&
+      tempFilterMeta?.id !== filterId
+    ) {
+      const memberId = filterId.slice('assignedTo:'.length)
+      const member = (membersData?.res || []).find(
+        m => String(m.userId) === String(memberId),
+      )
+      const memberName = member?.displayName || member?.name || member?.username
+      applyTempFilter(
+        {
+          conditions: [
+            {
+              type: 'assignee',
+              operator: 'is',
+              // Match the type FilterBuilderContent's chip selection compares
+              // against (`m.userId`, usually a number) — the raw URL slice is
+              // always a string, and Array.includes is strict-equality.
+              value: member ? member.userId : memberId,
+            },
+          ],
+          operator: 'AND',
+        },
+        {
+          id: filterId,
+          name: memberName ? `Assigned to ${memberName}` : 'Assigned to',
+          icon: <Person sx={{ fontSize: '2rem', color: 'primary.main' }} />,
+        },
+      )
+      return
+    }
+
     // If filterId is no longer in URL but filter is still active in state, clear it
     if (!filterId && !oldFilter && activeFilterId) {
       clearActiveFilter()
@@ -543,6 +746,7 @@ const MyChores = () => {
     hasQuickFilters,
     activeFilterId,
     savedFilters,
+    membersData,
     applyCustomFilter,
     applyTempFilter,
     clearActiveFilter,
@@ -783,6 +987,16 @@ const MyChores = () => {
     localStorage.setItem('selectedChoreSection', value)
   }
 
+  const setChoreSortByWithCache = value => {
+    setChoreSortBy(value)
+    localStorage.setItem('choreSortBy', value)
+  }
+
+  const setChoreSortDirectionWithCache = value => {
+    setChoreSortDirection(value)
+    localStorage.setItem('choreSortDirection', value)
+  }
+
   const setOpenChoreSectionsWithCache = value => {
     setOpenChoreSections(value)
     localStorage.setItem('openChoreSections', JSON.stringify(value))
@@ -897,7 +1111,7 @@ const MyChores = () => {
             label: t('chores:empty.errorAction'),
             onClick: () => {
               refetchChores()
-              queryClient.invalidateQueries(['circleMembers'])
+              queryClient.invalidateQueries({ queryKey: ['circleMembers'] })
             },
           }}
         />
@@ -927,14 +1141,10 @@ const MyChores = () => {
         flexDirection: 'row',
       }}
     >
-      <Container maxWidth='md' sx={{ px: 1 }}>
-        <MyChoreHeader
-          activeFilterId={activeFilterId}
-          activeFilter={activeFilter}
-          selectedProject={selectedProject}
-          tempFilter={tempFilter}
-          tempFilterMeta={tempFilterMeta}
-        />
+      <Container
+        maxWidth='md'
+        sx={{ px: 1, pt: { xs: 1, md: 3 }, minWidth: 0 }}
+      >
         <ChoreToolbar
           members={membersData?.res || []}
           labels={userLabels || []}
@@ -971,10 +1181,7 @@ const MyChores = () => {
               : undefined
           }
           selectedProject={selectedProject}
-          onProjectSelect={project => {
-            setSelectedProjectWithCache(project)
-            clearActiveFilter()
-          }}
+          onProjectSelect={handleProjectSelect}
           selectedAssigneeFilter={selectedChoreFilter}
           onAssigneeFilterChange={filter => {
             setSelectedChoreFilterWithCache(filter)
@@ -1014,6 +1221,10 @@ const MyChores = () => {
             setSelectedChoreSectionWithCache(value)
             clearQuickFilters()
           }}
+          selectedSort={choreSortBy}
+          onSortChange={setChoreSortByWithCache}
+          sortDirection={choreSortDirection}
+          onSortDirectionChange={setChoreSortDirectionWithCache}
           viewMode={viewMode}
           onToggleViewMode={toggleViewMode}
           isMultiSelectMode={isMultiSelectMode}
@@ -1188,7 +1399,9 @@ const MyChores = () => {
             {selectedCalendarDate && (
               <Box sx={{ mt: 2 }}>
                 <Typography level='title-md' gutterBottom>
-                  Tasks for {selectedCalendarDate.toLocaleDateString()}
+                  {t('tasksForDate', {
+                    date: selectedCalendarDate.toLocaleDateString(),
+                  })}
                 </Typography>
                 <Box
                   sx={{
@@ -1244,44 +1457,119 @@ const MyChores = () => {
                   expanded={Boolean(openChoreSections[index])}
                 >
                   <Divider orientation='horizontal'>
-                    <Chip
-                      variant='soft'
-                      color='neutral'
-                      size='md'
-                      onClick={() => {
-                        if (openChoreSections[index]) {
-                          const newOpenChoreSections = {
-                            ...openChoreSections,
-                          }
-                          delete newOpenChoreSections[index]
-                          setOpenChoreSectionsWithCache(newOpenChoreSections)
-                        } else {
-                          setOpenChoreSectionsWithCache({
-                            ...openChoreSections,
-                            [index]: true,
-                          })
-                        }
-                      }}
-                      endDecorator={
-                        openChoreSections[index] ? (
-                          <ExpandCircleDown
-                            color='primary'
-                            sx={{ transform: 'rotate(180deg)' }}
-                          />
-                        ) : (
-                          <ExpandCircleDown color='primary' />
-                        )
-                      }
-                      startDecorator={
-                        <>
-                          <Chip color='primary' size='sm' variant='soft'>
-                            {section?.content?.length}
+                    {(() => {
+                      const sectionSelectedCount = section.content.filter(
+                        chore => selectedChores.has(chore.id),
+                      ).length
+                      const allSelected =
+                        sectionSelectedCount === section.content.length
+                      const partiallySelected =
+                        sectionSelectedCount > 0 && !allSelected
+                      return (
+                        <Box sx={{ display: 'flex', alignItems: 'stretch' }}>
+                          {/* Its own zone rather than nested inside the chip
+                              below — a checkbox inside a clickable chip is two
+                              interactive targets fighting over one tap.
+                              Butted flush against the chip (shared background,
+                              opposite corner radii) so the pair still reads as
+                              a single pill. */}
+                          {isMultiSelectMode && (
+                            <Box
+                              role='checkbox'
+                              aria-checked={
+                                allSelected
+                                  ? 'true'
+                                  : partiallySelected
+                                    ? 'mixed'
+                                    : 'false'
+                              }
+                              tabIndex={0}
+                              onClick={() =>
+                                toggleSectionSelection(section.content)
+                              }
+                              onKeyDown={e => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault()
+                                  toggleSectionSelection(section.content)
+                                }
+                              }}
+                              title={t('archived.selectSectionTitle')}
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: 30,
+                                cursor: 'pointer',
+                                borderRadius: '999px 0 0 999px',
+                                bgcolor:
+                                  allSelected || partiallySelected
+                                    ? 'primary.solidBg'
+                                    : 'neutral.softBg',
+                                color:
+                                  allSelected || partiallySelected
+                                    ? 'primary.solidColor'
+                                    : 'transparent',
+                                '&:hover': {
+                                  bgcolor:
+                                    allSelected || partiallySelected
+                                      ? 'primary.solidHoverBg'
+                                      : 'neutral.softHoverBg',
+                                },
+                              }}
+                            >
+                              {allSelected ? (
+                                <Check sx={{ fontSize: 16 }} />
+                              ) : (
+                                <Remove sx={{ fontSize: 16 }} />
+                              )}
+                            </Box>
+                          )}
+                          <Chip
+                            variant='soft'
+                            color='neutral'
+                            size='md'
+                            onClick={() => {
+                              if (openChoreSections[index]) {
+                                const newOpenChoreSections = {
+                                  ...openChoreSections,
+                                }
+                                delete newOpenChoreSections[index]
+                                setOpenChoreSectionsWithCache(
+                                  newOpenChoreSections,
+                                )
+                              } else {
+                                setOpenChoreSectionsWithCache({
+                                  ...openChoreSections,
+                                  [index]: true,
+                                })
+                              }
+                            }}
+                            sx={{
+                              borderRadius: isMultiSelectMode
+                                ? '0 999px 999px 0'
+                                : undefined,
+                            }}
+                            endDecorator={
+                              openChoreSections[index] ? (
+                                <ExpandCircleDown
+                                  color='primary'
+                                  sx={{ transform: 'rotate(180deg)' }}
+                                />
+                              ) : (
+                                <ExpandCircleDown color='primary' />
+                              )
+                            }
+                            startDecorator={
+                              <Chip color='primary' size='sm' variant='soft'>
+                                {section?.content?.length}
+                              </Chip>
+                            }
+                          >
+                            {section.name}
                           </Chip>
-                        </>
-                      }
-                    >
-                      {section.name}
-                    </Chip>
+                        </Box>
+                      )
+                    })()}
                   </Divider>
                   <AccordionDetails
                     sx={{
@@ -1312,15 +1600,12 @@ const MyChores = () => {
             })}
           </AccordionGroup>
         )}
-        <Box
+        <ScrollHideFab
           sx={{
-            position: 'fixed',
             bottom: getSafeBottom(10, 10),
-            left: 10,
-            display: 'flex',
-            justifyContent: 'flex-end',
-            gap: 2,
-            'z-index': 100,
+            '@media (max-width: 768px)': {
+              bottom: getSafeBottom(66, 10),
+            },
           }}
         >
           <IconButton
@@ -1382,7 +1667,7 @@ const MyChores = () => {
             show={showKeyboardShortcuts}
             shortcut='J'
           />
-        </Box>
+        </ScrollHideFab>
         <NotificationAccessSnackbar />
         <PolicyUpdatePrompt />
         <FeedbackPrompt />
@@ -1452,14 +1737,18 @@ const MyChores = () => {
               }),
             })
           } else {
-            // Create new filter
+            // Create new filter — the mutation re-checks the plan allowance,
+            // so only announce it once it actually saved.
             saveFilter(filter)
-            showSuccess({
-              title: t('chores:list.advancedFilterCreated'),
-              message: t('chores:list.advancedFilterCreatedMsg', {
-                name: filter.name,
-              }),
-            })
+              .then(() => {
+                showSuccess({
+                  title: t('chores:list.advancedFilterCreated'),
+                  message: t('chores:list.advancedFilterCreatedMsg', {
+                    name: filter.name,
+                  }),
+                })
+              })
+              .catch(() => {})
           }
           setShowAdvancedFilterBuilder(false)
           setEditingFilter(null)

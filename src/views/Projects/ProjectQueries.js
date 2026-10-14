@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { track } from '../../analytics'
+import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
+import { canCreateProject } from '../../utils/entitlements'
 import {
   CreateProject,
   DeleteProject,
@@ -35,31 +37,47 @@ export const useProjects = () => {
   })
 }
 
+// Reads the server's { error } message so the form can show why a save failed
+// (e.g. a member who is no longer in the circle).
+const errorFrom = async (response, fallback) => {
+  let message = fallback
+  try {
+    const body = await response.json()
+    if (typeof body?.error === 'string' && body.error.trim())
+      message = body.error
+  } catch {
+    // no JSON body
+  }
+  const error = new Error(message)
+  error.status = response.status
+  return error
+}
+
 // Mutation hook for creating a new project
 export const useCreateProject = () => {
   const queryClient = useQueryClient()
+  const { isPlanKnown, isPlus, showPaywall } = usePaywall()
 
   return useMutation({
     mutationFn: async projectData => {
-      try {
-        const response = await CreateProject(projectData)
-        if (response.ok) {
-          const data = await response.json()
-          track('project_created', {})
-          return data.res || data
-        }
-        throw new Error('Failed to create project')
-      } catch (error) {
-        console.error('Error creating project:', error)
-        // For development, create a local project
-        const localProject = {
-          id: `local-${Date.now()}`,
-          ...projectData,
-          created_by: 'current_user',
-          created_at: new Date().toISOString(),
-        }
-        return localProject
+      // Last line of defense behind the click-time gates: an entry point that
+      // forgets to check can't push a free account past its allowance. Waits
+      // for the plan to be known so a cold load never blocks a Plus user.
+      const existing = queryClient.getQueryData(['projects']) ?? []
+      if (isPlanKnown && !canCreateProject(existing.length, isPlus)) {
+        showPaywall(PAYWALL_REASON.PROJECT_LIMIT)
+        throw new Error('Project limit reached')
       }
+
+      // No local fallback: a project that only exists in this browser would
+      // pretend to be shared (or private) while the server knows nothing of it.
+      const response = await CreateProject(projectData)
+      if (!response.ok) {
+        throw await errorFrom(response, 'Failed to create project')
+      }
+      const data = await response.json()
+      track('project_created', {})
+      return data.res || data
     },
     onSuccess: newProject => {
       // Update the projects cache
@@ -69,7 +87,7 @@ export const useCreateProject = () => {
       })
 
       // Invalidate and refetch
-      queryClient.invalidateQueries(['projects'])
+      queryClient.invalidateQueries({ queryKey: ['projects'] })
     },
     onError: error => {
       console.error('Create project mutation failed:', error)
@@ -83,22 +101,14 @@ export const useUpdateProject = () => {
 
   return useMutation({
     mutationFn: async ({ projectData, projectId }) => {
-      try {
-        const response = await UpdateProject(projectId, projectData)
-        if (response.ok) {
-          const data = await response.json()
-          return data.res || data
-        }
-        throw new Error('Failed to update project')
-      } catch (error) {
-        console.error('Error updating project:', error)
-        // For development, return updated project
-        return {
-          id: projectId,
-          ...projectData,
-          updated_at: new Date().toISOString(),
-        }
+      // Never report success for a save the server did not accept: for a change
+      // of who can see the project that would be actively misleading.
+      const response = await UpdateProject(projectId, projectData)
+      if (!response.ok) {
+        throw await errorFrom(response, 'Failed to update project')
       }
+      const data = await response.json()
+      return data.res || data
     },
     onSuccess: updatedProject => {
       // Update the projects cache
@@ -108,8 +118,10 @@ export const useUpdateProject = () => {
         )
       })
 
-      // Invalidate and refetch
-      queryClient.invalidateQueries(['projects'])
+      // Invalidate and refetch. A change of who can see the project also
+      // changes task assignments, so tasks are refreshed too.
+      queryClient.invalidateQueries({ queryKey: ['projects'] })
+      queryClient.invalidateQueries({ queryKey: ['chores'] })
     },
     onError: error => {
       console.error('Update project mutation failed:', error)
@@ -147,7 +159,7 @@ export const useDeleteProject = () => {
       })
 
       // Invalidate and refetch
-      queryClient.invalidateQueries(['projects'])
+      queryClient.invalidateQueries({ queryKey: ['projects'] })
     },
     onError: error => {
       console.error('Delete project mutation failed:', error)

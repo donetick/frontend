@@ -9,7 +9,7 @@
   "dueDate": "Vervaldatum",
   "assignedTo": "Toegewezen aan",
   "priority": "Prioriteit",
-  "status": "",
+  "status": "Status",
   "description": "Beschrijving",
   "choreView": {
     "assignment": "Toewijzing",
@@ -20,7 +20,7 @@
     "statistics": "Statistieken",
     "completed": "Voltooid",
     "times": "keer",
-    "details": "",
+    "details": "Details",
     "createdBy": "Aangemaakt door",
     "na": "N/B",
     "taskCompleted": "Taak Voltooid",
@@ -111,10 +111,12 @@
     "unableChangeAssignee": "",
     "availableToCompleteStarting": "",
     "delegateToSomeoneElse": "",
-    "selectAPerformer": ""
+    "selectAPerformer": "",
+    "notFoundTitle": "Taak niet beschikbaar",
+    "notFoundDescription": "Deze taak is mogelijk verwijderd of wordt niet meer met jou gedeeld."
   },
   "toolbar": {
-    "defaultProject": "",
+    "defaultProject": "Default Project",
     "everyone": "",
     "mine": "",
     "availableToMe": "",
@@ -134,10 +136,14 @@
       "assignee": ""
     },
     "display": "",
-    "displayOptions": ""
+    "displayOptions": "",
+    "moreSaveOptions": "Meer opslagopties",
+    "showCount": "{{count}} weergeven",
+    "done": "Klaar",
+    "savedFilters": "Opgeslagen filters"
   },
   "sort": {
-    "assignedToMe": "",
+    "assignedToMe": "Assigned to me",
     "smart": "",
     "createdDate": "",
     "updatedDate": "",
@@ -271,7 +277,9 @@
       "skipTitle": "",
       "skippedTitle": "",
       "skipFailedTitle": ""
-    }
+    },
+    "failAssignTitle": "",
+    "failAssignMessage": ""
   },
   "archived": {
     "restoredTitle": "",
@@ -314,6 +322,7 @@
     "selected_one": "",
     "selected_other": "",
     "selectAllTitle": "",
+    "selectSectionTitle": "",
     "all": "",
     "closeMultiSelect": "",
     "clearMultiSelect": "",
@@ -336,7 +345,7 @@
     "noMatchFilters": "",
     "emptyTitle": "",
     "emptyDescription": "",
-    "backToTasks": ""
+    "backToTasks": "Terug naar taken"
   },
   "edit": {
     "deleteConfirm": ""
@@ -383,7 +392,8 @@
     "labels": "",
     "labelsHint": "",
     "done": "",
-    "noPriority": ""
+    "noPriority": "",
+    "dueDateTitle": ""
   },
   "remind": {
     "title": "",
@@ -401,7 +411,11 @@
     "removeAria": ""
   },
   "assignee": {
-    "anyone": ""
+    "label": "",
+    "anyone": "",
+    "unknown": "",
+    "selectedCount_one": "",
+    "selectedCount_other": ""
   },
   "filterChip": {
     "cancelAll": "",
@@ -544,8 +558,6 @@
   },
   "subTask": {
     "namePlaceholder": "",
-    "deleteShortcut": "",
-    "addPlaceholder": "",
     "untitled": "Naamloze subtaak",
     "actions": "Subtaakacties",
     "edit": "Bewerken",
@@ -555,7 +567,9 @@
     "delete": "Verwijderen",
     "editTitle": "Subtaak bewerken",
     "addTitle": "Subtaak toevoegen",
-    "addChildTitle": "Geneste subtaak toevoegen"
+    "addChildTitle": "Geneste subtaak toevoegen",
+    "deleteShortcut": "",
+    "addPlaceholder": ""
   },
   "voiceToTask": {
     "title": "",
@@ -605,7 +619,15 @@
     "keepAsAttachment": "",
     "altCaptured": "",
     "altProcessing": "",
-    "taskIdentified": ""
+    "taskIdentified": "",
+    "runningNativeOcr": "Running native OCR…",
+    "identifyingTask": "Identifying task with AI…",
+    "tapToScanHint": "Tik op \"Document scannen\" om de scanner te openen",
+    "readingTextProgress": "Tekst lezen uit afbeelding… {{progress}}%",
+    "dueDate": "Vervalt: {{date}}",
+    "hideRawText": "Ruwe tekst verbergen",
+    "showRawText": "Ruwe tekst weergeven",
+    "cameraUnavailableUseUpload": "Camera niet beschikbaar — gebruik in plaats daarvan Uploaden"
   },
   "descriptionPlaceholder": "",
   "notificationTemplate": {
@@ -722,7 +744,7 @@
     "rescheduleFromCompletion": "",
     "rescheduleFromCompletionHelp": "",
     "notifications": "",
-    "notificationsPlanWarning": "",
+    "notificationsPlanWarning": "Task notifications are not available in the Basic plan. Upgrade to Plus to receive reminders when tasks are due or completed.",
     "notifyForTask": "",
     "notifyForTaskHelp": "",
     "notificationSchedule": "",
@@ -753,7 +775,10 @@
     "updatedBy": "",
     "archive": "",
     "unarchive": "",
-    "create": ""
+    "create": "",
+    "alwaysDueHint": "Deze taak heeft geen vervaldatum en is altijd beschikbaar om te voltooien",
+    "notifyForTaskUnavailable": "Meldingen zijn niet beschikbaar voor trigger-gebaseerde of altijd beschikbare taken",
+    "notificationsFreePlanNote": "Je abonnement bevat een herinnering op de vervaldatum. Plus voegt herinneringen vóór de datum en opvolgherrinneringen daarna toe."
   },
   "addTask": {
     "title": "",
@@ -766,7 +791,9 @@
     "createCount": "",
     "useTask": "",
     "processing": "",
-    "create": ""
+    "create": "",
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:"
   },
   "repeat": {
     "days": {
@@ -798,11 +825,13 @@
       "monthly": "",
       "yearly": "",
       "adaptive": "",
-      "custom": ""
+      "custom": "",
+      "always": "Altijd"
     },
     "freqMessage": {
       "adaptive": "",
-      "custom": ""
+      "custom": "",
+      "always": "Deze taak heeft geen vervaldatum en blijft op elk moment beschikbaar om te voltooien. Ze wordt niet gearchiveerd na voltooiing."
     },
     "weekPattern": {
       "every_week": "",
@@ -854,7 +883,7 @@
     "repeatOn": "",
     "triggerLabel": "",
     "triggerHelp": "",
-    "triggerPlanWarning": "",
+    "triggerPlanWarning": "Thing-based triggers are not available in the Basic plan. Upgrade to Plus to automatically trigger tasks when device states change.",
     "previewEvery": "",
     "previewOccurrence": "",
     "defaultTime": "",
@@ -945,6 +974,7 @@
       "2": "",
       "3": ""
     },
+    "anyOf": "",
     "include": "",
     "exclude": "",
     "has": "",
@@ -1028,5 +1058,7 @@
     "today": "",
     "yesterday": "",
     "noteTitle": ""
-  }
+  },
+  "tasksForDate": "Taken voor {{date}}",
+  "createSuggestion": "\"{{value}}\" maken"
 }

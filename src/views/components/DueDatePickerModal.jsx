@@ -27,6 +27,12 @@ import ModalActions from '../../components/common/ModalActions'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 
+// 23:59(:59) is the app-wide "no specific time" stamp — the same one
+// ChoreEdit, AddTaskModal, and the bulk reschedule handler write. Keep this in
+// sync with END_OF_DAY in useChoreActions.js and the check in
+// ChoreCardHelpers.getDueDateChipText.
+const END_OF_DAY_TIME = '23:59'
+
 // Split a date-ish value (ISO string / Date) into the parts this picker edits.
 export const splitDueDate = value => {
   if (!value) {
@@ -40,16 +46,17 @@ export const splitDueDate = value => {
   return {
     dueDateOnly: m.format('YYYY-MM-DD'),
     dueTime: time,
-    // Midnight is how a date-only value round-trips, so treat it as "anytime"
-    useCustomTime: time !== '00:00',
+    useCustomTime: time !== END_OF_DAY_TIME,
   }
 }
 
 // Inverse of splitDueDate — returns a Date, or null when there is no due date.
 export const combineDueDate = ({ dueDateOnly, dueTime, useCustomTime }) => {
   if (!dueDateOnly) return null
-  const time = useCustomTime && dueTime ? dueTime : '00:00'
-  return moment(`${dueDateOnly} ${time}`, 'YYYY-MM-DD HH:mm').toDate()
+  if (useCustomTime && dueTime) {
+    return moment(`${dueDateOnly} ${dueTime}`, 'YYYY-MM-DD HH:mm').toDate()
+  }
+  return moment(`${dueDateOnly} 23:59:59`, 'YYYY-MM-DD HH:mm:ss').toDate()
 }
 
 export const getQuickScheduleDate = option => {

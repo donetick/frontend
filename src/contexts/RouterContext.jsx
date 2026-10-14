@@ -24,10 +24,11 @@ import ChoreView from '../views/ChoreEdit/ChoreView'
 import ArchivedTasks from '../views/Chores/ArchivedTasks'
 import MyChores from '../views/Chores/MyChores'
 import JoinCircleView from '../views/Circles/JoinCircle'
-import MemberDetailView from '../views/Circles/MemberDetailView'
 import NotFound from '../views/components/NotFound'
 import FilterView from '../views/Filters/FilterView'
 import ChoreHistory from '../views/History/ChoreHistory'
+import DefaultViewRoute from '../views/Home/DefaultViewRoute'
+import HomeView from '../views/Home/HomeView'
 import LabelDetailView from '../views/Labels/LabelDetailView'
 import LabelView from '../views/Labels/LabelView'
 import Landing from '../views/Landing/Landing'
@@ -42,12 +43,14 @@ import PrivacyPolicyView from '../views/PrivacyPolicy/PrivacyPolicyView'
 import ProjectView from '../views/Projects/ProjectView'
 import RewardsView from '../views/Rewards/RewardsView'
 import APITokenSettings from '../views/Settings/APITokenSettings'
+import CalendarSettings from '../views/Settings/CalendarSettings'
+import HomeSectionsSettings from '../views/Settings/HomeSectionsSettings'
+import LayoutSettings from '../views/Settings/LayoutSettings'
 import LocalizationSettings from '../views/Settings/LocalizationSettings'
 import MFASettings from '../views/Settings/MFASettings'
 import NotificationSetting from '../views/Settings/NotificationSetting'
 import PrivacyAnalyticsSettings from '../views/Settings/PrivacyAnalyticsSettings'
 import ProfileSettings from '../views/Settings/ProfileSettings'
-import SidepanelSettings from '../views/Settings/SidepanelSettings'
 import StorageSettings from '../views/Settings/StorageSettings'
 import TermsView from '../views/Terms/TermsView'
 import TestView from '../views/TestView/Test'
@@ -64,7 +67,11 @@ const Router = createBrowserRouter([
     children: [
       {
         path: '/',
-        element: <MyChores />,
+        element: <DefaultViewRoute />,
+      },
+      {
+        path: '/home',
+        element: <HomeView />,
       },
       {
         path: '/settings',
@@ -107,12 +114,20 @@ const Router = createBrowserRouter([
             element: <APITokenSettings />,
           },
           {
+            path: 'calendar',
+            element: <CalendarSettings />,
+          },
+          {
             path: 'storage',
             element: <StorageSettings />,
           },
           {
-            path: 'sidepanel',
-            element: <SidepanelSettings />,
+            path: 'home-sections',
+            element: <HomeSectionsSettings />,
+          },
+          {
+            path: 'layout',
+            element: <LayoutSettings />,
           },
           {
             path: 'theme',
@@ -272,10 +287,6 @@ const Router = createBrowserRouter([
       {
         path: 'rewards/',
         element: <RewardsView />,
-      },
-      {
-        path: 'members/:userId',
-        element: <MemberDetailView />,
       },
       {
         path: 'projects/',

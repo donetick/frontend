@@ -2,7 +2,6 @@ import '@meauxt/react-swipeable-list/dist/styles.css'
 
 import {
   SwipeableList,
-  SwipeableListItem,
   SwipeAction,
   TrailingActions,
   Type as ListType,
@@ -28,7 +27,6 @@ import {
   Container,
   IconButton,
   Input,
-  Stack,
   Typography,
 } from '@mui/joy'
 import Fuse from 'fuse.js'
@@ -39,6 +37,9 @@ import { useNavigate } from 'react-router-dom'
 import { track } from '../../analytics'
 import EmptyState from '../../components/common/EmptyState'
 import SortAndFilterMenu from '../../components/common/SortAndFilterMenu'
+import SwipeListItem, {
+  SWIPE_COMMIT_THRESHOLD,
+} from '../../components/common/SwipeListItem'
 import { useNotification } from '../../service/NotificationProvider'
 import {
   CreateThing,
@@ -47,7 +48,8 @@ import {
   SaveThing,
   UpdateThingState,
 } from '../../utils/Fetcher'
-import { getSafeBottomStyles } from '../../utils/SafeAreaUtils'
+import { getSafeBottom, getSafeBottomStyles } from '../../utils/SafeAreaUtils'
+import ScrollHideFab from '../components/ScrollHideFab'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import CreateThingModal from '../Modals/Inputs/CreateThingModal'
 import EditThingStateModal from '../Modals/Inputs/EditThingState'
@@ -313,6 +315,13 @@ const ThingsView = () => {
     saveFunc(thing)
       .then(result => {
         result.json().then(data => {
+          if (!result.ok || !data?.res) {
+            showError({
+              title: t('notify.saveFailTitle'),
+              message: t('notify.saveFailMessage'),
+            })
+            return
+          }
           if (thing?.id) {
             const currentThings = [...things]
             const thingIndex = currentThings.findIndex(
@@ -411,6 +420,13 @@ const ThingsView = () => {
     UpdateThingState(updatedThing)
       .then(result => {
         result.json().then(data => {
+          if (!result.ok || !data?.res) {
+            showError({
+              title: t('notify.updateFailTitle'),
+              message: t('notify.updateFailMessage'),
+            })
+            return
+          }
           const currentThings = [...things]
           const thingIndex = currentThings.findIndex(
             currentThing => currentThing.id === updatedThing.id,
@@ -443,6 +459,13 @@ const ThingsView = () => {
     UpdateThingState(thing)
       .then(result => {
         result.json().then(data => {
+          if (!result.ok || !data?.res) {
+            showError({
+              title: t('notify.updateFailTitle'),
+              message: t('notify.updateFailMessage'),
+            })
+            return
+          }
           const currentThings = [...things]
           const thingIndex = currentThings.findIndex(
             currentThing => currentThing.id === thing.id,
@@ -466,20 +489,6 @@ const ThingsView = () => {
 
   return (
     <Container maxWidth='md' sx={{ px: 0 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, p: 2 }}>
-        {/* <EmojiEvents sx={{ fontSize: '2rem', color: '#FFD700' }} /> */}
-        <Stack sx={{ flex: 1 }}>
-          <Typography
-            level='h3'
-            sx={{ fontWeight: 'lg', color: 'text.primary' }}
-          >
-            {t('view.title')}
-          </Typography>
-          <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-            {t('view.description')}
-          </Typography>
-        </Stack>
-      </Box>
       {things.length > 0 && (
         <Box
           sx={{ px: 2, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}
@@ -582,9 +591,13 @@ const ThingsView = () => {
             }}
           />
         )}
-        <SwipeableList type={ListType.IOS} fullSwipe={false}>
+        <SwipeableList
+          type={ListType.IOS}
+          fullSwipe
+          threshold={SWIPE_COMMIT_THRESHOLD}
+        >
           {filteredThings.map(thing => (
-            <SwipeableListItem
+            <SwipeListItem
               onClick={() => navigate(`/things/${thing?.id}`)}
               key={thing.id}
               swipeActionOpen={showMoreInfoId === thing.id ? 'trailing' : null}
@@ -612,22 +625,25 @@ const ThingsView = () => {
                           flexDirection: 'column',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          bgcolor: 'success.softBg',
-                          color: 'success.700',
+                          bgcolor: 'success.500',
+                          color: '#fff',
                           px: 3,
                           height: '100%',
                         }}
                       >
                         {thing?.type === 'text' ? (
-                          <Flip sx={{ fontSize: 20 }} />
+                          <Flip sx={{ fontSize: 20, color: 'white' }} />
                         ) : thing?.type === 'number' ? (
-                          <PlusOne sx={{ fontSize: 20 }} />
+                          <PlusOne sx={{ fontSize: 20, color: 'white' }} />
                         ) : thing.state === 'true' ? (
-                          <ToggleOn sx={{ fontSize: 20 }} />
+                          <ToggleOn sx={{ fontSize: 20, color: 'white' }} />
                         ) : (
-                          <ToggleOff sx={{ fontSize: 20 }} />
+                          <ToggleOff sx={{ fontSize: 20, color: 'white' }} />
                         )}
-                        <Typography level='body-xs' sx={{ mt: 0.5 }}>
+                        <Typography
+                          level='body-xs'
+                          sx={{ mt: 0.5, color: 'inherit' }}
+                        >
                           {thing?.type === 'text'
                             ? t('common:edit')
                             : t('view.toggle')}
@@ -641,14 +657,17 @@ const ThingsView = () => {
                           flexDirection: 'column',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          bgcolor: 'neutral.softBg',
-                          color: 'neutral.700',
+                          bgcolor: 'primary.500',
+                          color: '#fff',
                           px: 3,
                           height: '100%',
                         }}
                       >
-                        <Edit sx={{ fontSize: 20 }} />
-                        <Typography level='body-xs' sx={{ mt: 0.5 }}>
+                        <Edit sx={{ fontSize: 20, color: 'white' }} />
+                        <Typography
+                          level='body-xs'
+                          sx={{ mt: 0.5, color: 'inherit' }}
+                        >
                           {t('common:edit')}
                         </Typography>
                       </Box>
@@ -660,14 +679,17 @@ const ThingsView = () => {
                           flexDirection: 'column',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          bgcolor: 'danger.softBg',
-                          color: 'danger.700',
+                          bgcolor: 'danger.500',
+                          color: '#fff',
                           px: 3,
                           height: '100%',
                         }}
                       >
-                        <Delete sx={{ fontSize: 20 }} />
-                        <Typography level='body-xs' sx={{ mt: 0.5 }}>
+                        <Delete sx={{ fontSize: 20, color: 'white' }} />
+                        <Typography
+                          level='body-xs'
+                          sx={{ mt: 0.5, color: 'inherit' }}
+                        >
                           {t('common:delete')}
                         </Typography>
                       </Box>
@@ -686,19 +708,16 @@ const ThingsView = () => {
                   }
                 }}
               />
-            </SwipeableListItem>
+            </SwipeListItem>
           ))}
         </SwipeableList>
       </Box>
-      <Box
-        // variant='outlined'
+      <ScrollHideFab
         sx={{
           ...getSafeBottomStyles({ bottom: 0, padding: 16 }),
-          left: 10,
-          display: 'flex',
-          justifyContent: 'flex-end',
-          gap: 2,
-          'z-index': 1000,
+          '@media (max-width: 768px)': {
+            bottom: getSafeBottom(56, 16),
+          },
         }}
       >
         <IconButton
@@ -716,31 +735,31 @@ const ThingsView = () => {
         >
           <Add />
         </IconButton>
-        {isShowCreateThingModal && (
-          <CreateThingModal
-            isOpen={isShowCreateThingModal}
-            onClose={() => {
-              setIsShowCreateThingModal(false)
-              setCreateModalThing(null)
-            }}
-            onSave={handleSaveThing}
-            currentThing={createModalThing}
-          />
-        )}
-        {isShowEditThingStateModal && (
-          <EditThingStateModal
-            isOpen={isShowEditThingStateModal}
-            onClose={() => {
-              setIsShowEditStateModal(false)
-              setCreateModalThing(null)
-            }}
-            onSave={handleSetThingState}
-            currentThing={createModalThing}
-          />
-        )}
+      </ScrollHideFab>
+      {isShowCreateThingModal && (
+        <CreateThingModal
+          isOpen={isShowCreateThingModal}
+          onClose={() => {
+            setIsShowCreateThingModal(false)
+            setCreateModalThing(null)
+          }}
+          onSave={handleSaveThing}
+          currentThing={createModalThing}
+        />
+      )}
+      {isShowEditThingStateModal && (
+        <EditThingStateModal
+          isOpen={isShowEditThingStateModal}
+          onClose={() => {
+            setIsShowEditStateModal(false)
+            setCreateModalThing(null)
+          }}
+          onSave={handleSetThingState}
+          currentThing={createModalThing}
+        />
+      )}
 
-        <ConfirmationModal config={confirmModelConfig} />
-      </Box>
+      <ConfirmationModal config={confirmModelConfig} />
     </Container>
   )
 }

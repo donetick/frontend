@@ -181,8 +181,8 @@ export const useDeleteChores = () => {
       )
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['chores'])
-      queryClient.invalidateQueries(['pendingCommands'])
+      queryClient.invalidateQueries({ queryKey: ['chores'] })
+      queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
     },
   })
 }
@@ -250,8 +250,8 @@ export const useCreateChore = () => {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['chores'])
-      queryClient.invalidateQueries(['pendingCommands'])
+      queryClient.invalidateQueries({ queryKey: ['chores'] })
+      queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
     },
   })
 }
@@ -323,9 +323,11 @@ export const useUpdateChore = () => {
       }
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries(['chores'])
-      queryClient.invalidateQueries(['choreHistory', variables.id])
-      queryClient.invalidateQueries(['pendingCommands'])
+      queryClient.invalidateQueries({ queryKey: ['chores'] })
+      queryClient.invalidateQueries({
+        queryKey: ['choreHistory', variables.id],
+      })
+      queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
     },
   })
 }
@@ -366,20 +368,30 @@ export const useChoreDetails = choreId => {
     queryKey: ['choreDetails', choreId],
     refetchOnWindowFocus: true,
     queryFn: async () => {
+      let response
       try {
-        const response = await GetChoreDetailById(choreId)
-        if (response && response.ok) {
-          return await response.json()
-        }
-        throw new Error('Failed to fetch chore detail')
+        response = await GetChoreDetailById(choreId)
       } catch {
-        // Fall back to cached chore (without timer details)
-        const cached = await offlineDB.getChore(choreId)
-        if (cached) {
-          return { res: cached }
-        }
-        throw new Error('Chore detail not available offline')
+        response = null
       }
+
+      if (response && response.ok) {
+        return await response.json()
+      }
+
+      if (response && (response.status === 403 || response.status === 404)) {
+        // Server says this chore is gone/inaccessible (e.g. its project
+        // turned private) — purge the stale cache instead of serving it
+        await offlineDB.deleteChores([choreId]).catch(() => {})
+        throw new Error('Chore is no longer accessible')
+      }
+
+      // Network/server error — fall back to cached chore (without timer details)
+      const cached = await offlineDB.getChore(choreId)
+      if (cached) {
+        return { res: cached }
+      }
+      throw new Error('Chore detail not available offline')
     },
   })
 }
@@ -394,27 +406,37 @@ export const useChore = choreId => {
         throw new Error('Chore ID is required to fetch chore details')
       }
 
+      let response
       try {
-        const response = await GetChoreByID(choreId)
-        if (response && response.ok) {
-          const data = await response.json()
-          // Fire-and-forget: store this chore's images (incl. attachments,
-          // which only appear in detail responses) for offline use
-          if (data?.res) cacheChoreImages(data.res)
-          return data
-        }
-        throw new Error('Failed to fetch chore')
+        response = await GetChoreByID(choreId)
       } catch {
-        // API failed — try offline cache
-        const cached = await offlineDB.getChore(choreId)
-        if (cached) {
-          return { res: cached }
-        }
-        throw new Error('Chore not available offline')
+        response = null
       }
+
+      if (response && response.ok) {
+        const data = await response.json()
+        // Fire-and-forget: store this chore's images (incl. attachments,
+        // which only appear in detail responses) for offline use
+        if (data?.res) cacheChoreImages(data.res)
+        return data
+      }
+
+      if (response && (response.status === 403 || response.status === 404)) {
+        // Server says this chore is gone/inaccessible (e.g. its project
+        // turned private) — purge the stale cache instead of serving it
+        await offlineDB.deleteChores([choreId]).catch(() => {})
+        throw new Error('Chore is no longer accessible')
+      }
+
+      // Network/server error — try offline cache
+      const cached = await offlineDB.getChore(choreId)
+      if (cached) {
+        return { res: cached }
+      }
+      throw new Error('Chore not available offline')
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['chores'])
+      queryClient.invalidateQueries({ queryKey: ['chores'] })
     },
   })
 }
@@ -425,7 +447,7 @@ export const useArchiveChore = () => {
   return useMutation({
     mutationFn: ArchiveChore,
     onSuccess: () => {
-      queryClient.invalidateQueries(['chores'])
+      queryClient.invalidateQueries({ queryKey: ['chores'] })
     },
   })
 }
@@ -436,7 +458,7 @@ export const useUnArchiveChore = () => {
   return useMutation({
     mutationFn: UnArchiveChore,
     onSuccess: () => {
-      queryClient.invalidateQueries(['chores'])
+      queryClient.invalidateQueries({ queryKey: ['chores'] })
     },
   })
 }
@@ -538,9 +560,9 @@ export const useUpdateChoreHistory = () => {
     },
     onSuccess: (data, { choreId }) => {
       if (!data?.queued) {
-        queryClient.invalidateQueries(['choreHistory', choreId])
+        queryClient.invalidateQueries({ queryKey: ['choreHistory', choreId] })
       }
-      queryClient.invalidateQueries(['pendingCommands'])
+      queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
     },
   })
 }
@@ -597,9 +619,9 @@ export const useDeleteChoreHistory = () => {
     },
     onSuccess: (data, { choreId }) => {
       if (!data?.queued) {
-        queryClient.invalidateQueries(['choreHistory', choreId])
+        queryClient.invalidateQueries({ queryKey: ['choreHistory', choreId] })
       }
-      queryClient.invalidateQueries(['pendingCommands'])
+      queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
     },
   })
 }
@@ -676,10 +698,10 @@ export const useMarkChoreComplete = () => {
       }
     },
     onSuccess: (_, { choreId }) => {
-      queryClient.invalidateQueries(['chores'])
-      queryClient.invalidateQueries(['choreHistory', choreId])
-      queryClient.invalidateQueries(['choreDetails', choreId])
-      queryClient.invalidateQueries(['pendingCommands'])
+      queryClient.invalidateQueries({ queryKey: ['chores'] })
+      queryClient.invalidateQueries({ queryKey: ['choreHistory', choreId] })
+      queryClient.invalidateQueries({ queryKey: ['choreDetails', choreId] })
+      queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
     },
   })
 }
@@ -726,10 +748,10 @@ export const useSkipChore = () => {
       }
     },
     onSuccess: (_, choreId) => {
-      queryClient.invalidateQueries(['chores'])
-      queryClient.invalidateQueries(['choreHistory', choreId])
-      queryClient.invalidateQueries(['choreDetails', choreId])
-      queryClient.invalidateQueries(['pendingCommands'])
+      queryClient.invalidateQueries({ queryKey: ['chores'] })
+      queryClient.invalidateQueries({ queryKey: ['choreHistory', choreId] })
+      queryClient.invalidateQueries({ queryKey: ['choreDetails', choreId] })
+      queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
     },
   })
 }
@@ -740,9 +762,9 @@ export const useApproveChore = () => {
   return useMutation({
     mutationFn: ApproveChore,
     onSuccess: (_, choreId) => {
-      queryClient.invalidateQueries(['chores'])
-      queryClient.invalidateQueries(['choreHistory', choreId])
-      queryClient.invalidateQueries(['choreDetails', choreId])
+      queryClient.invalidateQueries({ queryKey: ['chores'] })
+      queryClient.invalidateQueries({ queryKey: ['choreHistory', choreId] })
+      queryClient.invalidateQueries({ queryKey: ['choreDetails', choreId] })
     },
   })
 }
@@ -753,9 +775,9 @@ export const useRejectChore = () => {
   return useMutation({
     mutationFn: RejectChore,
     onSuccess: (_, choreId) => {
-      queryClient.invalidateQueries(['chores'])
-      queryClient.invalidateQueries(['choreHistory', choreId])
-      queryClient.invalidateQueries(['choreDetails', choreId])
+      queryClient.invalidateQueries({ queryKey: ['chores'] })
+      queryClient.invalidateQueries({ queryKey: ['choreHistory', choreId] })
+      queryClient.invalidateQueries({ queryKey: ['choreDetails', choreId] })
     },
   })
 }

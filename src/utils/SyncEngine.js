@@ -264,8 +264,23 @@ class SyncEngine {
 
     let hasMore = true
     let currentCursor = cursor
+    let pages = 0
 
     while (hasMore && networkManager.deviceOnline) {
+      // Bail out if the user logged out (or switched servers) mid-sync —
+      // without this the loop below has no way to know the session it's
+      // paging through is gone, and keeps hammering the server forever.
+      if (!localStorage.getItem('token')) break
+
+      // Safety valve: a server that reports hasMore without ever advancing
+      // the cursor (bug, or mismatched /sync/changes contract on a custom
+      // server) would otherwise spin this loop indefinitely, flooding the
+      // backend with requests. Bail loudly instead.
+      pages += 1
+      if (pages > 500) {
+        throw new Error('Delta sync aborted: too many pages, possible loop')
+      }
+
       // Use apiClient.get which handles auth and returns a fetch Response
       const response = await apiClient.get(
         `/sync/changes?since=${currentCursor}`,
@@ -307,11 +322,21 @@ class SyncEngine {
       }
 
       // Always advance the cursor, even when there are no changes
+      const cursorAdvanced =
+        data.cursor != null && data.cursor !== currentCursor
       if (data.cursor != null) {
         currentCursor = data.cursor
       }
 
       hasMore = !!data.hasMore
+      // A server reporting hasMore without ever moving the cursor would spin
+      // this loop forever — treat a stuck cursor as "no more" instead.
+      if (hasMore && !cursorAdvanced) {
+        console.error(
+          'Delta sync cursor did not advance, stopping to avoid a request loop',
+        )
+        hasMore = false
+      }
     }
 
     await offlineDB.setSyncCursor(currentCursor)

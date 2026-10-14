@@ -21,17 +21,17 @@ import {
   Menu,
   MenuButton,
   MenuItem,
-  Stack,
   Typography,
 } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
 import Fuse from 'fuse.js'
 import moment from 'moment'
-import { useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
 
 import EmptyState from '../../components/common/EmptyState'
+import { useNavBarTitle } from '../../contexts/NavBarTitleContext'
 import { useChores } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { DeleteLabel } from '../../utils/Fetcher'
@@ -67,6 +67,23 @@ const LabelDetailView = () => {
     () => (labels || []).find(item => String(item.id) === String(labelId)),
     [labels, labelId],
   )
+  const handleLabelSelect = useCallback(
+    item => navigate(`/labels/${encodeURIComponent(item.id)}`),
+    [navigate],
+  )
+  const labelSelector = useMemo(
+    () =>
+      label && labels?.length
+        ? {
+            items: labels,
+            onSelect: handleLabelSelect,
+            selectedId: label.id,
+            type: 'label',
+          }
+        : null,
+    [handleLabelSelect, label, labels],
+  )
+  useNavBarTitle(label?.name || t('common:navigation.labels'), labelSelector)
 
   // Tasks carrying this label, soonest due first — undated tasks sink to the
   // bottom rather than sorting as epoch 0.
@@ -186,45 +203,20 @@ const LabelDetailView = () => {
 
   return (
     <Container maxWidth='md'>
-      {/* Identity: the label's own color is what names this page, so it leads
-          the title rather than sitting in a decorative avatar. */}
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, mb: 2 }}>
-        <Stack sx={{ flex: 1, minWidth: 0, gap: 0.5 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Box
-              sx={{
-                width: 12,
-                height: 12,
-                borderRadius: '50%',
-                bgcolor: label.color,
-                flexShrink: 0,
-              }}
-            />
-            <Typography
-              level='h3'
-              sx={{
-                fontWeight: 'lg',
-                color: 'text.primary',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {label.name}
-            </Typography>
-            {!isOwnedByCurrentUser && (
-              <Chip size='sm' variant='soft' color='warning'>
-                {t('shared')}
-              </Chip>
-            )}
-          </Box>
-          <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-            {t('detail.taskCount', { count: counts.all })}
-          </Typography>
-        </Stack>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+        <Typography
+          level='body-sm'
+          sx={{ color: 'text.secondary', flex: 1, minWidth: 0 }}
+        >
+          {t('detail.taskCount', { count: counts.all })}
+          {!isOwnedByCurrentUser && (
+            <Chip size='sm' variant='soft' color='warning' sx={{ ml: 1 }}>
+              {t('shared')}
+            </Chip>
+          )}
+        </Typography>
 
-        {/* One trailing target. Delete is destructive, so it lives behind the
-            overflow instead of being a naked icon next to the title. */}
+        {/* Delete is destructive, so it stays behind one overflow target. */}
         <Dropdown>
           <MenuButton
             slots={{ root: IconButton }}

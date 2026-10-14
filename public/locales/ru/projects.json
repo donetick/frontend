@@ -1,72 +1,72 @@
 {
-  "blurb": "Раскладывайте дела по проектам. Создавайте отдельные пространства, чтобы всё лежало по местам и быстро находилось.",
-  "defaultChip": "По умолчанию",
-  "defaultDescription": "Все дела без конкретного проекта",
-  "delete": {
-    "message": "Удалить проект «{{name}}»? Сам проект исчезнет, но все дела останутся — они перейдут в проект по умолчанию.",
-    "title": "Удалить проект"
-  },
   "iconPicker": {
-    "availableIcons": "Доступные значки",
-    "chooseIcon": "Выбор значка проекта"
+    "chooseIcon": "Выбор значка проекта",
+    "availableIcons": "Доступные значки"
   },
   "icons": {
-    "AccountBalance": "Финансы",
-    "Book": "Учёба",
-    "Build": "Ремонт",
+    "FolderOpen": "Папка",
+    "Work": "Дела",
+    "Home": "Дом",
+    "School": "Школа",
     "BusinessCenter": "Работа",
     "Code": "Код",
-    "Computer": "Техника",
-    "DirectionsCar": "Авто",
-    "FitnessCenter": "Спортзал",
-    "Flight": "Поездки",
-    "FolderOpen": "Папка",
-    "Games": "Игры",
-    "Garden": "Сад",
-    "Home": "Дом",
-    "LocalHospital": "Здоровье",
-    "MusicNote": "Музыка",
+    "Build": "Ремонт",
     "Palette": "Дизайн",
-    "Pets": "Питомцы",
-    "PhotoCamera": "Фото",
-    "Restaurant": "Еда",
-    "School": "Школа",
-    "Science": "Наука",
-    "ShoppingCart": "Покупки",
     "SportsSoccer": "Спорт",
-    "Work": "Дела"
+    "FitnessCenter": "Спортзал",
+    "ShoppingCart": "Покупки",
+    "Restaurant": "Еда",
+    "Flight": "Поездки",
+    "Book": "Учёба",
+    "MusicNote": "Музыка",
+    "PhotoCamera": "Фото",
+    "Games": "Игры",
+    "Science": "Наука",
+    "AccountBalance": "Финансы",
+    "LocalHospital": "Здоровье",
+    "DirectionsCar": "Авто",
+    "Pets": "Питомцы",
+    "Garden": "Сад",
+    "Computer": "Техника"
+  },
+  "defaultChip": "По умолчанию",
+  "tasks_one": "{{count}} дело",
+  "tasks_other": "{{count}} дела",
+  "shared": "Общий",
+  "delete": {
+    "title": "Удалить проект",
+    "message": "Удалить проект «{{name}}»? Сам проект исчезнет, но все дела останутся — они перейдут в проект по умолчанию."
   },
   "loadError": "Не удалось загрузить проекты. Попробуйте ещё раз.",
-  "modal": {
-    "colorLabel": "Цвет проекта",
-    "descriptionLabel": "Описание",
-    "descriptionPlaceholder": "Описание проекта (необязательно)...",
-    "errorCreate": "Не удалось создать проект",
-    "errorNameRequired": "Укажите название проекта",
-    "errorUpdate": "Не удалось сохранить проект",
-    "iconLabel": "Значок проекта",
-    "nameLabel": "Название проекта",
-    "namePlaceholder": "Введите название...",
-    "selectIcon": "Выбрать значок"
-  },
   "search": {
-    "clear": "Очистить поиск",
-    "noFilterResultsDescription": "Под текущий фильтр не подходит ни один проект.",
-    "noResultsDescription": "Нет проектов по запросу «{{searchTerm}}».",
-    "noResultsTitle": "Ничего не нашлось",
     "placeholder": "Поиск проектов",
+    "noResultsTitle": "Ничего не нашлось",
+    "noResultsDescription": "Нет проектов по запросу «{{searchTerm}}».",
+    "noFilterResultsDescription": "Под текущий фильтр не подходит ни один проект.",
+    "clear": "Очистить поиск",
     "showAll": "Показать все проекты"
   },
+  "blurb": "Раскладывайте дела по проектам. Создавайте отдельные пространства, чтобы всё лежало по местам и быстро находилось.",
+  "defaultDescription": "Все дела без конкретного проекта",
   "selector": {
+    "title": "Проекты",
     "createNew": "Новый проект",
     "createNewDescription": "Добавить своё пространство для дел",
     "manage": "Управление проектами",
     "manageDescription": "Смотреть, изменять и наводить порядок в проектах",
-    "title": "Проекты"
+    "currentProjectTitle": "",
+    "builtInWorkspace": ""
   },
-  "shared": "Общий",
-  "tasks_few": "{{count}} дела",
-  "tasks_many": "{{count}} дел",
-  "tasks_one": "{{count}} дело",
-  "tasks_other": "{{count}} дела"
+  "modal": {
+    "errorNameRequired": "Укажите название проекта",
+    "errorUpdate": "Не удалось сохранить проект",
+    "errorCreate": "Не удалось создать проект",
+    "namePlaceholder": "Введите название...",
+    "descriptionPlaceholder": "Описание проекта (необязательно)...",
+    "nameLabel": "Название проекта",
+    "descriptionLabel": "Описание",
+    "iconLabel": "Значок проекта",
+    "selectIcon": "Выбрать значок",
+    "colorLabel": "Цвет проекта"
+  }
 }

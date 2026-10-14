@@ -111,7 +111,9 @@
     "unableChangeAssignee": "Zuständige Person konnte nicht geändert werden",
     "availableToCompleteStarting": "Ab {{date}} erledigbar",
     "delegateToSomeoneElse": "An jemand anderen übertragen",
-    "selectAPerformer": "Wähle eine ausführende Person"
+    "selectAPerformer": "Wähle eine ausführende Person",
+    "notFoundTitle": "Aufgabe nicht verfügbar",
+    "notFoundDescription": "Diese Aufgabe wurde möglicherweise gelöscht oder wird nicht mehr mit dir geteilt."
   },
   "toolbar": {
     "defaultProject": "Standardprojekt",
@@ -134,7 +136,11 @@
       "assignee": "Zugewiesene Person"
     },
     "display": "Anzeige",
-    "displayOptions": "Anzeigeoptionen"
+    "displayOptions": "Anzeigeoptionen",
+    "moreSaveOptions": "Weitere Speicheroptionen",
+    "showCount": "{{count}} anzeigen",
+    "done": "Fertig",
+    "savedFilters": "Gespeicherte Filter"
   },
   "sort": {
     "assignedToMe": "Mir zugewiesen",
@@ -168,9 +174,9 @@
       "eq": "Gleich",
       "neq": "Ungleich",
       "gt": "Größer als",
-      "gte": "Größer als oder gleich",
+      "gte": "Größer oder gleich",
       "lt": "Kleiner als",
-      "lte": "Kleiner als oder gleich"
+      "lte": "Kleiner oder gleich"
     }
   },
   "activity": {
@@ -210,7 +216,7 @@
     "noDueDateDesc_other": "{{count}} Aufgaben benötigen eine Frist"
   },
   "labels": {
-    "label": "Labels"
+    "label": "Beschriftungen"
   },
   "actionMenu": {
     "view": "Anzeigen",
@@ -271,14 +277,16 @@
       "skipTitle": "Aufgaben überspringen",
       "skippedTitle": "⏭️ Aufgaben übersprungen",
       "skipFailedTitle": "Das Überspringen mehrere Aufgaben ist fehlgeschlagen"
-    }
+    },
+    "failAssignTitle": "Zuweisung fehlgeschlagen",
+    "failAssignMessage": "Aufgabe konnte nicht zugewiesen werden"
   },
   "archived": {
     "restoredTitle": "Aufgabe wiederhergestellt",
     "restoredMsg": "Die Aufgabe wurde wiederhergestellt und ist jetzt aktiv.",
     "deletedTitle": "Aufgabe gelöscht",
     "delete": "Löschen",
-    "someFailedTitle": "Einige Aufgaben sind fehlgeschlagen",
+    "someFailedTitle": "Einige Aufgaben konnten nicht verarbeitet werden",
     "unexpectedError": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es erneut.",
     "deletedBulkTitle": "🗑️ Aufgaben gelöscht",
     "bulkDeleteFailTitle": "Die Löschung mehrerer Aufgaben ist fehlgeschlagen",
@@ -312,8 +320,9 @@
     "exitMultiSelect": "Mehrfachauswahl beenden (Strg+S)",
     "enableMultiSelect": "Mehrfachauswahl aktivieren (Strg+S)",
     "selected_one": "{{count}} Aufgabe ausgewählt",
-    "selected_other": "{{count}}\u00a0Aufgaben ausgewählt",
+    "selected_other": "{{count}} Aufgaben ausgewählt",
     "selectAllTitle": "Alle sichtbaren Aufgaben auswählen (Strg+A)",
+    "selectSectionTitle": "Alle Aufgaben in diesem Abschnitt auswählen",
     "all": "Alle",
     "closeMultiSelect": "Mehrfachauswahl schließen (Esc)",
     "clearMultiSelect": "Auswahl aufheben (Esc)",
@@ -380,10 +389,11 @@
     "more": "Mehr",
     "priority": "Priorität",
     "assignee": "Zugewiesene Person",
-    "labels": "Labels",
+    "labels": "Beschriftungen",
     "labelsHint": "Tippen zum Hinzufügen · erneut tippen zum Entfernen",
     "done": "Fertig",
-    "noPriority": "Keine"
+    "noPriority": "Keine",
+    "dueDateTitle": "Fälligkeitsdatum für {{count}} Aufgabe(n)"
   },
   "remind": {
     "title": "Erinnerungen",
@@ -515,8 +525,8 @@
     "title": "Fälligkeitsdatum",
     "apply": "Übernehmen",
     "remove": "Entfernen",
-    "quickDate": "Schnellauswahl Datum",
-    "quickTime": "Schnellauswahl Uhrzeit",
+    "quickDate": "Datum schnell auswählen",
+    "quickTime": "Uhrzeit schnell auswählen",
     "nextMonth": "Nächster Monat",
     "morning": "Morgens",
     "noon": "Mittags",
@@ -548,8 +558,6 @@
   },
   "subTask": {
     "namePlaceholder": "Aufgabenname...",
-    "deleteShortcut": "Löschen (Umschalt+Rücktaste)",
-    "addPlaceholder": "Neue Aufgabe hinzufügen... (Eingabetaste zum Hinzufügen)",
     "untitled": "Unbenannte Unteraufgabe",
     "actions": "Unteraufgaben-Aktionen",
     "edit": "Bearbeiten",
@@ -559,7 +567,9 @@
     "delete": "Loschen",
     "editTitle": "Unteraufgabe bearbeiten",
     "addTitle": "Unteraufgabe hinzufugen",
-    "addChildTitle": "Verschachtelte Unteraufgabe hinzufugen"
+    "addChildTitle": "Verschachtelte Unteraufgabe hinzufugen",
+    "deleteShortcut": "Löschen (Umschalt+Rücktaste)",
+    "addPlaceholder": "Neue Aufgabe hinzufügen... (Eingabetaste zum Hinzufügen)"
   },
   "voiceToTask": {
     "title": "Sprich deine Aufgaben ein",
@@ -579,8 +589,8 @@
     "reminder_other": "{{count}} Erinnerungen",
     "points": "{{count}} Pkt.",
     "frequency": {
-      "everyN": "Alle {{count}} {{unit}}",
-      "everyUnit": "Jede(n) {{unit}}",
+      "everyN": "Jede(n) {{count}} {{unit}}",
+      "everyUnit": "Alle {{unit}}",
       "daily": "Täglich",
       "weekly": "Wöchentlich",
       "monthly": "Monatlich",
@@ -609,7 +619,15 @@
     "keepAsAttachment": "Foto als Anhang behalten",
     "altCaptured": "Erfasstes Dokument",
     "altProcessing": "Verarbeitung läuft",
-    "taskIdentified": "Aufgabe erkannt"
+    "taskIdentified": "Aufgabe erkannt",
+    "runningNativeOcr": "Running native OCR…",
+    "identifyingTask": "Identifying task with AI…",
+    "tapToScanHint": "Tippe auf \"Dokument scannen\", um den Scanner zu öffnen",
+    "readingTextProgress": "Text wird aus Bild gelesen… {{progress}} %",
+    "dueDate": "Fällig: {{date}}",
+    "hideRawText": "Rohtext ausblenden",
+    "showRawText": "Rohtext anzeigen",
+    "cameraUnavailableUseUpload": "Kamera nicht verfügbar — stattdessen hochladen"
   },
   "descriptionPlaceholder": "Beschreibung eingeben...",
   "notificationTemplate": {
@@ -674,7 +692,7 @@
     "project": "Projekt",
     "projectDesc": "Zu welchem Projekt gehört diese Aufgabe?",
     "defaultProject": "Standardprojekt",
-    "labels": "Labels",
+    "labels": "Beschriftungen",
     "labelsDesc": "Hinweise zu dieser Aufgabe oder Schlagwörter zur Kennzeichnung",
     "addNewLabel": "Neues Label hinzufügen",
     "subTasks": "Unteraufgaben",
@@ -757,7 +775,10 @@
     "updatedBy": "Aktualisiert von",
     "archive": "Archivieren",
     "unarchive": "Archivierung aufheben",
-    "create": "Erstellen"
+    "create": "Erstellen",
+    "alwaysDueHint": "Diese Aufgabe hat kein Fälligkeitsdatum und ist jederzeit verfügbar",
+    "notifyForTaskUnavailable": "Benachrichtigungen sind für auslöserbasierte oder immer verfügbare Aufgaben nicht möglich",
+    "notificationsFreePlanNote": "Ihr Tarif enthält eine Erinnerung am Fälligkeitsdatum. Plus fügt Erinnerungen vor dem Termin und Nachfass‑Erinnerungen danach hinzu."
   },
   "addTask": {
     "title": "Neue Aufgabe erstellen",
@@ -770,7 +791,9 @@
     "createCount": "{{count}} Aufgaben erstellen",
     "useTask": "Aufgabe übernehmen",
     "processing": "Verarbeitung läuft",
-    "create": "Erstellen"
+    "create": "Erstellen",
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:"
   },
   "repeat": {
     "days": {
@@ -802,11 +825,13 @@
       "monthly": "Monatlich",
       "yearly": "Jährlich",
       "adaptive": "Adaptiv",
-      "custom": "Benutzerdefiniert"
+      "custom": "Benutzerdefiniert",
+      "always": "Immer"
     },
     "freqMessage": {
       "adaptive": "Diese Aufgabe wird dynamisch anhand vorheriger Abschlussdaten geplant.",
-      "custom": "Diese Aufgabe wird anhand einer benutzerdefinierten Häufigkeit geplant."
+      "custom": "Diese Aufgabe wird anhand einer benutzerdefinierten Häufigkeit geplant.",
+      "always": "Diese Aufgabe hat kein Fälligkeitsdatum und bleibt jederzeit verfügbar. Sie wird nach Abschluss nicht archiviert."
     },
     "weekPattern": {
       "every_week": "Jede Woche",
@@ -949,6 +974,7 @@
       "2": "In Bearbeitung",
       "3": "Genehmigung ausstehend"
     },
+    "anyOf": "Beliebige von",
     "include": "Einschließen",
     "exclude": "Ausschließen",
     "has": "Hat",
@@ -958,7 +984,7 @@
     "statusHeading": "Status",
     "priority": "Priorität",
     "dueDate": "Fälligkeitsdatum",
-    "labels": "Labels",
+    "labels": "Beschriftungen",
     "projects": "Projekte",
     "defaultProject": "Standardprojekt",
     "points": "Punkte",
@@ -1032,5 +1058,7 @@
     "today": "Heute",
     "yesterday": "Gestern",
     "noteTitle": "Notiz - {{choreName}}"
-  }
+  },
+  "tasksForDate": "Aufgaben für {{date}}",
+  "createSuggestion": "\"{{value}}\" erstellen"
 }

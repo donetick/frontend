@@ -8,9 +8,15 @@ import { isOfficialDonetickInstance } from '../utils/FeatureToggle'
 const STATE_KEY = 'feedbackState'
 
 // Eligibility thresholds for the automatic sentiment prompt.
-const MIN_COMPLETIONS = 10
+const MIN_COMPLETIONS = 7
 const MIN_DAYS_SINCE_SIGNUP = 7
-const COOLDOWN_DAYS = 120
+// Apple allows three review prompts per user per year, so anything above ~120
+// days leaves part of that allowance unused.
+const COOLDOWN_DAYS = 90
+// A soft opt-out lapses: someone who dismissed the prompt during a busy week,
+// or who reviewed an old version, is a fair candidate again a year later. An
+// explicit "stop asking me" never lapses.
+const OPT_OUT_LAPSE_DAYS = 365
 // A recent crash/API failure poisons the sentiment reading, so hold off.
 const ERROR_QUIET_PERIOD_MS = 10 * 60 * 1000
 
@@ -34,11 +40,48 @@ const defaultState = {
   reviewRequestedAt: null,
   lastSentiment: null,
   optedOut: false,
+  // When the opt-out was set, and what caused it. Anything other than
+  // 'explicit' lapses after OPT_OUT_LAPSE_DAYS.
+  optedOutAt: null,
+  optedOutReason: null,
   // Developer Settings escape hatch; never set in normal use.
   devForced: false,
 }
 
 let cachedState = null
+
+const persist = async () => {
+  try {
+    await Preferences.set({
+      key: STATE_KEY,
+      value: JSON.stringify(cachedState),
+    })
+  } catch (error) {
+    console.warn('FeedbackService: unable to persist state', error)
+  }
+}
+
+/**
+ * Expires a soft opt-out that has outlived OPT_OUT_LAPSE_DAYS. Returns the same
+ * object when nothing changed, so the caller can tell whether to persist.
+ */
+const clearLapsedOptOut = state => {
+  if (!state.optedOut || state.optedOutReason === 'explicit') return state
+  // State written before opt-outs carried a timestamp. Start the clock now
+  // rather than expiring it on sight, so nobody gets re-prompted immediately
+  // because of the upgrade.
+  if (!state.optedOutAt) return { ...state, optedOutAt: Date.now() }
+  if (Date.now() - state.optedOutAt < OPT_OUT_LAPSE_DAYS * DAY_MS) return state
+  return {
+    ...state,
+    optedOut: false,
+    optedOutAt: null,
+    optedOutReason: null,
+    // Otherwise the next single dismissal would immediately re-trip the
+    // three-strikes rule.
+    dismissCount: 0,
+  }
+}
 
 const readState = async () => {
   if (cachedState) return cachedState
@@ -49,20 +92,18 @@ const readState = async () => {
     console.warn('FeedbackService: unable to read state', error)
     cachedState = { ...defaultState }
   }
+  const normalized = clearLapsedOptOut(cachedState)
+  if (normalized !== cachedState) {
+    cachedState = normalized
+    await persist()
+  }
   return cachedState
 }
 
 const writeState = async patch => {
   const current = await readState()
   cachedState = { ...current, ...patch }
-  try {
-    await Preferences.set({
-      key: STATE_KEY,
-      value: JSON.stringify(cachedState),
-    })
-  } catch (error) {
-    console.warn('FeedbackService: unable to persist state', error)
-  }
+  await persist()
   return cachedState
 }
 
@@ -125,7 +166,7 @@ export const collectFeedbackContext = async ({ feature, userProfile } = {}) => {
     isOfficialDonetickInstance().catch(() => false),
   ])
 
-  const signupDate = userProfile?.created_at
+  const signupDate = userProfile?.createdAt || userProfile?.created_at
   const daysSinceSignup = signupDate
     ? Math.floor((Date.now() - new Date(signupDate).getTime()) / DAY_MS)
     : null
@@ -153,37 +194,86 @@ export const collectFeedbackContext = async ({ feature, userProfile } = {}) => {
 // Eligibility
 // ---------------------------------------------------------------------------
 
+const OPT_OUT_REASONS = {
+  dismissed: 'dismissed the prompt 3 times',
+  reviewed: 'a store review was already requested',
+  explicit: 'asked not to be prompted again',
+}
+
+/** Spells out an opt-out for Developer Settings, including when it lapses. */
+const describeOptOut = state => {
+  const reason = OPT_OUT_REASONS[state.optedOutReason] || 'reason unknown'
+  if (state.optedOutReason === 'explicit') return `${reason} (permanent)`
+  if (!state.optedOutAt) return reason
+  const daysLeft = Math.ceil(
+    OPT_OUT_LAPSE_DAYS - (Date.now() - state.optedOutAt) / DAY_MS,
+  )
+  return `${reason} (lapses in ${daysLeft} days)`
+}
+
+/**
+ * Stable identifiers for each gate, safe to send to analytics. The human
+ * strings in `blockers` are for Developer Settings and change freely; these
+ * don't, so historical funnels stay comparable.
+ */
+export const PROMPT_BLOCKERS = {
+  OPTED_OUT: 'opted_out',
+  TOO_FEW_COMPLETIONS: 'too_few_completions',
+  RECENT_ERROR: 'recent_error',
+  NEW_ACCOUNT: 'new_account',
+  COOLDOWN: 'cooldown',
+  SAME_VERSION: 'same_version',
+}
+
 /**
  * Runs every gate and reports which ones failed, so Developer Settings can
  * explain why the prompt is or isn't showing rather than just saying "no".
+ *
+ * Gates are evaluated in rough order of how permanent they are, so
+ * `blockerCodes[0]` is the most meaningful single reason to report.
  */
 export const evaluatePromptEligibility = async ({ userProfile } = {}) => {
   const state = await readState()
   const version = await getAppVersion()
 
   if (state.devForced) {
-    return { eligible: true, forced: true, blockers: [], state, version }
+    return {
+      eligible: true,
+      forced: true,
+      blockers: [],
+      blockerCodes: [],
+      state,
+      version,
+    }
   }
 
-  const blockers = []
+  const failed = []
+  const fail = (code, detail) => failed.push({ code, detail })
 
   if (state.optedOut) {
-    blockers.push('User opted out (chose a sentiment, or dismissed 3 times)')
+    fail(PROMPT_BLOCKERS.OPTED_OUT, `User opted out: ${describeOptOut(state)}`)
   }
   if (state.completions < MIN_COMPLETIONS) {
-    blockers.push(
+    fail(
+      PROMPT_BLOCKERS.TOO_FEW_COMPLETIONS,
       `Only ${state.completions} completions, needs ${MIN_COMPLETIONS}`,
     )
   }
   if (hasRecentError()) {
-    blockers.push('An error occurred in the last 10 minutes')
+    fail(
+      PROMPT_BLOCKERS.RECENT_ERROR,
+      'An error occurred in the last 10 minutes',
+    )
   }
 
-  const signupDate = userProfile?.createdAt
+  // The profile shape varies by source, so accept either spelling rather than
+  // letting the gate silently never apply.
+  const signupDate = userProfile?.createdAt || userProfile?.created_at
   if (signupDate) {
     const days = (Date.now() - new Date(signupDate).getTime()) / DAY_MS
     if (days < MIN_DAYS_SINCE_SIGNUP) {
-      blockers.push(
+      fail(
+        PROMPT_BLOCKERS.NEW_ACCOUNT,
         `Account is ${Math.floor(days)} days old, needs ${MIN_DAYS_SINCE_SIGNUP}`,
       )
     }
@@ -192,7 +282,8 @@ export const evaluatePromptEligibility = async ({ userProfile } = {}) => {
   if (state.lastPromptedAt) {
     const daysSincePrompt = (Date.now() - state.lastPromptedAt) / DAY_MS
     if (daysSincePrompt < COOLDOWN_DAYS) {
-      blockers.push(
+      fail(
+        PROMPT_BLOCKERS.COOLDOWN,
         `Cooldown: ${Math.ceil(COOLDOWN_DAYS - daysSincePrompt)} days remaining`,
       )
     }
@@ -200,20 +291,21 @@ export const evaluatePromptEligibility = async ({ userProfile } = {}) => {
 
   // Never ask twice on the same build, even after the cooldown expires.
   if (state.lastPromptedVersion && state.lastPromptedVersion === version) {
-    blockers.push(`Already prompted on this version (${version})`)
+    fail(
+      PROMPT_BLOCKERS.SAME_VERSION,
+      `Already prompted on this version (${version})`,
+    )
   }
 
   return {
-    eligible: blockers.length === 0,
+    eligible: failed.length === 0,
     forced: false,
-    blockers,
+    blockers: failed.map(item => item.detail),
+    blockerCodes: failed.map(item => item.code),
     state,
     version,
   }
 }
-
-export const shouldShowSentimentPrompt = async options =>
-  (await evaluatePromptEligibility(options)).eligible
 
 /** Developer Settings: bypass every gate on the next eligibility check. */
 export const setDevForcedPrompt = forced => writeState({ devForced: !!forced })
@@ -244,14 +336,26 @@ export const markPromptShown = async () => {
 export const markPromptDismissed = async () => {
   const state = await readState()
   const dismissCount = state.dismissCount + 1
-  // Three dismissals in a row is an answer: stop asking automatically.
-  return writeState({ dismissCount, optedOut: dismissCount >= 3 })
+  // Three dismissals in a row is an answer, but not a permanent one.
+  if (dismissCount < 3) return writeState({ dismissCount })
+  return writeState({
+    dismissCount,
+    optedOut: true,
+    optedOutAt: Date.now(),
+    optedOutReason: 'dismissed',
+  })
 }
 
 export const markSentiment = async sentiment =>
   writeState({ lastSentiment: sentiment, dismissCount: 0 })
 
-export const optOutOfFeedbackPrompts = () => writeState({ optedOut: true })
+/** The user asking outright, which is the one opt-out that never lapses. */
+export const optOutOfFeedbackPrompts = () =>
+  writeState({
+    optedOut: true,
+    optedOutAt: Date.now(),
+    optedOutReason: 'explicit',
+  })
 
 // ---------------------------------------------------------------------------
 // Store review + submission
@@ -279,7 +383,12 @@ export const requestStoreReview = async () => {
   if (!Capacitor.isNativePlatform()) return false
   try {
     await InAppReview.requestReview()
-    await writeState({ reviewRequestedAt: Date.now(), optedOut: true })
+    await writeState({
+      reviewRequestedAt: Date.now(),
+      optedOut: true,
+      optedOutAt: Date.now(),
+      optedOutReason: 'reviewed',
+    })
     return true
   } catch (error) {
     console.warn('FeedbackService: review request failed', error)

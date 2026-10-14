@@ -46,7 +46,9 @@
     "pointsEarned": "Verdiente Punkte",
     "points_one": "{{count}} Punkt",
     "points_other": "{{count}} Punkte",
-    "note": "Notiz"
+    "note": "Notiz",
+    "reason": "Grund",
+    "notes": "Notizen"
   },
   "charts": {
     "noData": "Keine Daten verfügbar",
@@ -67,7 +69,7 @@
       "description": "Aufgaben nach Priorität"
     },
     "labels": {
-      "title": "Labels",
+      "title": "Beschriftungen",
       "description": "Aufgaben nach Labels"
     },
     "labelsDuration": {
@@ -86,7 +88,7 @@
   "filter": {
     "status": "Status",
     "pending": "Ausstehend",
-    "labels": "Labels",
+    "labels": "Beschriftungen",
     "hasNotes": "Mit Notizen",
     "hasPoints": "Mit Punkten",
     "timePeriod": "Zeitraum",
@@ -99,14 +101,33 @@
     "days_other": "{{count}} Tage",
     "allTime": "Gesamter Zeitraum"
   },
+  "search": {
+    "placeholder": "Verlauf durchsuchen...",
+    "clear": "Suche zurücksetzen"
+  },
+  "sort": {
+    "date": "Fertigstellungsdatum",
+    "updatedDate": "Aktualisierungsdatum",
+    "performer": "Erledigt von",
+    "status": "Status",
+    "points": "Punkte"
+  },
   "activities": {
     "title": "Aktivitäten",
+    "subtitle": "Sieh was erledigt, übersprungen oder verpasst wurde",
     "emptyTitle": "Keine Aktivität in diesem Zeitraum",
     "emptyDescriptionEveryone": "In deinem Kreis wurde {{period}} von niemandem etwas erledigt. Versuche einen größeren Zeitraum oder ein anderes Mitglied.",
     "emptyDescriptionMember": "{{name}} hat {{period}} nichts erledigt. Versuche einen größeren Zeitraum oder ein anderes Mitglied.",
     "periodSoFar": "bisher",
     "periodLastDays": "in den letzten {{count}} Tagen",
-    "unknownMember": "diesem Mitglied"
+    "unknownMember": "diesem Mitglied",
+    "searchPlaceholder": "Aktivitäten suchen...",
+    "sort": {
+      "date": "Datum",
+      "name": "Name der Aufgabe",
+      "status": "Status",
+      "points": "Punkte"
+    }
   },
   "title": {
     "summary": "Aufgabenzusammenfassung",
@@ -159,5 +180,11 @@
   },
   "noteViewer": {
     "updatedAt": "Aktualisiert am {{date}}"
+  },
+  "plan": {
+    "lockedTitle": "Ältere Einträge bleiben im Free‑Tarif {{days}} Tage erhalten",
+    "allLockedTitle": "Die Historie dieser Aufgabe ist älter als {{days}} Tage",
+    "lockedDescription": "Einträge, die älter als {{days}} Tage sind, können dauerhaft gelöscht werden. Upgrade auf Plus, um Ihre vollständige Historie zu behalten.",
+    "unlock": "Auf Plus upgraden"
   }
 }

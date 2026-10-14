@@ -1,144 +1,190 @@
 {
-  "activities": {
-    "title": "Активность"
+  "edit": {
+    "title": "Изменить запись",
+    "completedDate": "Дата выполнения",
+    "note": "Заметка",
+    "additionalNotes": "Дополнительная заметка",
+    "deleteTitle": "Удалить запись",
+    "deleteMessage": "Удалить эту запись истории?"
+  },
+  "status": {
+    "inProgress": "В работе",
+    "completed": "Выполнено",
+    "skipped": "Пропущено",
+    "pendingApproval": "Ждёт одобрения",
+    "rejected": "Отклонено",
+    "missed": "Не сделано",
+    "rescheduled": "Перенесено",
+    "scheduled": "Запланировано"
   },
   "badge": {
     "onTime": "Вовремя",
     "onTimeLabel": "Вовремя"
   },
   "card": {
-    "assignedTo": "Назначено: {{name}}",
-    "daysAfterDue": "на {{count}} д позже срока",
-    "daysAfterDue_few": "{{count}}д после срока",
-    "daysAfterDue_many": "{{count}}д после срока",
-    "daysAfterDue_one": "{{count}}д после срока",
-    "daysAfterDue_other": "{{count}}д после срока",
-    "daysBeforeDue": "на {{count}} д раньше срока",
-    "daysBeforeDue_few": "{{count}}д до срока",
-    "daysBeforeDue_many": "{{count}}д до срока",
+    "wasDue": "Срок был {{date}}",
     "daysBeforeDue_one": "{{count}}д до срока",
     "daysBeforeDue_other": "{{count}}д до срока",
-    "hoursAfterDue": "на {{count}} ч позже срока",
-    "hoursAfterDue_few": "{{count}}ч после срока",
-    "hoursAfterDue_many": "{{count}}ч после срока",
-    "hoursAfterDue_one": "{{count}}ч после срока",
-    "hoursAfterDue_other": "{{count}}ч после срока",
-    "hoursBeforeDue": "на {{count}} ч раньше срока",
-    "hoursBeforeDue_few": "{{count}}ч до срока",
-    "hoursBeforeDue_many": "{{count}}ч до срока",
+    "daysAfterDue_one": "{{count}}д после срока",
+    "daysAfterDue_other": "{{count}}д после срока",
     "hoursBeforeDue_one": "{{count}}ч до срока",
     "hoursBeforeDue_other": "{{count}}ч до срока",
-    "points_few": "★ {{count}} балла",
-    "points_many": "★ {{count}} баллов",
+    "hoursAfterDue_one": "{{count}}ч после срока",
+    "hoursAfterDue_other": "{{count}}ч после срока",
+    "assignedTo": "Назначено: {{name}}",
     "points_one": "★ {{count}} балл",
-    "points_other": "★ {{count}} балла",
-    "wasDue": "Срок был {{date}}"
-  },
-  "charts": {
-    "assigneeBreakdown": {
-      "description": "Дела в разрезе исполнителей",
-      "title": "По исполнителям"
-    },
-    "due": {
-      "description": "Сроки текущих дел",
-      "title": "Срок"
-    },
-    "labels": {
-      "description": "Дела по меткам",
-      "title": "Метки"
-    },
-    "labelsDuration": {
-      "description": "Время по меткам (часы)",
-      "title": "Метки (время)"
-    },
-    "late": "С опозданием",
-    "noData": "Нет данных",
-    "noLabels": "Без меток",
-    "priority": {
-      "description": "Дела по приоритету",
-      "title": "Приоритет"
-    },
-    "status": {
-      "description": "Статус выполненных дел",
-      "title": "Статус"
-    },
-    "tasksTime": {
-      "description": "Время по отдельным делам (часы)",
-      "title": "Дела (время)"
-    },
-    "unassigned": "Без исполнителя",
-    "unknownTask": "Неизвестное дело"
+    "points_other": "★ {{count}} балла"
   },
   "detail": {
-    "assignedTo": "Назначено на",
-    "duration": "Длительность",
-    "editEntry": "Изменить запись",
-    "lastUpdated": "Последнее изменение",
-    "note": "Заметка",
+    "title": "Подробности записи",
     "openTask": "Открыть дело",
+    "editEntry": "Изменить запись",
     "performedBy": "Выполнил",
+    "assignedTo": "Назначено на",
+    "lastUpdated": "Последнее изменение",
+    "duration": "Длительность",
     "pointsEarned": "Начислено баллов",
-    "points_few": "{{count}} балла",
-    "points_many": "{{count}} баллов",
     "points_one": "{{count}} балл",
     "points_other": "{{count}} балла",
-    "title": "Подробности записи"
-  },
-  "edit": {
-    "additionalNotes": "Дополнительная заметка",
-    "completedDate": "Дата выполнения",
-    "deleteMessage": "Удалить эту запись истории?",
-    "deleteTitle": "Удалить запись",
     "note": "Заметка",
-    "title": "Изменить запись"
+    "reason": "Причина",
+    "notes": "Заметки"
+  },
+  "charts": {
+    "noData": "Нет данных",
+    "noLabels": "Без меток",
+    "unassigned": "Без исполнителя",
+    "unknownTask": "Неизвестное дело",
+    "late": "С опозданием",
+    "status": {
+      "title": "Статус",
+      "description": "Статус выполненных дел"
+    },
+    "due": {
+      "title": "Срок",
+      "description": "Сроки текущих дел"
+    },
+    "priority": {
+      "title": "Приоритет",
+      "description": "Дела по приоритету"
+    },
+    "labels": {
+      "title": "Метки",
+      "description": "Дела по меткам"
+    },
+    "labelsDuration": {
+      "title": "Метки (время)",
+      "description": "Время по меткам (часы)"
+    },
+    "tasksTime": {
+      "title": "Дела (время)",
+      "description": "Время по отдельным делам (часы)"
+    },
+    "assigneeBreakdown": {
+      "title": "По исполнителям",
+      "description": "Дела в разрезе исполнителей"
+    }
   },
   "filter": {
-    "completedAt": "Когда выполнено",
-    "completedBy": "Кто выполнил",
+    "status": "Статус",
+    "pending": "Ожидает",
+    "labels": "Метки",
     "hasNotes": "С заметкой",
     "hasPoints": "С баллами",
-    "labels": "Метки",
-    "pending": "Ожидает",
-    "status": "Статус",
     "timePeriod": "Период",
-    "user": "Участник"
+    "user": "Участник",
+    "completedBy": "Кто выполнил",
+    "completedAt": "Когда выполнено"
+  },
+  "period": {
+    "days_one": "{{count}} день",
+    "days_other": "{{count}} дня",
+    "allTime": "всё время"
+  },
+  "search": {
+    "placeholder": "",
+    "clear": ""
+  },
+  "sort": {
+    "date": "",
+    "updatedDate": "",
+    "performer": "",
+    "status": "",
+    "points": ""
+  },
+  "activities": {
+    "title": "Активность",
+    "subtitle": "",
+    "emptyTitle": "",
+    "emptyDescriptionEveryone": "",
+    "emptyDescriptionMember": "",
+    "periodSoFar": "",
+    "periodLastDays": "",
+    "unknownMember": "",
+    "searchPlaceholder": "",
+    "sort": {
+      "date": "",
+      "name": "",
+      "status": "",
+      "points": ""
+    }
+  },
+  "title": {
+    "summary": "Сводка по делу",
+    "activity": "Активность по делу"
   },
   "noResults": {
     "clear": "Сбросить фильтры"
   },
-  "period": {
-    "allTime": "всё время",
-    "days_few": "{{count}} дня",
-    "days_many": "{{count}} дней",
-    "days_one": "{{count}} день",
-    "days_other": "{{count}} дня"
-  },
-  "status": {
-    "completed": "Выполнено",
-    "inProgress": "В работе",
-    "missed": "Не сделано",
-    "pendingApproval": "Ждёт одобрения",
-    "rejected": "Отклонено",
-    "rescheduled": "Перенесено",
-    "scheduled": "Запланировано",
-    "skipped": "Пропущено"
-  },
-  "title": {
-    "activity": "Активность по делу",
-    "summary": "Сводка по делу"
-  },
   "toast": {
-    "deleteQueued": {
-      "title": "Удаление в очереди"
-    },
-    "deleted": {
-      "title": "Запись удалена"
-    },
     "updateQueued": {
-      "title": "Изменение в очереди"
+      "title": "Изменение в очереди",
+      "message": ""
     },
     "updated": {
-      "title": "История изменена"
+      "title": "История изменена",
+      "message": ""
+    },
+    "deleteQueued": {
+      "title": "Удаление в очереди",
+      "message": ""
+    },
+    "deleted": {
+      "title": "Запись удалена",
+      "message": ""
     }
+  },
+  "delete": {
+    "title": "",
+    "message": ""
+  },
+  "empty": {
+    "title": "",
+    "description": "",
+    "backToTasks": "",
+    "noResultsTitle": "",
+    "noResultsDescription": ""
+  },
+  "info": {
+    "allCompleted": "",
+    "timesSuffix": "",
+    "averageTiming": "",
+    "onTime": "",
+    "longestDelay": "",
+    "neverLate": "",
+    "completedMost": "",
+    "unknown": "",
+    "membersInvolved": "",
+    "membersSuffix": "",
+    "lastCompleted": ""
+  },
+  "noteViewer": {
+    "updatedAt": ""
+  },
+  "plan": {
+    "lockedTitle": "На бесплатном тарифе старые записи хранятся {{days}} дней",
+    "allLockedTitle": "История этой задачи старше {{days}} дней",
+    "lockedDescription": "Записи старше {{days}} дней могут быть окончательно удалены. Обновитесь до Plus, чтобы сохранять всю историю.",
+    "unlock": "Обновить до Plus"
   }
 }

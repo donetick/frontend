@@ -385,57 +385,60 @@ const CaptureMorph = ({ after, before, delay = 0 }) => (
 const WAVE_BARS = [10, 18, 24, 14, 20, 11, 16]
 
 /** The "before": a live waveform standing in for on-device speech capture. */
-const VoiceWave = ({ delay = 0 }) => (
-  <Box
-    sx={{
-      ...cardSx,
-      height: 68,
-      px: 1.5,
-      display: 'flex',
-      alignItems: 'center',
-      gap: 1.25,
-    }}
-  >
+const VoiceWave = ({ delay = 0 }) => {
+  const { t } = useTranslation('common')
+  return (
     <Box
       sx={{
-        flex: '0 0 auto',
-        width: 8,
-        height: 8,
-        borderRadius: '50%',
-        bgcolor: 'danger.500',
-        animation: `recDotPulse 1000ms ease-in-out ${delay}ms infinite`,
-        '@keyframes recDotPulse': {
-          '0%, 100%': { opacity: 1 },
-          '50%': { opacity: 0.35 },
-        },
+        ...cardSx,
+        height: 68,
+        px: 1.5,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 1.25,
       }}
-    />
-    <Box
-      sx={{ display: 'flex', alignItems: 'flex-end', gap: '3px', height: 24 }}
     >
-      {WAVE_BARS.map((height, index) => (
-        <Box
-          key={index}
-          sx={{
-            width: 3,
-            height,
-            borderRadius: '2px',
-            bgcolor: 'primary.500',
-            transformOrigin: 'bottom',
-            animation: `waveBounce 900ms ease-in-out ${delay + index * 90}ms infinite`,
-            '@keyframes waveBounce': {
-              '0%, 100%': { transform: 'scaleY(0.4)' },
-              '50%': { transform: 'scaleY(1)' },
-            },
-          }}
-        />
-      ))}
+      <Box
+        sx={{
+          flex: '0 0 auto',
+          width: 8,
+          height: 8,
+          borderRadius: '50%',
+          bgcolor: 'danger.500',
+          animation: `recDotPulse 1000ms ease-in-out ${delay}ms infinite`,
+          '@keyframes recDotPulse': {
+            '0%, 100%': { opacity: 1 },
+            '50%': { opacity: 0.35 },
+          },
+        }}
+      />
+      <Box
+        sx={{ display: 'flex', alignItems: 'flex-end', gap: '3px', height: 24 }}
+      >
+        {WAVE_BARS.map((height, index) => (
+          <Box
+            key={index}
+            sx={{
+              width: 3,
+              height,
+              borderRadius: '2px',
+              bgcolor: 'primary.500',
+              transformOrigin: 'bottom',
+              animation: `waveBounce 900ms ease-in-out ${delay + index * 90}ms infinite`,
+              '@keyframes waveBounce': {
+                '0%, 100%': { transform: 'scaleY(0.4)' },
+                '50%': { transform: 'scaleY(1)' },
+              },
+            }}
+          />
+        ))}
+      </Box>
+      <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+        {t('onboarding.voiceWave.listening')}
+      </Typography>
     </Box>
-    <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-      Listening…
-    </Typography>
-  </Box>
-)
+  )
+}
 
 const CORNER_MARKS = [
   { top: 6, left: 6, borderWidth: '2px 0 0 2px' },

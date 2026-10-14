@@ -1,9 +1,9 @@
+import { LockOutlined } from '@mui/icons-material'
 import {
   Box,
   Button,
   Card,
   Checkbox,
-  Chip,
   FormControl,
   FormHelperText,
   Grid,
@@ -22,6 +22,7 @@ import { useTranslation } from 'react-i18next'
 
 import NumberInput from '../../components/common/NumberInput'
 import { useLocalization } from '../../contexts/LocalizationContext'
+import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
 import { useUserProfile } from '../../queries/UserQueries'
 import { isPlusAccount } from '../../utils/Helpers'
 import ThingTriggerSection from './ThingTriggerSection'
@@ -32,10 +33,11 @@ const FREQUENCY_TYPES_RADIOS = [
   'monthly',
   'yearly',
   'adaptive',
+  'always',
   'custom',
 ]
 
-const FREQUENCY_TYPE_WITH_MESSAGE = ['adaptive', 'custom']
+const FREQUENCY_TYPE_WITH_MESSAGE = ['adaptive', 'custom', 'always']
 const REPEAT_ON_TYPE = ['interval', 'days_of_the_week', 'day_of_the_month']
 const MONTHS = [
   'january',
@@ -292,7 +294,7 @@ export const RepeatOnSections = ({
               </RadioGroup>
 
               {frequencyMetadata?.weekPattern === 'week_of_month' && (
-                <Box mt={2}>
+                <Box>
                   <Typography level='body-sm' mb={1}>
                     {t('repeat.selectOccurrences')}
                   </Typography>
@@ -512,31 +514,54 @@ const RepeatSection = ({
   viewOnly = false,
 }) => {
   const { data: userProfile } = useUserProfile({ enabled: !viewOnly })
+  const { showPaywall } = usePaywall()
   const { t } = useTranslation('chores')
 
   return (
-    <Box mt={2}>
-      <Typography level='h4'>{t('repeat.title')}</Typography>
-      <FormControl sx={{ mt: 1 }}>
-        <Checkbox
-          onChange={e => {
-            onFrequencyTypeUpdate(e.target.checked ? 'daily' : 'once')
-            if (e.target.checked) {
-              onTriggerUpdate(null)
+    <Box>
+      <FormControl>
+        <Typography level='h4'>{t('repeat.picker.scheduleType')}</Typography>
+        <Select
+          aria-label={t('repeat.picker.scheduleType')}
+          value={
+            ['once', 'no_repeat'].includes(frequencyType)
+              ? 'once'
+              : frequencyType === 'trigger'
+                ? 'trigger'
+                : frequencyType === 'always'
+                  ? 'always'
+                  : 'repeat'
+          }
+          onChange={(_, mode) => {
+            if (!mode) return
+            if (mode === 'trigger' && !isPlusAccount(userProfile)) {
+              showPaywall(PAYWALL_REASON.THING_TRIGGERS)
+              return
             }
+            onFrequencyTypeUpdate(mode === 'repeat' ? 'daily' : mode)
+            if (mode !== 'trigger') onTriggerUpdate(null)
           }}
-          defaultChecked={!['once', 'trigger'].includes(frequencyType)}
-          checked={!['once', 'trigger'].includes(frequencyType)}
-          value={!['once', 'trigger'].includes(frequencyType)}
-          overlay
-          label={t('repeat.repeatThisTask')}
-        />
-        <FormHelperText>{t('repeat.repeatThisTaskHelp')}</FormHelperText>
+        >
+          <Option value='once'>{t('taskEditor.oneTimeTask')}</Option>
+          <Option value='repeat'>{t('taskEditor.repeatingTask')}</Option>
+          <Option value='trigger'>
+            {t('taskEditor.triggeredByAThing')}
+            {!isPlusAccount(userProfile) && (
+              <LockOutlined sx={{ fontSize: 14, opacity: 0.6 }} />
+            )}
+          </Option>
+          {frequencyType === 'always' && (
+            <Option value='always'>{t('taskEditor.alwaysAvailable')}</Option>
+          )}
+        </Select>
       </FormControl>
-      {!['once', 'trigger'].includes(frequencyType) && (
+      {!['once', 'no_repeat', 'trigger', 'always'].includes(frequencyType) && (
         <>
-          <Card sx={{ mt: 1 }}>
-            <Typography level='h5'>{t('repeat.howOften')}</Typography>
+          <Card
+            variant='plain'
+            sx={{ mt: 2, p: 0, bgcolor: 'transparent', gap: 1.5 }}
+          >
+            <Typography level='h5'>{t('taskEditor.repeats')}</Typography>
 
             <List
               orientation='horizontal'
@@ -693,40 +718,6 @@ const RepeatSection = ({
           </Card>
         </>
       )}
-      <FormControl sx={{ mt: 1 }}>
-        <Checkbox
-          onChange={e => {
-            onFrequencyTypeUpdate(e.target.checked ? 'trigger' : 'once')
-            //  if unchecked, set selectedThing to null:
-            if (!e.target.checked) {
-              onTriggerUpdate(null)
-            }
-          }}
-          defaultChecked={frequencyType === 'trigger'}
-          checked={frequencyType === 'trigger'}
-          value={frequencyType === 'trigger'}
-          disabled={!isPlusAccount(userProfile)}
-          overlay
-          label={t('repeat.triggerLabel')}
-        />
-        <FormHelperText
-          sx={{
-            opacity: !isPlusAccount(userProfile) ? 0.5 : 1,
-          }}
-        >
-          {t('repeat.triggerHelp')}{' '}
-          {userProfile && !isPlusAccount(userProfile) && (
-            <Chip variant='soft' color='warning'>
-              {t('settings:common.plusFeature')}
-            </Chip>
-          )}
-        </FormHelperText>
-        {!isPlusAccount(userProfile) && (
-          <Typography level='body-sm' color='warning' sx={{ mt: 1 }}>
-            {t('repeat.triggerPlanWarning')}
-          </Typography>
-        )}
-      </FormControl>
       {frequencyType === 'trigger' && (
         <ThingTriggerSection
           things={allUserThings}

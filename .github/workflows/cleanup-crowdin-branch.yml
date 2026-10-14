@@ -1,0 +1,55 @@
+name: Clean up Crowdin branch
+
+on:
+  pull_request_target:
+    types: [closed]
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  delete-branch:
+    if: >-
+      startsWith(github.event.pull_request.head.ref, 'l10n_') &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Delete unused Crowdin service branch
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const branch = context.payload.pull_request.head.ref
+            const { owner, repo } = context.repo
+            const openPulls = await github.paginate(github.rest.pulls.list, {
+              owner,
+              repo,
+              state: 'open',
+              head: `${owner}:${branch}`,
+              per_page: 100,
+            })
+
+            if (openPulls.length > 0) {
+              core.notice(
+                `Keeping ${branch}; it is still used by PR(s): ${openPulls
+                  .map(pr => `#${pr.number}`)
+                  .join(', ')}`,
+              )
+              return
+            }
+
+            try {
+              await github.rest.git.deleteRef({
+                owner,
+                repo,
+                ref: `heads/${branch}`,
+              })
+              core.notice(`Deleted stale Crowdin branch ${branch}`)
+            } catch (error) {
+              if (error.status === 422 || error.status === 404) {
+                core.notice(`Crowdin branch ${branch} is already deleted`)
+                return
+              }
+              throw error
+            }

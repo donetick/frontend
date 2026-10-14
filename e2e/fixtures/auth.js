@@ -4,10 +4,13 @@ import { fileURLToPath } from 'url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
+// Signup and login both land on the Home screen at `/`, not on the task list.
+const atHome = url => new URL(url).pathname === '/'
+
 /**
  * Fill and submit the signup form through the UI.
  * After successful signup the app auto-logs in and walks through the
- * onboarding flow (/circle-setup, then /ready) before landing on /chores.
+ * onboarding flow (/circle-setup, then /ready) before landing on Home.
  */
 export async function signUpViaUI(
   page,
@@ -20,25 +23,30 @@ export async function signUpViaUI(
   await page.locator('#displayName').fill(displayName)
   await page.getByRole('button', { name: 'Create account' }).click()
 
-  await page.waitForURL('**/circle-setup', { timeout: 10_000 })
-  await page.getByRole('button', { name: 'Continue' }).click()
+  // Onboarding has gained and lost steps over time (/circle-setup, /ready,
+  // /heard-about). Walk whatever is in front of us rather than hard-coding the
+  // sequence, so adding a step doesn't break every signup test.
+  for (let step = 0; step < 6; step++) {
+    if (atHome(page.url())) break
+    const next = page.getByRole('button', { name: /continue/i }).first()
+    await next.waitFor({ timeout: 10_000 })
+    await next.click()
+    await page.waitForTimeout(750)
+  }
 
-  await page.waitForURL('**/ready', { timeout: 10_000 })
-  await page.getByRole('button', { name: 'Continue' }).click()
-
-  await page.waitForURL('**/chores', { timeout: 10_000 })
+  await page.waitForURL(atHome, { timeout: 10_000 })
 }
 
 /**
  * Fill and submit the login form through the UI.
- * After successful login the app redirects to /chores.
+ * After successful login the app redirects to Home.
  */
 export async function loginViaUI(page, { password, username }) {
   await page.goto('/login')
   await page.locator('#username').fill(username)
   await page.locator('#password').fill(password)
   await page.getByRole('button', { name: 'Sign In' }).click()
-  await page.waitForURL('**/chores', { timeout: 10_000 })
+  await page.waitForURL(atHome, { timeout: 10_000 })
 }
 
 /**

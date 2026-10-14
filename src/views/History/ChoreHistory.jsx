@@ -2,7 +2,6 @@ import '@meauxt/react-swipeable-list/dist/styles.css'
 
 import {
   SwipeableList,
-  SwipeableListItem,
   SwipeAction,
   TrailingActions,
   Type as ListType,
@@ -12,32 +11,54 @@ import {
   CalendarMonth,
   Check,
   Checklist,
+  Close,
   EventBusy,
   EventNote,
   FilterList,
   Group,
   History,
   HourglassEmpty,
+  LockOutlined,
   Person,
   Redo,
   RunningWithErrors,
   Schedule,
+  Search,
+  Sort,
   Star,
   ThumbDown,
   Timelapse,
   TrendingUp,
+  Tune,
 } from '@mui/icons-material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
-import { Box, Card, Container, Grid, Sheet, Typography } from '@mui/joy'
+import {
+  Badge,
+  Box,
+  Button,
+  Card,
+  Container,
+  Grid,
+  IconButton,
+  Input,
+  Sheet,
+  Typography,
+} from '@mui/joy'
+import Fuse from 'fuse.js'
 import moment from 'moment'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 
 import EmptyState from '../../components/common/EmptyState'
 import FilterBar from '../../components/common/FilterBar'
+import SortAndFilterMenu from '../../components/common/SortAndFilterMenu'
+import SwipeListItem, {
+  SWIPE_COMMIT_THRESHOLD,
+} from '../../components/common/SwipeListItem'
 import { useLocalization } from '../../contexts/LocalizationContext'
+import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
 import useConfirmationModal from '../../hooks/useConfirmationModal'
 import { useFilter } from '../../hooks/useFilter'
 import { usePendingCommands } from '../../hooks/usePendingCommands'
@@ -49,6 +70,11 @@ import {
 import { useCircleMembers } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { ChoreHistoryStatus } from '../../utils/Chores'
+import {
+  FREE_HISTORY_DAYS,
+  historyCutoffMs,
+  partitionHistoryByPlan,
+} from '../../utils/entitlements'
 import LoadingComponent from '../components/Loading'
 import EditHistoryModal from '../Modals/EditHistoryModal'
 import HistoryDetailModal from '../Modals/HistoryDetailModal'
@@ -65,10 +91,29 @@ const ChoreHistory = () => {
   const [editHistory, setEditHistory] = useState(null)
   const { confirmModalConfig, showConfirmation } = useConfirmationModal()
   const { fmt } = useLocalization()
+  const { isPlanKnown, isPlus, showPaywall } = usePaywall()
+  // Don't clamp until the plan is actually known — flashing an upgrade card at
+  // a paying subscriber is worse than briefly showing a free user everything.
+  const applyHistoryWindow = isPlanKnown && !isPlus
   const [showMoreInfoId, setShowMoreInfoId] = useState(null)
   const [noteViewerConfig, setNoteViewerConfig] = useState({ isOpen: false })
   const [detailModalConfig, setDetailModalConfig] = useState({ isOpen: false })
   const { showError, showSuccess } = useNotification()
+  const [searchTerm, setSearchTerm] = useState('')
+  const [sortBy, setSortBy] = useState(
+    () => localStorage.getItem('choreHistorySortBy') || 'date',
+  )
+  const [sortDirection, setSortDirection] = useState(
+    () => localStorage.getItem('choreHistorySortDirection') || 'desc',
+  )
+  const [filterBarOpen, setFilterBarOpen] = useState(false)
+  const searchInputRef = useRef(null)
+
+  useEffect(() => {
+    localStorage.setItem('choreHistorySortBy', sortBy)
+    localStorage.setItem('choreHistorySortDirection', sortDirection)
+  }, [sortBy, sortDirection])
+
   // React Query hooks
   const { data: choreHistoryData, isLoading } = useChoreHistory(choreId)
   const { data: circleMembersData } = useCircleMembers()
@@ -76,7 +121,18 @@ const ChoreHistory = () => {
   const deleteChoreHistory = useDeleteChoreHistory()
   const { data: pendingCmds } = usePendingCommands(choreId)
 
-  const choreHistory = choreHistoryData?.res || []
+  // Free accounts read the last 30 days. This endpoint takes no day parameter,
+  // so the window is applied here and the hidden count drives a concrete
+  // upsell instead of rows just going missing.
+  const { lockedCount, visible: choreHistory } = useMemo(
+    () =>
+      partitionHistoryByPlan(
+        choreHistoryData?.res,
+        !applyHistoryWindow,
+        entry => entry.performedAt || entry.updatedAt,
+      ),
+    [choreHistoryData, applyHistoryWindow],
+  )
   const performers = circleMembersData?.res || []
   const pendingByHistoryId = useMemo(() => {
     if (!pendingCmds?.length) return {}
@@ -186,15 +242,79 @@ const ChoreHistory = () => {
     setFilter,
   } = useFilter(choreHistory, filterDefs)
 
-  const sortedHistory = useMemo(
+  // Reaching for a start date older than the plan's window would otherwise
+  // just return an empty list, which reads as a bug rather than a limit.
+  const handleSetFilter = (id, value) => {
+    if (id === 'dateRange' && value?.from) {
+      const cutoff = historyCutoffMs(!applyHistoryWindow)
+      if (cutoff !== null && new Date(value.from).getTime() < cutoff) {
+        showPaywall(PAYWALL_REASON.HISTORY_WINDOW)
+        return
+      }
+    }
+    setFilter(id, value)
+  }
+
+  const searchableHistory = useMemo(
     () =>
-      [...filteredHistory].sort(
-        (a, b) =>
-          new Date(b.performedAt || b.updatedAt) -
-          new Date(a.performedAt || a.updatedAt),
-      ),
-    [filteredHistory],
+      filteredHistory.map(item => ({
+        ...item,
+        performerName:
+          performers.find(p => p.userId === item.completedBy)?.displayName ||
+          '',
+      })),
+    [filteredHistory, performers],
   )
+
+  const fuse = useMemo(
+    () =>
+      new Fuse(searchableHistory, {
+        keys: ['notes', 'performerName'],
+        includeScore: true,
+        isCaseSensitive: false,
+        findAllMatches: true,
+      }),
+    [searchableHistory],
+  )
+
+  const sortedHistory = useMemo(() => {
+    const matched = searchTerm
+      ? fuse.search(searchTerm).map(result => result.item)
+      : searchableHistory
+
+    const direction = sortDirection === 'desc' ? -1 : 1
+    return [...matched].sort((a, b) => {
+      switch (sortBy) {
+        case 'name':
+          return (
+            direction *
+            (a.performerName || '').localeCompare(b.performerName || '')
+          )
+        case 'status':
+          return direction * ((a.status ?? 0) - (b.status ?? 0))
+        case 'points':
+          return direction * ((a.points ?? 0) - (b.points ?? 0))
+        case 'updatedDate': {
+          const aTime = new Date(a.updatedAt || a.performedAt).getTime()
+          const bTime = new Date(b.updatedAt || b.performedAt).getTime()
+          return direction * (aTime - bTime)
+        }
+        case 'date':
+        default: {
+          const aTime = new Date(a.performedAt || a.updatedAt).getTime()
+          const bTime = new Date(b.performedAt || b.updatedAt).getTime()
+          return direction * (aTime - bTime)
+        }
+      }
+    })
+  }, [fuse, searchTerm, searchableHistory, sortBy, sortDirection])
+
+  const handleSearchChange = e => setSearchTerm(e.target.value)
+
+  const handleSearchClose = () => {
+    setSearchTerm('')
+    searchInputRef.current?.blur()
+  }
 
   const handleDelete = historyEntry => {
     showConfirmation(
@@ -314,6 +434,26 @@ const ChoreHistory = () => {
   if (isLoading) {
     return <LoadingComponent />
   }
+  // All of this task's history predates the plan's window. Saying "no history"
+  // here would be a lie — the entries exist, they're just out of reach.
+  if (!choreHistory.length && lockedCount > 0) {
+    return (
+      <Container maxWidth='md'>
+        <EmptyState
+          fullHeight
+          icon={<LockOutlined />}
+          title={t('plan.allLockedTitle', { days: FREE_HISTORY_DAYS })}
+          description={t('plan.lockedDescription', {
+            days: FREE_HISTORY_DAYS,
+          })}
+          primaryAction={{
+            label: t('plan.unlock'),
+            onClick: () => showPaywall(PAYWALL_REASON.HISTORY_WINDOW),
+          }}
+        />
+      </Container>
+    )
+  }
   if (!choreHistory.length) {
     return (
       <Container maxWidth='md'>
@@ -422,13 +562,76 @@ const ChoreHistory = () => {
       </Box>
 
       <Box sx={{ px: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+          <Input
+            slotProps={{ input: { ref: searchInputRef } }}
+            placeholder={t('search.placeholder')}
+            value={searchTerm}
+            fullWidth
+            sx={{
+              borderRadius: 24,
+              height: 24,
+              borderColor: 'text.disabled',
+              padding: 1,
+            }}
+            onChange={handleSearchChange}
+            startDecorator={<Search />}
+            endDecorator={
+              searchTerm && (
+                <IconButton
+                  variant='plain'
+                  size='sm'
+                  onClick={handleSearchClose}
+                  sx={{ borderRadius: '50%' }}
+                >
+                  <Close />
+                </IconButton>
+              )
+            }
+          />
+          <SortAndFilterMenu
+            icon={<Sort />}
+            sortOptions={[
+              { name: t('sort.date'), value: 'date' },
+              { name: t('sort.updatedDate'), value: 'updatedDate' },
+              { name: t('sort.performer'), value: 'name' },
+              { name: t('sort.status'), value: 'status' },
+              { name: t('sort.points'), value: 'points' },
+            ]}
+            selectedSort={sortBy}
+            onSortChange={setSortBy}
+            sortDirection={sortDirection}
+            onSortDirectionChange={setSortDirection}
+            isActive={sortBy !== 'date' || sortDirection !== 'desc'}
+          />
+          <Badge
+            badgeContent={activeFilterCount || null}
+            color='primary'
+            size='sm'
+            anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+          >
+            <IconButton
+              onClick={() => setFilterBarOpen(true)}
+              variant='outlined'
+              color={activeFilterCount > 0 ? 'primary' : 'neutral'}
+              size='sm'
+              sx={{ height: 32, width: 32, borderRadius: '50%', flexShrink: 0 }}
+              aria-label={t('common:filterBar.filtersButton')}
+            >
+              <Tune />
+            </IconButton>
+          </Badge>
+        </Box>
         <FilterBar
           filterDefs={filterDefs}
           activeFilters={activeFilters}
-          onSetFilter={setFilter}
+          onSetFilter={handleSetFilter}
           onClearAll={clearAll}
           resultCount={filteredHistory.length}
           totalCount={choreHistory.length}
+          showTrigger={false}
+          open={filterBarOpen}
+          onOpenChange={setFilterBarOpen}
         />
       </Box>
       {sortedHistory.length === 0 && activeFilterCount > 0 && (
@@ -440,14 +643,30 @@ const ChoreHistory = () => {
           primaryAction={{ label: t('noResults.clear'), onClick: clearAll }}
         />
       )}
+      {sortedHistory.length === 0 && activeFilterCount === 0 && searchTerm && (
+        <EmptyState
+          variant='no-results'
+          icon={<Search />}
+          title={t('empty.noResultsTitle')}
+          description={t('empty.noResultsDescription')}
+          primaryAction={{
+            label: t('search.clear'),
+            onClick: handleSearchClose,
+          }}
+        />
+      )}
 
       {sortedHistory.length > 0 && (
         <Sheet variant='plain' sx={{ borderRadius: 'sm', overflow: 'hidden' }}>
           {/* Chore History List (Updated Style) */}
 
-          <SwipeableList type={ListType.IOS} fullSwipe={false}>
+          <SwipeableList
+            type={ListType.IOS}
+            fullSwipe
+            threshold={SWIPE_COMMIT_THRESHOLD}
+          >
             {sortedHistory.map((historyEntry, index) => (
-              <SwipeableListItem
+              <SwipeListItem
                 key={historyEntry.id || index}
                 swipeActionOpen={
                   showMoreInfoId === (historyEntry.id || index)
@@ -470,15 +689,18 @@ const ChoreHistory = () => {
                             flexDirection: 'column',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            bgcolor: 'neutral.softBg',
-                            color: 'neutral.700',
+                            bgcolor: 'primary.500',
+                            color: '#fff',
                             px: 3,
                             height: '100%',
                             width: '100%',
                           }}
                         >
-                          <EditIcon sx={{ fontSize: 20 }} />
-                          <Typography level='body-xs' sx={{ mt: 0.5 }}>
+                          <EditIcon sx={{ fontSize: 20, color: 'white' }} />
+                          <Typography
+                            level='body-xs'
+                            sx={{ mt: 0.5, color: 'inherit' }}
+                          >
                             {t('common:edit')}
                           </Typography>
                         </Box>
@@ -490,14 +712,17 @@ const ChoreHistory = () => {
                             flexDirection: 'column',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            bgcolor: 'danger.softBg',
-                            color: 'danger.700',
+                            bgcolor: 'danger.500',
+                            color: '#fff',
                             px: 3,
                             height: '100%',
                           }}
                         >
-                          <DeleteIcon sx={{ fontSize: 20 }} />
-                          <Typography level='body-xs' sx={{ mt: 0.5 }}>
+                          <DeleteIcon sx={{ fontSize: 20, color: 'white' }} />
+                          <Typography
+                            level='body-xs'
+                            sx={{ mt: 0.5, color: 'inherit' }}
+                          >
                             {t('common:delete')}
                           </Typography>
                         </Box>
@@ -544,10 +769,43 @@ const ChoreHistory = () => {
                     }
                   }}
                 />
-              </SwipeableListItem>
+              </SwipeListItem>
             ))}
           </SwipeableList>
         </Sheet>
+      )}
+
+      {lockedCount > 0 && (
+        <Box sx={{ px: 2, pt: 2 }}>
+          <Card
+            variant='soft'
+            sx={{
+              p: 2,
+              display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
+              alignItems: { xs: 'flex-start', sm: 'center' },
+              gap: 1.5,
+            }}
+          >
+            <LockOutlined sx={{ opacity: 0.6, flexShrink: 0 }} />
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Typography level='title-sm'>
+                {t('plan.lockedTitle', { days: FREE_HISTORY_DAYS })}
+              </Typography>
+              <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
+                {t('plan.lockedDescription', { days: FREE_HISTORY_DAYS })}
+              </Typography>
+            </Box>
+            <Button
+              size='sm'
+              variant='solid'
+              onClick={() => showPaywall(PAYWALL_REASON.HISTORY_WINDOW)}
+              sx={{ flexShrink: 0, alignSelf: { xs: 'stretch', sm: 'auto' } }}
+            >
+              {t('plan.unlock')}
+            </Button>
+          </Card>
+        </Box>
       )}
       <EditHistoryModal
         config={{

@@ -1,17 +1,43 @@
+import fs from 'node:fs'
+
 import posthog from '@posthog/rollup-plugin'
 import react from '@vitejs/plugin-react-swc'
 import { defineConfig, loadEnv } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
-import pkg from './package.json'
+const pkg = JSON.parse(
+  fs.readFileSync(new URL('./package.json', import.meta.url), 'utf-8'),
+)
+
+export const getPosthogSourcemapConfig = ({ command, env = {} }) => {
+  if (command !== 'build') return null
+
+  const uploadFlag =
+    env.POSTHOG_UPLOAD_SOURCEMAPS ??
+    process.env.POSTHOG_UPLOAD_SOURCEMAPS ??
+    'false'
+
+  if (String(uploadFlag).toLowerCase() !== 'true') return null
+
+  const personalApiKey = env.POSTHOG_API_KEY || process.env.POSTHOG_API_KEY
+  const projectId = env.POSTHOG_PROJECT_ID || process.env.POSTHOG_PROJECT_ID
+  const host = env.POSTHOG_HOST || process.env.POSTHOG_HOST
+
+  if (!personalApiKey || !projectId || !host) return null
+
+  return { personalApiKey, projectId, host }
+}
+
+export const shouldUploadPosthogSourcemaps = options =>
+  Boolean(getPosthogSourcemapConfig(options))
+
 // https://vitejs.dev/config/
 export default ({ command, mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
-  const personalApiKey = process.env.POSTHOG_API_KEY || env.POSTHOG_API_KEY
-  const projectId = process.env.POSTHOG_PROJECT_ID || env.POSTHOG_PROJECT_ID
-  const host = process.env.POSTHOG_HOST || env.POSTHOG_HOST
-  const uploadPosthogSourcemaps =
-    command === 'build' && Boolean(personalApiKey && projectId)
+  const posthogSourcemapConfig = getPosthogSourcemapConfig({
+    command,
+    env: { ...process.env, ...env },
+  })
 
   return defineConfig({
     define: {
@@ -24,12 +50,10 @@ export default ({ command, mode }) => {
     },
     plugins: [
       react(),
-      ...(uploadPosthogSourcemaps
+      ...(posthogSourcemapConfig
         ? [
             posthog({
-              personalApiKey,
-              projectId,
-              host,
+              ...posthogSourcemapConfig,
               sourcemaps: {
                 deleteAfterUpload: true,
               },
@@ -93,7 +117,6 @@ export default ({ command, mode }) => {
           // The PWA plugin runs after PostHog's upload/cleanup stage, so prevent
           // it from leaving separate service-worker source maps in dist.
           sourcemap: false,
-          clientsClaim: true, // Take control of uncontrolled clients as soon as the service worker becomes active
           maximumFileSizeToCacheInBytes: 6000000, // 6MB
           //Exclude API and Swagger routes from service worker navigation fallback
           navigateFallback: '/index.html',
@@ -101,7 +124,9 @@ export default ({ command, mode }) => {
             /^\/api\//, // Exclude all API routes
             /^\/swagger/, // Exclude all Swagger routes
           ],
-          skipWaiting: true, // Force the waiting service worker to become the active service worker
+          // Do not use skipWaiting/clientsClaim with the prompt flow. The new
+          // worker activates only after the user accepts the in-app update.
+          skipWaiting: false,
         },
       }),
     ],

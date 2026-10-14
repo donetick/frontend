@@ -1,5 +1,6 @@
 import { FolderOpen } from '@mui/icons-material'
 
+import { ProjectAccessIcon } from '../Projects/ProjectVisibilityField'
 import BaseOptionPicker from './BaseOptionPicker'
 
 const ProjectPickerField = ({
@@ -15,6 +16,8 @@ const ProjectPickerField = ({
       id: project.id,
       name: project.name,
       color: project.color,
+      isPrivate: project.isPrivate,
+      visibility: project.visibility,
     })),
   ]
 
@@ -37,6 +40,9 @@ const ProjectPickerField = ({
             color: item.color || 'text.secondary',
           }}
         />
+      )}
+      renderItemEnd={({ item }) => (
+        <ProjectAccessIcon project={item} sx={{ fontSize: '14px' }} />
       )}
       getTriggerText={({ isEmpty, selectedItems }) =>
         isEmpty ? 'Project' : selectedItems[0].name

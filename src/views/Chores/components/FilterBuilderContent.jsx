@@ -2,6 +2,7 @@ import {
   CalendarMonth,
   Check,
   FolderOpen,
+  HowToReg,
   Label,
   Person,
   PriorityHigh,
@@ -13,6 +14,7 @@ import { useTranslation } from 'react-i18next'
 
 import NumberInput from '../../../components/common/NumberInput'
 import Priorities from '../../../utils/Priorities'
+import { ProjectAccessIcon } from '../../Projects/ProjectVisibilityField'
 
 // `labelKey` resolves against `chores:filterBuilder.dueDateOption.*` — these
 // are also read by ChoreToolbarPrototype, which translates them the same way.
@@ -48,7 +50,7 @@ export const defaultSelections = () => ({
   priority: { operator: 'is', values: [] },
   label: { operator: 'is', values: [] },
   project: { operator: 'is', values: [] },
-  dueDate: { operator: null },
+  dueDate: { operators: [] },
   points: { operator: 'greaterThan', value: 0, active: false },
 })
 
@@ -57,7 +59,15 @@ export const conditionsToSelections = conditions => {
   if (!conditions) return sel
   conditions.forEach(c => {
     if (c.type === 'dueDate') {
-      sel.dueDate = { operator: c.operator }
+      // Filters saved before multi-select carry a single operator.
+      sel.dueDate = {
+        operators:
+          c.operator === 'anyOf'
+            ? (Array.isArray(c.value) ? c.value : [c.value]).filter(Boolean)
+            : c.operator
+              ? [c.operator]
+              : [],
+      }
     } else if (c.type === 'points') {
       sel.points = { operator: c.operator, value: c.value ?? 0, active: true }
     } else if (c.type in sel) {
@@ -87,11 +97,20 @@ export const selectionsToConditions = selections => {
       }
     },
   )
-  if (selections.dueDate.operator) {
+  const dueDateOperators = selections.dueDate.operators || []
+  if (dueDateOperators.length === 1) {
+    // Stay on the single-operator shape whenever we can, so filters remain
+    // readable by anything that predates `anyOf`.
     conditions.push({
       type: 'dueDate',
-      operator: selections.dueDate.operator,
+      operator: dueDateOperators[0],
       value: null,
+    })
+  } else if (dueDateOperators.length > 1) {
+    conditions.push({
+      type: 'dueDate',
+      operator: 'anyOf',
+      value: dueDateOperators,
     })
   }
   if (selections.points.active) {
@@ -188,10 +207,17 @@ const FilterBuilderContent = ({
     }))
 
   const toggleDueDate = op =>
-    onSelectionsChange(prev => ({
-      ...prev,
-      dueDate: { operator: prev.dueDate.operator === op ? null : op },
-    }))
+    onSelectionsChange(prev => {
+      const cur = prev.dueDate.operators || []
+      return {
+        ...prev,
+        dueDate: {
+          operators: cur.includes(op)
+            ? cur.filter(o => o !== op)
+            : [...cur, op],
+        },
+      }
+    })
 
   const setPointsOperator = op =>
     onSelectionsChange(prev => ({
@@ -239,10 +265,32 @@ const FilterBuilderContent = ({
     )
   }
 
-  const personChipRow = type => {
+  const personChipRow = (type, { includeAvailableForMe = false } = {}) => {
     const selected = selections[type].values || []
+    const isAvailableForMeSelected = selected.includes('available_for_me')
     return (
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+        {includeAvailableForMe && (
+          <Chip
+            variant={isAvailableForMeSelected ? 'solid' : 'soft'}
+            color={isAvailableForMeSelected ? 'success' : 'neutral'}
+            startDecorator={
+              isAvailableForMeSelected ? (
+                <Check sx={{ fontSize: 14 }} />
+              ) : (
+                <HowToReg sx={{ fontSize: 16 }} />
+              )
+            }
+            onClick={() => toggleValue(type, 'available_for_me')}
+            sx={{
+              cursor: 'pointer',
+              userSelect: 'none',
+              transition: 'all 0.15s ease',
+            }}
+          >
+            {t('toolbar.availableToMe')}
+          </Chip>
+        )}
         {members.map(m => {
           const isSelected = selected.includes(m.userId)
           return (
@@ -287,7 +335,7 @@ const FilterBuilderContent = ({
               onChange={op => setOperator('assignee', op)}
             />
           </SectionHeader>
-          {personChipRow('assignee')}
+          {personChipRow('assignee', { includeAvailableForMe: true })}
           <Divider sx={{ my: 2.5 }} />
         </>
       )}
@@ -353,10 +401,21 @@ const FilterBuilderContent = ({
       <SectionHeader
         icon={<CalendarMonth />}
         label={t('filterBuilder.dueDate')}
-      />
+      >
+        {/* Due-date windows overlap, so picking several has to mean "any of"
+            — the opposite of every other section here. Say so once it can
+            actually be misread. */}
+        {(selections.dueDate.operators || []).length > 1 && (
+          <Chip size='sm' variant='soft' color='primary' sx={{ ml: 'auto' }}>
+            {t('filterBuilder.anyOf')}
+          </Chip>
+        )}
+      </SectionHeader>
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
         {DUE_DATE_OPTIONS.map(opt => {
-          const isSelected = selections.dueDate.operator === opt.value
+          const isSelected = (selections.dueDate.operators || []).includes(
+            opt.value,
+          )
           return (
             <Chip
               key={opt.value}
@@ -447,7 +506,21 @@ const FilterBuilderContent = ({
             { value: 'default', label: t('filterBuilder.defaultProject') },
             ...projects
               .filter(p => p.id !== 'default')
-              .map(p => ({ value: p.id, label: p.name })),
+              .map(p => ({
+                value: p.id,
+                label: (
+                  <Box
+                    sx={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 0.5,
+                    }}
+                  >
+                    {p.name}
+                    <ProjectAccessIcon project={p} sx={{ fontSize: 12 }} />
+                  </Box>
+                ),
+              })),
           ])}
           <Divider sx={{ my: 2.5 }} />
         </>

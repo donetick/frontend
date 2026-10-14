@@ -359,6 +359,13 @@ const AcceptCircleMemberRequest = id => {
   })
 }
 
+const DeclineCircleMemberRequest = id => {
+  return Fetch(`/circles/members/requests/decline?requestId=${id}`, {
+    method: 'DELETE',
+    headers: HEADERS(),
+  })
+}
+
 const LeaveCircle = id => {
   return Fetch(`/circles/leave?circle_id=${id}`, {
     method: 'DELETE',
@@ -742,6 +749,34 @@ const GetStorageUsage = () => {
   })
 }
 
+const GetCalendarURL = () => {
+  return Fetch(`/chores/calendar/url`, {
+    method: 'GET',
+    headers: HEADERS(),
+  })
+}
+
+const CreateCalendarURL = () => {
+  return Fetch(`/chores/calendar/url`, {
+    method: 'POST',
+    headers: HEADERS(),
+  })
+}
+
+const RotateCalendarURL = () => {
+  return Fetch(`/chores/calendar/url/rotate`, {
+    method: 'POST',
+    headers: HEADERS(),
+  })
+}
+
+const RevokeCalendarURL = () => {
+  return Fetch(`/chores/calendar/url`, {
+    method: 'DELETE',
+    headers: HEADERS(),
+  })
+}
+
 // Timer/TimeSession API functions
 const GetChoreTimer = choreId => {
   return Fetch(`/chores/${choreId}/timer`, {
@@ -891,6 +926,7 @@ const RegisterDeviceToken = (
 const UnregisterDeviceToken = (deviceId, token) => {
   return Fetch(`/devices/tokens`, {
     method: 'DELETE',
+    skipAuthRecovery: true,
     headers: HEADERS(),
     body: JSON.stringify({
       deviceId,
@@ -982,6 +1018,16 @@ const DeleteProject = id => {
   })
 }
 
+// Server-side dry run of a change of who can see a project: which tasks change
+// assignees and who gains or loses access. Nothing is written.
+const PreviewProjectAccess = (id, access) => {
+  return Fetch(`/projects/${id}/access-preview`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify(access),
+  })
+}
+
 // Filter-related API functions
 const GetFilters = () => {
   return Fetch(`/filters`, {
@@ -1060,6 +1106,7 @@ export {
   CompleteSubTask,
   ConfirmMFA,
   CreateBackup,
+  CreateCalendarURL,
   CreateChildUser,
   CreateChore,
   createChore,
@@ -1069,6 +1116,7 @@ export {
   CreateProject,
   CreateReward,
   CreateThing,
+  DeclineCircleMemberRequest,
   DeleteChildUser,
   DeleteChore,
   DeleteChoreAttachment,
@@ -1087,6 +1135,7 @@ export {
   GetAllCircleMembers,
   GetAllUsers,
   GetArchivedChores,
+  GetCalendarURL,
   GetChildUsers,
   GetChoreAttachments,
   GetChoreByID,
@@ -1123,6 +1172,7 @@ export {
   MarkChoreComplete,
   NudgeChore,
   PauseChore,
+  PreviewProjectAccess,
   PutNotificationTarget,
   PutWebhookURL,
   RedeemPoints,
@@ -1135,6 +1185,8 @@ export {
   ResetChoreTimer,
   ResetPassword,
   RestoreBackup,
+  RevokeCalendarURL,
+  RotateCalendarURL,
   SaveChore,
   SaveThing,
   SetupMFA,

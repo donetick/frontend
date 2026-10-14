@@ -62,9 +62,9 @@
         "title": "הגדרות אחסון",
         "description": "גבו ושחזרו את הנתונים שלכם, ונהלו את האחסון המקומי והעדפות הסנכרון."
       },
-      "sidepanel": {
-        "title": "התאמת סרגל הצד",
-        "description": "התאימו את הפריסה ואת הנראות של הכרטיסים בסרגל הצד."
+      "layout": {
+        "title": "פריסה וניווט",
+        "description": "בחרו באיזה מסך האפליקציה נפתחת, ואילו קיצורי דרך ולוחות מקיפים אותו."
       },
       "theme": {
         "title": "העדפות ערכת נושא",
@@ -78,6 +78,10 @@
         "title": "הגדרות מתקדמות",
         "description": "הגדירו Webhooks, עדכונים בזמן אמת ותכונות מתקדמות נוספות לשיפור הפרודוקטיביות."
       },
+      "privacy": {
+        "title": "",
+        "description": ""
+      },
       "developer": {
         "title": "הגדרות מפתחים",
         "description": "הציגו מידע טכני על אסימוני אימות, חיבורי SSE ונתוני ניפוי שגיאות."
@@ -87,8 +91,8 @@
         "description": "ספרו לנו כיצד Donetick עובד עבורכם או בקשו תכונה חדשה."
       },
       "bugReport": {
-        "title": "דיווח על באג",
-        "description": "משהו לא עובד כראוי? שלחו לנו את הפרטים יחד עם מידע טכני שיעזור לנו לאתר את הבעיה."
+        "title": "",
+        "description": ""
       }
     }
   },
@@ -164,7 +168,8 @@
     "joinCircle": "הצטרפות למעגל",
     "joinedPending": "הצטרפתם למעגל בהצלחה. המתינו לאישור של בעל המעגל.",
     "alreadyMember": "אתם כבר חברים במעגל הזה",
-    "joinFailed": "ההצטרפות למעגל נכשלה"
+    "joinFailed": "ההצטרפות למעגל נכשלה",
+    "copyLink": ""
   },
   "accountSettings": {
     "title": "הגדרות חשבון",
@@ -348,7 +353,8 @@
     "backupCodesModal": {
       "title": "קודי גיבוי חדשים",
       "warning": "קודי הגיבוי הקודמים שלכם אינם תקפים יותר. שמרו את הקודים החדשים במקום בטוח. ניתן להשתמש בכל קוד פעם אחת בלבד."
-    }
+    },
+    "generateCodes": ""
   },
   "apiTokens": {
     "title": "אסימוני API",
@@ -389,7 +395,6 @@
   },
   "sidepanel": {
     "title": "התאמת סרגל הצד",
-    "heading": "הגדרות סרגל הצד",
     "description": "התאימו אילו כרטיסים יופיעו בסרגל הצד ואת הסדר שלהם. גררו ושחררו כדי לשנות את הסדר, או הפעילו וכבו את הנראות של כל כרטיס.",
     "resetToDefaults": "איפוס לברירת המחדל",
     "resetHelper": "פעולה זו תשחזר את הנראות והסדר של כל הכרטיסים לברירת המחדל.",
@@ -420,6 +425,74 @@
       }
     }
   },
+  "homeSections": {
+    "title": "",
+    "description": "",
+    "resetToDefaults": "",
+    "resetHelper": "",
+    "sections": {
+      "greeting": {
+        "name": "",
+        "description": ""
+      },
+      "glance": {
+        "name": "",
+        "description": ""
+      },
+      "circle": {
+        "name": "",
+        "description": ""
+      },
+      "review": {
+        "name": "",
+        "description": ""
+      },
+      "overdue": {
+        "name": "",
+        "description": ""
+      },
+      "nextUp": {
+        "name": "",
+        "description": ""
+      },
+      "filters": {
+        "name": "מסננים",
+        "description": ""
+      },
+      "projects": {
+        "name": "פרויקטים",
+        "description": ""
+      }
+    },
+    "detailedDescription": ""
+  },
+  "layout": {
+    "title": "פריסה וניווט",
+    "detailedDescription": "בחרו באיזה מסך האפליקציה נפתחת ואילו קיצורי דרך ולוחות מקיפים אותו.",
+    "defaultView": {
+      "title": "תצוגת ברירת מחדל",
+      "description": "בחרו באיזה מסך האפליקציה נפתחת.",
+      "options": {
+        "home": {
+          "name": "סקירה",
+          "description": "סיכום של מה שדורש את תשומת לבכם היום, עם הוספה מהירה"
+        },
+        "tasks": {
+          "name": "רשימת המשימות",
+          "description": "רשימת המשימות המלאה עם סינון, חיפוש וקיבוץ"
+        }
+      }
+    },
+    "bottomNav": {
+      "title": "ניווט תחתון",
+      "description": "בחרו עד {{max}} קיצורי דרך לסרגל הניווט התחתון בנייד וגררו כדי לשנות את הסדר. הפריט \"עוד\" תמיד נשאר אחרון ופותח את התפריט המלא.",
+      "resetToDefaults": "איפוס לברירת המחדל",
+      "resetHelper": "הפעולה תשחזר את קיצורי הדרך והסדר של ברירת המחדל בניווט התחתון."
+    },
+    "sidepanel": {
+      "title": "לוח צד"
+    }
+  },
   "theme": {
     "title": "העדפות ערכת נושא",
     "description": "בחרו כיצד האתר יוצג עבורכם. בחרו ערכת נושא אחת, או הסתנכרנו עם הגדרות המערכת כדי לעבור אוטומטית בין מצב יום ללילה.",
@@ -446,13 +519,15 @@
     "sunday": "יום ראשון",
     "monday": "יום שני",
     "saturday": "שבת",
+    "helpTranslate": "",
     "formats": {
       "mdy": "MM/DD/YYYY (ארה״ב)",
       "dmy": "DD/MM/YYYY (אירופה)",
       "ymd": "YYYY-MM-DD (ISO)",
       "long": "תבנית ארוכה (לדוגמה, 1 בינואר 2024)",
       "short": "תבנית קצרה (לדוגמה, 1 בינו׳ 2024)"
-    }
+    },
+    "descriptionLong": ""
   },
   "advanced": {
     "title": "הגדרות מתקדמות",
@@ -490,5 +565,174 @@
       "notConnected": "עדכונים בזמן אמת מופעלים אך אינם מחוברים כרגע.",
       "basicPlanNotice": "עדכונים בזמן אמת אינם זמינים בתוכנית Basic. שדרגו ל-Plus כדי לקבל התראות מיידיות כאשר אתם או חברים אחרים במעגל משלימים, מדלגים או משנים משימות."
     }
+  },
+  "privacyAnalytics": {
+    "title": "",
+    "description": "",
+    "analyticsToggle": "",
+    "analyticsHelper": "",
+    "crashToggle": "",
+    "crashHelper": "",
+    "footnote": ""
+  },
+  "subscription": {
+    "sessionFailed": "",
+    "errorTitle": "",
+    "errorMessage": "",
+    "subscribe": "",
+    "cancelAnytime": "",
+    "description": "",
+    "whatsIncluded": "",
+    "mostPopular": "",
+    "featureNotifications": "",
+    "featureRichText": "",
+    "featureThingTriggers": "",
+    "featureApiTokens": "",
+    "featureImageUploads": "",
+    "featureAutomation": "",
+    "planYearly": "",
+    "reasonAdvancedReminders": "תזכורות לפני תאריך היעד ומעקב אחרי הן תכונת Plus. התוכנית הנוכחית שלך מזכירה בתאריך היעד.",
+    "reasonReminderChannels": "שליחת תזכורות משימות לקבוצת Telegram היא תכונת Plus.",
+    "reasonHistoryWindow": "התוכנית שלך מציגה את 30 הימים האחרונים. שדרג/י ל‑Plus כדי לקבל את כל ההיסטוריה ומגמות לטווח ארוך.",
+    "reasonThingTriggers": "הפעלת משימות אוטומטית כאשר פריט משנה מצב היא תכונת Plus.",
+    "reasonProjectLimit": "לתוכנית הנוכחית שלך יש {{projectLimit}} פרויקטים. שדרג/י ל‑Plus כדי ליצור כמה שתרצה/י.",
+    "reasonQuickFilterLimit": "לתוכנית הנוכחית שלך יש {{filterLimit}} מסננים מהירים שמורים. שדרג/י ל‑Plus עבור מסננים ללא הגבלה.",
+    "reasonFileUpload": "צירוף קבצים ותמונות היא תכונת Plus. שדרג/י ל‑Plus כדי להוסיף תמונות, סריקות ומסמכים למשימות שלך."
+  },
+  "childUsers": {
+    "errNameRequired": "",
+    "errNameMin": "",
+    "errNameMax": "",
+    "errNameChars": "",
+    "errPasswordRequired": "",
+    "errPasswordLength": "",
+    "errPasswordMatch": "",
+    "errDisplayNameMax": "",
+    "createTitle": "",
+    "createDescription": "",
+    "createButton": "",
+    "nameLabel": "",
+    "namePlaceholder": "",
+    "displayNameLabel": "",
+    "displayNamePlaceholder": "",
+    "passwordLabel": "",
+    "passwordPlaceholder": "",
+    "confirmPasswordLabel": "",
+    "confirmPasswordPlaceholder": ""
+  },
+  "passwordChange": {
+    "minLength": "",
+    "maxLength": "",
+    "description": "",
+    "mismatch": "",
+    "newPassword": "",
+    "newPasswordPlaceholder": "",
+    "confirmPassword": "",
+    "confirmPasswordPlaceholder": ""
+  },
+  "payment": {
+    "cancelledTitle": "",
+    "cancelledRedirect": "",
+    "successTitle": "",
+    "successRedirect": ""
+  },
+  "developer": {
+    "tokenRefreshed": "",
+    "endpointCalled": "",
+    "clearDbCleared": "",
+    "clearDbDone": "",
+    "intro": "",
+    "refreshCookieNote": "",
+    "noReconnectInfo": "",
+    "noTimeoutInfo": "",
+    "noDebugInfo": ""
+  },
+  "backup": {
+    "keyRequired": "",
+    "created": "",
+    "createFailed": "",
+    "selectFile": "",
+    "restored": "",
+    "restoreFailed": "",
+    "readFailed": "",
+    "createIntro": "",
+    "keyPlaceholder": "",
+    "includeAssets": "",
+    "warningLabel": "אזהרה:",
+    "restoreWarning": "",
+    "restoreKeyPlaceholder": "",
+    "title": "",
+    "createTab": "",
+    "restoreTab": "",
+    "creating": "",
+    "restoring": "",
+    "encryptionKeyRequired": "מפתח הצפנה *",
+    "keySafetyNotice": "שמור על מפתח זה בבטחה — תזדקק לו כדי לשחזר את הגיבוי שלך",
+    "nameOptional": "שם הגיבוי (אופציונלי)",
+    "namePlaceholder": "לדוגמה: גיבוי שבועי",
+    "fileRequired": "קובץ גיבוי *",
+    "selectedFile": "נבחר: {{name}}"
+  },
+  "deletion": {
+    "passwordRequired": "",
+    "passwordAndDelete": "",
+    "failed": "",
+    "passwordPlaceholder": "",
+    "transferIntro": "",
+    "selectOwner": "",
+    "confirmPrompt": "",
+    "typeDelete": "",
+    "warningLead": "",
+    "warningIntro": "",
+    "removesProfile": "",
+    "removesChores": "",
+    "removesTokens": "",
+    "removesStorage": "",
+    "removesPoints": "",
+    "removesCircles": "",
+    "passwordToContinue": "",
+    "circleLabel": "",
+    "newOwner": "",
+    "logoutNotice": "",
+    "passwordLabel": "",
+    "typeToConfirm": ""
+  },
+  "realtime": {
+    "titleSse": "",
+    "subtitleSse": "",
+    "basicPlanDescription": "Real-time updates (SSE) are not available in the Basic plan. Upgrade to Plus to receive instant notifications when chores are updated.",
+    "disabledDescription": "Real-time updates (SSE) are disabled. Enable to see live changes when you or other circle members complete, skip, or modify chores.",
+    "connectedDescription": "Real-time updates (SSE) are working. You'll see live changes when you or other circle members complete, skip, or modify chores.",
+    "connectingDescription": "Connecting to real-time updates (SSE)...",
+    "errorDescription": "Real-time updates (SSE) are enabled but not working: {{error}}",
+    "disconnectedDescription": "Real-time updates (SSE) are enabled but not currently connected.",
+    "enableLabel": "Enable Real-time Updates (SSE)",
+    "statusLabel": "Status:"
+  },
+  "nativeCancel": {
+    "title": "",
+    "dismiss": "",
+    "cancelViaStore": "",
+    "cancelDesktop": "",
+    "intro": "",
+    "iosHeading": "",
+    "iosStep1": "",
+    "iosStep2": "",
+    "iosStep3": "",
+    "iosStep4": "",
+    "iosStep5": "",
+    "iosNote": "",
+    "androidHeading": "",
+    "androidStep1": "",
+    "androidStep2": "",
+    "androidStep3": "",
+    "androidStep4": "",
+    "androidStep5": "",
+    "androidStep6": "",
+    "androidNote": "",
+    "webHeading": "",
+    "webBody": "",
+    "webNote": "",
+    "footer": ""
   }
 }

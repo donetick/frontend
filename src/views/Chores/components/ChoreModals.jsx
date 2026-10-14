@@ -5,9 +5,9 @@ import DueDatePickerModal, {
   combineDueDate,
   splitDueDate,
 } from '../../components/DueDatePickerModal'
+import AssigneeModal from '../../Modals/Inputs/AssigneeModal'
 import DateModal from '../../Modals/Inputs/DateModal'
 import NudgeModal from '../../Modals/Inputs/NudgeModal'
-import SelectModal from '../../Modals/Inputs/SelectModal'
 import TextModal from '../../Modals/Inputs/TextModal'
 import WriteNFCModal from '../../Modals/Inputs/WriteNFCModal'
 
@@ -56,14 +56,13 @@ const ChoreModals = ({
       )}
 
       {activeModal === 'changeAssignee' && modalChore && (
-        <SelectModal
+        <AssigneeModal
           isOpen={true}
-          options={membersData?.res || []}
-          displayKey='displayName'
+          members={membersData?.res || []}
+          assignedTo={modalChore.assignedTo}
           title={t('modals.delegate')}
-          placeholder={t('modals.selectPerformer')}
           onClose={onClose}
-          onSave={selected => onAssigneeChange(selected.id)}
+          onSave={onAssigneeChange}
         />
       )}
 

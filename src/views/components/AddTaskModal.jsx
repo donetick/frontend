@@ -1,4 +1,4 @@
-import { Add, KeyboardArrowDown } from '@mui/icons-material'
+import { Add, KeyboardArrowDown, Lock } from '@mui/icons-material'
 import {
   Box,
   Button,
@@ -28,9 +28,14 @@ import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { localAIService } from '../../service/LocalAIService'
 import { voiceInputService } from '../../service/VoiceInputService'
 import LABEL_COLORS, { TASK_COLOR } from '../../utils/Colors'
+import { sanitizeRemindersForPlan } from '../../utils/entitlements'
 import { CreateLabel } from '../../utils/Fetcher'
 import { imageSourceToFile } from '../../utils/FileConvert'
 import { isPlusAccount } from '../../utils/Helpers'
+import {
+  filterMembersForProject,
+  getProjectAudienceIds,
+} from '../../utils/ProjectAccess'
 import { getIconComponent } from '../../utils/ProjectIcons'
 import { generateUUID } from '../../utils/UUID'
 import { useLabels } from '../Labels/LabelQueries'
@@ -49,6 +54,7 @@ import {
   parseRepeatV2,
 } from './CustomParsers'
 import DueDatePickerField from './DueDatePickerField'
+import { combineDueDate } from './DueDatePickerModal'
 import LabelsPickerField from './LabelsPickerField'
 import NotificationPickerField from './NotificationPickerField'
 import PriorityPickerField from './PriorityPickerField'
@@ -199,7 +205,7 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
   const { data: userLabels, isLoading: userLabelsLoading } = useLabels()
   const { data: circleMembers, isLoading: isCircleMembersLoading } =
     useCircleMembers()
-  const { data: projects, isLoading: isProjectsLoading } = useProjects()
+  const { data: projects = [], isLoading: isProjectsLoading } = useProjects()
   const createChoreMutation = useCreateChore()
   const queryClient = useQueryClient()
 
@@ -208,7 +214,6 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
   // Stable identities for the voice panel: these queries are undefined while
   // loading, and a fresh [] each render would churn the panel's parse context
   const voiceLabels = useMemo(() => userLabels || [], [userLabels])
-  const voiceMembers = useMemo(() => circleMembers?.res || [], [circleMembers])
 
   const handleCreateLabel = useCallback(
     name => {
@@ -216,33 +221,10 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
         LABEL_COLORS[1 + Math.floor(Math.random() * (LABEL_COLORS.length - 1))]
           .value
       CreateLabel({ name, color })
-        .then(() => queryClient.invalidateQueries(['labels']))
+        .then(() => queryClient.invalidateQueries({ queryKey: ['labels'] }))
         .catch(error => console.error('Error creating label:', error))
     },
     [queryClient],
-  )
-
-  const smartInputSuggestions = useMemo(
-    () => ({
-      '#': {
-        value: 'id',
-        display: 'name',
-        options: userLabels || [],
-        creatable: true,
-        onCreate: handleCreateLabel,
-      },
-      '!': PRIORITY_SUGGESTIONS,
-      '@': {
-        value: 'userId',
-        display: 'displayName',
-        options: [
-          { userId: 'anyone', displayName: t('addTask.anyone') },
-          ...(circleMembers?.res || []),
-        ],
-      },
-      '*': POINTS_SUGGESTIONS,
-    }),
-    [userLabels, circleMembers, handleCreateLabel, t],
   )
 
   const [taskText, setTaskText] = useState('')
@@ -296,7 +278,6 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
   // create flow in ChoreEdit.jsx.
   const taskSourceRef = useRef('quick_add')
   const [priority, setPriority] = useState(0)
-  const [dueDate, setDueDate] = useState(null)
   const [description, setDescription] = useState(null)
   const [assignees, setAssignees] = useState([])
   const [labelsV2, setLabelsV2] = useState([])
@@ -320,6 +301,15 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
   const [dueDateOnly, setDueDateOnly] = useState(null)
   const [dueTime, setDueTime] = useState(null)
   const [useCustomTime, setUseCustomTime] = useState(false)
+  // These three are the source of truth; the due date is only their
+  // combination. It used to be a fourth piece of state that every handler
+  // recomputed for itself, which meant the picker's Apply — three callbacks
+  // in one batch — had each of them reading stale siblings and the chosen
+  // time losing to the end-of-day fallback.
+  const dueDate = useMemo(() => {
+    const combined = combineDueDate({ dueDateOnly, dueTime, useCustomTime })
+    return combined ? moment(combined).format('YYYY-MM-DDTHH:mm:ss') : null
+  }, [dueDateOnly, dueTime, useCustomTime])
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
   const [projectId, setProjectId] = useState(getInitialProject)
   const selectedProject = useMemo(
@@ -372,6 +362,64 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
     localAIService.isAvailable().then(setLlmAvailable)
     voiceInputService.isSupported().then(setVoiceAvailable)
   }, [])
+
+  // A task in a private or shared project is always private: the project's
+  // privacy wins over the task's own setting, so keep the form in sync with the
+  // selected project.
+  const taskProject = projects.find(project => project.id === projectId)
+  const selectedProjectIsPrivate = Boolean(taskProject?.isPrivate)
+  useEffect(() => {
+    if (selectedProjectIsPrivate && !isPrivate) {
+      setIsPrivate(true)
+    }
+  }, [selectedProjectIsPrivate, isPrivate])
+
+  // Only people who can see the selected project can be assigned (the server
+  // rejects anybody else), so the picker and @mentions offer just them.
+  const assignableMembers = useMemo(
+    () => filterMembersForProject(circleMembers?.res || [], taskProject),
+    [circleMembers, taskProject],
+  )
+
+  // Voice tasks land in the selected project as well, so they offer the same
+  // people (assignableMembers is memoized, so the panel's parse context stays put).
+  const voiceMembers = assignableMembers
+
+  const smartInputSuggestions = useMemo(
+    () => ({
+      '#': {
+        value: 'id',
+        display: 'name',
+        options: userLabels || [],
+        creatable: true,
+        onCreate: handleCreateLabel,
+      },
+      '!': PRIORITY_SUGGESTIONS,
+      '@': {
+        value: 'userId',
+        display: 'displayName',
+        options: [
+          { userId: 'anyone', displayName: t('addTask.anyone') },
+          ...assignableMembers,
+        ],
+      },
+      '*': POINTS_SUGGESTIONS,
+    }),
+    [userLabels, assignableMembers, handleCreateLabel, t],
+  )
+
+  const projectAudienceKey = (getProjectAudienceIds(taskProject) || []).join(
+    ',',
+  )
+  useEffect(() => {
+    const audience = getProjectAudienceIds(taskProject)
+    if (!audience) return
+    setAssignees(current => {
+      const kept = current.filter(a => audience.includes(a.userId))
+      return kept.length === current.length ? current : kept
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectAudienceKey])
 
   // Quick-capture widget entry points (donetick://chores/add?mode=voice|scan)
   // land here: open straight into the requested panel, once per modal open so
@@ -445,7 +493,6 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
       if (isHoldingCmd && event.key.toLowerCase() === 'b' && !dueDate) {
         const tomorrow = moment().add(1, 'day')
         setDueDateOnly(tomorrow.format('YYYY-MM-DD'))
-        setDueDate(tomorrow.endOf('day').format('YYYY-MM-DDTHH:mm:59'))
         setUseCustomTime(false)
         setDueTime(null)
         setShowKeyboardShortcuts(false)
@@ -615,7 +662,7 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
   // with identical data doesn't re-trigger the parse effect below
   const assigneesForParsing = useMemo(
     () =>
-      (circleMembers?.res || []).map(member => ({
+      assignableMembers.map(member => ({
         userId: member.userId,
         username:
           member.username ||
@@ -624,7 +671,7 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
         name: member.displayName,
         id: member.userId,
       })),
-    [circleMembers],
+    [assignableMembers],
   )
 
   const processText = useCallback(
@@ -658,17 +705,12 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
         setAssignees(parsedAssignees)
         assigneesFromMentionRef.current = true
       } else if (assigneesFromMentionRef.current) {
-        // The @mention that set the current assignees was deleted — fall back
-        // to the implicit self default. Picker selections stay untouched.
+        // The @mention that set the current assignees was deleted. An empty
+        // selection is assigned to the current user when the task is created.
+        // Picker selections stay untouched.
         assigneesFromMentionRef.current = false
         setIsAnyoneTask(false)
-        if (userProfile?.id) {
-          setAssignees([
-            {
-              userId: userProfile.id,
-            },
-          ])
-        }
+        setAssignees([])
       }
 
       if (repeat.result) {
@@ -680,7 +722,6 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
         const dateOnly = m.format('YYYY-MM-DD')
         const timeOnly = m.format('HH:mm')
         setDueDateOnly(dateOnly)
-        setDueDate(m.format('YYYY-MM-DDTHH:mm:ss'))
         if (timeOnly !== '23:59') {
           setUseCustomTime(true)
           setDueTime(timeOnly)
@@ -779,7 +820,6 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
           if (overrides.dueDate) {
             syncDueDateStates(overrides.dueDate)
           } else {
-            setDueDate(null)
             setDueDateOnly(null)
             setDueTime(null)
             setUseCustomTime(false)
@@ -787,7 +827,7 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
         }
       }
     },
-    [userLabels, renderHighlightedSentence, assigneesForParsing, userProfile],
+    [userLabels, renderHighlightedSentence, assigneesForParsing],
   )
 
   useEffect(() => {
@@ -820,56 +860,24 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
   ])
 
   const handleDueDateChange = e => {
-    const dateValue = e.target.value
-    setDueDateOnly(dateValue)
-    if (useCustomTime && dueTime) {
-      setDueDate(
-        moment(`${dateValue}T${dueTime}`).format('YYYY-MM-DDTHH:mm:00'),
-      )
-    } else {
-      setUseCustomTime(false)
-      setDueTime(null)
-      setDueDate(moment(dateValue).endOf('day').format('YYYY-MM-DDTHH:mm:ss'))
-    }
+    setDueDateOnly(e.target.value || null)
   }
 
   const handleDueTimeChange = e => {
     const timeValue = e.target.value
-    setDueTime(timeValue)
-    if (dueDateOnly) {
-      if (timeValue) {
-        setUseCustomTime(true)
-        setDueDate(
-          moment(`${dueDateOnly}T${timeValue}`).format('YYYY-MM-DDTHH:mm:00'),
-        )
-      } else {
-        setUseCustomTime(false)
-        setDueDate(
-          moment(dueDateOnly).endOf('day').format('YYYY-MM-DDTHH:mm:ss'),
-        )
-      }
-    }
+    setDueTime(timeValue || null)
+    // A time typed straight into the field is itself the request for one.
+    if (timeValue) setUseCustomTime(true)
   }
 
   const handleUseCustomTimeChange = checked => {
     setUseCustomTime(checked)
+    // Turning the toggle on needs something on the clock to show. The picker
+    // sends the real time right after this, and wins.
     if (checked) {
-      const defaultTime = dueTime || '18:00'
-      if (!dueTime) {
-        setDueTime(defaultTime)
-      }
-      if (dueDateOnly) {
-        setDueDate(
-          moment(`${dueDateOnly}T${defaultTime}`).format('YYYY-MM-DDTHH:mm:00'),
-        )
-      }
+      setDueTime(prev => prev || '18:00')
     } else {
       setDueTime(null)
-      if (dueDateOnly) {
-        setDueDate(
-          moment(dueDateOnly).endOf('day').format('YYYY-MM-DDTHH:mm:ss'),
-        )
-      }
     }
   }
 
@@ -920,8 +928,10 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
     if (extractedDue) {
       const m = moment(new Date(extractedDue))
       if (m.isValid()) {
+        // The scan gives a date, never a time — end of day, as before.
         setDueDateOnly(m.format('YYYY-MM-DD'))
-        setDueDate(m.endOf('day').format('YYYY-MM-DDTHH:mm:ss'))
+        setDueTime(null)
+        setUseCustomTime(false)
       }
     }
   }
@@ -1002,7 +1012,6 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
     setIsAttachingScan(false)
     setTaskText('')
     setTaskTitle('')
-    setDueDate(null)
     setFrequency(null)
     setPriority(0)
     setPoints(-1)
@@ -1054,11 +1063,20 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
       finalAssignStrategy = assignStrategy
     }
 
+    // "always" chores never have a due date — backend keeps nextDueDate null
+    // and never archives them on completion (see RepeatSection.jsx for the
+    // full-edit-form equivalent).
+    const isAlwaysAvailable = frequency?.frequencyType === 'always'
+
     const chore = {
       name: taskTitle,
       description: description,
       assignees: finalAssignees,
-      dueDate: dueDate ? new Date(dueDate).toISOString() : null,
+      dueDate: isAlwaysAvailable
+        ? null
+        : dueDate
+          ? new Date(dueDate).toISOString()
+          : null,
       assignedTo: finalAssignedTo,
       assignStrategy: finalAssignStrategy,
       isRolling: false,
@@ -1067,7 +1085,9 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
       points: points > -1 ? points : null,
       deadlineOffset: deadlineOffset < 0 ? null : deadlineOffset,
       completionWindow:
-        completionWindow < 0 || !dueDate ? null : completionWindow,
+        completionWindow < 0 || !dueDate || isAlwaysAvailable
+          ? null
+          : completionWindow,
       requireApproval: requireApproval,
       isPrivate: isPrivate,
       status: 0,
@@ -1081,17 +1101,22 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
       source: taskSourceRef.current,
     }
 
-    // Reminders are a Plus feature and only make sense when the user kept at
-    // least one template; without the flag the backend never schedules them.
-    const hasReminders =
-      isPlusAccount(userProfile) && notificationMetadata?.templates?.length > 0
+    // Every plan gets reminders; the free plan is capped at the on-due one.
+    // Without the flag the backend never schedules them. "always" chores are
+    // rejected with forbidden_with_trigger_frequency if notification is true,
+    // same rule as trigger frequencies.
+    const planReminders = sanitizeRemindersForPlan(
+      notificationMetadata?.templates,
+      isPlusAccount(userProfile),
+    )
+    const hasReminders = planReminders.length > 0 && !isAlwaysAvailable
 
     if (frequency) {
       chore.frequencyType = frequency.frequencyType
       chore.frequencyMetadata = frequency.frequencyMetadata
       chore.frequency = frequency.frequency
     }
-    if (dueDate) {
+    if (dueDate && !isAlwaysAvailable) {
       // Use RFC3339/ISO-8601 format expected by backend. The backend only
       // derives NextDueDate from what's sent on create (handler.go never
       // computes it from frequencyType), so this must be sent whether or
@@ -1101,7 +1126,10 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
     }
     if (hasReminders && (frequency || dueDate)) {
       chore.notification = true
-      chore.notificationMetadata = notificationMetadata
+      chore.notificationMetadata = {
+        ...notificationMetadata,
+        templates: planReminders,
+      }
     }
 
     createChoreMutation
@@ -1211,6 +1239,15 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
                         {project.id === 'default'
                           ? t('addTask.defaultProject')
                           : project.name}
+                        {project.isPrivate && (
+                          <Lock
+                            sx={{
+                              fontSize: 14,
+                              ml: 0.5,
+                              verticalAlign: 'text-bottom',
+                            }}
+                          />
+                        )}
                       </MenuItem>
                     )
                   })}
@@ -1400,7 +1437,6 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
                 onDueTimeChange={handleDueTimeChange}
                 onUseCustomTimeChange={handleUseCustomTimeChange}
                 onClear={() => {
-                  setDueDate(null)
                   setDueDateOnly(null)
                   setDueTime(null)
                   setUseCustomTime(false)
@@ -1409,7 +1445,16 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
               <RepeatPickerField
                 emptyDisplay={pickerEmptyDisplay}
                 value={frequency}
-                onChange={setFrequency}
+                onChange={newFrequency => {
+                  setFrequency(newFrequency)
+                  // "always" tasks never have a due date — clear whatever
+                  // was picked so the chips don't show a contradictory state
+                  if (newFrequency?.frequencyType === 'always') {
+                    setDueDateOnly(null)
+                    setDueTime(null)
+                    setUseCustomTime(false)
+                  }
+                }}
                 onClear={() => setFrequency(null)}
               />
               <PriorityPickerField
@@ -1437,8 +1482,7 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
                   setIsAnyoneTask(false)
                   setAssignees([])
                 }}
-                currentUserId={userProfile?.id}
-                members={circleMembers?.res || []}
+                members={assignableMembers}
               />
               <LabelsPickerField
                 emptyDisplay={pickerEmptyDisplay}
@@ -1561,11 +1605,14 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
               hasAssignees={!isAnyoneTask}
               isPrivate={isPrivate}
               onIsPrivateChange={setIsPrivate}
+              isPrivacyInherited={selectedProjectIsPrivate}
             />
 
             {hasDescription && (
               <Box>
-                <Typography level='body-sm'>Description:</Typography>
+                <Typography level='body-sm'>
+                  {t('addTask.descriptionLabel')}
+                </Typography>
                 <div>
                   <RichTextEditor
                     ref={richTextEditorRef}
@@ -1579,7 +1626,9 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
             )}
             {hasSubTasks && (
               <Box>
-                <Typography level='body-sm'>Subtasks:</Typography>
+                <Typography level='body-sm'>
+                  {t('addTask.subtasksLabel')}
+                </Typography>
                 <SubTasks
                   editMode={true}
                   tasks={subTasks ? subTasks : []}

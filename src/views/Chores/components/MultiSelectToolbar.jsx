@@ -43,6 +43,7 @@ import { getIconComponent } from '../../../utils/ProjectIcons'
 import DueDatePickerModal, {
   splitDueDate,
 } from '../../components/DueDatePickerModal'
+import { ProjectAccessIcon } from '../../Projects/ProjectVisibilityField'
 
 const renderProjectAvatar = (color, icon) => {
   const bg = color || LABEL_COLORS[0].value
@@ -60,15 +61,6 @@ const renderProjectAvatar = (color, icon) => {
 // the picker emits, or null to unplan. The quick options move the date only and
 // leave the time unset, so each task keeps whatever hour it was already due at
 // (and stays "anytime" if it had none).
-// 23:59 is the app's "no specific time" stamp, so the picker should open on
-// Anytime for it rather than showing it as a time the user chose.
-const prefillDueDate = value => {
-  const parts = splitDueDate(value)
-  return parts.dueTime === '23:59'
-    ? { dueDateOnly: parts.dueDateOnly, dueTime: null, useCustomTime: false }
-    : parts
-}
-
 const dateOnly = date => ({
   dueDateOnly: date.format('YYYY-MM-DD'),
   dueTime: null,
@@ -215,7 +207,12 @@ const MultiSelectToolbar = ({
         // Generous enough that the action buttons can wrap to two or three
         // rows on a narrow screen without being clipped, while still giving
         // the collapse something finite to animate to.
-        maxHeight: isVisible ? '400px' : '0',
+        // Collapsed value must be the number 0, not the string '0': MUI's
+        // sizing transform turns '0' into '0%', and a percentage max-height
+        // against an auto-height parent resolves circularly — the parent is
+        // sized with the toolbar expanded, leaving its full height as blank
+        // space below the page content.
+        maxHeight: isVisible ? '400px' : 0,
         opacity: isVisible ? 1 : 0,
         transform: isVisible ? 'translateY(0)' : 'translateY(-20px)',
         marginBottom: isVisible ? 2 : 0,
@@ -547,7 +544,17 @@ const MultiSelectToolbar = ({
                       {renderProjectAvatar(project.color, project.icon)}
                     </ListItemDecorator>
                     <ListItemContent>
-                      <Typography level='body-sm'>{project.name}</Typography>
+                      <Typography level='body-sm'>
+                        {project.name}
+                        <ProjectAccessIcon
+                          project={project}
+                          sx={{
+                            fontSize: 14,
+                            ml: 0.5,
+                            verticalAlign: 'text-bottom',
+                          }}
+                        />
+                      </Typography>
                     </ListItemContent>
                   </MenuItem>
                 ))}
@@ -635,7 +642,7 @@ const MultiSelectToolbar = ({
         title={
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <CheckBox sx={{ fontSize: 20 }} />
-            {selectedCount} task{selectedCount !== 1 ? 's' : ''} selected
+            {t('archived.selected', { count: selectedCount })}
           </Box>
         }
         footer={
@@ -792,8 +799,8 @@ const MultiSelectToolbar = ({
       {dueDatePickerOpen && (
         <DueDatePickerModal
           open
-          title={`Due date for ${selectedCount} task${selectedCount !== 1 ? 's' : ''}`}
-          {...prefillDueDate(
+          title={t('multiToolbar.dueDateTitle', { count: selectedCount })}
+          {...splitDueDate(
             summary.dueDate?.isMixed ? null : summary.dueDate?.value,
           )}
           onClose={() => setDueDatePickerOpen(false)}

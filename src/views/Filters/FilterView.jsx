@@ -2,7 +2,6 @@ import '@meauxt/react-swipeable-list/dist/styles.css'
 
 import {
   SwipeableList,
-  SwipeableListItem,
   SwipeAction,
   TrailingActions,
   Type as ListType,
@@ -28,20 +27,25 @@ import {
   Container,
   IconButton,
   Input,
-  Stack,
   Typography,
 } from '@mui/joy'
 import Fuse from 'fuse.js'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import EmptyState from '../../components/common/EmptyState'
 import SortAndFilterMenu from '../../components/common/SortAndFilterMenu'
+import SwipeListItem, {
+  SWIPE_COMMIT_THRESHOLD,
+} from '../../components/common/SwipeListItem'
+import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
 import { useChores } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
+import { canCreateQuickFilter } from '../../utils/entitlements'
 import { getFilterCount, getFilterOverdueCount } from '../../utils/FilterEngine'
-import { getSafeBottomStyles } from '../../utils/SafeAreaUtils'
+import { getSafeBottom, getSafeBottomStyles } from '../../utils/SafeAreaUtils'
+import ScrollHideFab from '../components/ScrollHideFab'
 import { useLabels } from '../Labels/LabelQueries'
 import AdvancedFilterBuilder from '../Modals/Inputs/AdvancedFilterBuilder'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
@@ -254,6 +258,7 @@ const FilterView = () => {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const { data: userProfile } = useUserProfile()
+  const { isPlus, showPaywall } = usePaywall()
   const { data: chores = { res: [] } } = useChores(false)
   const { data: labels = [] } = useLabels()
   const { data: projects = [] } = useProjects()
@@ -403,17 +408,20 @@ const FilterView = () => {
     }
   }, [chores, filtersData, userProfile?.id, labels, projects, membersData?.res])
 
-  const handleAddFilter = () => {
+  const handleAddFilter = useCallback(() => {
+    if (!canCreateQuickFilter(filtersData.length, isPlus)) {
+      showPaywall(PAYWALL_REASON.QUICK_FILTER_LIMIT)
+      return
+    }
     setEditingFilter(null)
     setShowAdvancedFilterBuilder(true)
-  }
+  }, [filtersData.length, isPlus, showPaywall])
 
   // ?create=1 lets other surfaces (global search quick actions) land here with
   // the filter builder already open.
   useEffect(() => {
     if (searchParams.get('create') !== '1') return
-    setEditingFilter(null)
-    setShowAdvancedFilterBuilder(true)
+    handleAddFilter()
     setSearchParams(
       params => {
         params.delete('create')
@@ -421,7 +429,7 @@ const FilterView = () => {
       },
       { replace: true },
     )
-  }, [searchParams, setSearchParams])
+  }, [searchParams, setSearchParams, handleAddFilter])
 
   const handleEditFilter = filter => {
     setEditingFilter(filter)
@@ -499,20 +507,6 @@ const FilterView = () => {
 
   return (
     <Container maxWidth='md' sx={{ px: 0 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, p: 2 }}>
-        <Stack sx={{ flex: 1 }}>
-          <Typography
-            level='h3'
-            sx={{ fontWeight: 'lg', color: 'text.primary' }}
-          >
-            {t('header.title')}
-          </Typography>
-          <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-            {t('header.subtitle')}
-          </Typography>
-        </Stack>
-      </Box>
-
       {savedFilters.length > 0 && (
         <Box
           sx={{ px: 2, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}
@@ -614,10 +608,14 @@ const FilterView = () => {
             }}
           />
         ) : (
-          <SwipeableList type={ListType.IOS} fullSwipe={false}>
+          <SwipeableList
+            type={ListType.IOS}
+            fullSwipe
+            threshold={SWIPE_COMMIT_THRESHOLD}
+          >
             {filteredFilters.map(filter => {
               return (
-                <SwipeableListItem
+                <SwipeListItem
                   swipeActionOpen={
                     showMoreInfoId === filter.id ? 'trailing' : null
                   }
@@ -643,18 +641,23 @@ const FilterView = () => {
                               flexDirection: 'column',
                               alignItems: 'center',
                               justifyContent: 'center',
-                              bgcolor: 'warning.softBg',
-                              color: 'warning.700',
+                              bgcolor: 'warning.500',
+                              color: '#fff',
                               px: 3,
                               height: '100%',
                             }}
                           >
                             {filter.isPinned ? (
-                              <Star sx={{ fontSize: 20 }} />
+                              <Star sx={{ fontSize: 20, color: 'white' }} />
                             ) : (
-                              <StarBorder sx={{ fontSize: 20 }} />
+                              <StarBorder
+                                sx={{ fontSize: 20, color: 'white' }}
+                              />
                             )}
-                            <Typography level='body-xs' sx={{ mt: 0.5 }}>
+                            <Typography
+                              level='body-xs'
+                              sx={{ mt: 0.5, color: 'inherit' }}
+                            >
                               {filter.isPinned ? t('unpin') : t('pin')}
                             </Typography>
                           </Box>
@@ -666,14 +669,17 @@ const FilterView = () => {
                               flexDirection: 'column',
                               alignItems: 'center',
                               justifyContent: 'center',
-                              bgcolor: 'neutral.softBg',
-                              color: 'neutral.700',
+                              bgcolor: 'primary.500',
+                              color: '#fff',
                               px: 3,
                               height: '100%',
                             }}
                           >
-                            <EditIcon sx={{ fontSize: 20 }} />
-                            <Typography level='body-xs' sx={{ mt: 0.5 }}>
+                            <EditIcon sx={{ fontSize: 20, color: 'white' }} />
+                            <Typography
+                              level='body-xs'
+                              sx={{ mt: 0.5, color: 'inherit' }}
+                            >
                               {t('common:edit')}
                             </Typography>
                           </Box>
@@ -687,17 +693,16 @@ const FilterView = () => {
                               flexDirection: 'column',
                               alignItems: 'center',
                               justifyContent: 'center',
-                              bgcolor: 'danger.softBg',
-                              color: 'danger.700',
+                              bgcolor: 'danger.500',
+                              color: '#fff',
                               px: 3,
                               height: '100%',
                             }}
                           >
-                            <DeleteIcon sx={{ fontSize: 20 }} color='danger' />
+                            <DeleteIcon sx={{ fontSize: 20, color: 'white' }} />
                             <Typography
                               level='body-xs'
-                              sx={{ mt: 0.5 }}
-                              color='danger'
+                              sx={{ mt: 0.5, color: 'inherit' }}
                             >
                               {t('common:delete')}
                             </Typography>
@@ -725,7 +730,7 @@ const FilterView = () => {
                     taskCount={filterCounts[filter.id]?.count || 0}
                     overdueCount={filterCounts[filter.id]?.overdueCount || 0}
                   />
-                </SwipeableListItem>
+                </SwipeListItem>
               )
             })}
           </SwipeableList>
@@ -749,14 +754,12 @@ const FilterView = () => {
         />
       )}
 
-      <Box
+      <ScrollHideFab
         sx={{
           ...getSafeBottomStyles({ bottom: 0, padding: 16 }),
-          left: 10,
-          display: 'flex',
-          justifyContent: 'flex-end',
-          gap: 2,
-          'z-index': 1000,
+          '@media (max-width: 768px)': {
+            bottom: getSafeBottom(56, 16),
+          },
         }}
       >
         <IconButton
@@ -772,7 +775,7 @@ const FilterView = () => {
         >
           <Add />
         </IconButton>
-      </Box>
+      </ScrollHideFab>
 
       <ConfirmationModal config={confirmationModel} />
     </Container>

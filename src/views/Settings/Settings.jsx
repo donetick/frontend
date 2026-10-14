@@ -49,11 +49,12 @@ import NativeCancelSubscriptionModal from '../Modals/Inputs/NativeCancelSubscrip
 import PassowrdChangeModal from '../Modals/Inputs/PasswordChangeModal'
 import UserDeletionModal from '../Modals/Inputs/UserDeletionModal'
 import APITokenSettings from './APITokenSettings'
+import HomeSectionsSettings from './HomeSectionsSettings'
+import LayoutSettings from './LayoutSettings'
 import LocalizationSettings from './LocalizationSettings'
 import MFASettings from './MFASettings'
 import NotificationSetting from './NotificationSetting'
 import ProfileSettings from './ProfileSettings'
-import SidepanelSettings from './SidepanelSettings'
 import StorageSettings from './StorageSettings'
 import ThemeToggle from './ThemeToggle'
 
@@ -448,10 +449,18 @@ const Settings = () => {
                                   message: t('circleSettings.memberRemoved'),
                                 })
                                 // Invalidate and refetch circle-related queries
-                                queryClient.invalidateQueries(['circleMembers'])
-                                queryClient.invalidateQueries(['userCircle'])
-                                queryClient.refetchQueries(['circleMembers'])
-                                queryClient.refetchQueries(['userCircle'])
+                                queryClient.invalidateQueries({
+                                  queryKey: ['circleMembers'],
+                                })
+                                queryClient.invalidateQueries({
+                                  queryKey: ['userCircle'],
+                                })
+                                queryClient.refetchQueries({
+                                  queryKey: ['circleMembers'],
+                                })
+                                queryClient.refetchQueries({
+                                  queryKey: ['userCircle'],
+                                })
                                 // Update local state immediately
                                 setCircleMembers(prevMembers =>
                                   prevMembers.filter(
@@ -533,12 +542,22 @@ const Settings = () => {
                           message: t('circleSettings.requestAccepted'),
                         })
                         // Invalidate and refetch circle-related queries
-                        queryClient.invalidateQueries(['circleMembers'])
-                        queryClient.invalidateQueries(['circleMemberRequests'])
-                        queryClient.invalidateQueries(['userCircle'])
-                        queryClient.refetchQueries(['circleMembers'])
-                        queryClient.refetchQueries(['circleMemberRequests'])
-                        queryClient.refetchQueries(['userCircle'])
+                        queryClient.invalidateQueries({
+                          queryKey: ['circleMembers'],
+                        })
+                        queryClient.invalidateQueries({
+                          queryKey: ['circleMemberRequests'],
+                        })
+                        queryClient.invalidateQueries({
+                          queryKey: ['userCircle'],
+                        })
+                        queryClient.refetchQueries({
+                          queryKey: ['circleMembers'],
+                        })
+                        queryClient.refetchQueries({
+                          queryKey: ['circleMemberRequests'],
+                        })
+                        queryClient.refetchQueries({ queryKey: ['userCircle'] })
                         // Refresh local state
                         refreshMemberRequests()
                         GetAllCircleMembers().then(data => {
@@ -733,8 +752,8 @@ const Settings = () => {
                   // Check if user now has entitlement after paywall interaction
                   const { customerInfo } = await Purchases.getCustomerInfo()
                   if (customerInfo.entitlements.active['Donetick Plus']) {
-                    queryClient.invalidateQueries(['userProfile'])
-                    queryClient.refetchQueries(['userProfile'])
+                    queryClient.invalidateQueries({ queryKey: ['userProfile'] })
+                    queryClient.refetchQueries({ queryKey: ['userProfile'] })
                     showNotification({
                       type: 'success',
                       message: t('accountSettings.purchase.success'),
@@ -896,13 +915,22 @@ const Settings = () => {
       <MFASettings />
       <APITokenSettings />
       <StorageSettings />
-      <div className='grid gap-4 py-4' id='sidepanel'>
-        <Typography level='h3'>{t('sidepanel.title')}</Typography>
+      <div className='grid gap-4 py-4' id='homeSections'>
+        <Typography level='h3'>{t('homeSections.title')}</Typography>
         <Divider />
         <Typography level='body-md'>
-          {t('sidepanel.detailedDescription')}
+          {t('homeSections.detailedDescription')}
         </Typography>
-        <SidepanelSettings />
+        <HomeSectionsSettings />
+      </div>
+
+      <div className='grid gap-4 py-4' id='layout'>
+        <Typography level='h3'>{t('layout.title')}</Typography>
+        <Divider />
+        <Typography level='body-md'>
+          {t('layout.detailedDescription')}
+        </Typography>
+        <LayoutSettings />
       </div>
 
       <div className='grid gap-4 py-4' id='theme'>

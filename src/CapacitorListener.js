@@ -7,10 +7,11 @@ import { Preferences } from '@capacitor/preferences'
 import { PushNotifications } from '@capacitor/push-notifications'
 import { focusManager } from '@tanstack/react-query'
 
-import { RegisterDeviceToken } from './utils/Fetcher'
+import { RegisterDeviceToken, UnregisterDeviceToken } from './utils/Fetcher'
 import { beginOAuthExchange } from './utils/OAuthExchangeState'
 import { hasSeenOnboarding } from './utils/Onboarding'
 import { setPendingInvite } from './utils/PendingInvite'
+import statusBarManager from './utils/StatusBarManager'
 
 // React Router navigate(), injected by <App /> once the router is mounted.
 // Using client-side navigation (instead of window.location.href) avoids a full
@@ -28,7 +29,7 @@ const routerNavigate = (path, { seedHome = false } = {}) => {
   if (navigateFn) {
     // On a cold deep-link launch there is no real screen behind the target, so
     // seed the chore list as the back target before pushing the chore view.
-    if (seedHome && window.location.pathname === '/') {
+    if (seedHome && ['/', '/home'].includes(window.location.pathname)) {
       navigateFn('/chores', { replace: true })
     }
     navigateFn(path)
@@ -220,6 +221,39 @@ const registerTokenIfNeeded = async (token, deviceInfo, deviceId, platform) => {
   }
 }
 
+// Drop this device from the account's push targets. Must run while the access
+// token is still valid (i.e. before the logout cleanup clears it), otherwise
+// the server keeps pushing this user's chores to a signed-out device.
+const unregisterPushNotifications = async () => {
+  if (!Capacitor.isNativePlatform()) return
+
+  try {
+    const stored = await Preferences.get({ key: 'deviceRegistration' })
+    const registration = stored.value ? JSON.parse(stored.value) : null
+
+    // Fall back to the platform device id when the local record is missing
+    // (e.g. app reinstall or preferences cleared) so we still try the delete.
+    const deviceId = registration?.deviceId ?? (await Device.getId()).identifier
+    const token = registration?.token ?? null
+
+    if (deviceId || token) {
+      await UnregisterDeviceToken(deviceId, token)
+    }
+
+    await Preferences.remove({ key: 'deviceRegistration' })
+    await Preferences.set({
+      key: 'pushNotificationPreferences',
+      value: JSON.stringify({ granted: false }),
+    })
+
+    // Stop APNs/FCM delivery to this install until the next sign-in registers again
+    await PushNotifications.removeAllListeners()
+    await PushNotifications.unregister()
+  } catch (error) {
+    console.error('Error unregistering device token', error)
+  }
+}
+
 const pushNotificationListenerRegistration = async () => {
   // Check and request permissions for Android 13+
   if (Capacitor.isNativePlatform()) {
@@ -318,6 +352,12 @@ const registerCapacitorListeners = navigate => {
     focusManager.setFocused(isActive)
   })
 
+  // On iOS, dismissing SFSafariViewController can leave the WebView laid out
+  // underneath the status bar even though overlaysWebView is disabled.
+  Browser.addListener('browserFinished', () => {
+    void statusBarManager.restoreAfterBrowserDismissal()
+  })
+
   mobileApp.addListener('backButton', ({ canGoBack }) => {
     if (canGoBack) {
       window.history.back()
@@ -333,4 +373,5 @@ const registerCapacitorListeners = navigate => {
 export {
   registerCapacitorListeners,
   pushNotificationListenerRegistration as registerPushNotifications,
+  unregisterPushNotifications,
 }

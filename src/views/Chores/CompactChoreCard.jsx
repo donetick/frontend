@@ -1,6 +1,8 @@
 import {
+  AllInclusive,
   Check,
   HourglassEmpty,
+  OpenInNew,
   Pause,
   PlayArrow,
   Repeat,
@@ -10,7 +12,6 @@ import {
 } from '@mui/icons-material'
 import { Box, Checkbox, Chip, IconButton, Typography } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
 
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useLocalization } from '../../contexts/LocalizationContext'
@@ -26,6 +27,12 @@ import {
   getPriorityColor,
   getTextColorFromBackgroundColor,
 } from '../../utils/Colors.jsx'
+import {
+  getFirstHttpUrl,
+  getUrlHostname,
+  openExternalUrl,
+  splitTextAtFirstHttpUrl,
+} from '../../utils/ExternalLinks.js'
 import ChoreActionMenu, {
   ChoreActionMenuTrigger,
 } from '../components/ChoreActionMenu'
@@ -57,10 +64,14 @@ const CompactChoreCard = ({
   // Multi-select props
   performers,
   showActions = true,
+  // Undefined leaves the old `&:last-child` CSS rule in charge (the card is a
+  // direct sibling of its neighbours). Pass explicitly once a wrapper — like a
+  // swipeable list item — puts each card in its own single-child container,
+  // where `:last-child` always matches and would hide every divider.
+  showDivider,
   sx,
   viewOnly,
 }) => {
-  const navigate = useNavigate()
   const { t } = useTranslation('chores')
 
   const { data: userProfile } = useUserProfile()
@@ -95,6 +106,8 @@ const CompactChoreCard = ({
       return <TimesOneMobiledata sx={{ fontSize: 14 }} />
     } else if (chore.frequencyType === 'trigger') {
       return <Webhook sx={{ fontSize: 14 }} />
+    } else if (chore.frequencyType === 'always') {
+      return <AllInclusive sx={{ fontSize: 14 }} />
     } else {
       return <Repeat sx={{ fontSize: 14 }} />
     }
@@ -126,6 +139,13 @@ const CompactChoreCard = ({
 
     return parts.join(' • ')
   }
+  const {
+    after: titleAfterUrl,
+    before: titleBeforeUrl,
+    url: titleUrl,
+  } = splitTextAtFirstHttpUrl(chore.name)
+  const descriptionUrl = getFirstHttpUrl(chore.description)
+  const showDescriptionUrl = descriptionUrl && descriptionUrl !== titleUrl
   const showLeadingSlot = showActions || isMultiSelectMode
   const showTrailingSlot = showActions && !isMultiSelectMode
   const visibleLabels = chore.labelsV2?.slice(0, 2) ?? []
@@ -145,13 +165,15 @@ const CompactChoreCard = ({
         minWidth: '100%',
         cursor: 'pointer',
         position: 'relative',
-        pl: '8px',
+        pl: showLeadingSlot ? '8px' : '14px',
+        // pr: '14px',
+        py: '4px',
         bgcolor: 'background.body',
-        borderBottom: '1px solid',
+        borderBottom: showDivider === false ? 'none' : '1px solid',
         borderColor: 'divider',
-        '&:last-child': {
-          borderBottom: 'none',
-        },
+        ...(showDivider === undefined && {
+          '&:last-child': { borderBottom: 'none' },
+        }),
         '&:hover': {
           bgcolor: 'background.level1',
           boxShadow: 'sm',
@@ -417,7 +439,35 @@ const CompactChoreCard = ({
               wordBreak: 'break-word',
             }}
           >
-            {chore.name}
+            {titleBeforeUrl}
+            {titleUrl && (
+              <Chip
+                component='span'
+                variant='soft'
+                color='primary'
+                size='sm'
+                startDecorator={<OpenInNew sx={{ fontSize: 12 }} />}
+                onClick={event => {
+                  event.stopPropagation()
+                  openExternalUrl(titleUrl)
+                }}
+                sx={{
+                  mx: 0.35,
+                  height: 20,
+                  maxWidth: 140,
+                  cursor: 'pointer',
+                  verticalAlign: 'middle',
+                  '& .MuiChip-label': {
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  },
+                }}
+                title={titleUrl}
+              >
+                {getUrlHostname(titleUrl)}
+              </Chip>
+            )}
+            {titleAfterUrl}
           </Typography>
           {(chore._pending || (pendingCmds && pendingCmds.length > 0)) && (
             <PendingBadge commands={pendingCmds} size='xs' sx={{ mr: -0.5 }} />
@@ -466,6 +516,32 @@ const CompactChoreCard = ({
           >
             {formatMetadata()}
           </Typography>
+
+          {showDescriptionUrl && (
+            <Chip
+              variant='soft'
+              color='primary'
+              size='sm'
+              startDecorator={<OpenInNew sx={{ fontSize: 13 }} />}
+              onClick={event => {
+                event.stopPropagation()
+                openExternalUrl(descriptionUrl)
+              }}
+              sx={{
+                ml: 0.5,
+                maxWidth: 140,
+                cursor: 'pointer',
+                flexShrink: 0,
+                '& .MuiChip-label': {
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                },
+              }}
+              title={descriptionUrl}
+            >
+              {getUrlHostname(descriptionUrl)}
+            </Chip>
+          )}
 
           {/* Labels - show only a couple and summarize the rest with +N */}
           {visibleLabels.map(l => (

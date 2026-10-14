@@ -1,7 +1,19 @@
 import { useColorScheme } from '@mui/joy'
 import { useEffect } from 'react'
 
+import { THEME_BACKGROUND } from '@/constants/theme'
+
 import statusBarManager from '../utils/StatusBarManager'
+
+// The Capacitor StatusBar plugin only runs on native builds. On the web/PWA the
+// OS reads <meta name="theme-color"> for the status bar, so sync it here —
+// otherwise it stays at the hardcoded light value even in dark mode.
+const setMetaThemeColor = resolvedTheme => {
+  const meta = document.querySelector('meta[name="theme-color"]')
+  if (!meta) return
+  const color = THEME_BACKGROUND[resolvedTheme] ?? THEME_BACKGROUND.light
+  meta.setAttribute('content', color)
+}
 
 /**
  * Custom hook to manage status bar integration with Joy UI themes
@@ -33,6 +45,10 @@ export const useStatusBar = () => {
       if (mode === 'system') {
         resolvedTheme = systemMode || 'light'
       }
+
+      // Sync the web/PWA theme-color meta tag (browser equivalent of the
+      // native StatusBar update below).
+      setMetaThemeColor(resolvedTheme)
 
       // Update the status bar with the resolved theme
       await statusBarManager.updateResolvedTheme(resolvedTheme)

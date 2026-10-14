@@ -1,49 +1,71 @@
 {
-  "blurb": "Управляйте метками, чтобы удобнее раскладывать дела. Метка автоматически станет общей для группы, если её поставить на общее дело.",
+  "shared": "Общая",
   "delete": {
-    "message": "Удалить эту метку? Она пропадёт со всех дел, где стоит.",
-    "title": "Удалить метку"
+    "title": "Удалить метку",
+    "message": "Удалить эту метку? Она пропадёт со всех дел, где стоит."
+  },
+  "loadError": "Не удалось загрузить метки. Попробуйте ещё раз.",
+  "search": {
+    "placeholder": "Поиск меток",
+    "noResultsTitle": "Ничего не нашлось",
+    "noResultsDescription": "Нет меток по запросу «{{searchTerm}}».",
+    "noFilterResultsDescription": "Под текущий фильтр не подходит ни одна метка.",
+    "clear": "Очистить поиск",
+    "showAll": "Показать все метки"
   },
   "detail": {
-    "backToLabels": "К меткам",
-    "browseTasks": "К списку дел",
-    "clearFilters": "Показать все дела",
-    "emptyDescription": "Метка «{{label}}» пока никому не присвоена. Поставьте её делу — оно появится здесь.",
-    "emptyTitle": "Нет дел с этой меткой",
+    "taskCount_one": "{{count}} дело",
+    "taskCount_other": "{{count}} дел",
+    "labelActions": "Действия с меткой",
     "filters": {
       "all": "Все",
       "overdue": "Просроченные",
       "today": "Сегодня",
       "undated": "Без даты"
     },
-    "labelActions": "Действия с меткой",
     "noMatchingStatus": "Сейчас нет дел с этой меткой в таком состоянии.",
-    "noResultsDescription": "Нет дел с этой меткой по запросу «{{searchTerm}}».",
-    "noResultsTitle": "Ничего не нашлось",
-    "notFoundDescription": "Метку могли удалить, или ей больше с вами не делятся.",
-    "notFoundTitle": "Метка не найдена",
+    "clearFilters": "Показать все дела",
     "searchPlaceholder": "Поиск дел с этой меткой",
-    "taskCount_few": "{{count}} дела",
-    "taskCount_many": "{{count}} дел",
-    "taskCount_one": "{{count}} дело",
-    "taskCount_other": "{{count}} дел"
-  },
-  "loadError": "Не удалось загрузить метки. Попробуйте ещё раз.",
-  "modal": {
-    "errorDuplicate": "Метка с таким названием уже есть",
-    "errorEmptyName": "Название не может быть пустым",
-    "errorNoColor": "Выберите цвет",
-    "name": "Название",
-    "saveFailedMessage": "Метка не сохранилась. Попробуйте ещё раз.",
-    "saveFailedTitle": "Не удалось сохранить метку"
-  },
-  "search": {
-    "clear": "Очистить поиск",
-    "noFilterResultsDescription": "Под текущий фильтр не подходит ни одна метка.",
-    "noResultsDescription": "Нет меток по запросу «{{searchTerm}}».",
+    "emptyTitle": "Нет дел с этой меткой",
+    "emptyDescription": "Метка «{{label}}» пока никому не присвоена. Поставьте её делу — оно появится здесь.",
+    "browseTasks": "К списку дел",
     "noResultsTitle": "Ничего не нашлось",
-    "placeholder": "Поиск меток",
-    "showAll": "Показать все метки"
+    "noResultsDescription": "Нет дел с этой меткой по запросу «{{searchTerm}}».",
+    "notFoundTitle": "Метка не найдена",
+    "notFoundDescription": "Метку могли удалить, или ей больше с вами не делятся.",
+    "backToLabels": "К меткам"
   },
-  "shared": "Общая"
+  "blurb": "Управляйте метками, чтобы удобнее раскладывать дела. Метка автоматически станет общей для группы, если её поставить на общее дело.",
+  "modal": {
+    "errorEmptyName": "Название не может быть пустым",
+    "errorDuplicate": "Метка с таким названием уже есть",
+    "errorNoColor": "Выберите цвет",
+    "saveFailedTitle": "Не удалось сохранить метку",
+    "saveFailedMessage": "Метка не сохранилась. Попробуйте ещё раз.",
+    "name": "Название",
+    "editTitle": "",
+    "addTitle": "",
+    "color": "",
+    "saveChanges": "",
+    "addLabel": "",
+    "colorAriaSelect": ""
+  },
+  "picker": {
+    "label": "",
+    "createLabel": "",
+    "labelsCount_one": "",
+    "labelsCount_other": ""
+  },
+  "view": {
+    "emptyTitle": "",
+    "emptyDescription": "",
+    "createLabel": "",
+    "filterTitle": "",
+    "sortName": "",
+    "sortColor": "",
+    "sortRecent": "",
+    "filterAll": "",
+    "filterMine": "",
+    "filterShared": ""
+  }
 }

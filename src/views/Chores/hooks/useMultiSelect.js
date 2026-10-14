@@ -121,6 +121,25 @@ export const useMultiSelect = () => {
     [selectedChores],
   )
 
+  // Section-header checkbox: fully selected sections deselect, anything else
+  // (none or partial) selects the rest of the section.
+  const toggleSectionSelection = useCallback(sectionChores => {
+    if (!sectionChores || sectionChores.length === 0) return
+    setSelectedChores(prev => {
+      const allSelected = sectionChores.every(chore => prev.has(chore.id))
+      const next = new Set(prev)
+      sectionChores.forEach(chore => {
+        if (allSelected) {
+          next.delete(chore.id)
+        } else {
+          next.add(chore.id)
+        }
+      })
+      return next
+    })
+    lastSelectedId.current = null
+  }, [])
+
   const clearSelection = useCallback(() => {
     lastSelectedId.current = null
     if (selectedChores.size === 0) {
@@ -202,6 +221,7 @@ export const useMultiSelect = () => {
     selectChoreRange,
     enterMultiSelectWithChore,
     selectAllVisibleChores,
+    toggleSectionSelection,
     clearSelection,
     getSelectedChoresData,
     getSelectionSummary,

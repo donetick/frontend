@@ -55,7 +55,11 @@ const MyChoreHeader = ({
     <Box
       sx={{
         overflow: 'hidden',
-        maxHeight: isVisible ? '120px' : '0',
+        // Numeric 0, not '0': MUI's sizing transform rewrites the string as
+        // '0%', and a percentage max-height against an auto-height parent
+        // resolves circularly, leaving the collapsed header's full height as
+        // phantom space in the page.
+        maxHeight: isVisible ? '120px' : 0,
         opacity: isVisible ? 1 : 0,
         transform: isVisible ? 'translateY(0)' : 'translateY(-8px)',
         transition:
@@ -75,7 +79,7 @@ const MyChoreHeader = ({
           <Box
             sx={{
               overflow: 'hidden',
-              maxHeight: description ? '40px' : '0',
+              maxHeight: description ? '40px' : 0,
               opacity: description ? 1 : 0,
               transition:
                 'max-height 0.3s ease-in-out, opacity 0.3s ease-in-out',

@@ -146,7 +146,9 @@ export const useSSE = () => {
               eventData.type === 'chore.updated' ||
               eventData.type === 'chore.status'
             ) {
-              queryClient.invalidateQueries(['choreDetails', updatedChore.id])
+              queryClient.invalidateQueries({
+                queryKey: ['choreDetails', updatedChore.id],
+              })
               queryClient.refetchQueries({
                 queryKey: ['choreDetails', updatedChore.id],
               })
@@ -206,6 +208,14 @@ export const useSSE = () => {
               }
             })
 
+            break
+
+          case 'project.updated':
+            // A project or who can see it changed. The event carries no project
+            // details on purpose: refetch what this user may see now, and let the
+            // task list resync (it drops tasks this user lost access to).
+            queryClient.invalidateQueries({ queryKey: ['projects'] })
+            queryClient.invalidateQueries({ queryKey: ['chores'] })
             break
 
           case 'subtask.updated':

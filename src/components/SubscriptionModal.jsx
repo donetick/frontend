@@ -4,11 +4,28 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { useNotification } from '../service/NotificationProvider'
+import {
+  FREE_PROJECT_LIMIT,
+  FREE_QUICK_FILTER_LIMIT,
+} from '../utils/entitlements'
 import { GetSubscriptionSession } from '../utils/Fetcher'
 import AppModal from './common/AppModal'
 import ModalActions from './common/ModalActions'
 
-const SubscriptionModal = ({ onClose, open }) => {
+// Opening line, keyed to the gate the user just hit. Falls back to the generic
+// pitch when the modal is opened from Settings rather than from a blocked action.
+const REASON_KEYS = {
+  advanced_reminders: 'subscription.reasonAdvancedReminders',
+  reminder_channels: 'subscription.reasonReminderChannels',
+  history_window: 'subscription.reasonHistoryWindow',
+  thing_triggers: 'subscription.reasonThingTriggers',
+  project_limit: 'subscription.reasonProjectLimit',
+  quick_filter_limit: 'subscription.reasonQuickFilterLimit',
+  file_upload: 'subscription.reasonFileUpload',
+  calendar_sync: 'subscription.reasonCalendarSync',
+}
+
+const SubscriptionModal = ({ onClose, open, reason }) => {
   const { t } = useTranslation('settings')
   const [selectedPlan, setSelectedPlan] = useState('yearly')
   const [isLoading, setIsLoading] = useState(false)
@@ -75,7 +92,11 @@ const SubscriptionModal = ({ onClose, open }) => {
       open={open}
       onClose={onClose}
       title={t('overview.upgrade.title')}
-      description={t('subscription.description')}
+      description={t(REASON_KEYS[reason] ?? 'subscription.description', {
+        // So the limit copy can never drift from the limits themselves.
+        projectLimit: FREE_PROJECT_LIMIT,
+        filterLimit: FREE_QUICK_FILTER_LIMIT,
+      })}
       size='lg'
       closeOnBackdrop={!isLoading}
       closeOnEscape={!isLoading}

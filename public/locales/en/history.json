@@ -46,7 +46,9 @@
     "pointsEarned": "Points earned",
     "points_one": "{{count}} pt",
     "points_other": "{{count}} pts",
-    "note": "Note"
+    "note": "Note",
+    "reason": "Reason",
+    "notes": "Notes"
   },
   "charts": {
     "noData": "No data available",
@@ -99,14 +101,33 @@
     "days_other": "{{count}} Days",
     "allTime": "All Time"
   },
+  "search": {
+    "placeholder": "Search history...",
+    "clear": "Clear search"
+  },
+  "sort": {
+    "date": "Completed date",
+    "updatedDate": "Updated date",
+    "performer": "Completed by",
+    "status": "Status",
+    "points": "Points"
+  },
   "activities": {
     "title": "Activities",
+    "subtitle": "See what's been completed, skipped, or missed",
     "emptyTitle": "No activity in this range",
     "emptyDescriptionEveryone": "Nothing was completed by anyone in your circle {{period}}. Try a wider time range or a different member.",
     "emptyDescriptionMember": "Nothing was completed by {{name}} {{period}}. Try a wider time range or a different member.",
     "periodSoFar": "so far",
     "periodLastDays": "in the last {{count}} days",
-    "unknownMember": "this member"
+    "unknownMember": "this member",
+    "searchPlaceholder": "Search activities...",
+    "sort": {
+      "date": "Date",
+      "name": "Task name",
+      "status": "Status",
+      "points": "Points"
+    }
   },
   "title": {
     "summary": "Task Summary",
@@ -159,5 +180,11 @@
   },
   "noteViewer": {
     "updatedAt": "Updated at {{date}}"
+  },
+  "plan": {
+    "lockedTitle": "Older history is kept for {{days}} days on Free",
+    "allLockedTitle": "This task's history is older than {{days}} days",
+    "lockedDescription": "Entries older than {{days}} days may be permanently deleted. Upgrade to Plus to keep your full history.",
+    "unlock": "Upgrade to Plus"
   }
 }

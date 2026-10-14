@@ -2,13 +2,15 @@ import moment from 'moment'
 
 import { TASK_COLOR } from './Colors.jsx'
 
-const priorityOrder = [1, 2, 3, 4, 0]
+export const priorityOrder = [1, 2, 3, 4, 0]
 // ChoreGrouperOptions enum:
 export const GROUPING_OPTIONS = Object.freeze({
   SMART: 'default',
   DUE_DATE: 'due_date',
   PRIORITY: 'priority',
   LABELS: 'labels',
+  CREATED_DATE: 'created_date',
+  UPDATED_DATE: 'updated_date',
 })
 
 export const ChoreHistoryStatus = Object.freeze({
@@ -56,17 +58,68 @@ const getDateGroupColor = dateKey => {
   return TASK_COLOR.FUTURE
 }
 
-const buildActualDateGroups = chores => {
+const getPastDateGroupName = dateKey => {
+  const today = moment().startOf('day')
+  const groupDate = moment(dateKey, 'YYYY-MM-DD')
+  if (groupDate.isSame(today)) return 'Today'
+  if (groupDate.isSame(moment(today).subtract(1, 'day'))) return 'Yesterday'
+  return groupDate.format('dddd, MMM D')
+}
+
+const getPastDateGroupColor = dateKey => {
+  const today = moment().startOf('day')
+  const groupDate = moment(dateKey, 'YYYY-MM-DD')
+  if (groupDate.isSame(today)) return TASK_COLOR.TODAY
+  if (groupDate.isSame(moment(today).subtract(1, 'day')))
+    return TASK_COLOR.TOMORROW
+  if (groupDate.isAfter(moment(today).subtract(8, 'days')))
+    return TASK_COLOR.NEXT_7_DAYS
+  if (groupDate.isSame(today, 'month')) return TASK_COLOR.LATER_THIS_MONTH
+  return TASK_COLOR.FUTURE
+}
+
+const buildPastDateGroups = (chores, dateField) => {
   const groupedByDate = {}
   const anytime = []
 
   chores.forEach(chore => {
-    if (!chore.nextDueDate) {
+    if (!chore[dateField]) {
       anytime.push(chore)
       return
     }
 
-    const dateKey = getDateGroupKey(chore.nextDueDate)
+    const dateKey = getDateGroupKey(chore[dateField])
+    if (!groupedByDate[dateKey]) {
+      groupedByDate[dateKey] = []
+    }
+    groupedByDate[dateKey].push(chore)
+  })
+
+  const dateGroups = Object.keys(groupedByDate)
+    .sort(
+      (a, b) =>
+        moment(a, 'YYYY-MM-DD').valueOf() - moment(b, 'YYYY-MM-DD').valueOf(),
+    )
+    .map(dateKey => ({
+      name: getPastDateGroupName(dateKey),
+      content: groupedByDate[dateKey],
+      color: getPastDateGroupColor(dateKey),
+    }))
+
+  return { dateGroups, anytime }
+}
+
+const buildActualDateGroups = (chores, dateField = 'nextDueDate') => {
+  const groupedByDate = {}
+  const anytime = []
+
+  chores.forEach(chore => {
+    if (!chore[dateField]) {
+      anytime.push(chore)
+      return
+    }
+
+    const dateKey = getDateGroupKey(chore[dateField])
     if (!groupedByDate[dateKey]) {
       groupedByDate[dateKey] = []
     }
@@ -87,7 +140,7 @@ const buildActualDateGroups = chores => {
   return { dateGroups, anytime }
 }
 
-export const ChoresGrouper = (groupBy, chores, filter) => {
+export const ChoresGrouper = (groupBy, chores, filter, direction = 'asc') => {
   if (filter) {
     chores = chores.filter(chore => filter(chore))
   } else {
@@ -226,6 +279,32 @@ export const ChoresGrouper = (groupBy, chores, filter) => {
       }
       break
     }
+    case 'created_date': {
+      var { anytime: createdAnytime, dateGroups: createdDateGroups } =
+        buildPastDateGroups(chores, 'createdAt')
+      groups = [...createdDateGroups]
+      if (createdAnytime.length > 0) {
+        groups.push({
+          name: 'Unknown',
+          content: createdAnytime,
+          color: TASK_COLOR.ANYTIME,
+        })
+      }
+      break
+    }
+    case 'updated_date': {
+      var { anytime: updatedAnytime, dateGroups: updatedDateGroups } =
+        buildPastDateGroups(chores, 'updatedAt')
+      groups = [...updatedDateGroups]
+      if (updatedAnytime.length > 0) {
+        groups.push({
+          name: 'Unknown',
+          content: updatedAnytime,
+          color: TASK_COLOR.ANYTIME,
+        })
+      }
+      break
+    }
     case 'priority':
       groupRaw = {
         p1: [],
@@ -299,10 +378,13 @@ export const ChoresGrouper = (groupBy, chores, filter) => {
           content: groupRaw[key],
         }
       })
-      groups.sort((a, b) => {
-        a.name < b.name ? 1 : -1
-      })
+      groups.sort((a, b) => (a.name < b.name ? -1 : 1))
   }
+
+  if (direction === 'desc' && groupBy !== 'default') {
+    groups = [...groups].reverse()
+  }
+
   return groups
 }
 export const ChoreSorter = (a, b) => {

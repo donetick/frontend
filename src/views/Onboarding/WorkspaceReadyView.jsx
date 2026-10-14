@@ -34,7 +34,7 @@ const WorkspaceReadyView = () => {
   const { data: userProfile } = useUserProfile()
   const [busy, setBusy] = useState(false)
 
-  const enterApp = () => navigate('/chores', { replace: true })
+  const enterApp = () => navigate('/', { replace: true })
 
   /**
    * Shows the configured RevenueCat offering, then continues into the app
@@ -64,7 +64,7 @@ const WorkspaceReadyView = () => {
 
     const { customerInfo } = await Purchases.getCustomerInfo()
     if (customerInfo.entitlements.active['Donetick Plus']) {
-      queryClient.invalidateQueries(['userProfile'])
+      queryClient.invalidateQueries({ queryKey: ['userProfile'] })
     }
   }
 

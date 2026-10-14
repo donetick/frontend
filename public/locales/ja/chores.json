@@ -111,10 +111,12 @@
     "unableChangeAssignee": "",
     "availableToCompleteStarting": "",
     "delegateToSomeoneElse": "",
-    "selectAPerformer": ""
+    "selectAPerformer": "",
+    "notFoundTitle": "タスクが利用できません",
+    "notFoundDescription": "このタスクは削除された可能性があるか、共有が解除されています。"
   },
   "toolbar": {
-    "defaultProject": "",
+    "defaultProject": "Default Project",
     "everyone": "",
     "mine": "",
     "availableToMe": "",
@@ -134,10 +136,14 @@
       "assignee": ""
     },
     "display": "",
-    "displayOptions": ""
+    "displayOptions": "",
+    "moreSaveOptions": "その他の保存オプション",
+    "showCount": "{{count}}件表示",
+    "done": "完了",
+    "savedFilters": "保存済みフィルター"
   },
   "sort": {
-    "assignedToMe": "",
+    "assignedToMe": "Assigned to me",
     "smart": "",
     "createdDate": "",
     "updatedDate": "",
@@ -271,7 +277,9 @@
       "skipTitle": "",
       "skippedTitle": "",
       "skipFailedTitle": ""
-    }
+    },
+    "failAssignTitle": "",
+    "failAssignMessage": ""
   },
   "archived": {
     "restoredTitle": "",
@@ -314,6 +322,7 @@
     "selected_one": "",
     "selected_other": "",
     "selectAllTitle": "",
+    "selectSectionTitle": "",
     "all": "",
     "closeMultiSelect": "",
     "clearMultiSelect": "",
@@ -336,7 +345,7 @@
     "noMatchFilters": "",
     "emptyTitle": "",
     "emptyDescription": "",
-    "backToTasks": ""
+    "backToTasks": "タスクに戻る"
   },
   "edit": {
     "deleteConfirm": ""
@@ -383,7 +392,8 @@
     "labels": "",
     "labelsHint": "",
     "done": "",
-    "noPriority": ""
+    "noPriority": "",
+    "dueDateTitle": ""
   },
   "remind": {
     "title": "",
@@ -401,7 +411,11 @@
     "removeAria": ""
   },
   "assignee": {
-    "anyone": ""
+    "label": "",
+    "anyone": "",
+    "unknown": "",
+    "selectedCount_one": "",
+    "selectedCount_other": ""
   },
   "filterChip": {
     "cancelAll": "",
@@ -544,8 +558,6 @@
   },
   "subTask": {
     "namePlaceholder": "",
-    "deleteShortcut": "",
-    "addPlaceholder": "",
     "untitled": "無題のサブタスク",
     "actions": "サブタスク操作",
     "edit": "編集",
@@ -555,7 +567,9 @@
     "delete": "削除",
     "editTitle": "サブタスクを編集",
     "addTitle": "サブタスクを追加",
-    "addChildTitle": "ネストしたサブタスクを追加"
+    "addChildTitle": "ネストしたサブタスクを追加",
+    "deleteShortcut": "",
+    "addPlaceholder": ""
   },
   "voiceToTask": {
     "title": "",
@@ -605,7 +619,15 @@
     "keepAsAttachment": "",
     "altCaptured": "",
     "altProcessing": "",
-    "taskIdentified": ""
+    "taskIdentified": "",
+    "runningNativeOcr": "Running native OCR…",
+    "identifyingTask": "Identifying task with AI…",
+    "tapToScanHint": "「ドキュメントをスキャン」をタップしてスキャナーを開く",
+    "readingTextProgress": "画像からテキストを読み取り中… {{progress}}%",
+    "dueDate": "期限: {{date}}",
+    "hideRawText": "元のテキストを非表示",
+    "showRawText": "元のテキストを表示",
+    "cameraUnavailableUseUpload": "カメラが利用できません — 代わりにアップロードを使用してください"
   },
   "descriptionPlaceholder": "",
   "notificationTemplate": {
@@ -722,7 +744,7 @@
     "rescheduleFromCompletion": "",
     "rescheduleFromCompletionHelp": "",
     "notifications": "",
-    "notificationsPlanWarning": "",
+    "notificationsPlanWarning": "Task notifications are not available in the Basic plan. Upgrade to Plus to receive reminders when tasks are due or completed.",
     "notifyForTask": "",
     "notifyForTaskHelp": "",
     "notificationSchedule": "",
@@ -753,7 +775,10 @@
     "updatedBy": "",
     "archive": "",
     "unarchive": "",
-    "create": ""
+    "create": "",
+    "alwaysDueHint": "このタスクには期限がなく、いつでも完了できます",
+    "notifyForTaskUnavailable": "トリガー式または常時利用可能なタスクには通知を設定できません",
+    "notificationsFreePlanNote": "あなたのプランでは期限日にリマインダーが届きます。Plusにすると、期限前のリマインダーと期限後のフォローアップが追加されます。"
   },
   "addTask": {
     "title": "",
@@ -766,7 +791,9 @@
     "createCount": "",
     "useTask": "",
     "processing": "",
-    "create": ""
+    "create": "",
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:"
   },
   "repeat": {
     "days": {
@@ -798,11 +825,13 @@
       "monthly": "",
       "yearly": "",
       "adaptive": "",
-      "custom": ""
+      "custom": "",
+      "always": "常時"
     },
     "freqMessage": {
       "adaptive": "",
-      "custom": ""
+      "custom": "",
+      "always": "このタスクには期限がなく、いつでも完了できる状態が続きます。完了してもアーカイブされません。"
     },
     "weekPattern": {
       "every_week": "",
@@ -854,7 +883,7 @@
     "repeatOn": "",
     "triggerLabel": "",
     "triggerHelp": "",
-    "triggerPlanWarning": "",
+    "triggerPlanWarning": "Thing-based triggers are not available in the Basic plan. Upgrade to Plus to automatically trigger tasks when device states change.",
     "previewEvery": "",
     "previewOccurrence": "",
     "defaultTime": "",
@@ -945,6 +974,7 @@
       "2": "",
       "3": ""
     },
+    "anyOf": "",
     "include": "",
     "exclude": "",
     "has": "",
@@ -1028,5 +1058,7 @@
     "today": "",
     "yesterday": "",
     "noteTitle": ""
-  }
+  },
+  "tasksForDate": "{{date}} のタスク",
+  "createSuggestion": "「{{value}}」を作成"
 }

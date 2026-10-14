@@ -62,7 +62,7 @@ function CreateThingModal({ currentThing, isOpen, onClose, onSave }) {
       name,
       type,
       id: currentThing?.id,
-      state: state === '' ? null : state,
+      state: state === '' ? null : String(state),
     })
     onClose()
   }

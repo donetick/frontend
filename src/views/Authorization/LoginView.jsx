@@ -149,7 +149,7 @@ const LoginView = () => {
         Cookies.remove('ca_redirect')
         Navigate(redirectUrl)
       } else {
-        Navigate('/chores')
+        Navigate('/')
       }
     }
   }, [isAuthenticated, user, Navigate])
@@ -218,14 +218,14 @@ const LoginView = () => {
       }
 
       // Refetch user profile after successful login
-      queryClient.refetchQueries(['userProfile'])
+      queryClient.refetchQueries({ queryKey: ['userProfile'] })
 
       const redirectUrl = Cookies.get('ca_redirect')
       if (redirectUrl && redirectUrl !== '/') {
         Cookies.remove('ca_redirect')
         Navigate(redirectUrl)
       } else {
-        Navigate('/chores')
+        Navigate('/')
       }
     } else {
       showError({
@@ -287,7 +287,7 @@ const LoginView = () => {
           })
 
           // Refetch user profile after successful OAuth login
-          queryClient.invalidateQueries(['userProfile'])
+          queryClient.invalidateQueries({ queryKey: ['userProfile'] })
 
           const redirectUrl = Cookies.get('ca_redirect')
           if (redirectUrl) {
@@ -314,14 +314,14 @@ const LoginView = () => {
   }
   const getUserProfileAndNavigateToHome = () => {
     // Refetch user profile after login using React Query
-    queryClient.invalidateQueries(['userProfile']).then(() => {
+    queryClient.invalidateQueries({ queryKey: ['userProfile'] }).then(() => {
       // check if redirect url is set in cookie:
       const redirectUrl = Cookies.get('ca_redirect')
       if (redirectUrl) {
         Cookies.remove('ca_redirect')
         Navigate(redirectUrl)
       } else {
-        Navigate('/chores')
+        Navigate('/')
       }
     })
   }
@@ -339,14 +339,14 @@ const LoginView = () => {
     setMfaSessionToken('')
 
     // Refetch user profile after MFA success
-    queryClient.invalidateQueries(['userProfile'])
+    queryClient.invalidateQueries({ queryKey: ['userProfile'] })
 
     const redirectUrl = Cookies.get('ca_redirect')
     if (redirectUrl) {
       Cookies.remove('ca_redirect')
       Navigate(redirectUrl)
     } else {
-      Navigate('/chores')
+      Navigate('/')
     }
   }
 
@@ -376,6 +376,12 @@ const LoginView = () => {
     const authentikAuthorizeUrl = resource?.identity_provider?.auth_url
     const state = generateRandomState()
 
+    const scopes = resource?.identity_provider?.scopes ?? [
+      'openid',
+      'profile',
+      'email',
+    ]
+
     if (Capacitor.isNativePlatform()) {
       const redirectUri = 'donetick://auth/oauth2'
 
@@ -383,7 +389,7 @@ const LoginView = () => {
         response_type: 'code',
         client_id: resource?.identity_provider?.client_id,
         redirect_uri: redirectUri,
-        scope: 'openid profile email',
+        scope: scopes.join(' '),
         state: state,
       })
 
@@ -410,7 +416,7 @@ const LoginView = () => {
         response_type: 'code',
         client_id: resource?.identity_provider?.client_id,
         redirect_uri: `${window.location.origin}/auth/oauth2`,
-        scope: 'openid profile email',
+        scope: scopes.join(' '),
         state: state,
       })
 

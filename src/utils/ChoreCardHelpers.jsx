@@ -34,7 +34,7 @@ export const getDueDateChipText = (
     nextDay: `[Tomorrow] ${timeFormat}`,
     nextWeek: `dddd ${timeFormat}`,
     lastDay: `[Yesterday] ${timeFormat}`,
-    lastWeek: `[Last] dddd ${timeFormat}`,
+    lastWeek: `dddd ${timeFormat}`,
     sameElse: `MMM D ${timeFormat}`,
   }
 
@@ -45,13 +45,18 @@ export const getDueDateChipText = (
     dueDate.seconds() === 59
   ) {
     if (diff < 0) {
-      // For overdue dates, show calendar format for recent dates
+      // For overdue dates, show calendar format for recent dates (Today/Yesterday);
+      // beyond that, use a calendar-day count ("2 days") instead of a weekday name,
+      // since a weekday alone doesn't convey how overdue the chore is
       const absDiff = Math.abs(diff)
+      if (absDiff <= 24) {
+        return moment(nextDueDate).calendar(null, calendarFormat).split(' ')[0]
+      }
       if (absDiff <= 48) {
-        return moment(nextDueDate)
-          .calendar(null, calendarFormat)
-          .split(' ')[0]
-          .toLowerCase()
+        const daysAgo = moment()
+          .startOf('day')
+          .diff(dueDate.clone().startOf('day'), 'days')
+        return `${daysAgo} day${daysAgo === 1 ? '' : 's'}`
       }
       return dueDate.fromNow()
     }
@@ -115,6 +120,8 @@ export const getRecurrentChipText = chore => {
   }
   if (chore.frequencyType === 'once') {
     return 'Once'
+  } else if (chore.frequencyType === 'always') {
+    return 'Always'
   } else if (chore.frequencyType === 'trigger') {
     return 'Trigger'
   } else if (chore.frequencyType === 'daily') {

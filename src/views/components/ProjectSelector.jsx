@@ -1,4 +1,10 @@
-import { Add, Check, FolderOpen, Settings } from '@mui/icons-material'
+import {
+  Add,
+  Check,
+  FolderOpen,
+  KeyboardArrowDown,
+  Settings,
+} from '@mui/icons-material'
 import {
   Avatar,
   Box,
@@ -16,12 +22,15 @@ import { useNavigate } from 'react-router-dom'
 
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import { usePageShortcutScope } from '../../contexts/KeyboardShortcutScopeContext'
+import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
 import LABEL_COLORS, {
   getTextColorFromBackgroundColor,
 } from '../../utils/Colors'
+import { canCreateProject } from '../../utils/entitlements'
 import { getIconComponent } from '../../utils/ProjectIcons'
 import ProjectModal from '../Modals/Inputs/ProjectModal'
 import { useProjects } from '../Projects/ProjectQueries'
+import { ProjectAccessIcon } from '../Projects/ProjectVisibilityField'
 
 const ProjectSelector = ({
   onProjectSelect,
@@ -30,6 +39,7 @@ const ProjectSelector = ({
 }) => {
   const { t } = useTranslation('projects')
   const { data: projects = [], isLoading } = useProjects()
+  const { isPlus, showPaywall } = usePaywall()
   const navigate = useNavigate()
   // Stays mounted underneath modals (it's part of the page toolbar), so its
   // own Cmd+E must defer to whatever modal currently owns the keyboard —
@@ -80,8 +90,12 @@ const ProjectSelector = ({
   }
 
   const handleAddProjectClick = () => {
-    setIsProjectModalOpen(true)
     handleMenuClose()
+    if (!canCreateProject(projects.length, isPlus)) {
+      showPaywall(PAYWALL_REASON.PROJECT_LIMIT)
+      return
+    }
+    setIsProjectModalOpen(true)
   }
 
   const handleProjectModalSave = project => {
@@ -205,44 +219,71 @@ const ProjectSelector = ({
           color='neutral'
           size='sm'
           sx={{
-            height: 24,
-            borderRadius: 24,
-            minWidth: 'auto',
+            '--Button-gap': '8px',
+            height: 32,
+            minHeight: 32,
+            borderRadius: 'lg',
+            minWidth: '150px',
+            justifyContent: 'flex-start',
+            pl: 0.75,
+            pr: 1.25,
             maxWidth: '200px',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-            backgroundColor: currentProject?.color || LABEL_COLORS[0].value,
+            borderColor: 'divider',
+            bgcolor: 'background.surface',
+            '&:hover': {
+              bgcolor: 'background.level1',
+              borderColor: 'neutral.outlinedHoverBorder',
+            },
           }}
           title={t('selector.currentProjectTitle', {
             project: effectiveSelectedProject,
           })}
         >
           {(() => {
+            const projectColor = currentProject?.color || LABEL_COLORS[0].value
             const IconComponent = getIconComponent(
               currentProject?.icon || 'FolderOpen',
             )
             return (
-              // <Avatar
-              //   size='sm'
-              //   sx={{
-              //     width: 24,
-              //     height: 24,
-              //     backgroundColor: project.color || LABEL_COLORS[0].value,
-              //     display: 'flex',
-              //     alignItems: 'center',
-              //     justifyContent: 'center',
-              //   }}
-              // >
-              <IconComponent
-                sx={{
-                  fontSize: 16,
-                  color: getTextColorFromBackgroundColor(
-                    currentProject?.color || LABEL_COLORS[0].value,
-                  ),
-                }}
-              />
-              // </Avatar>
+              <>
+                <KeyboardArrowDown
+                  sx={{
+                    fontSize: 18,
+                    flexShrink: 0,
+                    color: 'text.tertiary',
+                  }}
+                />
+                <Avatar
+                  size='sm'
+                  sx={{
+                    width: 24,
+                    height: 24,
+                    bgcolor: projectColor,
+                  }}
+                >
+                  <IconComponent
+                    sx={{
+                      fontSize: 14,
+                      color: getTextColorFromBackgroundColor(projectColor),
+                    }}
+                  />
+                </Avatar>
+                <Typography
+                  level='body-xs'
+                  sx={{
+                    marginInlineStart: '8px',
+                    fontWeight: 500,
+                    color: 'text.primary',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {effectiveSelectedProject === 'Default Project'
+                    ? t('chores:toolbar.defaultProject')
+                    : effectiveSelectedProject}
+                </Typography>
+              </>
             )
           })()}
         </Button>
@@ -452,6 +493,14 @@ const ProjectSelector = ({
                   }}
                 >
                   {project.name}
+                  <ProjectAccessIcon
+                    project={project}
+                    sx={{
+                      fontSize: 14,
+                      ml: 0.5,
+                      verticalAlign: 'text-bottom',
+                    }}
+                  />
                 </Typography>
                 {effectiveSelectedProject === project.name && (
                   <Check

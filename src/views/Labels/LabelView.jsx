@@ -2,7 +2,6 @@ import '@meauxt/react-swipeable-list/dist/styles.css'
 
 import {
   SwipeableList,
-  SwipeableListItem,
   SwipeAction,
   TrailingActions,
   Type as ListType,
@@ -25,7 +24,6 @@ import {
   Container,
   IconButton,
   Input,
-  Stack,
   Typography,
 } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
@@ -36,10 +34,14 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import EmptyState from '../../components/common/EmptyState'
 import SortAndFilterMenu from '../../components/common/SortAndFilterMenu'
+import SwipeListItem, {
+  SWIPE_COMMIT_THRESHOLD,
+} from '../../components/common/SwipeListItem'
 import { useUserProfile } from '../../queries/UserQueries'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors'
 import { DeleteLabel } from '../../utils/Fetcher'
-import { getSafeBottomStyles } from '../../utils/SafeAreaUtils'
+import { getSafeBottom, getSafeBottomStyles } from '../../utils/SafeAreaUtils'
+import ScrollHideFab from '../components/ScrollHideFab'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import LabelModal from '../Modals/Inputs/LabelModal'
 import { useLabels } from './LabelQueries'
@@ -273,12 +275,12 @@ const LabelView = () => {
       const updatedLabels = userLabels.filter(label => label.id !== id)
       setUserLabels(updatedLabels)
 
-      queryClient.invalidateQueries('labels')
+      queryClient.invalidateQueries({ queryKey: ['labels'] })
     })
   }
 
   const handleSaveLabel = newOrUpdatedLabel => {
-    queryClient.invalidateQueries('labels')
+    queryClient.invalidateQueries({ queryKey: ['labels'] })
     setModalOpen(false)
     const updatedLabels = userLabels.map(label =>
       label.id === newOrUpdatedLabel.id ? newOrUpdatedLabel : label,
@@ -330,20 +332,6 @@ const LabelView = () => {
 
   return (
     <Container maxWidth='md' sx={{ px: 0 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, p: 2 }}>
-        {/* <EmojiEvents sx={{ fontSize: '2rem', color: '#FFD700' }} /> */}
-        <Stack sx={{ flex: 1 }}>
-          <Typography
-            level='h3'
-            sx={{ fontWeight: 'lg', color: 'text.primary' }}
-          >
-            {t('common:navigation.labels')}
-          </Typography>
-          <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-            {t('blurb')}
-          </Typography>
-        </Stack>
-      </Box>
       {userLabels.length > 0 && (
         <Box
           sx={{ px: 2, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}
@@ -441,9 +429,13 @@ const LabelView = () => {
             }}
           />
         )}
-        <SwipeableList type={ListType.IOS} fullSwipe={false}>
+        <SwipeableList
+          type={ListType.IOS}
+          fullSwipe
+          threshold={SWIPE_COMMIT_THRESHOLD}
+        >
           {filteredLabels.map(label => (
-            <SwipeableListItem
+            <SwipeListItem
               key={label.id}
               onClick={() => navigate(`/labels/${label.id}`)}
               swipeActionOpen={showMoreInfoId === label.id ? 'trailing' : null}
@@ -463,14 +455,17 @@ const LabelView = () => {
                           flexDirection: 'column',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          bgcolor: 'neutral.softBg',
-                          color: 'neutral.700',
+                          bgcolor: 'primary.500',
+                          color: '#fff',
                           px: 3,
                           height: '100%',
                         }}
                       >
-                        <EditIcon sx={{ fontSize: 20 }} />
-                        <Typography level='body-xs' sx={{ mt: 0.5 }}>
+                        <EditIcon sx={{ fontSize: 20, color: 'white' }} />
+                        <Typography
+                          level='body-xs'
+                          sx={{ mt: 0.5, color: 'inherit' }}
+                        >
                           {t('common:edit')}
                         </Typography>
                       </Box>
@@ -482,14 +477,17 @@ const LabelView = () => {
                           flexDirection: 'column',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          bgcolor: 'danger.softBg',
-                          color: 'danger.700',
+                          bgcolor: 'danger.500',
+                          color: '#fff',
                           px: 3,
                           height: '100%',
                         }}
                       >
-                        <DeleteIcon sx={{ fontSize: 20 }} />
-                        <Typography level='body-xs' sx={{ mt: 0.5 }}>
+                        <DeleteIcon sx={{ fontSize: 20, color: 'white' }} />
+                        <Typography
+                          level='body-xs'
+                          sx={{ mt: 0.5, color: 'inherit' }}
+                        >
                           {t('common:delete')}
                         </Typography>
                       </Box>
@@ -509,7 +507,7 @@ const LabelView = () => {
                   }
                 }}
               />
-            </SwipeableListItem>
+            </SwipeListItem>
           ))}
         </SwipeableList>
       </Box>
@@ -523,14 +521,12 @@ const LabelView = () => {
         />
       )}
 
-      <Box
+      <ScrollHideFab
         sx={{
           ...getSafeBottomStyles({ bottom: 0, padding: 16 }),
-          left: 10,
-          display: 'flex',
-          justifyContent: 'flex-end',
-          gap: 2,
-          'z-index': 1000,
+          '@media (max-width: 768px)': {
+            bottom: getSafeBottom(56, 16),
+          },
         }}
       >
         <IconButton
@@ -545,7 +541,7 @@ const LabelView = () => {
         >
           <Add />
         </IconButton>
-      </Box>
+      </ScrollHideFab>
       <ConfirmationModal config={confirmationModel} />
     </Container>
   )

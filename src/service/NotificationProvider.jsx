@@ -1,6 +1,7 @@
 import { CheckCircle, Error, Info, Undo, Warning } from '@mui/icons-material'
 import { Box, Button, Snackbar, Typography } from '@mui/joy'
 import React, { createContext, useContext, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 const NotificationContext = createContext()
 
@@ -12,53 +13,55 @@ export const useError = () => {
   return { showError }
 }
 
-// Notification types configuration with default titles
+// Notification types configuration; defaultTitle holds an i18n key resolved
+// at render time (this object is module-level, so it can't call useTranslation).
 const NOTIFICATION_TYPES = {
   error: {
     color: 'danger',
     icon: <Error color='danger' />,
     autoHideDuration: 6000,
     showDismissButton: true,
-    defaultTitle: 'Error',
+    defaultTitle: 'notification.error',
   },
   success: {
     color: 'success',
     icon: <CheckCircle color='success' />,
     autoHideDuration: 5000,
     showDismissButton: false,
-    defaultTitle: 'Success',
+    defaultTitle: 'notification.success',
   },
   undo: {
     color: 'success',
     icon: <Undo color='success' />,
     autoHideDuration: null,
     showDismissButton: false,
-    defaultTitle: 'Undone Successfully',
+    defaultTitle: 'notification.undoneSuccessfully',
   },
   warning: {
     color: 'warning',
     icon: <Warning color='warning' />,
     autoHideDuration: 4000,
     showDismissButton: false,
-    defaultTitle: 'Warning',
+    defaultTitle: 'notification.warning',
   },
   info: {
     color: 'primary',
     icon: <Info color='primary' />,
     autoHideDuration: 4000,
     showDismissButton: false,
-    defaultTitle: 'Information',
+    defaultTitle: 'notification.information',
   },
   custom: {
     color: 'neutral',
     icon: null,
     autoHideDuration: null,
     showDismissButton: false,
-    defaultTitle: 'Notification',
+    defaultTitle: 'notification.title',
   },
 }
 
 export const NotificationProvider = ({ children }) => {
+  const { t } = useTranslation('common')
   const [notifications, setNotifications] = useState([])
 
   const addNotification = notification => {
@@ -120,7 +123,7 @@ export const NotificationProvider = ({ children }) => {
 
     return {
       type,
-      message: input?.toString() || 'Unknown notification',
+      message: input?.toString() || t('notification.unknown'),
     }
   }
 
@@ -189,7 +192,7 @@ export const NotificationProvider = ({ children }) => {
     const notificationIcon = notification.icon || config.icon
 
     // Determine title and message
-    const title = notification.title || config.defaultTitle
+    const title = notification.title || t(config.defaultTitle)
     const message = notification.message
 
     return (
@@ -209,7 +212,7 @@ export const NotificationProvider = ({ children }) => {
                 removeNotification(notification.id)
               }}
             >
-              Undo
+              {t('notification.undo')}
             </Button>
           ) : config.showDismissButton ? (
             <Button
@@ -217,7 +220,7 @@ export const NotificationProvider = ({ children }) => {
               color={config.color}
               onClick={() => removeNotification(notification.id)}
             >
-              Dismiss
+              {t('notification.dismiss')}
             </Button>
           ) : null
         }
@@ -241,7 +244,7 @@ export const NotificationProvider = ({ children }) => {
           </Box>
         ) : (
           <Typography color={config.color} level='body-md'>
-            {message || title || 'Notification'}
+            {message || title || t('notification.title')}
           </Typography>
         )}
       </Snackbar>

@@ -32,7 +32,6 @@
   "defaultChip": "Default",
   "tasks_one": "{{count}} task",
   "tasks_other": "{{count}} tasks",
-  "shared": "Shared",
   "delete": {
     "title": "Delete Project",
     "message": "Are you sure you want to delete \"{{name}}\"? This will remove the project but keep all tasks (they'll move to the Default Project)."
@@ -67,6 +66,59 @@
     "descriptionLabel": "Description",
     "iconLabel": "Project Icon",
     "selectIcon": "Select Icon",
-    "colorLabel": "Project Color"
+    "colorLabel": "Project Color",
+    "editTitle": "Edit project",
+    "createTitle": "Create new project",
+    "update": "Update",
+    "create": "Create"
+  },
+  "visibility": {
+    "label": "Who can see this project?",
+    "ownerOnly": "Only the owner of this project can change who can see it.",
+    "changeHint": "Changing who can see this project also affects its tasks. You will see exactly what changes before anything is saved.",
+    "private": {
+      "title": "Only me",
+      "description": "Hidden from everyone else in the circle, including admins. Tasks in it are private too."
+    },
+    "members": {
+      "title": "Selected members",
+      "description": "Only you and the people you pick below see the project and all of its tasks.",
+      "pickerTitle": "Share with",
+      "noCandidates": "There is nobody else in your circle yet. Invite people to the circle first.",
+      "emptyHint": "Nobody is selected: for now only you can see the project. You can add people any time.",
+      "hint_one": "Shared with {{count}} person. Removing someone later keeps all tasks and history.",
+      "hint_other": "Shared with {{count}} people. Removing someone later keeps all tasks and history."
+    },
+    "circle": {
+      "title": "Whole circle",
+      "description": "Everyone in the circle sees the project: {{names}}"
+    },
+    "chip": {
+      "private": "Only you",
+      "members_one": "{{count}} member",
+      "members_other": "{{count}} members",
+      "everyone": "Everyone"
+    },
+    "review": {
+      "title": "Check before saving",
+      "back": "Back",
+      "confirm": "Save change",
+      "you": "you",
+      "audienceMembers": "Selected members: {{names}}",
+      "audienceMembersNone": "Selected members: nobody yet",
+      "loseAccess": "Will lose access",
+      "loseAccessHint_one": "They will no longer see the project or its {{count}} task. Devices that already synced remove it at their next sync.",
+      "loseAccessHint_other": "They will no longer see the project or its {{count}} tasks. Devices that already synced remove them at their next sync.",
+      "gainAccess": "Will gain access",
+      "opensToCircle": "Everyone in the circle, including people who join later, will see this project and all of its tasks.",
+      "assignmentChanges_one": "Assignment changes in {{count}} task",
+      "assignmentChanges_other": "Assignment changes in {{count}} tasks",
+      "removedAssignees": "No longer assigned: {{names}}.",
+      "addedAssignees": "Added: {{names}}.",
+      "nowAssigned": "Now responsible: {{name}}.",
+      "nowUnassigned": "Now unassigned.",
+      "keepsHistory": "Tasks, completion history and points stay as they are. If you share the project again later, tasks and history become visible again; removed assignments have to be set again.",
+      "previewFailed": "Could not check the effect of this change. Please try again."
+    }
   }
 }

@@ -46,7 +46,9 @@
     "pointsEarned": "Points gagnés",
     "points_one": "{{count}} point",
     "points_other": "{{count}} points",
-    "note": "Note"
+    "note": "Note",
+    "reason": "Motif",
+    "notes": "Notes"
   },
   "charts": {
     "noData": "Aucune donnée disponible",
@@ -95,18 +97,37 @@
     "completedAt": "Terminée le"
   },
   "period": {
-    "days_one": "{{count}} jour",
+    "days_one": "{{count}} jour",
     "days_other": "{{count}} jours",
     "allTime": "Toute la période"
   },
+  "search": {
+    "placeholder": "Rechercher dans l'historique...",
+    "clear": "Effacer la recherche"
+  },
+  "sort": {
+    "date": "Date de fin",
+    "updatedDate": "Date de mise à jour",
+    "performer": "Terminée par",
+    "status": "Statut",
+    "points": "Points"
+  },
   "activities": {
     "title": "Activités",
+    "subtitle": "Consultez les tâches terminées, passées ou manquées",
     "emptyTitle": "Aucune activité sur cette période",
     "emptyDescriptionEveryone": "Personne n'a terminé de tâche dans votre cercle {{period}}. Essayez une période plus longue ou un autre membre.",
     "emptyDescriptionMember": "Aucune tâche terminée par {{name}} {{period}}. Essayez une période plus longue ou un autre membre.",
     "periodSoFar": "jusqu'à présent",
     "periodLastDays": "au cours des {{count}} derniers jours",
-    "unknownMember": "ce membre"
+    "unknownMember": "ce membre",
+    "searchPlaceholder": "Rechercher dans les activités...",
+    "sort": {
+      "date": "Date",
+      "name": "Nom de la tâche",
+      "status": "Statut",
+      "points": "Points"
+    }
   },
   "title": {
     "summary": "Récapitulatif des tâches",
@@ -154,10 +175,16 @@
     "completedMost": "Record de tâches terminées",
     "unknown": "Inconnu",
     "membersInvolved": "Membres impliqués",
-    "membersSuffix": "Membres : {{count}}",
+    "membersSuffix": "Membres : {{count}}",
     "lastCompleted": "Dernière tâche terminée par"
   },
   "noteViewer": {
     "updatedAt": "Mise à jour le {{date}}"
+  },
+  "plan": {
+    "lockedTitle": "L'historique plus ancien est conservé pendant {{days}} jours sur Basic",
+    "allLockedTitle": "L'historique de cette tâche a plus de {{days}} jours",
+    "lockedDescription": "Les entrées de plus de {{days}} jours peuvent être supprimées définitivement. Passez à Plus pour conserver votre historique complet.",
+    "unlock": "Passer à Plus"
   }
 }
