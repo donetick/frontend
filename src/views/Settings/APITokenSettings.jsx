@@ -101,7 +101,11 @@ const APITokenSettings = () => {
         )}
 
         {newToken && (
-          <Alert color='warning' variant='soft' sx={{ flexDirection: 'column', alignItems: 'stretch' }}>
+          <Alert
+            color='warning'
+            variant='soft'
+            sx={{ flexDirection: 'column', alignItems: 'stretch' }}
+          >
             <Typography level='title-sm'>
               {t('apiTokens.tokenCreatedTitle')}
             </Typography>
