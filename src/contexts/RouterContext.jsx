@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom'
 
 import App from '@/App'
 import ChoreEdit from '@/views/ChoreEdit/ChoreEdit'
@@ -282,6 +282,10 @@ const Router = createBrowserRouter([
       {
         path: 'labels/:labelId',
         element: <LabelDetailView />,
+      },
+      {
+        path: 'rewards/',
+        element: <Navigate to='/points?tab=rewards' replace />,
       },
       {
         path: 'projects/',
