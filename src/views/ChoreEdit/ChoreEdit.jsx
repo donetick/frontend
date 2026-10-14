@@ -2424,25 +2424,27 @@ const ChoreEdit = () => {
                 <FormControl sx={{ mt: 1 }}>
                   <Checkbox
                     onChange={e => {
-                      setIsNotificable(e.target.checked)
-                      if (!e.target.checked) {
+                      const enabled = e.target.checked
+                      setIsNotificable(enabled)
+                      if (!enabled) {
                         setNotificationMetadata({})
+                      } else if (!notificationMetadata?.templates?.length) {
+                        // Every plan includes one reminder on the due date.
+                        setNotificationMetadata({
+                          ...notificationMetadata,
+                          templates: [{ value: 0, unit: 'm' }],
+                        })
                       }
                     }}
                     defaultChecked={isNotificable}
                     checked={isNotificable}
-                    disabled={
-                      !isPlusAccount(userProfile) ||
-                      NOTIFICATION_FORBIDDEN_TYPE.includes(frequencyType)
-                    }
+                    disabled={NOTIFICATION_FORBIDDEN_TYPE.includes(
+                      frequencyType,
+                    )}
                     overlay
                     label={t('choreEdit.notifyForTask')}
                   />
-                  <FormHelperText
-                    sx={{
-                      opacity: !isPlusAccount(userProfile) ? 0.5 : 1,
-                    }}
-                  >
+                  <FormHelperText>
                     {NOTIFICATION_FORBIDDEN_TYPE.includes(frequencyType)
                       ? t('choreEdit.notifyForTaskUnavailable')
                       : t('choreEdit.notifyForTaskHelp')}
