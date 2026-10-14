@@ -68,6 +68,7 @@ import DurationInput from '../../components/common/DurationInput'
 import EmptyState from '../../components/common/EmptyState'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import NotificationTemplate from '../../components/NotificationTemplate.jsx'
+import NumberInput from '../../components/common/NumberInput'
 import { usePageShortcutScope } from '../../contexts/KeyboardShortcutScopeContext'
 import { usePaywall } from '../../contexts/PaywallContext'
 import { useDocumentScanner } from '../../hooks/useDocumentScanner'
@@ -1650,39 +1651,32 @@ const ChoreEdit = () => {
                       variant='soft'
                       color='neutral'
                       startDecorator={<Check sx={{ fontSize: 14 }} />}
+                      sx={{ minHeight: 32, px: '0.75rem' }}
                     >
                       {t('taskEditor.savedDefault')}
                     </Chip>
                   )}
                   {showSaveAssigneeDefault && (
-                    <Box sx={{ display: 'flex', justifyContent: 'start' }}>
-                      <Button
-                        variant='plain'
-                        size='sm'
-                        color='neutral'
-                        startDecorator={<Save sx={{ fontSize: 16 }} />}
-                        sx={{
-                          borderRadius: 6,
-                          fontWeight: 500,
-                          '&:hover': {
-                            background: 'neutral.softHoverBg',
-                          },
-                        }}
-                        onClick={() => {
-                          localStorage.setItem(
-                            'defaultAnyoneSetting',
-                            JSON.stringify(anyone),
-                          )
-                          localStorage.setItem(
-                            'defaultAssigneeSetting',
-                            JSON.stringify(assignableTo),
-                          )
-                          setShowSaveAssigneeDefault(false)
-                        }}
-                      >
-                        {t('taskEditor.useAsDefault')}
-                      </Button>
-                    </Box>
+                    <Chip
+                      size='sm'
+                      variant='soft'
+                      color='neutral'
+                      startDecorator={<Save sx={{ fontSize: 14 }} />}
+                      sx={{ minHeight: 32, px: '0.75rem' }}
+                      onClick={() => {
+                        localStorage.setItem(
+                          'defaultAnyoneSetting',
+                          JSON.stringify(anyone),
+                        )
+                        localStorage.setItem(
+                          'defaultAssigneeSetting',
+                          JSON.stringify(assignableTo),
+                        )
+                        setShowSaveAssigneeDefault(false)
+                      }}
+                    >
+                      {t('taskEditor.useAsDefault')}
+                    </Chip>
                   )}
                 </Box>
                 <Typography
@@ -1897,7 +1891,7 @@ const ChoreEdit = () => {
               title={t('taskEditor.descriptionAttachments')}
               icon={DescriptionOutlined}
               section='description'
-              collapsible={!singlePageEditor}
+              collapsible
               defaultOpen
               error={errors.description}
               summary={
@@ -2154,7 +2148,7 @@ const ChoreEdit = () => {
               title={t('taskEditor.organization')}
               icon={LabelOutlined}
               section='organization'
-              collapsible={!singlePageEditor}
+              collapsible
               summary={[
                 priority
                   ? Priorities.find(
@@ -2375,7 +2369,7 @@ const ChoreEdit = () => {
                 title={t('taskEditor.subtasks')}
                 icon={Checklist}
                 section='subtasks'
-                collapsible={!singlePageEditor}
+                collapsible
                 defaultOpen={Boolean(subTasks?.length)}
                 summary={
                   subTasks?.length
@@ -2420,7 +2414,7 @@ const ChoreEdit = () => {
               title={t('taskEditor.onCompletion')}
               icon={BoltOutlined}
               section='actions'
-              collapsible={!singlePageEditor}
+              collapsible
               defaultOpen={
                 points >= 0 || completionActions.length > 0 || requireApproval
               }
@@ -2453,22 +2447,17 @@ const ChoreEdit = () => {
               title={t('choreEdit.notifications')}
               icon={NotificationsOutlined}
               section='notifications'
-              collapsible={!singlePageEditor}
+              collapsible
               defaultOpen={isNotificable}
               summary={isNotificable ? 'Reminders enabled' : 'Reminders off'}
             >
               <Box mb={2}>
-                {!isPlusAccount(userProfile) && (
-                  <Typography level='body-sm' color='warning' sx={{ mb: 1 }}>
-                    {t('taskEditor.taskNotificationsAreNotAvailableInThe')}
-                  </Typography>
-                )}
-
                 <FormControl sx={{ mt: 1 }}>
                   <Checkbox
                     onChange={e => {
                       const enabled = e.target.checked
                       setIsNotificable(enabled)
+                      setShowSaveNotificationDefault(true)
                       if (!enabled) {
                         setNotificationMetadata({})
                       } else if (!notificationMetadata?.templates?.length) {
@@ -2493,6 +2482,32 @@ const ChoreEdit = () => {
                       : t('choreEdit.notifyForTaskHelp')}
                   </FormHelperText>
                 </FormControl>
+                {showSaveNotificationDefault && (
+                  <Box sx={{ mt: 1, display: 'flex', justifyContent: 'start' }}>
+                    <Button
+                      variant='outlined'
+                      size='sm'
+                      color='neutral'
+                      startDecorator={<Save />}
+                      sx={{
+                        borderRadius: 6,
+                        fontWeight: 500,
+                        '&:hover': {
+                          background: 'neutral.softHoverBg',
+                        },
+                      }}
+                      onClick={() => {
+                        localStorage.setItem(
+                          'defaultNotificationSetting',
+                          JSON.stringify(isNotificable),
+                        )
+                        setShowSaveNotificationDefault(false)
+                      }}
+                    >
+                      {t('taskEditor.useAsDefault')}
+                    </Button>
+                  </Box>
+                )}
               </Box>
 
               {isNotificable &&
@@ -2568,13 +2583,6 @@ const ChoreEdit = () => {
                               : false
                           }
                           label={t('choreEdit.specificGroup')}
-                          endDecorator={
-                            isPlusAccount(userProfile) ? null : (
-                              <LockOutlined
-                                sx={{ fontSize: 14, opacity: 0.6 }}
-                              />
-                            )
-                          }
                         />
                         <FormHelperText>
                           {t('choreEdit.specificGroupHelp')}
@@ -2812,7 +2820,7 @@ const ChoreEdit = () => {
               icon={InfoOutlined}
               section='metadata'
               summary={t('taskEditor.whoCreatedAndLastEditedThisTask')}
-              collapsible={!singlePageEditor}
+              collapsible
             >
               <Sheet
                 sx={{
