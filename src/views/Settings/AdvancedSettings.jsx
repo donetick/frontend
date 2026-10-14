@@ -13,6 +13,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import RealTimeSettings from '../../components/RealTimeSettings'
+import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
 import { useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { GetUserCircle, PutWebhookURL } from '../../utils/Fetcher'
@@ -31,6 +32,7 @@ import SettingsLayout from './SettingsLayout'
 const AdvancedSettings = () => {
   const { t } = useTranslation('settings')
   const { data: userProfile } = useUserProfile()
+  const { showPaywall } = usePaywall()
   const queryClient = useQueryClient()
   const { showNotification } = useNotification()
 
@@ -179,15 +181,14 @@ const AdvancedSettings = () => {
             <Typography level='body-md' mt={-1}>
               {t('advanced.webhookDescription')}
             </Typography>
-            {!isPlusAccount(userProfile) && (
-              <Typography level='body-sm' color='warning' sx={{ mt: 1 }}>
-                {t('advanced.webhookPlusNotice')}
-              </Typography>
-            )}
             <FormControl sx={{ mt: 1 }}>
               <Checkbox
                 checked={webhookURL !== null}
                 onClick={() => {
+                  if (!isPlusAccount(userProfile)) {
+                    showPaywall(PAYWALL_REASON.WEBHOOKS)
+                    return
+                  }
                   if (webhookURL === null) {
                     setWebhookURL('')
                   } else {
@@ -196,21 +197,9 @@ const AdvancedSettings = () => {
                 }}
                 variant='soft'
                 label={t('advanced.webhookToggle')}
-                disabled={!isPlusAccount(userProfile)}
                 overlay
               />
-              <FormHelperText
-                sx={{
-                  opacity: !isPlusAccount(userProfile) ? 0.5 : 1,
-                }}
-              >
-                {t('advanced.webhookHelper')}{' '}
-                {userProfile && !isPlusAccount(userProfile) && (
-                  <Chip variant='soft' color='warning'>
-                    {t('common.plusFeature')}
-                  </Chip>
-                )}
-              </FormHelperText>
+              <FormHelperText>{t('advanced.webhookHelper')}</FormHelperText>
             </FormControl>
 
             {webhookURL !== null && (
@@ -250,7 +239,6 @@ const AdvancedSettings = () => {
                       }
                     })
                   }}
-                  disabled={!isPlusAccount(userProfile)}
                 >
                   {t('common.save')}
                 </Button>

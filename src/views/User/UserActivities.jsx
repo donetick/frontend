@@ -7,7 +7,6 @@ import {
   EventBusy,
   EventNote,
   HourglassEmpty,
-  LockOutlined,
   Person,
   Redo,
   RunningWithErrors,
@@ -481,12 +480,6 @@ const UserActivites = () => {
   const { t } = useTranslation('history')
   const { data: userProfile } = useUserProfile()
   const { isPlus, showPaywall } = usePaywall()
-  // Memoized so `filterDefs` below isn't rebuilt on every render.
-  const historyLockIcon = useMemo(
-    () => (isPlus ? undefined : <LockOutlined sx={{ fontSize: 14 }} />),
-    [isPlus],
-  )
-
   const [tabValue, setTabValue] = React.useState(7)
   const [selectedHistory, setSelectedHistory] = React.useState([])
   const [enrichedHistory, setEnrichedHistory] = React.useState([])
@@ -710,16 +703,8 @@ const UserActivites = () => {
         options: [
           { value: 7, label: t('period.days', { count: 7 }) },
           { value: 30, label: t('period.days', { count: 30 }) },
-          {
-            value: 90,
-            label: t('period.days', { count: 90 }),
-            icon: historyLockIcon,
-          },
-          {
-            value: 365,
-            label: t('period.allTime'),
-            icon: historyLockIcon,
-          },
+          { value: 90, label: t('period.days', { count: 90 }) },
+          { value: 365, label: t('period.allTime') },
         ],
       },
       {
@@ -735,7 +720,7 @@ const UserActivites = () => {
       },
       ...clientFilterDefs,
     ],
-    [circleUsers, clientFilterDefs, historyLockIcon, t],
+    [circleUsers, clientFilterDefs, t],
   )
 
   // Merge server-driven and client-driven active filter states for the bar
@@ -1220,9 +1205,6 @@ const UserActivites = () => {
                 }}
               >
                 {period.label}
-                {period.plus && !isPlus && (
-                  <LockOutlined sx={{ fontSize: 13, ml: 0.5, opacity: 0.55 }} />
-                )}
               </Tab>
             ))}
           </TabList>

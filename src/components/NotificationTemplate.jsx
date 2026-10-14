@@ -2,7 +2,6 @@ import { Save } from '@mui/icons-material'
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
 import InfoIcon from '@mui/icons-material/Info'
-import LockOutlined from '@mui/icons-material/LockOutlined'
 import NotificationsOutlined from '@mui/icons-material/NotificationsOutlined'
 import Alert from '@mui/joy/Alert'
 import Box from '@mui/joy/Box'
@@ -77,10 +76,6 @@ const NotificationTemplate = ({
     showPaywall(PAYWALL_REASON.ADVANCED_REMINDERS)
     return false
   }, [isPlus, showPaywall])
-
-  const plusHint = isPlus ? null : (
-    <LockOutlined sx={{ fontSize: 14, opacity: 0.65 }} />
-  )
 
   const commitNotifications = updated => {
     setNotifications(updated)
@@ -289,7 +284,6 @@ const NotificationTemplate = ({
                           key={option}
                           value={option}
                           disabled={option === 'ondue' && hasOnDueElsewhere}
-                          endDecorator={option === 'ondue' ? null : plusHint}
                         >
                           {t(`notificationTemplate.timing.${option}`)}
                         </Option>
@@ -392,7 +386,6 @@ const NotificationTemplate = ({
           onClick={() => addSmartNotification('reminder')}
           disabled={hasReachedLimit}
           startDecorator={<AddIcon />}
-          endDecorator={plusHint}
           size='sm'
           variant='outlined'
           color='neutral'
@@ -403,7 +396,6 @@ const NotificationTemplate = ({
           onClick={() => addSmartNotification('followup')}
           disabled={hasReachedLimit}
           startDecorator={<AddIcon />}
-          endDecorator={plusHint}
           size='sm'
           variant='outlined'
           color='neutral'

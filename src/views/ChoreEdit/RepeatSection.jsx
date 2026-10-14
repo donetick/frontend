@@ -1,4 +1,3 @@
-import { LockOutlined } from '@mui/icons-material'
 import {
   Box,
   Button,
@@ -544,12 +543,7 @@ const RepeatSection = ({
         >
           <Option value='once'>{t('taskEditor.oneTimeTask')}</Option>
           <Option value='repeat'>{t('taskEditor.repeatingTask')}</Option>
-          <Option value='trigger'>
-            {t('taskEditor.triggeredByAThing')}
-            {!isPlusAccount(userProfile) && (
-              <LockOutlined sx={{ fontSize: 14, opacity: 0.6 }} />
-            )}
-          </Option>
+          <Option value='trigger'>{t('taskEditor.triggeredByAThing')}</Option>
           {frequencyType === 'always' && (
             <Option value='always'>{t('taskEditor.alwaysAvailable')}</Option>
           )}

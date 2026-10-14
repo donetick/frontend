@@ -26,7 +26,6 @@ import {
   CheckBoxOutlineBlank,
   DisplaySettings,
   FilterList,
-  LockOutlined,
   Save,
   Sort,
   Tune,
@@ -884,11 +883,7 @@ const ChoreToolbar = ({
                       {t('toolbar.saveFilter')}
                     </MenuItem>
                     <MenuItem onClick={startSavingNewFilter}>
-                      {canSaveNewFilter ? (
-                        <Save sx={{ fontSize: 16, mr: 1 }} />
-                      ) : (
-                        <LockOutlined sx={{ fontSize: 16, mr: 1 }} />
-                      )}
+                      <Save sx={{ fontSize: 16, mr: 1 }} />
                       {t('toolbar.saveAsNew')}
                     </MenuItem>
                   </Menu>

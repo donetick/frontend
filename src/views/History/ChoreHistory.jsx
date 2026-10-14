@@ -18,7 +18,6 @@ import {
   Group,
   History,
   HourglassEmpty,
-  LockOutlined,
   Person,
   Redo,
   RunningWithErrors,
@@ -441,7 +440,7 @@ const ChoreHistory = () => {
       <Container maxWidth='md'>
         <EmptyState
           fullHeight
-          icon={<LockOutlined />}
+          icon={<History />}
           title={t('plan.allLockedTitle', { days: FREE_HISTORY_DAYS })}
           description={t('plan.lockedDescription', {
             days: FREE_HISTORY_DAYS,
@@ -787,7 +786,7 @@ const ChoreHistory = () => {
               gap: 1.5,
             }}
           >
-            <LockOutlined sx={{ opacity: 0.6, flexShrink: 0 }} />
+            <History sx={{ opacity: 0.6, flexShrink: 0 }} />
             <Box sx={{ flex: 1, minWidth: 0 }}>
               <Typography level='title-sm'>
                 {t('plan.lockedTitle', { days: FREE_HISTORY_DAYS })}

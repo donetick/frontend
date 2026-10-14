@@ -2,7 +2,6 @@ import {
   AssignmentTurnedInRounded,
   EmojiEventsRounded,
   KeyboardArrowDownRounded,
-  LockOutlined,
   MilitaryTechRounded,
   RedeemRounded,
   TollRounded,
@@ -429,9 +428,6 @@ const UserPoints = () => {
                 }}
               >
                 {t(item.shortKey)}
-                {item.plus && !isPlus && (
-                  <LockOutlined sx={{ fontSize: 13, ml: 0.5, opacity: 0.55 }} />
-                )}
               </Tab>
             ))}
           </TabList>

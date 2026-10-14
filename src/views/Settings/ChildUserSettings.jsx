@@ -5,7 +5,6 @@ import {
   LockResetRounded,
   PeopleOutlineRounded,
   PersonAddRounded,
-  WorkspacePremiumRounded,
 } from '@mui/icons-material'
 import {
   Avatar,
@@ -23,6 +22,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { useLocalization } from '../../contexts/LocalizationContext'
+import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
 import useConfirmationModal from '../../hooks/useConfirmationModal'
 import { useChildUsers, useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
@@ -48,6 +48,7 @@ const ChildUserSettings = () => {
   const { t } = useTranslation('settings')
   const { fmt } = useLocalization()
   const { data: userProfile } = useUserProfile()
+  const { showPaywall } = usePaywall()
   const { data: childUsers, isLoading, refetch } = useChildUsers()
   const { showNotification } = useNotification()
   const queryClient = useQueryClient()
@@ -59,6 +60,14 @@ const ChildUserSettings = () => {
   const [deletingChildId, setDeletingChildId] = useState(null)
 
   const isParentUser = userProfile?.userType === 0 && !userProfile?.parentUserId
+
+  const openCreateModal = () => {
+    if (!isPlusAccount(userProfile)) {
+      showPaywall(PAYWALL_REASON.CHILD_ACCOUNTS)
+      return
+    }
+    setCreateModalOpen(true)
+  }
 
   const refreshChildren = async () => {
     await queryClient.invalidateQueries({ queryKey: ['childUsers'] })
@@ -205,32 +214,12 @@ const ChildUserSettings = () => {
           </Typography>
           <Button
             startDecorator={<PersonAddRounded />}
-            onClick={() => setCreateModalOpen(true)}
+            onClick={openCreateModal}
             sx={{ flexShrink: 0, width: { xs: '100%', sm: 'auto' } }}
           >
             {t('subaccounts.add')}
           </Button>
         </Box>
-
-        {!isPlusAccount(userProfile) && (
-          <Sheet
-            variant='soft'
-            color='warning'
-            sx={{
-              alignItems: 'flex-start',
-              borderRadius: 'lg',
-              display: 'flex',
-              gap: 1.25,
-              mb: 2.5,
-              p: 1.5,
-            }}
-          >
-            <WorkspacePremiumRounded sx={{ flex: '0 0 auto' }} />
-            <Typography level='body-sm'>
-              {t('subaccounts.freePlanNotice')}
-            </Typography>
-          </Sheet>
-        )}
 
         <Box component='section'>
           <Typography
@@ -295,7 +284,7 @@ const ChildUserSettings = () => {
               </Typography>
               <Button
                 startDecorator={<PersonAddRounded />}
-                onClick={() => setCreateModalOpen(true)}
+                onClick={openCreateModal}
               >
                 {t('subaccounts.addFirst')}
               </Button>

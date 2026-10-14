@@ -239,9 +239,9 @@ const ProfileContent = ({ refetchUserProfile, userProfile }) => {
           </Box>
         </Sheet>
 
-        <Sheet sx={{ ...surfaceSx, p: { xs: 2, sm: 2.5 } }}>
-          <Box sx={{ display: 'grid', gap: 2.25 }}>
-            <FormControl required>
+        <Sheet sx={{ ...surfaceSx, overflow: 'hidden', p: { xs: 2, sm: 2.5 } }}>
+          <Box sx={{ display: 'grid', gap: 2.25, minWidth: 0 }}>
+            <FormControl required sx={{ minWidth: 0 }}>
               <FormLabel>{t('profile.displayName')}</FormLabel>
               <Input
                 size='lg'
@@ -249,13 +249,15 @@ const ProfileContent = ({ refetchUserProfile, userProfile }) => {
                 onChange={event => setDisplayName(event.target.value)}
                 placeholder={t('profile.displayNamePlaceholder')}
                 startDecorator={<PersonOutlineRounded />}
+                sx={{ width: '100%' }}
               />
             </FormControl>
 
-            <FormControl required>
+            <FormControl required sx={{ minWidth: 0 }}>
               <FormLabel>{t('profile.timezone')}</FormLabel>
               <Autocomplete
                 size='lg'
+                sx={{ width: '100%' }}
                 value={timezone}
                 onChange={(event, newValue) => setTimezone(newValue)}
                 options={timezones}

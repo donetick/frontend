@@ -22,6 +22,10 @@ export const PAYWALL_REASON = {
   QUICK_FILTER_LIMIT: 'quick_filter_limit',
   FILE_UPLOAD: 'file_upload',
   CALENDAR_SYNC: 'calendar_sync',
+  REALTIME_SYNC: 'realtime_sync',
+  WEBHOOKS: 'webhooks',
+  API_TOKENS: 'api_tokens',
+  CHILD_ACCOUNTS: 'child_accounts',
 }
 
 const PaywallContext = createContext(null)
