@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom'
 
 import App from '@/App'
 import ChoreEdit from '@/views/ChoreEdit/ChoreEdit'
@@ -41,7 +41,6 @@ import PaymentCancelledView from '../views/Payments/PaymentFailView'
 import PaymentSuccessView from '../views/Payments/PaymentSuccessView'
 import PrivacyPolicyView from '../views/PrivacyPolicy/PrivacyPolicyView'
 import ProjectView from '../views/Projects/ProjectView'
-import RewardsView from '../views/Rewards/RewardsView'
 import APITokenSettings from '../views/Settings/APITokenSettings'
 import CalendarSettings from '../views/Settings/CalendarSettings'
 import HomeSectionsSettings from '../views/Settings/HomeSectionsSettings'
@@ -286,7 +285,7 @@ const Router = createBrowserRouter([
       },
       {
         path: 'rewards/',
-        element: <RewardsView />,
+        element: <Navigate to='/points?tab=rewards' replace />,
       },
       {
         path: 'projects/',

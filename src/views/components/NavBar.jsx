@@ -10,7 +10,6 @@ import {
   Logout,
   MenuOpenRounded,
   MenuRounded,
-  Redeem,
   ReportProblem,
   SearchRounded,
   SettingsOutlined,
@@ -176,11 +175,6 @@ const NavBar = () => {
       to: '/points',
       label: t('navigation.points'),
       icon: <Toll />,
-    },
-    {
-      to: 'rewards',
-      label: t('navigation.rewards'),
-      icon: <Redeem />,
     },
     {
       to: '/settings',

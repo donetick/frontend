@@ -4,6 +4,9 @@
   "notEnoughPoints": "Not enough points",
   "approve": "Approve",
   "reject": "Reject",
+  "actions": {
+    "menu": "Actions for {{name}}"
+  },
   "pointsCost_one": "{{count}} point",
   "pointsCost_other": "{{count}} points",
   "tabs": {
@@ -42,6 +45,10 @@
     "addReward": "Add Reward"
   },
   "view": {
+    "subtitle": "Use the points you earn to choose something special.",
+    "availableBalance": "Available balance",
+    "pointsLabel": "points",
+    "rewardFallbackDescription": "A little something to look forward to.",
     "emptyTitle": "No rewards yet",
     "emptyDescription": "Add a reward — like movie night or a treat — that circle members can redeem their points for.",
     "createReward": "Create a reward"
