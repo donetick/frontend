@@ -147,4 +147,60 @@ test.describe('ChoreEdit', () => {
     expect(updated.assignees ?? []).toHaveLength(0)
     expect(updated.assignedTo).toBeFalsy()
   })
+
+  test('reopening a chore after saving shows the edited subtasks without a reload', async ({
+    page,
+  }) => {
+    const choreName = `E2E Subtask Chore ${Date.now()}`
+    // Due later today so it lands in the expanded "Today" group of the list
+    const dueToday = new Date()
+    dueToday.setHours(23, 0, 0, 0)
+
+    // ── Create a chore with two subtasks via the API ────────────────────────
+    await page.goto('/chores')
+    const token = await page.evaluate(() => localStorage.getItem('token'))
+    const createRes = await fetch(`${API_URL}/api/v1/chores/`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: choreName,
+        frequencyType: 'once',
+        dueDate: dueToday.toISOString(),
+        nextDueDate: dueToday.toISOString(),
+        assignStrategy: 'random',
+        isActive: true,
+        subTasks: [
+          { id: -1, name: 'Original first', orderId: 0 },
+          { id: -2, name: 'Original second', orderId: 1 },
+        ],
+      }),
+    })
+    expect(createRes.ok).toBe(true)
+    const { res: choreId } = await createRes.json()
+
+    // ── Open the chore and its edit page, caching both in the app ──────────
+    await page.goto(`/chores/${choreId}`)
+    await expect(page.getByText('Original second')).toBeVisible()
+    await page.getByRole('button', { name: 'Edit' }).first().click()
+    await page.waitForURL(`**/chores/${choreId}/edit`)
+
+    // ── Rename a subtask and save ───────────────────────────────────────────
+    await page.locator('input[value="Original second"]').fill('Edited second')
+    await page.getByRole('button', { name: 'Save' }).click()
+    await page.waitForURL('**/chores', { timeout: 15_000 })
+
+    // ── Reopen through in-app navigation (no reload) ───────────────────────
+    await page.getByText(choreName).click()
+    await page.waitForURL(`**/chores/${choreId}`)
+    await expect(page.getByText('Edited second')).toBeVisible()
+    await expect(page.getByText('Original second')).toHaveCount(0)
+
+    await page.getByRole('button', { name: 'Edit' }).first().click()
+    await page.waitForURL(`**/chores/${choreId}/edit`)
+    await expect(page.locator('input[value="Edited second"]')).toBeVisible()
+    await expect(page.locator('input[value="Original second"]')).toHaveCount(0)
+  })
 })
