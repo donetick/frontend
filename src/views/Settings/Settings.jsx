@@ -23,6 +23,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
+import { track } from '../../analytics'
 import RealTimeSettings from '../../components/RealTimeSettings'
 import SubscriptionModal from '../../components/SubscriptionModal'
 import { useLocalization } from '../../contexts/LocalizationContext'
@@ -733,9 +734,10 @@ const Settings = () => {
                     await import('@revenuecat/purchases-capacitor-ui')
 
                   const offering = await Purchases.getOfferings()
-                  await RevenueCatUI.presentPaywall({
+                  const { result } = await RevenueCatUI.presentPaywall({
                     offering: offering.current,
                   })
+                  track('settings_paywall_result', { result })
 
                   // Check if user now has entitlement after paywall interaction
                   const { customerInfo } = await Purchases.getCustomerInfo()

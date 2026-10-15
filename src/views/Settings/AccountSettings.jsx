@@ -11,6 +11,7 @@ import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { track } from '../../analytics'
 import SubscriptionModal from '../../components/SubscriptionModal'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useUserProfile } from '../../queries/UserQueries'
@@ -115,7 +116,10 @@ const AccountSettings = () => {
       const { RevenueCatUI } =
         await import('@revenuecat/purchases-capacitor-ui')
       const offering = await Purchases.getOfferings()
-      await RevenueCatUI.presentPaywall({ offering: offering.current })
+      const { result } = await RevenueCatUI.presentPaywall({
+        offering: offering.current,
+      })
+      track('account_paywall_result', { result })
 
       const { customerInfo } = await Purchases.getCustomerInfo()
       if (customerInfo.entitlements.active['Donetick Plus']) {
