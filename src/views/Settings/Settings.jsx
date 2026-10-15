@@ -930,6 +930,7 @@ const Settings = () => {
 
       <SubscriptionModal
         open={subscriptionModal}
+        invoker={NATIVE_PAYWALL_INVOKER.SETTINGS}
         onClose={() => setSubscriptionModal(false)}
       />
 

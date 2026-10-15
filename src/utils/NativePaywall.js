@@ -58,6 +58,10 @@ export const presentNativePaywall = async ({ appUserID, invoker }) => {
   if (!isNativePurchasePlatform()) return null
 
   const paywallInvoker = invoker ?? 'unknown'
+  track('paywall_shown', {
+    provider: 'revenuecat',
+    invoker: paywallInvoker,
+  })
 
   try {
     const Purchases = await ensureRevenueCatConfigured(appUserID)

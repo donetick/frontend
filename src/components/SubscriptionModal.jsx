@@ -1,8 +1,10 @@
 import { Check, Star } from '@mui/icons-material'
 import { Box, Card, Chip, Divider, Radio, Typography } from '@mui/joy'
-import { useState } from 'react'
+import PropTypes from 'prop-types'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { track } from '../analytics'
 import { useNotification } from '../service/NotificationProvider'
 import {
   FREE_PROJECT_LIMIT,
@@ -25,11 +27,19 @@ const REASON_KEYS = {
   calendar_sync: 'subscription.reasonCalendarSync',
 }
 
-const SubscriptionModal = ({ onClose, open, reason }) => {
+const SubscriptionModal = ({ invoker, onClose, open, reason }) => {
   const { t } = useTranslation('settings')
   const [selectedPlan, setSelectedPlan] = useState('yearly')
   const [isLoading, setIsLoading] = useState(false)
   const { showError } = useNotification()
+
+  useEffect(() => {
+    if (!open) return
+    track('paywall_shown', {
+      provider: 'stripe',
+      invoker: invoker ?? reason ?? 'unknown',
+    })
+  }, [invoker, open, reason])
 
   const plans = {
     yearly: {
@@ -251,6 +261,13 @@ const SubscriptionModal = ({ onClose, open, reason }) => {
       </Typography>
     </AppModal>
   )
+}
+
+SubscriptionModal.propTypes = {
+  invoker: PropTypes.string,
+  onClose: PropTypes.func.isRequired,
+  open: PropTypes.bool.isRequired,
+  reason: PropTypes.string,
 }
 
 export default SubscriptionModal

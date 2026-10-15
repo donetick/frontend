@@ -7,7 +7,6 @@ import {
   useState,
 } from 'react'
 
-import { track } from '../analytics'
 import SubscriptionModal from '../components/SubscriptionModal'
 import { useUserProfile } from '../queries/UserQueries'
 import { isPlusAccount } from '../utils/Helpers'
@@ -62,7 +61,6 @@ export const PaywallProvider = ({ children }) => {
   const showPaywall = useCallback(
     nextReason => {
       const paywallReason = nextReason ?? 'unknown'
-      track('paywall_shown', { reason: paywallReason })
 
       if (isNativePurchasePlatform()) {
         presentNativePaywall({

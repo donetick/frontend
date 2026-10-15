@@ -381,6 +381,7 @@ const AccountSettings = () => {
 
       <SubscriptionModal
         open={subscriptionModal}
+        invoker={NATIVE_PAYWALL_INVOKER.ACCOUNT_SETTINGS}
         onClose={() => setSubscriptionModal(false)}
       />
 
