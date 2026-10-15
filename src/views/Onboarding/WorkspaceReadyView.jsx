@@ -60,7 +60,10 @@ const WorkspaceReadyView = () => {
     const offerings = await Purchases.getOfferings()
     if (!offerings?.current) return
 
-    await RevenueCatUI.presentPaywall({ offering: offerings.current })
+    const { result } = await RevenueCatUI.presentPaywall({
+      offering: offerings.current,
+    })
+    track('onboarding_paywall_result', { result })
 
     const { customerInfo } = await Purchases.getCustomerInfo()
     if (customerInfo.entitlements.active['Donetick Plus']) {
