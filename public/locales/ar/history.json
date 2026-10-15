@@ -27,12 +27,12 @@
     "daysBeforeDue_other": "{{count}}d قبل تاريخ الاستحقاق",
     "daysAfterDue_one": "{{count}}d بعد تاريخ الاستحقاق",
     "daysAfterDue_other": "{{count}}d بعد تاريخ الاستحقاق",
-    "hoursBeforeDue_one": "قبل ساعة واحدة من الاستحقاق",
+    "hoursBeforeDue_one": "قبل {{count}} ساعة من الاستحقاق",
     "hoursBeforeDue_other": "قبل {{count}} ساعات من الاستحقاق",
     "hoursAfterDue_one": "{{count}}ساعة بعد تاريخ الاستحقاق",
     "hoursAfterDue_other": "{{count}}ساعة بعد تاريخ الاستحقاق",
     "assignedTo": "تم تعيينه إلى {{name}}",
-    "points_one": "نقطة واحدة",
+    "points_one": "{{count}} نقطة",
     "points_other": "{{count}} نقطة"
   },
   "detail": {
@@ -167,7 +167,7 @@
   },
   "info": {
     "allCompleted": "اكتملت جميع المهام",
-    "timesSuffix": "مرة",
+    "timesSuffix": "{{count}} مرة",
     "averageTiming": "متوسط التوقيت",
     "onTime": "في الوقت المناسب",
     "longestDelay": "أطول تأخير",

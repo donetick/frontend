@@ -11,11 +11,11 @@
     "color": "اللون"
   },
   "nameExists": "يوجد عامل تصفية بهذا الاسم مسبقاً",
-  "tasks_one": "مهمة واحدة",
+  "tasks_one": "{{count}} مهمة",
   "tasks_other": "{{count}} مهام",
   "overdue": "{{count}} متأخرة",
   "noConditions": "لا توجد شروط",
-  "condition_one": "شرط واحد",
+  "condition_one": "{{count}} شرط",
   "condition_other": "{{count}} شروط",
   "usedCount": "استُخدم {{count}} مرة",
   "delete": {

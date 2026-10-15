@@ -21,7 +21,7 @@
     "you": "أنت",
     "tasksAndAvg": "{{tasks}} مهام • متوسط {{avg}} لكل مهمة",
     "available": "{{count}} نقطة متاحة",
-    "points_one": "نقطة واحدة",
+    "points_one": "{{count}} نقطة",
     "points_other": "{{count}} نقاط"
   },
   "tabs": {

@@ -391,7 +391,7 @@
       "done": "تم",
       "skip": "تخطي",
       "startTimer": "بدء المؤقت",
-      "waitingApproval": "بانتظار الموافقة",
+      "waitingApproval": "{{name}} وضع علامة إكمالها · بانتظارك",
       "approve": "الموافقة",
       "reject": "رفض",
       "completed": "مكتمل",
@@ -417,7 +417,7 @@
       "takeOutTrash": "إخراج القمامة",
       "waterPlants": "مياه النباتات",
       "today": "اليوم",
-      "left": "متبقٍ"
+      "left": "متبقٍ: {{count}}"
     },
     "reminders": {
       "trashTitle": "إخراج القمامة",
@@ -607,7 +607,7 @@
     },
     "verdict": {
       "late": {
-        "title_one": "مهمة واحدة متأخرة",
+        "title_one": "{{count}} مهمة تحتاج إلى الانتباه.",
         "title_other": "{{count}} مهام متأخرة"
       },
       "review": {
@@ -616,7 +616,7 @@
         "body_other": "المهام المنجزة {{count}} في انتظار أن يتم تسجيل الدخول."
       },
       "today": {
-        "title_one": "مهمة واحدة مستحقة اليوم",
+        "title_one": "{{count}} مهمة مستحقة اليوم.",
         "title_other": "{{count}} مهام مستحقة اليوم"
       },
       "clear": {
@@ -667,11 +667,11 @@
     "circle": {
       "title": "دائرتك",
       "action": "إدارة الدائرة",
-      "open_one": "مهمة مفتوحة واحدة",
+      "open_one": "{{count}} مهمة مفتوحة",
       "open_other": "{{count}} مهام مفتوحة",
-      "late_one": "مهمة متأخرة واحدة",
+      "late_one": "{{count}} مهمة متأخرة",
       "late_other": "{{count}} مهام متأخرة",
-      "done_one": "مهمة مكتملة واحدة",
+      "done_one": "{{count}} مهمة مكتملة",
       "done_other": "{{count}} مهام مكتملة",
       "caughtUp": "الكل واضح",
       "emptyTitle": "لا أحد آخر هنا بعد",
@@ -683,16 +683,16 @@
       "action": "جميع المشاريع",
       "tasks_one": "مهمة {{count}}",
       "tasks_other": "مهام {{count}}",
-      "tasksOverdue_one": "مهمة متأخرة واحدة",
-      "tasksOverdue_other": "{{count}} مهام متأخرة",
-      "tasksUnplanned_one": "مهمة غير مخططة واحدة",
-      "tasksUnplanned_other": "{{count}} مهام غير مخططة",
+      "tasksOverdue_one": "{{count}} مهمة، منها {{overdue}} متأخرة",
+      "tasksOverdue_other": "{{count}} مهام، منها {{overdue}} متأخرة",
+      "tasksUnplanned_one": "{{count}} مهمة، منها {{unplanned}} غير مخططة",
+      "tasksUnplanned_other": "{{count}} مهام، منها {{unplanned}} غير مخططة",
       "clear": "الكل واضح"
     },
     "filters": {
       "title": "فلاتر",
       "action": "جميع الفلاتر",
-      "tasks_one": "مهمة واحدة",
+      "tasks_one": "{{count}} مهمة",
       "tasks_other": "{{count}} مهام",
       "clear": "لا يوجد تطابق"
     },

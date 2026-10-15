@@ -204,15 +204,15 @@
     "quickActions": "الإجراءات السريعة استنادًا إلى المهام الخاصة بك",
     "overdueDesc_one": "مهمة {{count}} متأخرة",
     "overdueDesc_other": "{{count}} مهام متأخرة",
-    "dueTodayDesc_one": "مهمة واحدة مستحقة بنهاية اليوم",
+    "dueTodayDesc_one": "{{count}} مهمة مستحقة بنهاية اليوم",
     "dueTodayDesc_other": "{{count}} مهام مستحقة بنهاية اليوم",
-    "pendingApprovalDesc_one": "مهمة واحدة بانتظار الموافقة",
+    "pendingApprovalDesc_one": "{{count}} مهمة بانتظار الموافقة",
     "pendingApprovalDesc_other": "{{count}} مهام بانتظار الموافقة",
-    "dueThisWeekDesc_one": "مهمة واحدة مستحقة خلال الأيام السبعة القادمة",
+    "dueThisWeekDesc_one": "{{count}} مهمة مستحقة خلال الأيام السبعة القادمة",
     "dueThisWeekDesc_other": "{{count}} مهام مستحقة خلال الأيام السبعة القادمة",
-    "highPriorityDesc_one": "مهمة واحدة تتطلب اهتمامًا فوريًا",
+    "highPriorityDesc_one": "{{count}} مهمة تتطلب اهتمامًا فوريًا",
     "highPriorityDesc_other": "{{count}} مهام تتطلب اهتمامًا فوريًا",
-    "noDueDateDesc_one": "مهمة واحدة تحتاج إلى موعد استحقاق",
+    "noDueDateDesc_one": "{{count}} مهمة تحتاج إلى موعد استحقاق",
     "noDueDateDesc_other": "{{count}} مهام تحتاج إلى موعد استحقاق"
   },
   "labels": {
@@ -319,7 +319,7 @@
     "switchToCard": "التبديل إلى عرض البطاقة",
     "exitMultiSelect": "الخروج من وضع تحديد متعدد (Ctrl+S)",
     "enableMultiSelect": "تمكين وضع تحديد متعدد (Ctrl+S)",
-    "selected_one": "تم تحديد مهمة واحدة",
+    "selected_one": "تم تحديد {{count}} مهمة",
     "selected_other": "تم تحديد {{count}} مهام",
     "selectAllTitle": "حدد جميع المهام المرئية (Ctrl+A)",
     "selectSectionTitle": "حدد جميع المهام في هذا القسم",
@@ -393,7 +393,7 @@
     "labelsHint": "انقر لإضافة · اضغط مرة أخرى للإزالة",
     "done": "تم",
     "noPriority": "لا",
-    "dueDateTitle": "تعيين تاريخ الاستحقاق للمهام المحددة"
+    "dueDateTitle": "تعيين تاريخ الاستحقاق لـ {{count}} مهمة"
   },
   "remind": {
     "title": "تذكيرات",
@@ -414,7 +414,7 @@
     "label": "المكلّف",
     "anyone": "أي",
     "unknown": "غير معروف",
-    "selectedCount_one": "مكلّف واحد",
+    "selectedCount_one": "{{count}} مكلّف",
     "selectedCount_other": "{{count}} مكلّفين محددين"
   },
   "filterChip": {
