@@ -62,6 +62,7 @@
     "@capacitor/push-notifications": "^8.0.0",
     "@capacitor/share": "^8.0.1",
     "@capacitor/status-bar": "^8.0.0",
+    "@capawesome/capacitor-badge": "^8.0.4",
     "@capgo/capacitor-document-scanner": "^8.4.0",
     "@capgo/capacitor-nfc": "^8.0.0",
     "@capgo/capacitor-social-login": "^8.3.38",

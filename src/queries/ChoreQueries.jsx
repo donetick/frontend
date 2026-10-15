@@ -94,10 +94,11 @@ const buildOfflineChore = task => ({
   _pendingCreate: true,
 })
 
-export const useChores = (includeArchive = false) => {
+export const useChores = (includeArchive = false, { enabled = true } = {}) => {
   return useQuery({
     queryKey: ['chores', includeArchive],
     refetchOnWindowFocus: true,
+    enabled,
     queryFn: async () => {
       if (isOfflineFeatureEnabled()) {
         try {

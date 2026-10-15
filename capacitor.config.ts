@@ -18,6 +18,12 @@ const config: CapacitorConfig = {
     PushNotifications: {
       presentationOptions: ['badge', 'sound', 'alert'],
     },
+    // We drive the badge count ourselves from the due/overdue total (see
+    // useAppBadgeSync), so don't let a resume reset it to 0 out from under us.
+    Badge: {
+      persist: true,
+      autoClear: false,
+    },
     LocalNotifications: {
       smallIcon: 'ic_stat_icon_config_sample',
       iconColor: '#488AFF',

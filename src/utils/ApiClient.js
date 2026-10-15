@@ -192,6 +192,12 @@ class ApiClient {
     } catch (e) {
       console.error('Error unregistering push device on logout', e)
     }
+    try {
+      const { clearAppBadge } = await import('./AppBadge')
+      await clearAppBadge()
+    } catch (e) {
+      console.error('Error clearing app badge on logout', e)
+    }
 
     await clearAllTokens()
     try {
