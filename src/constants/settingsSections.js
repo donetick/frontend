@@ -3,6 +3,7 @@ import {
   Api,
   CalendarMonth,
   Circle,
+  CloudQueue,
   Code,
   FamilyRestroom,
   Language,
@@ -20,6 +21,7 @@ import {
 // gating. Titles/descriptions live in locales/settings.json under
 // `overview.sections.<id>`, keyed off the same ids.
 export const SETTINGS_SECTIONS = [
+  { id: 'bridge', icon: CloudQueue, parentOnly: true, isBeta: true },
   { id: 'profile', icon: Person },
   { id: 'circle', icon: Circle, parentOnly: true },
   { id: 'account', icon: AccountCircle, parentOnly: true },

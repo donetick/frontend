@@ -479,6 +479,39 @@ const PutNotificationTarget = (platform, deviceToken) => {
     body: JSON.stringify({ platform, deviceToken }),
   })
 }
+// Donetick Bridge (hosted push-notification relay for self-hosted instances).
+// These call Core's own /api/v1/bridge/* endpoints; the browser never talks
+// to Bridge directly and never persists the instance token.
+const GetBridgeStatus = () => {
+  return Fetch(`/bridge/status`, {
+    method: 'GET',
+    headers: HEADERS(),
+  })
+}
+
+const ConnectBridge = ({ baseUrl, instanceId, instanceToken }) => {
+  return Fetch(`/bridge/connect`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify({ baseUrl, instanceId, instanceToken }),
+  })
+}
+
+const RotateBridgeCredential = ({ baseUrl, instanceId, instanceToken }) => {
+  return Fetch(`/bridge/rotate`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify({ baseUrl, instanceId, instanceToken }),
+  })
+}
+
+const DisconnectBridge = () => {
+  return Fetch(`/bridge/disconnect`, {
+    method: 'POST',
+    headers: HEADERS(),
+  })
+}
+
 const CreateLabel = label => {
   return Fetch(`/labels`, {
     method: 'POST',
@@ -1105,6 +1138,7 @@ export {
   ClearChoreTimer,
   CompleteSubTask,
   ConfirmMFA,
+  ConnectBridge,
   CreateBackup,
   CreateCalendarURL,
   CreateChildUser,
@@ -1132,9 +1166,11 @@ export {
   DeleteTimeSession,
   DeleteUser,
   DisableMFA,
+  DisconnectBridge,
   GetAllCircleMembers,
   GetAllUsers,
   GetArchivedChores,
+  GetBridgeStatus,
   GetCalendarURL,
   GetChildUsers,
   GetChoreAttachments,
@@ -1186,6 +1222,7 @@ export {
   ResetPassword,
   RestoreBackup,
   RevokeCalendarURL,
+  RotateBridgeCredential,
   RotateCalendarURL,
   SaveChore,
   SaveThing,
