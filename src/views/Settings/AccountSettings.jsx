@@ -1,4 +1,3 @@
-import { Capacitor } from '@capacitor/core'
 import {
   DeleteOutlineRounded,
   LockOutlined,
@@ -8,7 +7,7 @@ import { Box, Button, Chip, Sheet, Typography } from '@mui/joy'
 import { Purchases } from '@revenuecat/purchases-capacitor'
 import { useQueryClient } from '@tanstack/react-query'
 import moment from 'moment'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import SubscriptionModal from '../../components/SubscriptionModal'
@@ -16,6 +15,11 @@ import { useLocalization } from '../../contexts/LocalizationContext'
 import { useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { CancelSubscription, UpdatePassword } from '../../utils/Fetcher'
+import {
+  isNativePurchasePlatform,
+  NATIVE_PAYWALL_INVOKER,
+  presentNativePaywall,
+} from '../../utils/NativePaywall'
 import LoadingComponent from '../components/Loading'
 import NativeCancelSubscriptionModal from '../Modals/Inputs/NativeCancelSubscriptionModal'
 import PassowrdChangeModal from '../Modals/Inputs/PasswordChangeModal'
@@ -41,18 +45,6 @@ const AccountSettings = () => {
   const [userDeletionModal, setUserDeletionModal] = useState(false)
   const [nativeCancelModal, setNativeCancelModal] = useState(false)
   const [isPurchasing, setIsPurchasing] = useState(false)
-
-  useEffect(() => {
-    if (!Capacitor.isNativePlatform() || !userProfile) return
-
-    Purchases.configure({
-      apiKey:
-        Capacitor.getPlatform() === 'ios'
-          ? import.meta.env.VITE_REACT_APP_REVENUECAT_API_KEY_IOS
-          : import.meta.env.VITE_REACT_APP_REVENUECAT_API_KEY_ANDROID,
-      appUserID: String(userProfile.id),
-    }).catch(error => console.error('Failed to configure purchases:', error))
-  }, [userProfile])
 
   if (!userProfile) return <LoadingComponent />
 
@@ -105,17 +97,17 @@ const AccountSettings = () => {
   }
 
   const handleUpgrade = async () => {
-    if (!Capacitor.isNativePlatform()) {
+    if (!isNativePurchasePlatform()) {
       setSubscriptionModal(true)
       return
     }
 
     setIsPurchasing(true)
     try {
-      const { RevenueCatUI } =
-        await import('@revenuecat/purchases-capacitor-ui')
-      const offering = await Purchases.getOfferings()
-      await RevenueCatUI.presentPaywall({ offering: offering.current })
+      await presentNativePaywall({
+        appUserID: userProfile.id,
+        invoker: NATIVE_PAYWALL_INVOKER.ACCOUNT_SETTINGS,
+      })
 
       const { customerInfo } = await Purchases.getCustomerInfo()
       if (customerInfo.entitlements.active['Donetick Plus']) {
@@ -389,6 +381,7 @@ const AccountSettings = () => {
 
       <SubscriptionModal
         open={subscriptionModal}
+        invoker={NATIVE_PAYWALL_INVOKER.ACCOUNT_SETTINGS}
         onClose={() => setSubscriptionModal(false)}
       />
 

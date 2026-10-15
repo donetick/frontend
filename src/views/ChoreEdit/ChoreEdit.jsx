@@ -2449,32 +2449,26 @@ const ChoreEdit = () => {
                     gap: 2,
                   }}
                 >
-                  <Card variant='outlined'>
-                    <Typography level='h4' mb={0.5}>
-                      {t('choreEdit.notificationSchedule')}
-                    </Typography>
-                    <FormHelperText sx={{ mb: 1.5 }}>
-                      {t('choreEdit.notifyForTaskHelp')}
-                    </FormHelperText>
-                    <Box sx={{ p: 0.5 }}>
-                      <NotificationTemplate
-                        minNotifications={0}
-                        onChange={metadata => {
-                          const newTemplates = metadata.notifications
-                          if (
-                            notificationMetadata?.templates !== newTemplates
-                          ) {
-                            setNotificationMetadata({
-                              ...notificationMetadata,
-                              templates: newTemplates,
-                            })
-                          }
-                        }}
-                        value={notificationMetadata}
-                      />
-                    </Box>
+                  <FormHelperText sx={{ mb: 1.5 }}>
+                    {t('choreEdit.notifyForTaskHelp')}
+                  </FormHelperText>
+                  <Box sx={{ p: 0.5 }}>
+                    <NotificationTemplate
+                      minNotifications={0}
+                      onChange={metadata => {
+                        const newTemplates = metadata.notifications
+                        if (notificationMetadata?.templates !== newTemplates) {
+                          setNotificationMetadata({
+                            ...notificationMetadata,
+                            templates: newTemplates,
+                          })
+                        }
+                      }}
+                      value={notificationMetadata}
+                    />
+                  </Box>
 
-                    {isNotificable && (
+                  {/* {isNotificable && (
                       <>
                         <Typography level='h4' mt={3} mb={2}>
                           {t('choreEdit.whoToNotify')}
@@ -2551,8 +2545,7 @@ const ChoreEdit = () => {
                           </Box>
                         )}
                       </>
-                    )}
-                  </Card>
+                    )} */}
                 </Box>
               )}
             </EditorSection>

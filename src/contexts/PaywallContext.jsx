@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query'
 import {
   createContext,
   useCallback,
@@ -6,10 +7,13 @@ import {
   useState,
 } from 'react'
 
-import { track } from '../analytics'
 import SubscriptionModal from '../components/SubscriptionModal'
 import { useUserProfile } from '../queries/UserQueries'
 import { isPlusAccount } from '../utils/Helpers'
+import {
+  isNativePurchasePlatform,
+  presentNativePaywall,
+} from '../utils/NativePaywall'
 
 // Where the user ran into the wall. Used for the modal's lead line and for the
 // analytics event, so we can see which gate actually drives upgrades.
@@ -44,6 +48,7 @@ export const usePaywall = () => useContext(PaywallContext) ?? UNGATED_FALLBACK
 
 export const PaywallProvider = ({ children }) => {
   const { data: userProfile } = useUserProfile()
+  const queryClient = useQueryClient()
   const [reason, setReason] = useState(null)
 
   const isPlus = isPlusAccount(userProfile)
@@ -53,10 +58,29 @@ export const PaywallProvider = ({ children }) => {
   // unknown plan as free — the worst case there is a dismissable modal.
   const isPlanKnown = Boolean(userProfile)
 
-  const showPaywall = useCallback(nextReason => {
-    setReason(nextReason ?? null)
-    track('paywall_shown', { reason: nextReason ?? 'unknown' })
-  }, [])
+  const showPaywall = useCallback(
+    nextReason => {
+      const paywallReason = nextReason ?? 'unknown'
+
+      if (isNativePurchasePlatform()) {
+        presentNativePaywall({
+          appUserID: userProfile?.id,
+          invoker: paywallReason,
+        })
+          .then(() =>
+            queryClient.invalidateQueries({ queryKey: ['userProfile'] }),
+          )
+          .catch(error =>
+            console.error('Failed to show native paywall:', error),
+          )
+        return
+      }
+
+      // Browsers and desktop builds use the Stripe subscription modal.
+      setReason(paywallReason)
+    },
+    [queryClient, userProfile?.id],
+  )
 
   const value = useMemo(
     () => ({ isPlus, isPlanKnown, showPaywall }),
