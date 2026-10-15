@@ -405,22 +405,30 @@ const NotificationTemplate = ({
       </Box>
 
       {showSaveDefault && notifications.length > 0 && (
-        <Button
-          variant='plain'
-          size='sm'
-          color='neutral'
-          startDecorator={<Save />}
-          sx={{ mt: 1 }}
-          onClick={() => {
-            localStorage.setItem(
-              'defaultNotificationTemplate',
-              JSON.stringify(notifications),
-            )
-            setShowSaveDefault(false)
-          }}
-        >
-          {t('notificationTemplate.rememberFuture')}
-        </Button>
+        <Box sx={{ mt: 1, display: 'flex', justifyContent: 'start' }}>
+          <Button
+            variant='outlined'
+            size='sm'
+            color='neutral'
+            startDecorator={<Save />}
+            sx={{
+              borderRadius: 6,
+              fontWeight: 500,
+              '&:hover': {
+                background: 'neutral.softHoverBg',
+              },
+            }}
+            onClick={() => {
+              localStorage.setItem(
+                'defaultNotificationTemplate',
+                JSON.stringify(notifications),
+              )
+              setShowSaveDefault(false)
+            }}
+          >
+            {t('notificationTemplate.rememberFuture')}
+          </Button>
+        </Box>
       )}
     </Box>
   )
