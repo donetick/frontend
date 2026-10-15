@@ -575,7 +575,7 @@ const ProjectView = () => {
   }
 
   return (
-    <Container maxWidth='md' sx={{ px: 0 }}>
+    <Container maxWidth='md' sx={{ px: 0, pt: { xs: 0, md: 3 } }}>
       <Box sx={{ px: 2, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
         <Input
           slotProps={{ input: { ref: searchInputRef } }}

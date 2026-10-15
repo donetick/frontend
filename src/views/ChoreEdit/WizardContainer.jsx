@@ -42,7 +42,15 @@ export default function WizardContainer({ children, onClose, sx, ...props }) {
           return
         onClose?.(event, reason)
       }}
-      sx={{ '--Modal-backdropBackground': 'rgba(0, 0, 0, 0.6)' }}
+      sx={{
+        '--Modal-backdropBackground': 'rgba(0, 0, 0, 0.6)',
+        // Joy raises portaled listboxes above modals, but its selector misses
+        // Menu because Menu renders with role="menu". Mirrors the workaround
+        // in AppModal so menus opened inside this wizard modal stay visible.
+        '& ~ [role="menu"]': {
+          '--unstable_popup-zIndex': 'calc(var(--joy-zIndex-modal) + 1)',
+        },
+      }}
     >
       {content}
     </Modal>

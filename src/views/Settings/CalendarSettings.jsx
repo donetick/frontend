@@ -9,7 +9,6 @@ import {
   Box,
   Button,
   Card,
-  Chip,
   CircularProgress,
   Divider,
   IconButton,
@@ -144,28 +143,7 @@ const CalendarSettings = () => {
       <Stack spacing={3} sx={{ maxWidth: 720, pb: 4 }}>
         <Typography level='body-md'>{t('calendar.description')}</Typography>
 
-        {!isPlus && isPlanKnown ? (
-          <Card variant='outlined'>
-            <Stack spacing={2} alignItems='flex-start'>
-              <Chip variant='soft' color='warning'>
-                {t('common.plusFeature')}
-              </Chip>
-              <Typography level='title-md'>
-                {t('calendar.plusTitle')}
-              </Typography>
-              <Typography level='body-sm'>
-                {t('calendar.plusNotice')}
-              </Typography>
-              <Button
-                variant='soft'
-                color='primary'
-                onClick={() => showPaywall(PAYWALL_REASON.CALENDAR_SYNC)}
-              >
-                {t('calendar.upgrade')}
-              </Button>
-            </Stack>
-          </Card>
-        ) : loading || !isPlanKnown ? (
+        {loading || !isPlanKnown ? (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 3 }}>
             <CircularProgress size='sm' />
             <Typography level='body-sm'>{t('common.loading')}</Typography>
@@ -320,13 +298,17 @@ const CalendarSettings = () => {
               <Button
                 loading={action === 'create'}
                 disabled={Boolean(action)}
-                onClick={() =>
+                onClick={() => {
+                  if (!isPlus) {
+                    showPaywall(PAYWALL_REASON.CALENDAR_SYNC)
+                    return
+                  }
                   runAction(
                     'create',
                     CreateCalendarURL,
                     t('calendar.generated'),
                   )
-                }
+                }}
               >
                 {t('calendar.generate')}
               </Button>

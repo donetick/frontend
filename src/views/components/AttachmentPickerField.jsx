@@ -5,7 +5,6 @@ import {
   DocumentScanner,
   Image,
   InsertDriveFile,
-  LockOutlined,
   PhotoCamera,
 } from '@mui/icons-material'
 import {
@@ -52,7 +51,7 @@ const AttachmentPickerField = ({
   const { showError } = useNotification()
   // Read the plan from the paywall rather than the profile directly, so the
   // marketing app (no provider) keeps the picker unlocked.
-  const { isPlanKnown, isPlus, showPaywall } = usePaywall()
+  const { isPlus, showPaywall } = usePaywall()
 
   // Without a native scanner, `capture` asks a phone for its camera directly.
   // Desktop browsers ignore it and fall back to the file picker, which would
@@ -169,13 +168,6 @@ const AttachmentPickerField = ({
             }
             setIsOpen(prev => !prev)
           }}
-          endDecorator={
-            // Until the profile lands we don't know the plan — don't flash a
-            // lock at a Plus user.
-            isLocked && isPlanKnown ? (
-              <LockOutlined sx={{ fontSize: 14, opacity: 0.6 }} />
-            ) : null
-          }
           sx={{
             borderRadius: '128px',
             minHeight: 40,

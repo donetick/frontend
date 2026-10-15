@@ -64,11 +64,6 @@ const StorageSettings = () => {
         <Card className='p-4' sx={{ maxWidth: 500, mb: 2 }}>
           <Typography level='title-md' sx={{ mb: 1 }}>
             {t('storage.serverTitle')}
-            {!isPlusAccount(userProfile) && (
-              <Chip variant='soft' color='warning' sx={{ ml: 1 }}>
-                {t('common.plusFeature')}
-              </Chip>
-            )}
           </Typography>
           <Typography level='body-sm' sx={{ mb: 1 }}>
             {t('storage.serverDescription')}
@@ -88,9 +83,6 @@ const StorageSettings = () => {
               />
               <Typography level='body-xs' sx={{ opacity: 0.6, mb: 1 }}>
                 {t('storage.usagePlaceholder')}
-              </Typography>
-              <Typography level='body-sm' color='warning'>
-                {t('storage.basicPlanNotice')}
               </Typography>
             </>
           ) : loading ? (

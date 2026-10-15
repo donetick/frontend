@@ -67,6 +67,7 @@ import {
 import DurationInput from '../../components/common/DurationInput'
 import EmptyState from '../../components/common/EmptyState'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
+import NumberInput from '../../components/common/NumberInput'
 import NotificationTemplate from '../../components/NotificationTemplate.jsx'
 import { usePageShortcutScope } from '../../contexts/KeyboardShortcutScopeContext'
 import { usePaywall } from '../../contexts/PaywallContext'
@@ -200,7 +201,7 @@ const ChoreEdit = () => {
   const [notificationMetadata, setNotificationMetadata] = useState({})
 
   const [isRolling, setIsRolling] = useState(false)
-  const [isNotificable, setIsNotificable] = useState(false)
+  const isNotificable = (notificationMetadata?.templates?.length ?? 0) > 0
   const [isActive, setIsActive] = useState(true)
   const [updatedBy, setUpdatedBy] = useState(0)
   const [createdBy, setCreatedBy] = useState(0)
@@ -215,8 +216,6 @@ const ChoreEdit = () => {
   })
   const [showSavePrivacyDefault, setShowSavePrivacyDefault] = useState(false)
   const [privacySaved, setPrivacySaved] = useState(false)
-  const [showSaveNotificationDefault, setShowSaveNotificationDefault] =
-    useState(false)
   const [showSaveAssigneeDefault, setShowSaveAssigneeDefault] = useState(false)
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
 
@@ -722,13 +721,6 @@ const ChoreEdit = () => {
         setIsPrivate(JSON.parse(defaultPrivacySetting))
       }
 
-      const defaultNotificationSetting = localStorage.getItem(
-        'defaultNotificationSetting',
-      )
-      if (defaultNotificationSetting !== null) {
-        setIsNotificable(JSON.parse(defaultNotificationSetting))
-      }
-
       const defaultAnyoneSetting = localStorage.getItem('defaultAnyoneSetting')
       if (defaultAnyoneSetting != null) {
         const savedAnyone = JSON.parse(defaultAnyoneSetting)
@@ -899,7 +891,6 @@ const ChoreEdit = () => {
         }
       }
 
-      setIsNotificable(data.res.notification)
       setThingTrigger(data.res.thingChore)
 
       // Parse existing due date into date and time components
@@ -960,7 +951,6 @@ const ChoreEdit = () => {
     // backend rejects notification: true for these frequency types
     // (forbidden_with_trigger_frequency), so clear it client-side too
     if (NOTIFICATION_FORBIDDEN_TYPE.includes(frequencyType)) {
-      setIsNotificable(false)
       setNotificationMetadata({})
     }
   }, [frequencyType])
@@ -1644,46 +1634,6 @@ const ChoreEdit = () => {
                   <Typography level='h4' sx={{ mb: '0 !important' }}>
                     {t('taskEditor.assignTo')}
                   </Typography>
-                  {!showSaveAssigneeDefault && (
-                    <Chip
-                      size='sm'
-                      variant='soft'
-                      color='neutral'
-                      startDecorator={<Check sx={{ fontSize: 14 }} />}
-                    >
-                      {t('taskEditor.savedDefault')}
-                    </Chip>
-                  )}
-                  {showSaveAssigneeDefault && (
-                    <Box sx={{ display: 'flex', justifyContent: 'start' }}>
-                      <Button
-                        variant='plain'
-                        size='sm'
-                        color='neutral'
-                        startDecorator={<Save sx={{ fontSize: 16 }} />}
-                        sx={{
-                          borderRadius: 6,
-                          fontWeight: 500,
-                          '&:hover': {
-                            background: 'neutral.softHoverBg',
-                          },
-                        }}
-                        onClick={() => {
-                          localStorage.setItem(
-                            'defaultAnyoneSetting',
-                            JSON.stringify(anyone),
-                          )
-                          localStorage.setItem(
-                            'defaultAssigneeSetting',
-                            JSON.stringify(assignableTo),
-                          )
-                          setShowSaveAssigneeDefault(false)
-                        }}
-                      >
-                        {t('taskEditor.useAsDefault')}
-                      </Button>
-                    </Box>
-                  )}
                 </Box>
                 <Typography
                   level='body-sm'
@@ -1833,6 +1783,36 @@ const ChoreEdit = () => {
                     ? 'This assignment matches your default for new tasks in this browser.'
                     : 'Use as default applies this assignment to new tasks in this browser.'}
                 </Typography>
+                {showSaveAssigneeDefault && (
+                  <Box sx={{ mt: 1, display: 'flex', justifyContent: 'start' }}>
+                    <Button
+                      variant='outlined'
+                      size='sm'
+                      color='neutral'
+                      startDecorator={<Save />}
+                      sx={{
+                        borderRadius: 6,
+                        fontWeight: 500,
+                        '&:hover': {
+                          background: 'neutral.softHoverBg',
+                        },
+                      }}
+                      onClick={() => {
+                        localStorage.setItem(
+                          'defaultAnyoneSetting',
+                          JSON.stringify(anyone),
+                        )
+                        localStorage.setItem(
+                          'defaultAssigneeSetting',
+                          JSON.stringify(assignableTo),
+                        )
+                        setShowSaveAssigneeDefault(false)
+                      }}
+                    >
+                      {t('taskEditor.useAsDefault')}
+                    </Button>
+                  </Box>
+                )}
                 {(errors.assignees || errors.assignedTo) && (
                   <FormControl
                     error={Boolean(errors.assignees || errors.assignedTo)}
@@ -1897,7 +1877,7 @@ const ChoreEdit = () => {
               title={t('taskEditor.descriptionAttachments')}
               icon={DescriptionOutlined}
               section='description'
-              collapsible={!singlePageEditor}
+              collapsible
               defaultOpen
               error={errors.description}
               summary={
@@ -2154,7 +2134,7 @@ const ChoreEdit = () => {
               title={t('taskEditor.organization')}
               icon={LabelOutlined}
               section='organization'
-              collapsible={!singlePageEditor}
+              collapsible
               summary={[
                 priority
                   ? Priorities.find(
@@ -2375,7 +2355,7 @@ const ChoreEdit = () => {
                 title={t('taskEditor.subtasks')}
                 icon={Checklist}
                 section='subtasks'
-                collapsible={!singlePageEditor}
+                collapsible
                 defaultOpen={Boolean(subTasks?.length)}
                 summary={
                   subTasks?.length
@@ -2420,7 +2400,7 @@ const ChoreEdit = () => {
               title={t('taskEditor.onCompletion')}
               icon={BoltOutlined}
               section='actions'
-              collapsible={!singlePageEditor}
+              collapsible
               defaultOpen={
                 points >= 0 || completionActions.length > 0 || requireApproval
               }
@@ -2453,162 +2433,128 @@ const ChoreEdit = () => {
               title={t('choreEdit.notifications')}
               icon={NotificationsOutlined}
               section='notifications'
-              collapsible={!singlePageEditor}
+              collapsible
               defaultOpen={isNotificable}
               summary={isNotificable ? 'Reminders enabled' : 'Reminders off'}
             >
-              <Box mb={2}>
-                {!isPlusAccount(userProfile) && (
-                  <Typography level='body-sm' color='warning' sx={{ mb: 1 }}>
-                    {t('taskEditor.taskNotificationsAreNotAvailableInThe')}
-                  </Typography>
-                )}
-
-                <FormControl sx={{ mt: 1 }}>
-                  <Checkbox
-                    onChange={e => {
-                      const enabled = e.target.checked
-                      setIsNotificable(enabled)
-                      if (!enabled) {
-                        setNotificationMetadata({})
-                      } else if (!notificationMetadata?.templates?.length) {
-                        // Every plan includes one reminder on the due date.
-                        setNotificationMetadata({
-                          ...notificationMetadata,
-                          templates: [{ value: 0, unit: 'm' }],
-                        })
-                      }
-                    }}
-                    defaultChecked={isNotificable}
-                    checked={isNotificable}
-                    disabled={NOTIFICATION_FORBIDDEN_TYPE.includes(
-                      frequencyType,
-                    )}
-                    overlay
-                    label={t('choreEdit.notifyForTask')}
-                  />
-                  <FormHelperText>
-                    {NOTIFICATION_FORBIDDEN_TYPE.includes(frequencyType)
-                      ? t('choreEdit.notifyForTaskUnavailable')
-                      : t('choreEdit.notifyForTaskHelp')}
-                  </FormHelperText>
-                </FormControl>
-              </Box>
-
-              {isNotificable &&
-                !NOTIFICATION_FORBIDDEN_TYPE.includes(frequencyType) && (
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: 2,
-                    }}
-                  >
-                    <Card variant='outlined'>
-                      <Typography level='h4' mb={2}>
-                        {t('choreEdit.notificationSchedule')}
-                      </Typography>
-                      <Box sx={{ p: 0.5 }}>
-                        <NotificationTemplate
-                          onChange={metadata => {
-                            const newTemplates = metadata.notifications
-                            if (
-                              notificationMetadata?.templates !== newTemplates
-                            ) {
-                              setNotificationMetadata({
-                                ...notificationMetadata,
-                                templates: newTemplates,
-                              })
-                            }
-                          }}
-                          value={notificationMetadata}
-                        />
-                      </Box>
-
-                      <Typography level='h4' mt={3} mb={2}>
-                        {t('choreEdit.whoToNotify')}
-                      </Typography>
-                      <FormControl>
-                        <Checkbox
-                          overlay
-                          disabled={true}
-                          checked={true}
-                          label={t('choreEdit.allAssignees')}
-                        />
-                        <FormHelperText>
-                          {t('choreEdit.allAssigneesHelp')}
-                        </FormHelperText>
-                      </FormControl>
-
-                      <FormControl>
-                        <Checkbox
-                          overlay
-                          onClick={() => {
-                            // Routing reminders to a Telegram group is an extra
-                            // delivery channel, which stays a Plus capability.
-                            if (
-                              !notificationMetadata?.circleGroup &&
-                              !isPlusAccount(userProfile)
-                            ) {
-                              showPaywall(PAYWALL_REASON.REMINDER_CHANNELS)
-                              return
-                            }
-                            if (notificationMetadata?.circleGroup) {
-                              delete notificationMetadata.circleGroupID
-                            }
-
+              {NOTIFICATION_FORBIDDEN_TYPE.includes(frequencyType) ? (
+                <FormHelperText sx={{ mb: 2 }}>
+                  {t('choreEdit.notifyForTaskUnavailable')}
+                </FormHelperText>
+              ) : (
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 2,
+                  }}
+                >
+                  <Card variant='outlined'>
+                    <Typography level='h4' mb={0.5}>
+                      {t('choreEdit.notificationSchedule')}
+                    </Typography>
+                    <FormHelperText sx={{ mb: 1.5 }}>
+                      {t('choreEdit.notifyForTaskHelp')}
+                    </FormHelperText>
+                    <Box sx={{ p: 0.5 }}>
+                      <NotificationTemplate
+                        minNotifications={0}
+                        onChange={metadata => {
+                          const newTemplates = metadata.notifications
+                          if (
+                            notificationMetadata?.templates !== newTemplates
+                          ) {
                             setNotificationMetadata({
                               ...notificationMetadata,
-                              circleGroup: !notificationMetadata?.circleGroup,
+                              templates: newTemplates,
                             })
-                          }}
-                          checked={
-                            notificationMetadata
-                              ? notificationMetadata?.circleGroup
-                              : false
                           }
-                          label={t('choreEdit.specificGroup')}
-                          endDecorator={
-                            isPlusAccount(userProfile) ? null : (
-                              <LockOutlined
-                                sx={{ fontSize: 14, opacity: 0.6 }}
-                              />
-                            )
-                          }
-                        />
-                        <FormHelperText>
-                          {t('choreEdit.specificGroupHelp')}
-                        </FormHelperText>
-                      </FormControl>
+                        }}
+                        value={notificationMetadata}
+                      />
+                    </Box>
 
-                      {notificationMetadata?.circleGroup && (
-                        <Box
-                          sx={{
-                            mt: 0,
-                            ml: 4,
-                          }}
-                        >
-                          <Typography level='body-sm'>
-                            {t('choreEdit.telegramGroupIdLabel')}
-                          </Typography>
-                          <NumberInput
-                            value={notificationMetadata?.circleGroupID}
-                            allowEmpty
-                            placeholder={t(
-                              'choreEdit.telegramGroupIdPlaceholder',
-                            )}
-                            onValueChange={next => {
+                    {isNotificable && (
+                      <>
+                        <Typography level='h4' mt={3} mb={2}>
+                          {t('choreEdit.whoToNotify')}
+                        </Typography>
+                        <FormControl>
+                          <Checkbox
+                            overlay
+                            disabled={true}
+                            checked={true}
+                            label={t('choreEdit.allAssignees')}
+                          />
+                          <FormHelperText>
+                            {t('choreEdit.allAssigneesHelp')}
+                          </FormHelperText>
+                        </FormControl>
+
+                        <FormControl>
+                          <Checkbox
+                            overlay
+                            onClick={() => {
+                              // Routing reminders to a Telegram group is an extra
+                              // delivery channel, which stays a Plus capability.
+                              if (
+                                !notificationMetadata?.circleGroup &&
+                                !isPlusAccount(userProfile)
+                              ) {
+                                showPaywall(PAYWALL_REASON.REMINDER_CHANNELS)
+                                return
+                              }
+                              if (notificationMetadata?.circleGroup) {
+                                delete notificationMetadata.circleGroupID
+                              }
+
                               setNotificationMetadata({
                                 ...notificationMetadata,
-                                circleGroupID: next,
+                                circleGroup: !notificationMetadata?.circleGroup,
                               })
                             }}
+                            checked={
+                              notificationMetadata
+                                ? notificationMetadata?.circleGroup
+                                : false
+                            }
+                            label={t('choreEdit.specificGroup')}
                           />
-                        </Box>
-                      )}
-                    </Card>
-                  </Box>
-                )}
+                          <FormHelperText>
+                            {t('choreEdit.specificGroupHelp')}
+                          </FormHelperText>
+                        </FormControl>
+
+                        {notificationMetadata?.circleGroup && (
+                          <Box
+                            sx={{
+                              mt: 0,
+                              ml: 4,
+                            }}
+                          >
+                            <Typography level='body-sm'>
+                              {t('choreEdit.telegramGroupIdLabel')}
+                            </Typography>
+                            <NumberInput
+                              value={notificationMetadata?.circleGroupID}
+                              allowEmpty
+                              placeholder={t(
+                                'choreEdit.telegramGroupIdPlaceholder',
+                              )}
+                              onValueChange={next => {
+                                setNotificationMetadata({
+                                  ...notificationMetadata,
+                                  circleGroupID: next,
+                                })
+                              }}
+                            />
+                          </Box>
+                        )}
+                      </>
+                    )}
+                  </Card>
+                </Box>
+              )}
             </EditorSection>
             {dueDate && (
               <EditorSection
@@ -2719,9 +2665,13 @@ const ChoreEdit = () => {
               collapsible
               defaultOpen={isPrivate}
               summary={
-                isPrivate
-                  ? 'Visible to assigned users'
-                  : 'Visible to your circle'
+                selectedProjectIsPrivate
+                  ? t('taskEditor.followsProjectName', {
+                      project: choreProject?.name,
+                    })
+                  : isPrivate
+                    ? 'Visible to assigned users'
+                    : 'Visible to your circle'
               }
             >
               <Box>
@@ -2777,7 +2727,7 @@ const ChoreEdit = () => {
                   </Typography>
                 )}
                 {showSavePrivacyDefault && !selectedProjectIsPrivate && (
-                  <Box sx={{ mt: 0, display: 'flex', justifyContent: 'start' }}>
+                  <Box sx={{ mt: 1, display: 'flex', justifyContent: 'start' }}>
                     <Button
                       variant='outlined'
                       size='sm'
@@ -2812,7 +2762,7 @@ const ChoreEdit = () => {
               icon={InfoOutlined}
               section='metadata'
               summary={t('taskEditor.whoCreatedAndLastEditedThisTask')}
-              collapsible={!singlePageEditor}
+              collapsible
             >
               <Sheet
                 sx={{

@@ -4,7 +4,6 @@ import {
   Box,
   Button,
   Card,
-  Chip,
   Divider,
   IconButton,
   Input,
@@ -15,6 +14,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { useLocalization } from '../../contexts/LocalizationContext'
+import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
 import { useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import {
@@ -30,6 +30,7 @@ import SettingsLayout from './SettingsLayout'
 const APITokenSettings = () => {
   const { t } = useTranslation('settings')
   const { data: userProfile } = useUserProfile()
+  const { showPaywall } = usePaywall()
   const { showNotification } = useNotification()
   const { fmt } = useLocalization()
   const [tokens, setTokens] = useState([])
@@ -89,17 +90,6 @@ const APITokenSettings = () => {
         <Typography level='h3'>{t('apiTokens.accessToken')}</Typography>
         <Divider />
         <Typography level='body-sm'>{t('apiTokens.description')}</Typography>
-        {!isPlusAccount(userProfile) && (
-          <>
-            <Chip variant='soft' color='warning'>
-              {t('common.plusFeature')}
-            </Chip>
-            <Typography level='body-sm' color='warning' sx={{ mt: 1 }}>
-              {t('apiTokens.plusNotice')}
-            </Typography>
-          </>
-        )}
-
         {newToken && (
           <Alert
             color='warning'
@@ -190,12 +180,15 @@ const APITokenSettings = () => {
         <Button
           variant='soft'
           color='primary'
-          disabled={!isPlusAccount(userProfile)}
           sx={{
             width: '210px',
             mb: 1,
           }}
           onClick={() => {
+            if (!isPlusAccount(userProfile)) {
+              showPaywall(PAYWALL_REASON.API_TOKENS)
+              return
+            }
             setIsGetTokenNameModalOpen(true)
           }}
         >
