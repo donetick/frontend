@@ -434,7 +434,9 @@
     "title": "Donetick Bridge",
     "description": "Connect your self-hosted instance to the official Donetick app and deliver reliable native push notifications without maintaining your own stack for it",
     "heroEyebrow": "Built for self-hosters",
+    "freeToStart": "Free to start",
     "heroTitle": "Keep control. Stay connected.",
+    "pricingSummary": "Start on the Free plan. Upgrade to Plus when you need more notifications or devices. or to support Donetick!",
     "connectedBadge": "Bridge is active",
     "benefits": {
       "native": {

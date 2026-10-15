@@ -268,16 +268,23 @@ const BridgeIntro = ({ connected, loading, t }) => (
         }}
       />
       <Box sx={{ maxWidth: 560, position: 'relative' }}>
-        <Chip
-          size='sm'
-          variant='soft'
-          color={connected ? 'success' : 'primary'}
-          startDecorator={
-            connected ? <CheckCircleRounded /> : <CloudDoneRounded />
-          }
-        >
-          {connected ? t('bridge.connectedBadge') : t('bridge.heroEyebrow')}
-        </Chip>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75 }}>
+          <Chip
+            size='sm'
+            variant='soft'
+            color={connected ? 'success' : 'primary'}
+            startDecorator={
+              connected ? <CheckCircleRounded /> : <CloudDoneRounded />
+            }
+          >
+            {connected ? t('bridge.connectedBadge') : t('bridge.heroEyebrow')}
+          </Chip>
+          {!connected && (
+            <Chip size='sm' variant='soft' color='success'>
+              {t('bridge.freeToStart')}
+            </Chip>
+          )}
+        </Box>
         <Typography
           level='h2'
           sx={{
@@ -297,6 +304,24 @@ const BridgeIntro = ({ connected, loading, t }) => (
         >
           {t('bridge.description')}
         </Typography>
+        {!connected && (
+          <Box
+            sx={{
+              alignItems: 'center',
+              display: 'flex',
+              gap: 0.75,
+              mt: 1.5,
+            }}
+          >
+            <CheckCircleRounded
+              color='success'
+              sx={{ flex: '0 0 auto', fontSize: 18 }}
+            />
+            <Typography level='body-sm' sx={{ fontWeight: 550 }}>
+              {t('bridge.pricingSummary')}
+            </Typography>
+          </Box>
+        )}
         {!connected && !loading && (
           <Button
             component='a'
