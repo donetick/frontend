@@ -11,23 +11,23 @@
     "color": "اللون"
   },
   "nameExists": "يوجد عامل تصفية بهذا الاسم مسبقاً",
-  "tasks_one": "مهمة {{count}}",
-  "tasks_other": "مهام {{count}}",
-  "overdue": "{{count}} overdue",
+  "tasks_one": "مهمة واحدة",
+  "tasks_other": "{{count}} مهام",
+  "overdue": "{{count}} متأخرة",
   "noConditions": "لا توجد شروط",
-  "condition_one": "شرط {{count}}",
-  "condition_other": "",
-  "usedCount": "مستعمل {{count}}x",
+  "condition_one": "شرط واحد",
+  "condition_other": "{{count}} شروط",
+  "usedCount": "استُخدم {{count}} مرة",
   "delete": {
     "title": "حذف الفلتر",
     "message": "هل أنت متأكد من أنك تريد حذف \"{{name}}\"؟ لا يمكن التراجع عن ذلك."
   },
   "empty": {
     "title": "لا توجد فلاتر محفوظة بعد",
-    "description": "حفظ مجموعة من الشروط مرة واحدة، مثل \"متأخرة ومحددة لي\"، والقفز مباشرة إلى الوراء من أي مكان.",
+    "description": "احفظ مجموعة من الشروط، مثل \"متأخرة ومسندة إليّ\"، للوصول إليها مباشرة من أي مكان.",
     "createFilter": "إنشاء فلتر",
     "noResultsTitle": "لا توجد فلاتر متطابقة",
-    "noResultsWithSearch": "لا يوجد فلاتر محفوظة تطابق \"{{search}}\".",
+    "noResultsWithSearch": "لا توجد فلاتر محفوظة تطابق \"{{search}}\".",
     "noResultsDefault": "لا يوجد فلتر محفوظ يطابق الفلتر الحالي.",
     "clearSearch": "مسح البحث",
     "showAllFilters": "إظهار جميع الفلاتر"
@@ -36,7 +36,7 @@
     "title": "فلاتر",
     "subtitle": "احفظ مجموعات الفلاتر المفضلة لديك للوصول السريع. أنشئ مشاهدات مخصصة لتنظيم المهام وإيجاد المهام أسرع."
   },
-  "searchPlaceholder": "فلاتر البحث",
+  "searchPlaceholder": "البحث في الفلاتر",
   "sort": {
     "smart": "ذكي",
     "name": "الاسم",
@@ -51,5 +51,5 @@
     "unpinned": "غير مثبت"
   },
   "pin": "تثبيت",
-  "unpin": "Unpin"
+  "unpin": "إلغاء تثبيت الفلتر"
 }

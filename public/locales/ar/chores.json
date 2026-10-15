@@ -23,8 +23,8 @@
     "details": "التفاصيل",
     "createdBy": "أنشئ بواسطة",
     "na": "غير متوفر",
-    "taskCompleted": "المهمة مكتملة",
-    "taskCompletedMessage": "تم وضع علامة مكتملة على مهمتك",
+    "taskCompleted": "اكتملت المهمة",
+    "taskCompletedMessage": "تم وضع علامة على المهمة باعتبارها مكتملة",
     "taskCompletionUndone": "تم التراجع عن إكمال المهمة.",
     "taskSkipUndone": "تم التراجع عن تخطي المهمة.",
     "undoSuccessful": "التراجع ناجح",
@@ -46,7 +46,7 @@
     "setCustomCompletionTime": "تعيين وقت إكمال مخصص",
     "skipTask": "تخطي المهمة",
     "skipTaskConfirmation": "هل أنت متأكد من أنك تريد تخطي هذه المهمة؟",
-    "markComplete": "وضع علامة مكتمل",
+    "markComplete": "وضع علامة مكتملة",
     "markAsDone": "وضع علامة كمنجز",
     "edit": "تعديل",
     "archive": "أرشفة",
@@ -74,15 +74,15 @@
       "delete": "حذف الجلسة"
     },
     "unableUndo": "فشل التراجع",
-    "offlineComplete": "أنت غير متصل – الإكمال سوف يتم مزامنته عند العودة عبر الإنترنت",
+    "offlineComplete": "أنت غير متصل — ستتم مزامنة الإكمال عند عودة الاتصال بالإنترنت",
     "unableComplete": "غير قادر على إكمال المهمة",
-    "offlineSkip": "أنت غير متصل – تخطي سيتم المزامنة عند العودة عبر الإنترنت",
+    "offlineSkip": "أنت غير متصل — ستتم مزامنة التخطي عند عودة الاتصال بالإنترنت",
     "unableSkip": "غير قادر على تخطي المهمة",
-    "offlineStart": "أنت غير متصل – ابدأ بالمزامنة عند العودة عبر الإنترنت",
+    "offlineStart": "أنت غير متصل — ستتم مزامنة البدء عند عودة الاتصال بالإنترنت",
     "unableStart": "غير قادر على بدء المهمة",
-    "offlinePause": "أنت غير متصل – سيتم إيقاف المزامنة عند العودة عبر الإنترنت",
+    "offlinePause": "أنت غير متصل — ستتم مزامنة الإيقاف المؤقت عند عودة الاتصال بالإنترنت",
     "unablePause": "غير قادر على إيقاف المهمة مؤقتاً",
-    "offlineRestore": "أنت غير متصل – سيتم المزامنة عند العودة عبر الإنترنت",
+    "offlineRestore": "أنت غير متصل — ستتم مزامنة الاستعادة عند عودة الاتصال بالإنترنت",
     "restoreFailed": "فشل الاستعادة",
     "unableRestore": "غير قادر على استعادة المهمة",
     "deadline": "الموعد: {{date}}",
@@ -102,23 +102,23 @@
     "taskMovedMessage": "تم نقل المهمة إلى {{project}}.",
     "failedMoveTask": "فشل نقل المهمة",
     "unableMoveTaskToProject": "غير قادر على نقل المهمة إلى المشروع",
-    "failedSendNudgeError": "فشل في إرسال دفعة",
-    "nudgeSentTitle": "تم ارسال الدافع!",
-    "nudgeSentMessage": "تم إرسال الوميض بنجاح",
-    "failedSendNudgeTitle": "فشل في إرسال Nudge",
-    "unableSendNudge": "غير قادر على إرسال دفعة في هذا الوقت",
+    "failedSendNudgeError": "تعذّر إرسال التذكير",
+    "nudgeSentTitle": "تم إرسال التذكير!",
+    "nudgeSentMessage": "تم إرسال التذكير بنجاح",
+    "failedSendNudgeTitle": "تعذّر إرسال التذكير",
+    "unableSendNudge": "يتعذّر إرسال التذكير حاليًا",
     "failedDelegate": "فشل في التفويض",
     "unableChangeAssignee": "تعذر تغيير المحال إليه",
-    "availableToCompleteStarting": "متاح لإكمال بدء {{date}}",
-    "delegateToSomeoneElse": "مندوب إلى شخص آخر",
-    "selectAPerformer": "حدد الأداء",
+    "availableToCompleteStarting": "متاح للإكمال ابتداءً من {{date}}",
+    "delegateToSomeoneElse": "إسناد إلى شخص آخر",
+    "selectAPerformer": "اختر المنفّذ",
     "notFoundTitle": "المهمة غير متاحة",
     "notFoundDescription": "ربما تم حذف هذه المهمة أو لم تعد مشاركة معك."
   },
   "toolbar": {
     "defaultProject": "المشروع الافتراضي",
     "everyone": "الجميع",
-    "mine": "لغم",
+    "mine": "مهامي",
     "availableToMe": "متوفر لي",
     "others": "أخرى",
     "cards": "البطاقات",
@@ -133,7 +133,7 @@
     "groupBy": "تجميع حسب",
     "showTasksFor": "إظهار المهام لـ",
     "type": {
-      "assignee": "Assignee"
+      "assignee": "المكلّف"
     },
     "display": "عرض",
     "displayOptions": "عرض الخيارات",
@@ -165,11 +165,11 @@
     "noThingsSuffix": "لإنشاء شيء",
     "conditionHint": "إنشاء شرط لتشغيل مهمة عند تغيير الحالة إلى الحالة المرغوب فيها",
     "stateChangeHint": "عندما تتغير حالة {{name}} على النحو المحدد أدناه، ستصبح المهمة مستحقة.",
-    "boolTrue": "حقيقي",
-    "boolFalse": "كاذبة",
-    "stateIs": "الدولة هي",
+    "boolTrue": "صحيح",
+    "boolFalse": "خطأ",
+    "stateIs": "الحالة هي",
     "typeChip": "النوع: {{type}}",
-    "stateChip": "الدولة: {{state}}",
+    "stateChip": "الحالة: {{state}}",
     "conditions": {
       "eq": "يساوي",
       "neq": "لا يساوي",
@@ -203,17 +203,17 @@
     "clickToClear": "انقر على عامل التصفية النشط لمسح",
     "quickActions": "الإجراءات السريعة استنادًا إلى المهام الخاصة بك",
     "overdueDesc_one": "مهمة {{count}} متأخرة",
-    "overdueDesc_other": "",
-    "dueTodayDesc_one": "{{count}} مهمة واجبة بنهاية اليوم",
-    "dueTodayDesc_other": "",
-    "pendingApprovalDesc_one": "",
-    "pendingApprovalDesc_other": "",
-    "dueThisWeekDesc_one": "مهمة {{count}} واجبة في الأيام السبعة القادمة",
-    "dueThisWeekDesc_other": "",
-    "highPriorityDesc_one": "",
-    "highPriorityDesc_other": "",
-    "noDueDateDesc_one": "",
-    "noDueDateDesc_other": ""
+    "overdueDesc_other": "{{count}} مهام متأخرة",
+    "dueTodayDesc_one": "مهمة واحدة مستحقة بنهاية اليوم",
+    "dueTodayDesc_other": "{{count}} مهام مستحقة بنهاية اليوم",
+    "pendingApprovalDesc_one": "مهمة واحدة بانتظار الموافقة",
+    "pendingApprovalDesc_other": "{{count}} مهام بانتظار الموافقة",
+    "dueThisWeekDesc_one": "مهمة واحدة مستحقة خلال الأيام السبعة القادمة",
+    "dueThisWeekDesc_other": "{{count}} مهام مستحقة خلال الأيام السبعة القادمة",
+    "highPriorityDesc_one": "مهمة واحدة تتطلب اهتمامًا فوريًا",
+    "highPriorityDesc_other": "{{count}} مهام تتطلب اهتمامًا فوريًا",
+    "noDueDateDesc_one": "مهمة واحدة تحتاج إلى موعد استحقاق",
+    "noDueDateDesc_other": "{{count}} مهام تحتاج إلى موعد استحقاق"
   },
   "labels": {
     "label": "التسميات"
@@ -249,7 +249,7 @@
       "completed": "اكتملت المهمة"
     },
     "completionPending": "اكتمال المهمة معلق",
-    "failCompleteTitle": "فشل في الاكتمال",
+    "failCompleteTitle": "تعذّر إكمال المهمة",
     "failStartTitle": "فشل في البدء",
     "failPauseTitle": "فشل في الإيقاف المؤقت",
     "failApproveTitle": "فشل في الموافقة",
@@ -263,9 +263,9 @@
     "failRescheduleTitle": "فشل في إعادة الجدولة",
     "failRescheduleMessage": "غير قادر على تحديث تاريخ الاستحقاق",
     "failRemoveDueDateTitle": "فشل في إزالة تاريخ الاستحقاق",
-    "nudgeSentTitle": "تم ارسال الدافع!",
+    "nudgeSentTitle": "تم إرسال التذكير!",
     "nudgeFailed": "فشل في إرسال دفعة",
-    "failNudgeTitle": "فشل في إرسال Nudge",
+    "failNudgeTitle": "تعذّر إرسال التذكير",
     "bulk": {
       "completeTitle": "اكمل المهام",
       "completedTitle": "✅ اكتملت المهام",
@@ -278,8 +278,8 @@
       "skippedTitle": "⏭️ تخطي المهام",
       "skipFailedTitle": "فشل تخطي الكتلة"
     },
-    "failAssignTitle": "",
-    "failAssignMessage": ""
+    "failAssignTitle": "تعذّر الإسناد",
+    "failAssignMessage": "تعذّر إسناد المهمة. يرجى المحاولة مرة أخرى."
   },
   "archived": {
     "restoredTitle": "تم استعادة المهمة",
@@ -290,7 +290,7 @@
     "unexpectedError": "حدث خطأ غير متوقع. الرجاء المحاولة مرة أخرى.",
     "deletedBulkTitle": "🗑️ المهام المحذوفة",
     "bulkDeleteFailTitle": "فشل الحذف الشامل",
-    "archivedDate": "تاريخ المؤرشفة",
+    "archivedDate": "تاريخ الأرشفة",
     "loadFailTitle": "فشل تحميل المهام المؤرشفة",
     "loadFailMsg": "الرجاء المحاولة مرة أخرى لاحقاً.",
     "deletedMsg": "تم حذف المهمة المؤرشفة بشكل دائم.",
@@ -319,8 +319,8 @@
     "switchToCard": "التبديل إلى عرض البطاقة",
     "exitMultiSelect": "الخروج من وضع تحديد متعدد (Ctrl+S)",
     "enableMultiSelect": "تمكين وضع تحديد متعدد (Ctrl+S)",
-    "selected_one": "",
-    "selected_other": "",
+    "selected_one": "تم تحديد مهمة واحدة",
+    "selected_other": "تم تحديد {{count}} مهام",
     "selectAllTitle": "حدد جميع المهام المرئية (Ctrl+A)",
     "selectSectionTitle": "حدد جميع المهام في هذا القسم",
     "all": "الكل",
@@ -336,11 +336,11 @@
     "count_other": "المهام المؤرشفة {{count}}",
     "matching": " مطابقة \"{{term}}\"",
     "filtersTitle": "فلاتر",
-    "sortArchivedDate": "تاريخ المؤرشفة",
+    "sortArchivedDate": "تاريخ الأرشفة",
     "sortName": "الاسم",
     "sortPriority": "الأولوية",
     "sortDueDate": "تاريخ الاستحقاق",
-    "noMatchTitle": "لا توجد تطابق المهام المؤرشفة",
+    "noMatchTitle": "لا توجد مهام مؤرشفة مطابقة",
     "noMatchSearch": "لا يوجد شيء في الأرشيف يتطابق مع \"{{term}}\".",
     "noMatchFilters": "هناك مهام محفوظة في الأرشيف، ولكن لا يوجد أي منها يناسب الفلاتر التي تعمل حاليا.",
     "emptyTitle": "لا شيء أرشيف",
@@ -348,14 +348,14 @@
     "backToTasks": "العودة إلى المهام"
   },
   "edit": {
-    "deleteConfirm": "هل أنت متأكد من أنك تريد حذف هذه الرابطة؟"
+    "deleteConfirm": "هل أنت متأكد من أنك تريد حذف هذه المهمة؟"
   },
   "list": {
-    "complete": "Complete",
+    "complete": "إكمال",
     "filterSaved": "تم حفظ الفلتر",
     "filterSavedMsg": "تم حفظ \"{{name}}\"",
     "nothingScheduled": "لا شيء مقرر",
-    "createChore": "إنشاء كرو جديد (Cmd+C)",
+    "createChore": "إنشاء مهمة جديدة (Cmd+C)",
     "filterUpdated": "تم تحديث الفلتر",
     "filterUpdatedMsg": "تم تحديث \"{{name}}\" بنجاح",
     "advancedFilterCreated": "تم إنشاء عامل تصفية متقدم",
@@ -363,18 +363,18 @@
     "reject": "رفض",
     "pending": "معلق",
     "schedule": "الجدول",
-    "nudge": "الدافع"
+    "nudge": "التذكير"
   },
   "multiToolbar": {
     "skip": "تخطي",
     "completeTitle": "إكمال المهام المحددة (المؤسسة)",
-    "complete": "Complete",
+    "complete": "إكمال",
     "skipTitle": "تخطي المهام المحددة (/)",
     "archiveTitle": "أرشفة المهام المحددة (X)",
     "archive": "أرشيف",
     "deleteTitle": "حذف المهام المحددة (Shift+X)",
     "mixed": "مختلطة",
-    "due": "واجب",
+    "due": "مستحق",
     "dueTitleSet": "تاريخ الاستحقاق في المهام المحددة: {{value}}",
     "dueTitleEmpty": "تعيين تاريخ الاستحقاق على المهام المحددة",
     "presetToday": "اليوم",
@@ -388,12 +388,12 @@
     "moreTitle": "تعيين الأولوية، أو المحال إليه، أو التسميات",
     "more": "المزيد",
     "priority": "الأولوية",
-    "assignee": "Assignee",
+    "assignee": "المكلّف",
     "labels": "التسميات",
     "labelsHint": "انقر لإضافة · اضغط مرة أخرى للإزالة",
     "done": "تم",
     "noPriority": "لا",
-    "dueDateTitle": ""
+    "dueDateTitle": "تعيين تاريخ الاستحقاق للمهام المحددة"
   },
   "remind": {
     "title": "تذكيرات",
@@ -411,11 +411,11 @@
     "removeAria": "إزالة التذكير"
   },
   "assignee": {
-    "label": "Assignee",
+    "label": "المكلّف",
     "anyone": "أي",
     "unknown": "غير معروف",
-    "selectedCount_one": "{{count}} assignee",
-    "selectedCount_other": ""
+    "selectedCount_one": "مكلّف واحد",
+    "selectedCount_other": "{{count}} مكلّفين محددين"
   },
   "filterChip": {
     "cancelAll": "إلغاء جميع الفلاتر",
@@ -465,11 +465,11 @@
   },
   "modals": {
     "changeDueDate": "تغيير تاريخ الاستحقاق",
-    "completePast": "حفظ المحور الذي أكملته في الماضي",
+    "completePast": "تسجيل إكمال المهمة في وقت سابق",
     "delegate": "مندوب إلى شخص آخر",
-    "selectPerformer": "حدد الأداء",
+    "selectPerformer": "اختر المنفّذ",
     "addNote": "أضف ملاحظة لإرفاقها بهذا الإكمال:",
-    "complete": "Complete"
+    "complete": "إكمال"
   },
   "shortcuts": {
     "allSelectedTitle": "✅ جميع المهام المحددة",
@@ -482,19 +482,19 @@
     "newChore": "متجر جديد",
     "unassigned": "غير مسند",
     "changeDueDate": "تغيير تاريخ الاستحقاق",
-    "colDue": "واجب",
-    "colChore": "كور",
-    "colAssignee": "Assignee",
+    "colDue": "الاستحقاق",
+    "colChore": "المهمة",
+    "colAssignee": "المكلّف",
     "colAction": "اجراء"
   },
   "dataError": {
     "attachmentsFailed": "فشل في جلب المرفقات"
   },
   "nudge": {
-    "title": "إرسال Nudge",
+    "title": "إرسال تذكير",
     "description": "إرسال تذكير لطيف إلى الأشخاص الذين تم تعيينهم لهذه المهمة.",
     "customMessage": "رسالة مخصصة (اختياري)",
-    "messagePlaceholder": "أضف رسالة شخصية مع حكامك...",
+    "messagePlaceholder": "أضف رسالة شخصية مع التذكير...",
     "notifyAll": "إشعار جميع المحال إليهم",
     "notifyAllHint": "في حالة التمكين، سيتم إخطار جميع الأعضاء الذين يمكنهم رؤية هذه المهمة. وإلا فإن الشخص المعين فقط سيتلقى الحكم.",
     "selfHostedHeading": "تنبيه!",
@@ -536,7 +536,7 @@
     "customTime": "وقت مخصص",
     "anytime": "في أي وقت",
     "specificTime": "وقت محدد",
-    "due": "واجب",
+    "due": "مستحق",
     "clearAria": "مسح تاريخ الاستحقاق"
   },
   "attachmentPicker": {
@@ -587,7 +587,7 @@
     "anyone": "أي",
     "reminder_one": "تذكير {{count}}",
     "reminder_other": "تذكير {{count}}",
-    "points": "",
+    "points": "{{count}} نقطة",
     "frequency": {
       "everyN": "كل {{count}} {{unit}}",
       "everyUnit": "كل {{unit}}",
@@ -614,14 +614,14 @@
     "processImage": "معالجة الصورة",
     "createTask": "إنشاء مهمة",
     "failedScan": "فشل الفحص",
-    "retake": "Retake",
+    "retake": "التقاط من جديد",
     "upload": "تحميل",
     "keepAsAttachment": "الاحتفاظ بالصورة كمرفق",
     "altCaptured": "وثيقة ملصقة",
     "altProcessing": "معالجة",
     "taskIdentified": "تم تحديد المهمة",
-    "runningNativeOcr": "Running native OCR…",
-    "identifyingTask": "Identifying task with AI…",
+    "runningNativeOcr": "جارٍ تشغيل التعرّف الضوئي على الحروف…",
+    "identifyingTask": "جارٍ تحديد المهمة باستخدام الذكاء الاصطناعي…",
     "tapToScanHint": "اضغط على \"مسح مستند\" لفتح الماسح الضوئي",
     "readingTextProgress": "جارٍ قراءة النص من الصورة… {{progress}}%",
     "dueDate": "الاستحقاق: {{date}}",
@@ -634,7 +634,7 @@
     "onDueDate": "في تاريخ الاستحقاق",
     "timing": {
       "before": "قبل",
-      "ondue": "واجب",
+      "ondue": "عند الاستحقاق",
       "after": "بعد"
     },
     "unitName": {
@@ -653,7 +653,7 @@
     "errOneDue": "مسموح بإشعار واحد فقط لـ \"يستحق التنبيه\".",
     "errAllConfigured": "تم بالفعل تكوين جميع الأوقات الشائعة {{type}}.",
     "reminder": "تذكير",
-    "dueAlert": "التنبيه الواجب",
+    "dueAlert": "تنبيه الاستحقاق",
     "followUp": "المتابعة",
     "rememberFuture": "تذكر المهام المستقبلية"
   },
@@ -669,7 +669,7 @@
     "errTitle": "الرجاء حل الأخطاء التالية:",
     "savedOfflineTitle": "تم الحفظ دون اتصال",
     "savedOfflineMessage": "سيتم مزامنة التغييرات الخاصة بك عند عودتك على الإنترنت.",
-    "savedTitle": "تم حفظ المحفوظات",
+    "savedTitle": "تم حفظ المهمة",
     "savedMessage": "تم حفظ مهمتك بنجاح!",
     "saveFailedTitle": "فشل الحفظ",
     "saveFailedMessage": "فشل حفظ المهمة، الرجاء المحاولة مرة أخرى.",
@@ -680,7 +680,7 @@
     "scanReadFailedMessage": "تعذر قراءة الصورة الممسوحة ضوئياً.",
     "deleteFailedTitle": "فشل الحذف",
     "deleteAttachmentFailed": "فشل في حذف المرفق.",
-    "deleteChoreFailed": "فشل في حذف الرابطة: {{error}}",
+    "deleteChoreFailed": "تعذّر حذف المهمة: {{error}}",
     "deleteChoreTitle": "حذف Chore",
     "name": "الاسم",
     "nameDesc": "ما هو اسم هذه المهمة؟",
@@ -792,8 +792,8 @@
     "useTask": "استخدام المهمة",
     "processing": "معالجة",
     "create": "إنشاء",
-    "descriptionLabel": "Description:",
-    "subtasksLabel": "Subtasks:"
+    "descriptionLabel": "الوصف:",
+    "subtasksLabel": "المهام الفرعية:"
   },
   "repeat": {
     "days": {
@@ -829,8 +829,8 @@
       "always": "دائماً"
     },
     "freqMessage": {
-      "adaptive": "وستحدد مواعيد هذا المبنى بشكل دينامي استنادا إلى تواريخ الإنجاز السابقة.",
-      "custom": "سيتم جدولة هذا الجزء استنادا إلى تردد مخصص.",
+      "adaptive": "ستُحدَّد مواعيد هذه المهمة ديناميكيًا استنادًا إلى تواريخ الإنجاز السابقة.",
+      "custom": "ستُجدول هذه المهمة وفق تكرار مخصص.",
       "always": "ليس لهذه المهمة تاريخ استحقاق وتبقى متاحة للإنجاز في أي وقت. لن يتم أرشفتها عند إكمالها."
     },
     "weekPattern": {
@@ -842,10 +842,10 @@
       "week_of_month": "تكرّر المهمة أحداث يوم محدّد كل شهر (على سبيل المثال يوم الاثنين الأول والجمعة الثالث)"
     },
     "occurrence": {
-      "1": "الحادث الأول",
-      "2": "الحادث الثاني",
-      "3": "الحادث الثالث",
-      "4": "الحادث الرابع",
+      "1": "المرة الأولى",
+      "2": "المرة الثانية",
+      "3": "المرة الثالثة",
+      "4": "المرة الرابعة",
       "last": "آخر حدث"
     },
     "ordinal": {
@@ -886,7 +886,7 @@
     "triggerPlanWarning": "المشغلات القائمة على الأشياء غير متوفرة في الخطة الأساسية. الترقية إلى Plus لتفعيل المهام تلقائياً عندما تتغير حالة الجهاز.",
     "previewEvery": "كل {{days}} في {{time}}",
     "previewOccurrence": "كل {{occurrences}} {{days}} من الشهر في {{time}}",
-    "defaultTime": "6:00 رسالة",
+    "defaultTime": "6:00 صباحًا",
     "daysShort": {
       "monday": "Mon",
       "tuesday": "توت",
@@ -952,7 +952,7 @@
       "keep_last_assigned": "إبقاء نفس المحال إليه",
       "random": "عشوائي",
       "least_completed": "أقل اكتمال",
-      "round_robin": "دوران السرقة"
+      "round_robin": "بالتناوب"
     },
     "hrs": "ساعات",
     "setDueDateHint": "تعيين تاريخ استحقاق لتكوين نافذة الإكمال",
@@ -979,7 +979,7 @@
     "exclude": "استبعاد",
     "has": "لديه",
     "doesntHave": "لم يكن لديك",
-    "assignee": "Assignee",
+    "assignee": "المكلّف",
     "createdBy": "تم إنشاؤها بواسطة",
     "statusHeading": "الحالة",
     "priority": "الأولوية",
@@ -1035,12 +1035,12 @@
     "lowestPriority": "أدنى أولوية",
     "noPriority": "لا توجد أولوية",
     "assignedToOther": "تم تعيينه للآخرين",
-    "tasksCount": ""
+    "tasksCount": "{{count}} مهمة"
   },
   "activitiesCard": {
     "justNow": "للتو الآن",
-    "hoursAgo": "",
-    "daysAgo": "",
+    "hoursAgo": "منذ {{count}} ساعة",
+    "daysAgo": "منذ {{count}} يومًا",
     "statusStarted": "بدأ",
     "statusDone": "تم",
     "statusLate": "متأخر",
@@ -1052,8 +1052,8 @@
     "statusCompleted": "مكتمل",
     "byUser": "بواسطة {{name}}",
     "unknownUser": "غير معروف",
-    "unknownChore": "كور غير معروف",
-    "pointsShort": "",
+    "unknownChore": "مهمة غير معروفة",
+    "pointsShort": "{{count}} نقطة",
     "noRecentActivities": "لا توجد أنشطة حديثة",
     "today": "اليوم",
     "yesterday": "أمس",

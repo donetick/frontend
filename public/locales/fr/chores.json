@@ -122,7 +122,7 @@
     "availableToMe": "Disponible pour moi",
     "others": "Autres",
     "cards": "Cartes",
-    "compact": "Compact",
+    "compact": "Compacte",
     "calendar": "Calendrier",
     "filters": "Filtres",
     "viewGroup": "Affichage et regroupement",
@@ -620,8 +620,8 @@
     "altCaptured": "Document capturé",
     "altProcessing": "Traitement en cours",
     "taskIdentified": "Tâche identifiée",
-    "runningNativeOcr": "Running native OCR…",
-    "identifyingTask": "Identifying task with AI…",
+    "runningNativeOcr": "Reconnaissance optique du texte en cours…",
+    "identifyingTask": "Identification de la tâche avec l’IA…",
     "tapToScanHint": "Appuyez sur \"Scanner un document\" pour ouvrir le scanner",
     "readingTextProgress": "Lecture du texte de l'image… {{progress}} %",
     "dueDate": "Échéance : {{date}}",
@@ -792,8 +792,8 @@
     "useTask": "Utiliser la tâche",
     "processing": "Traitement en cours",
     "create": "Créer",
-    "descriptionLabel": "Description:",
-    "subtasksLabel": "Subtasks:"
+    "descriptionLabel": "Description :",
+    "subtasksLabel": "Sous-tâches :"
   },
   "repeat": {
     "days": {

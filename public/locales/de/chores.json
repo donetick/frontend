@@ -620,8 +620,8 @@
     "altCaptured": "Erfasstes Dokument",
     "altProcessing": "Verarbeitung läuft",
     "taskIdentified": "Aufgabe erkannt",
-    "runningNativeOcr": "Running native OCR…",
-    "identifyingTask": "Identifying task with AI…",
+    "runningNativeOcr": "Native Texterkennung wird ausgeführt…",
+    "identifyingTask": "Aufgabe wird mit KI identifiziert…",
     "tapToScanHint": "Tippe auf \"Dokument scannen\", um den Scanner zu öffnen",
     "readingTextProgress": "Text wird aus Bild gelesen… {{progress}} %",
     "dueDate": "Fällig: {{date}}",
@@ -792,8 +792,8 @@
     "useTask": "Aufgabe übernehmen",
     "processing": "Verarbeitung läuft",
     "create": "Erstellen",
-    "descriptionLabel": "Description:",
-    "subtasksLabel": "Subtasks:"
+    "descriptionLabel": "Beschreibung:",
+    "subtasksLabel": "Unteraufgaben:"
   },
   "repeat": {
     "days": {
