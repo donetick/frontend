@@ -21,6 +21,7 @@ import {
 // gating. Titles/descriptions live in locales/settings.json under
 // `overview.sections.<id>`, keyed off the same ids.
 export const SETTINGS_SECTIONS = [
+  { id: 'bridge', icon: CloudQueue, parentOnly: true, isBeta: true },
   { id: 'profile', icon: Person },
   { id: 'circle', icon: Circle, parentOnly: true },
   { id: 'account', icon: AccountCircle, parentOnly: true },
@@ -28,7 +29,6 @@ export const SETTINGS_SECTIONS = [
   { id: 'notifications', icon: Notifications },
   { id: 'mfa', icon: Security, parentOnly: true },
   { id: 'apitokens', icon: Api, parentOnly: true },
-  { id: 'bridge', icon: CloudQueue, parentOnly: true },
   { id: 'calendar', icon: CalendarMonth },
   { id: 'storage', icon: Storage },
   // Default landing view, plus whichever chrome this device actually has:
