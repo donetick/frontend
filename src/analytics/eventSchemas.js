@@ -20,6 +20,14 @@ export const EVENT_SCHEMAS = {
     option: 'string',
     step: 'string',
   }),
+  paywall_result: withCommon({
+    invoker:
+      'enum:onboarding,account_settings,settings,advanced_reminders,' +
+      'reminder_channels,history_window,thing_triggers,project_limit,' +
+      'quick_filter_limit,file_upload,calendar_sync,realtime_sync,webhooks,' +
+      'api_tokens,child_accounts,unknown',
+    result: 'enum:CANCELLED,ERROR,NOT_PRESENTED,PURCHASED,RESTORED',
+  }),
 
   chore_created: withCommon({
     has_due_date: 'boolean',
@@ -103,7 +111,7 @@ export const EVENT_SCHEMAS = {
     reason:
       'enum:advanced_reminders,reminder_channels,history_window,' +
       'thing_triggers,project_limit,quick_filter_limit,file_upload,' +
-      'calendar_sync,unknown',
+      'calendar_sync,realtime_sync,webhooks,api_tokens,child_accounts,unknown',
   }),
 }
 

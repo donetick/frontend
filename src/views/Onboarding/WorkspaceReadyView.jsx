@@ -1,4 +1,3 @@
-import { Capacitor } from '@capacitor/core'
 import { CheckRounded } from '@mui/icons-material'
 import { Box, Button, Typography } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
@@ -10,6 +9,11 @@ import { track } from '../../analytics'
 import Logo from '../../Logo'
 import { useUserProfile } from '../../queries/UserQueries'
 import { isOfficialDonetickInstance } from '../../utils/FeatureToggle'
+import {
+  isNativePurchasePlatform,
+  NATIVE_PAYWALL_INVOKER,
+  presentNativePaywall,
+} from '../../utils/NativePaywall'
 import { haptic } from '../../utils/Onboarding'
 import { authButtonSx } from '../Authorization/authStyles'
 
@@ -41,30 +45,18 @@ const WorkspaceReadyView = () => {
    * whatever the outcome — dismissing the paywall is the "continue free" path,
    * and a missing offering or a store hiccup must never trap a new user here.
    */
-  const showPaywall = async () => {
+  const showOnboardingPaywall = async () => {
     const isDonetickDotCom = await isOfficialDonetickInstance()
-    if (!isDonetickDotCom || !Capacitor.isNativePlatform() || !userProfile?.id)
+    if (!isDonetickDotCom || !isNativePurchasePlatform() || !userProfile?.id)
       return
 
+    const result = await presentNativePaywall({
+      appUserID: userProfile.id,
+      invoker: NATIVE_PAYWALL_INVOKER.ONBOARDING,
+    })
+    if (!result) return
+
     const { Purchases } = await import('@revenuecat/purchases-capacitor')
-    const { RevenueCatUI } = await import('@revenuecat/purchases-capacitor-ui')
-
-    await Purchases.configure({
-      apiKey:
-        Capacitor.getPlatform() === 'ios'
-          ? import.meta.env.VITE_REACT_APP_REVENUECAT_API_KEY_IOS
-          : import.meta.env.VITE_REACT_APP_REVENUECAT_API_KEY_ANDROID,
-      appUserID: String(userProfile.id),
-    })
-
-    const offerings = await Purchases.getOfferings()
-    if (!offerings?.current) return
-
-    const { result } = await RevenueCatUI.presentPaywall({
-      offering: offerings.current,
-    })
-    track('onboarding_paywall_result', { result })
-
     const { customerInfo } = await Purchases.getCustomerInfo()
     if (customerInfo.entitlements.active['Donetick Plus']) {
       queryClient.invalidateQueries({ queryKey: ['userProfile'] })
@@ -75,7 +67,7 @@ const WorkspaceReadyView = () => {
     setBusy(true)
     haptic('medium')
     try {
-      await showPaywall()
+      await showOnboardingPaywall()
     } catch (error) {
       console.log('Paywall skipped:', error)
     } finally {

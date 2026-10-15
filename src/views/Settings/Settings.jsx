@@ -1,4 +1,3 @@
-import { Capacitor } from '@capacitor/core'
 import { Delete, Refresh } from '@mui/icons-material'
 import {
   Box,
@@ -23,7 +22,6 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
-import { track } from '../../analytics'
 import RealTimeSettings from '../../components/RealTimeSettings'
 import SubscriptionModal from '../../components/SubscriptionModal'
 import { useLocalization } from '../../contexts/LocalizationContext'
@@ -45,6 +43,11 @@ import {
   UpdatePassword,
 } from '../../utils/Fetcher'
 import { isPlusAccount } from '../../utils/Helpers'
+import {
+  isNativePurchasePlatform,
+  NATIVE_PAYWALL_INVOKER,
+  presentNativePaywall,
+} from '../../utils/NativePaywall'
 import LoadingComponent from '../components/Loading'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import NativeCancelSubscriptionModal from '../Modals/Inputs/NativeCancelSubscriptionModal'
@@ -142,21 +145,6 @@ const Settings = () => {
       setCircleMembers(data.res ? data.res : [])
     })
   }, [])
-  useEffect(() => {
-    async function configurePurchases() {
-      if (Capacitor.isNativePlatform() && userProfile) {
-        await Purchases.configure({
-          apiKey:
-            Capacitor.getPlatform() === 'ios'
-              ? import.meta.env.VITE_REACT_APP_REVENUECAT_API_KEY_IOS
-              : import.meta.env.VITE_REACT_APP_REVENUECAT_API_KEY_ANDROID,
-          appUserID: String(userProfile?.id),
-        })
-      }
-    }
-    configurePurchases()
-  }, [userProfile])
-
   // useEffect when circleMembers and userprofile:
   useEffect(() => {
     if (userProfile && userProfile.id) {
@@ -728,16 +716,12 @@ const Settings = () => {
                 userProfile?.subscription !== 'cancelled')
             }
             onClick={async () => {
-              if (Capacitor.isNativePlatform()) {
+              if (isNativePurchasePlatform()) {
                 try {
-                  const { RevenueCatUI } =
-                    await import('@revenuecat/purchases-capacitor-ui')
-
-                  const offering = await Purchases.getOfferings()
-                  const { result } = await RevenueCatUI.presentPaywall({
-                    offering: offering.current,
+                  await presentNativePaywall({
+                    appUserID: userProfile.id,
+                    invoker: NATIVE_PAYWALL_INVOKER.SETTINGS,
                   })
-                  track('settings_paywall_result', { result })
 
                   // Check if user now has entitlement after paywall interaction
                   const { customerInfo } = await Purchases.getCustomerInfo()
