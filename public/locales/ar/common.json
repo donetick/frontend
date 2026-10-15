@@ -11,27 +11,27 @@
   "warning": "تحذير",
   "colors": {
     "Salmon": "سالمون",
-    "Teal": "الفم",
+    "Teal": "أزرق مخضر",
     "Sky Blue": "أزرق سماء",
-    "Grape": "غضب",
-    "Sunshine": "الشمس",
+    "Grape": "عنب",
+    "Sunshine": "أصفر مشرق",
     "Coral": "المرجان",
-    "Lavender": "Lavender",
+    "Lavender": "خزامى",
     "Rose": "وردة",
     "Charcoal": "الفحم",
-    "Sienna": "Sienna",
+    "Sienna": "سيينا",
     "Mint": "النعناع",
     "Amber": "آمبر",
     "Cobalt": "كوبالت",
     "Emerald": "الزمردي",
     "Peach": "خوخ",
     "Ocean": "المحيط",
-    "Mustard": "مسرد",
+    "Mustard": "خردلي",
     "Ruby": "روبي",
-    "Periwinkle": "Periwinkle",
-    "Turquoise": "Turquoise",
+    "Periwinkle": "أزرق بنفسجي فاتح",
+    "Turquoise": "فيروزي",
     "Lime": "ليمي",
-    "Blush": "ضرب",
+    "Blush": "وردي ناعم",
     "Ash": "رماد",
     "Sand": "الرمال"
   },
@@ -132,7 +132,7 @@
   "feedback": {
     "later": "ربما لاحقاً",
     "sentiment": {
-      "title": "كيف تعمل من أجلك؟",
+      "title": "هل تناسبك Donetick؟",
       "subtitle": "إن إجابتك تساعدنا على تقرير ما سنبنيه بعد ذلك.",
       "options": {
         "love": "أحبها",
@@ -161,7 +161,7 @@
     "review": {
       "title": "يسعدك أن تستمتع به!",
       "subtitle": "التقييم أو النجم يساعد الآخرين على العثور على \"دونتيك\".",
-      "github": "Star on GitHub",
+      "github": "ضع نجمة على GitHub",
       "appStore": "قيم على متجر التطبيقات",
       "playStore": "قيم على جوجل بلاي"
     },
@@ -274,11 +274,11 @@
     "updatePending": "التحديث معلق",
     "createPending": "إنشاء معلق",
     "deletePending": "حذف معلق",
-    "editHistoryPending": "تحرير المحفوظات معلق",
-    "deleteHistoryPending": "حذف المحفوظات المعلقة",
+    "editHistoryPending": "تعديل السجل معلّق",
+    "deleteHistoryPending": "حذف السجل معلّق",
     "reschedulePending": "إعادة جدولة معلقة",
     "archivePending": "الأرشيف معلق",
-    "restorePending": "Restore pending",
+    "restorePending": "الاستعادة معلّقة",
     "startPending": "بدء الانتظار",
     "pausePending": "إيقاف مؤقت"
   },
@@ -291,7 +291,7 @@
     "filter": "تصفية"
   },
   "versionInfo": "V{{version}} (API: {{apiVersion}})",
-  "apiVersionUnavailable": "unavailable",
+  "apiVersionUnavailable": "غير متاح",
   "sync": {
     "aria": "فتح حالة المزامنة والشبكة",
     "allSynced": "تمت مزامنة جميع التغييرات",
@@ -300,23 +300,23 @@
     "commandLabels": {
       "createChore": "إنشاء مربع",
       "updateChore": "تحديث المربع",
-      "updateChoreHistory": "تحرير المحفوظات",
-      "completeChore": "أكمل الكر",
-      "skipChore": "تخطي المقطع",
-      "startChore": "ابدأ المحار",
+      "updateChoreHistory": "تعديل سجل المهمة",
+      "completeChore": "إكمال المهمة",
+      "skipChore": "تخطي المهمة",
+      "startChore": "بدء المهمة",
       "pauseChore": "إيقاف مؤقت",
       "deleteChore": "حذف المحطة",
-      "deleteChoreHistory": "حذف المحفوظات",
-      "rescheduleChore": "إعادة جدولة التمرير",
-      "archiveChore": "أرشيف القوس",
-      "unarchiveChore": "استعادة الوسط",
+      "deleteChoreHistory": "حذف سجل المهمة",
+      "rescheduleChore": "إعادة جدولة المهمة",
+      "archiveChore": "أرشفة المهمة",
+      "unarchiveChore": "إلغاء أرشفة المهمة",
       "pendingAction": "الإجراء المعلق"
     },
     "never": "لا",
     "justNow": "للتو الآن",
-    "secondsAgo": "",
-    "minutesAgo": "",
-    "hoursAgo": "",
+    "secondsAgo": "منذ {{count}} ثانية",
+    "minutesAgo": "منذ {{count}} دقيقة",
+    "hoursAgo": "منذ {{count}} ساعة",
     "online": "متصل",
     "offline": "غير متصل",
     "syncing": "مزامنة...",
@@ -326,7 +326,7 @@
     "pending": "معلق ({{count}})",
     "failed": "فشل ({{count}})",
     "dismiss": "تجاهل",
-    "nextAutoSync": "المزامنة التلقائية التالية في {{seconds}}ث",
+    "nextAutoSync": "المزامنة التلقائية التالية خلال {{seconds}} ثانية",
     "checkingServer": "التحقق من الخادم...",
     "retryingIn": "إعادة المحاولة في {{seconds}}ثانية",
     "syncNow": "المزامنة الآن",
@@ -334,7 +334,7 @@
     "pendingSyncLabel_other": "{{count}} إجراءات معلقة للمزامنة",
     "pendingActionsTitle": "الإجراءات المعلقة",
     "actionsWaitingToSync_one": "إجراء {{count}} في انتظار المزامنة.",
-    "actionsWaitingToSync_other": "",
+    "actionsWaitingToSync_other": "{{count}} إجراءات بانتظار المزامنة.",
     "cancelActionAria": "إلغاء {{label}}"
   },
   "attachments": "المرفقات",
@@ -372,7 +372,7 @@
       "trashRepeat": "كل اثنين",
       "homeLabel": "المنزل",
       "vehicleTitle": "تجديد تسجيل المدرعات 🚗",
-      "vehicleDue": "المصادقة الواجبة 3",
+      "vehicleDue": "تجديد التسجيل مستحق خلال 3 أيام",
       "acTitle": "💨 تغيير عامل تصفية AC",
       "acDue": "المستحق للجمعة",
       "acRepeat": "كل 3 أشهر"
@@ -380,7 +380,7 @@
     "schedule": {
       "fromDueDate": "إعادة الجدولة من تاريخ الاستحقاق",
       "fromCompletionDate": "إعادة الجدولة من تاريخ الإكمال",
-      "due": "واجب",
+      "due": "مستحق",
       "done": "تم",
       "next": "التالي"
     },
@@ -391,7 +391,7 @@
       "done": "تم",
       "skip": "تخطي",
       "startTimer": "بدء المؤقت",
-      "waitingApproval": "",
+      "waitingApproval": "{{name}} وضع علامة إكمالها · بانتظارك",
       "approve": "الموافقة",
       "reject": "رفض",
       "completed": "مكتمل",
@@ -407,7 +407,7 @@
     },
     "turns": {
       "binsTitle": "🗑️ خذ الحافلات إلى كبح",
-      "binsDue": "واجب الغد",
+      "binsDue": "مستحق غدًا",
       "binsRepeat": "كل أسبوع",
       "completed": "مكتمل",
       "metaJustNow": "الآن فقط · ★ 5 نقاط"
@@ -417,7 +417,7 @@
       "takeOutTrash": "إخراج القمامة",
       "waterPlants": "مياه النباتات",
       "today": "اليوم",
-      "left": ""
+      "left": "متبقٍ: {{count}}"
     },
     "reminders": {
       "trashTitle": "إخراج القمامة",
@@ -505,7 +505,7 @@
     "placeholderCrash": "على سبيل المثال, لقد قمت بالنقر على منصة في إختياراتي وأصبحت الشاشة فارغة",
     "email": "البريد الإلكتروني",
     "emailOptional": "(اختياري - فقط إذا كنت تريد الرد)",
-    "emailPlaceholder": "You@example.com",
+    "emailPlaceholder": "name@example.com",
     "showWhatGetsSent": "إظهار ما يتم إرساله",
     "hideWhatGetsSent": "إخفاء ما يتم إرساله",
     "copyDiagnostics": "نسخ التشخيصات",
@@ -528,7 +528,7 @@
   },
   "circleSetup": {
     "inviteTitle": "أحضر فريقك إلى",
-    "inviteSubtitle": "كل من ينضم إلى دائرتك يرى نفس الواجبات، ويأخذ دوره، ويبقى في المزامنة تلقائياً.",
+    "inviteSubtitle": "كل من ينضم إلى دائرتك يرى المهام نفسها، ويعرف دوره، وتبقى معلوماته متزامنة تلقائيًا.",
     "joinTitle": "الانضمام إلى دائرة",
     "joinSubtitle": "أدخل الرمز الذي أعطيت لك وسوف نرسل طلب للانضمام - مالك الدائرة يحتاج فقط إلى الموافقة عليه.",
     "loadingCode": "جاري التحميل…",
@@ -560,7 +560,7 @@
     "adminReviewNote": "سيقوم المشرف الدائري بمراجعة طلبك قبل أن تحصل على الوصول.",
     "sendRequest": "إرسال طلب الانضمام",
     "requestSentTitle": "تم إرسال الطلب",
-    "requestSentBody": "تم إرسال طلبك. سيحتاج مسؤول الدائرة إلى الموافقة عليه قبل أن تتمكن من الوصول إلى الدائرة وواجباتها. سنقوم بإعلامك عند الموافقة عليه.",
+    "requestSentBody": "تم إرسال طلبك. سيحتاج مسؤول الدائرة إلى الموافقة عليه قبل أن تتمكن من الوصول إلى الدائرة ومهامها. سنُعلمك عند الموافقة عليه.",
     "gotIt": "فهمت ذلك",
     "alreadyMember": "أنت بالفعل عضو في هذه الدائرة",
     "joinFailed": "فشل في الانضمام إلى الدائرة",
@@ -579,8 +579,8 @@
     "doneButton": "تم",
     "showResults_one": "إظهار النتيجة {{count}}",
     "showResults_other": "إظهار النتائج {{count}}",
-    "selectedCount": "",
-    "dateRangeFallback": "Date Range",
+    "selectedCount": "تم تحديد {{count}}",
+    "dateRangeFallback": "النطاق الزمني",
     "fromDate": "من {{date}}",
     "untilDate": "حتى {{date}}",
     "presetToday": "اليوم",
@@ -607,8 +607,8 @@
     },
     "verdict": {
       "late": {
-        "title_one": "",
-        "title_other": ""
+        "title_one": "{{count}} مهمة تحتاج إلى الانتباه.",
+        "title_other": "{{count}} مهام متأخرة"
       },
       "review": {
         "title": "شيء ما لاستعراض الاحتياجات.",
@@ -616,8 +616,8 @@
         "body_other": "المهام المنجزة {{count}} في انتظار أن يتم تسجيل الدخول."
       },
       "today": {
-        "title_one": "",
-        "title_other": ""
+        "title_one": "{{count}} مهمة مستحقة اليوم.",
+        "title_other": "{{count}} مهام مستحقة اليوم"
       },
       "clear": {
         "title": "جميعكم يقبضون عليكم.",
@@ -630,9 +630,9 @@
     },
     "triage": {
       "overdue": "متأخرة",
-      "dueToday": "الواجب اليوم",
+      "dueToday": "مستحقة اليوم",
       "needsReview": "استعراض الاحتياجات",
-      "comingUp": "",
+      "comingUp": "قادمة",
       "unplanned": "غير مخطط",
       "allClear": "لا شيء متأخر، لا ينتظر"
     },
@@ -667,12 +667,12 @@
     "circle": {
       "title": "دائرتك",
       "action": "إدارة الدائرة",
-      "open_one": "",
-      "open_other": "",
-      "late_one": "",
-      "late_other": "",
-      "done_one": "",
-      "done_other": "",
+      "open_one": "{{count}} مهمة مفتوحة",
+      "open_other": "{{count}} مهام مفتوحة",
+      "late_one": "{{count}} مهمة متأخرة",
+      "late_other": "{{count}} مهام متأخرة",
+      "done_one": "{{count}} مهمة مكتملة",
+      "done_other": "{{count}} مهام مكتملة",
       "caughtUp": "الكل واضح",
       "emptyTitle": "لا أحد آخر هنا بعد",
       "emptyBody": "قم بدعوة الأشخاص الذين تشارك في الأعباء معهم، وستظهر هذه الشاشة من يحملون ما يحملونه.",
@@ -683,17 +683,17 @@
       "action": "جميع المشاريع",
       "tasks_one": "مهمة {{count}}",
       "tasks_other": "مهام {{count}}",
-      "tasksOverdue_one": "",
-      "tasksOverdue_other": "",
-      "tasksUnplanned_one": "",
-      "tasksUnplanned_other": "",
+      "tasksOverdue_one": "{{count}} مهمة، منها {{overdue}} متأخرة",
+      "tasksOverdue_other": "{{count}} مهام، منها {{overdue}} متأخرة",
+      "tasksUnplanned_one": "{{count}} مهمة، منها {{unplanned}} غير مخططة",
+      "tasksUnplanned_other": "{{count}} مهام، منها {{unplanned}} غير مخططة",
       "clear": "الكل واضح"
     },
     "filters": {
       "title": "فلاتر",
       "action": "جميع الفلاتر",
-      "tasks_one": "",
-      "tasks_other": "",
+      "tasks_one": "{{count}} مهمة",
+      "tasks_other": "{{count}} مهام",
       "clear": "لا يوجد تطابق"
     },
     "capture": {

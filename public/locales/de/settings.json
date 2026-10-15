@@ -117,7 +117,7 @@
     "cancel": "Abbrechen"
   },
   "circleSettings": {
-    "title": "Circle-Einstellungen",
+    "title": "Kreiseinstellungen",
     "description": "Dein Konto wird automatisch mit einem Kreis verbunden, wenn du einen erstellst oder beitrittst. Lade Freunde ein, indem du den unten stehenden Kreiscode oder Link teilst. Du erhältst unten eine Benachrichtigung, wenn jemand deinem Kreis beitreten möchte.",
     "memberOf": "Du bist Teil von {{name}}",
     "yourCircleCode": "Dein Kreiscode lautet:",
@@ -129,8 +129,8 @@
     "shareTitle": "Tritt {{name}} auf Donetick bei",
     "shareText": "Ich möchte dich einladen, {{name}} auf Donetick beizutreten.",
     "shareDialogTitle": "Kreiseinladung teilen",
-    "leave": "Circle verlassen",
-    "leaveConfirmTitle": "Circle verlassen",
+    "leave": "Kreis verlassen",
+    "leaveConfirmTitle": "Kreis verlassen",
     "leaveConfirmMessage": "Möchtest du deinen Kreis wirklich verlassen?",
     "leaveConfirmButton": "Verlassen",
     "leftCircle": "Kreis erfolgreich verlassen",
@@ -700,13 +700,13 @@
   "realtime": {
     "titleSse": "Echtzeit-Aktualisierungen (SSE)",
     "subtitleSse": "Sofortige Benachrichtigungen über Server-Sent Events erhalten",
-    "basicPlanDescription": "Real-time updates (SSE) are not available in the Basic plan. Upgrade to Plus to receive instant notifications when chores are updated.",
-    "disabledDescription": "Real-time updates (SSE) are disabled. Enable to see live changes when you or other circle members complete, skip, or modify chores.",
-    "connectedDescription": "Real-time updates (SSE) are working. You'll see live changes when you or other circle members complete, skip, or modify chores.",
-    "connectingDescription": "Connecting to real-time updates (SSE)...",
-    "errorDescription": "Real-time updates (SSE) are enabled but not working: {{error}}",
-    "disconnectedDescription": "Real-time updates (SSE) are enabled but not currently connected.",
-    "enableLabel": "Enable Real-time Updates (SSE)",
+    "basicPlanDescription": "Echtzeitaktualisierungen (SSE) sind im Basic-Tarif nicht verfügbar. Wechsle zu Plus, um sofort über Änderungen an Aufgaben benachrichtigt zu werden.",
+    "disabledDescription": "Echtzeitaktualisierungen (SSE) sind deaktiviert. Aktiviere sie, um Änderungen zu sehen, wenn du oder andere Kreismitglieder Aufgaben erledigen, überspringen oder bearbeiten.",
+    "connectedDescription": "Echtzeitaktualisierungen (SSE) funktionieren. Du siehst Änderungen sofort, wenn du oder andere Kreismitglieder Aufgaben erledigen, überspringen oder bearbeiten.",
+    "connectingDescription": "Verbindung zu den Echtzeitaktualisierungen (SSE) wird hergestellt...",
+    "errorDescription": "Echtzeitaktualisierungen (SSE) sind aktiviert, funktionieren aber nicht: {{error}}",
+    "disconnectedDescription": "Echtzeitaktualisierungen (SSE) sind aktiviert, aber derzeit nicht verbunden.",
+    "enableLabel": "Echtzeitaktualisierungen (SSE) aktivieren",
     "statusLabel": "Status:"
   },
   "nativeCancel": {

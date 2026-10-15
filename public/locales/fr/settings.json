@@ -700,14 +700,14 @@
   "realtime": {
     "titleSse": "Mises à jour en temps réel (SSE)",
     "subtitleSse": "Recevez des notifications instantanées via les événements envoyés par le serveur",
-    "basicPlanDescription": "Real-time updates (SSE) are not available in the Basic plan. Upgrade to Plus to receive instant notifications when chores are updated.",
-    "disabledDescription": "Real-time updates (SSE) are disabled. Enable to see live changes when you or other circle members complete, skip, or modify chores.",
-    "connectedDescription": "Real-time updates (SSE) are working. You'll see live changes when you or other circle members complete, skip, or modify chores.",
-    "connectingDescription": "Connecting to real-time updates (SSE)...",
-    "errorDescription": "Real-time updates (SSE) are enabled but not working: {{error}}",
-    "disconnectedDescription": "Real-time updates (SSE) are enabled but not currently connected.",
-    "enableLabel": "Enable Real-time Updates (SSE)",
-    "statusLabel": "Status:"
+    "basicPlanDescription": "Les mises à jour en temps réel (SSE) ne sont pas disponibles avec la formule Basic. Passez à Plus pour recevoir instantanément les changements apportés aux tâches.",
+    "disabledDescription": "Les mises à jour en temps réel (SSE) sont désactivées. Activez-les pour voir les changements lorsque vous ou les membres de votre cercle accomplissez, ignorez ou modifiez des tâches.",
+    "connectedDescription": "Les mises à jour en temps réel (SSE) fonctionnent. Vous verrez instantanément les changements apportés par vous ou les membres de votre cercle.",
+    "connectingDescription": "Connexion aux mises à jour en temps réel (SSE)...",
+    "errorDescription": "Les mises à jour en temps réel (SSE) sont activées, mais ne fonctionnent pas : {{error}}",
+    "disconnectedDescription": "Les mises à jour en temps réel (SSE) sont activées, mais ne sont pas connectées actuellement.",
+    "enableLabel": "Activer les mises à jour en temps réel (SSE)",
+    "statusLabel": "État :"
   },
   "nativeCancel": {
     "title": "Résilier l'abonnement",
