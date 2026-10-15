@@ -180,7 +180,7 @@ const ConnectForm = ({
   t,
 }) => (
   <Stack spacing={2}>
-    <FormControl required>
+    {/* <FormControl required>
       <FormLabel>{t('bridge.connectForm.baseUrl')}</FormLabel>
       <Input
         value={form.baseUrl}
@@ -189,7 +189,7 @@ const ConnectForm = ({
         }
         placeholder={DEFAULT_BASE_URL}
       />
-    </FormControl>
+    </FormControl> */}
     <FormControl required>
       <FormLabel>{t('bridge.connectForm.instanceId')}</FormLabel>
       <Input
