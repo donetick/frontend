@@ -67,8 +67,8 @@ import {
 import DurationInput from '../../components/common/DurationInput'
 import EmptyState from '../../components/common/EmptyState'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
-import NotificationTemplate from '../../components/NotificationTemplate.jsx'
 import NumberInput from '../../components/common/NumberInput'
+import NotificationTemplate from '../../components/NotificationTemplate.jsx'
 import { usePageShortcutScope } from '../../contexts/KeyboardShortcutScopeContext'
 import { usePaywall } from '../../contexts/PaywallContext'
 import { useDocumentScanner } from '../../hooks/useDocumentScanner'
@@ -2665,9 +2665,13 @@ const ChoreEdit = () => {
               collapsible
               defaultOpen={isPrivate}
               summary={
-                isPrivate
-                  ? 'Visible to assigned users'
-                  : 'Visible to your circle'
+                selectedProjectIsPrivate
+                  ? t('taskEditor.followsProjectName', {
+                      project: choreProject?.name,
+                    })
+                  : isPrivate
+                    ? 'Visible to assigned users'
+                    : 'Visible to your circle'
               }
             >
               <Box>
