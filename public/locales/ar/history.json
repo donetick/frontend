@@ -1,10 +1,10 @@
 {
   "edit": {
-    "title": "تحرير المحفوظات",
+    "title": "سجل المهام",
     "completedDate": "تاريخ الانتهاء",
     "note": "ملاحظة",
     "additionalNotes": "ملاحظات إضافية",
-    "deleteTitle": "حذف المحفوظات",
+    "deleteTitle": "حذف السجل",
     "deleteMessage": "هل أنت متأكد من أنك تريد حذف هذا السجل؟"
   },
   "status": {
@@ -27,13 +27,13 @@
     "daysBeforeDue_other": "{{count}}d قبل تاريخ الاستحقاق",
     "daysAfterDue_one": "{{count}}d بعد تاريخ الاستحقاق",
     "daysAfterDue_other": "{{count}}d بعد تاريخ الاستحقاق",
-    "hoursBeforeDue_one": "",
-    "hoursBeforeDue_other": "",
+    "hoursBeforeDue_one": "قبل {{count}} ساعة من الاستحقاق",
+    "hoursBeforeDue_other": "قبل {{count}} ساعات من الاستحقاق",
     "hoursAfterDue_one": "{{count}}ساعة بعد تاريخ الاستحقاق",
     "hoursAfterDue_other": "{{count}}ساعة بعد تاريخ الاستحقاق",
     "assignedTo": "تم تعيينه إلى {{name}}",
-    "points_one": "",
-    "points_other": ""
+    "points_one": "{{count}} نقطة",
+    "points_other": "{{count}} نقطة"
   },
   "detail": {
     "title": "تفاصيل النشاط",
@@ -130,7 +130,7 @@
     }
   },
   "title": {
-    "summary": "Task Summary",
+    "summary": "ملخص المهام",
     "activity": "نشاط المهمة"
   },
   "noResults": {
@@ -150,13 +150,13 @@
       "message": "أنت غير متصل. سيتم مزامنة حذف السجل عند استعادة الاتصال."
     },
     "deleted": {
-      "title": "تم حذف المحفوظات",
-      "message": "تم حذف سجل المحفوظات بنجاح."
+      "title": "تم حذف السجل",
+      "message": "تم حذف سجل المهمة بنجاح."
     }
   },
   "delete": {
     "title": "حذف سجل السجل",
-    "message": "هل أنت متأكد من أنك تريد حذف سجل المحفوظات هذا؟"
+    "message": "هل أنت متأكد من أنك تريد حذف سجل هذه المهمة؟"
   },
   "empty": {
     "title": "لا يوجد تاريخ بعد",
@@ -166,8 +166,8 @@
     "noResultsDescription": "هناك تاريخ هنا، ولكن لا أحد منها يناسب الفلاتر الموجودة حاليا."
   },
   "info": {
-    "allCompleted": "تم اكتمال الكل",
-    "timesSuffix": "",
+    "allCompleted": "اكتملت جميع المهام",
+    "timesSuffix": "{{count}} مرة",
     "averageTiming": "متوسط التوقيت",
     "onTime": "في الوقت المناسب",
     "longestDelay": "أطول تأخير",
@@ -176,7 +176,7 @@
     "unknown": "غير معروف",
     "membersInvolved": "الأعضاء المشمولون",
     "membersSuffix": "{{count}} أعضاء",
-    "lastCompleted": "اخر اكتمل"
+    "lastCompleted": "آخر مهمة مكتملة"
   },
   "noteViewer": {
     "updatedAt": "تم التحديث في {{date}}"

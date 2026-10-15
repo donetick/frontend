@@ -1,15 +1,15 @@
 {
   "redeem": "استبدال النقاط",
   "redeemModal": {
-    "redeemButton": "Redeem",
-    "pointsAvailable": "{{count}} points available",
+    "redeemButton": "استبدال",
+    "pointsAvailable": "{{count}} نقطة متاحة",
     "pointsToRedeem": "النقاط المراد استبدالها",
-    "placeholder": "أدخل نقاط...",
+    "placeholder": "أدخل عدد النقاط...",
     "cannotExceed": "لا يمكن تجاوز النقاط المتاحة",
     "quickAdd": "إضافة سريعة:",
-    "aboutToRedeem": "أنت على وشك الاسترداد",
-    "amount": "{{count}} نقاط",
-    "remaining": "المتبقية: {{count}} نقاط"
+    "aboutToRedeem": "أنت على وشك استبدال النقاط",
+    "amount": "{{count}} نقطة",
+    "remaining": "المتبقي: {{count}} نقطة"
   },
   "leaderboard": {
     "titlePoints": "لائحة المتصدرين",
@@ -19,39 +19,39 @@
     "modePoints": "النقاط",
     "modeTasks": "مهام",
     "you": "أنت",
-    "tasksAndAvg": "مهام {{tasks}} • متوسط {{avg}} لكل مهمة",
-    "available": "{{count}} available",
-    "points_one": "{{count}} point",
+    "tasksAndAvg": "{{tasks}} مهام • متوسط {{avg}} لكل مهمة",
+    "available": "{{count}} نقطة متاحة",
+    "points_one": "{{count}} نقطة",
     "points_other": "{{count}} نقاط"
   },
   "tabs": {
     "short7d": "7D",
     "short6m": "6 ميغا",
     "shortAll": "الكل",
-    "days7": "7 أيام",
+    "days7": "آخر 7 أيام",
     "months6": "6 أشهر",
     "allTime": "كل الوقت",
     "short30d": "30D",
-    "days30": "30 أيام"
+    "days30": "آخر 30 يومًا"
   },
   "filter": {
-    "analysisTitle": "الفلتر والتحليل",
-    "title": "نقاط الفلتر",
+    "analysisTitle": "تصفية النقاط وتحليلها",
+    "title": "تصفية النقاط",
     "showFor": "إظهار النقاط لـ:",
     "timePeriod": "الفترة الزمنية:"
   },
   "cards": {
     "available": {
-      "title": "متوفر",
-      "subtext": "جاهز للاسترداد"
+      "title": "متاح",
+      "subtext": "جاهز للاستبدال"
     },
     "redeemed": {
-      "title": "استبدلت",
-      "subtext": "مستخدم من قبل"
+      "title": "مستبدلة",
+      "subtext": "تم استخدامها"
     },
     "total": {
       "title": "المجموع",
-      "subtext": "كل الوقت المكتسبة"
+      "subtext": "المكتسبة طوال الوقت"
     },
     "period": {
       "title": "نقاط الفترة",
@@ -62,9 +62,9 @@
     }
   },
   "summary": {
-    "showingFor": "عرض النقاط ل",
+    "showingFor": "عرض النقاط لـ",
     "unknownUser": "مستخدم غير معروف",
-    "overThe": "فوق",
+    "overThe": "خلال",
     "allTime": "كل الوقت",
     "last6Months": "آخر 6 أشهر",
     "lastDays_one": "آخر {{count}} يوم",
