@@ -700,14 +700,14 @@
   "realtime": {
     "titleSse": "Echtzeit-Aktualisierungen (SSE)",
     "subtitleSse": "Sofortige Benachrichtigungen über Server-Sent Events erhalten",
-      "basicPlanDescription": "Echtzeitaktualisierungen (SSE) sind im Basic-Tarif nicht verfügbar. Wechsle zu Plus, um sofort über Änderungen an Aufgaben benachrichtigt zu werden.",
-      "disabledDescription": "Echtzeitaktualisierungen (SSE) sind deaktiviert. Aktiviere sie, um Änderungen zu sehen, wenn du oder andere Kreismitglieder Aufgaben erledigen, überspringen oder bearbeiten.",
-      "connectedDescription": "Echtzeitaktualisierungen (SSE) funktionieren. Du siehst Änderungen sofort, wenn du oder andere Kreismitglieder Aufgaben erledigen, überspringen oder bearbeiten.",
-      "connectingDescription": "Verbindung zu den Echtzeitaktualisierungen (SSE) wird hergestellt...",
-      "errorDescription": "Echtzeitaktualisierungen (SSE) sind aktiviert, funktionieren aber nicht: {{error}}",
-      "disconnectedDescription": "Echtzeitaktualisierungen (SSE) sind aktiviert, aber derzeit nicht verbunden.",
-      "enableLabel": "Echtzeitaktualisierungen (SSE) aktivieren",
-      "statusLabel": "Status:"
+    "basicPlanDescription": "Echtzeitaktualisierungen (SSE) sind im Basic-Tarif nicht verfügbar. Wechsle zu Plus, um sofort über Änderungen an Aufgaben benachrichtigt zu werden.",
+    "disabledDescription": "Echtzeitaktualisierungen (SSE) sind deaktiviert. Aktiviere sie, um Änderungen zu sehen, wenn du oder andere Kreismitglieder Aufgaben erledigen, überspringen oder bearbeiten.",
+    "connectedDescription": "Echtzeitaktualisierungen (SSE) funktionieren. Du siehst Änderungen sofort, wenn du oder andere Kreismitglieder Aufgaben erledigen, überspringen oder bearbeiten.",
+    "connectingDescription": "Verbindung zu den Echtzeitaktualisierungen (SSE) wird hergestellt...",
+    "errorDescription": "Echtzeitaktualisierungen (SSE) sind aktiviert, funktionieren aber nicht: {{error}}",
+    "disconnectedDescription": "Echtzeitaktualisierungen (SSE) sind aktiviert, aber derzeit nicht verbunden.",
+    "enableLabel": "Echtzeitaktualisierungen (SSE) aktivieren",
+    "statusLabel": "Status:"
   },
   "nativeCancel": {
     "title": "Abonnement kündigen",
