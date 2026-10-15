@@ -44,6 +44,9 @@ project(':capacitor-share').projectDir = new File('../node_modules/@capacitor/sh
 include ':capacitor-status-bar'
 project(':capacitor-status-bar').projectDir = new File('../node_modules/@capacitor/status-bar/android')
 
+include ':capawesome-capacitor-badge'
+project(':capawesome-capacitor-badge').projectDir = new File('../node_modules/@capawesome/capacitor-badge/android')
+
 include ':capgo-capacitor-document-scanner'
 project(':capgo-capacitor-document-scanner').projectDir = new File('../node_modules/@capgo/capacitor-document-scanner/android')
 

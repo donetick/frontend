@@ -22,6 +22,7 @@ import { KeyboardShortcutScopeProvider } from './contexts/KeyboardShortcutScopeC
 import { NavBarTitleProvider } from './contexts/NavBarTitleContext'
 import { PaywallProvider } from './contexts/PaywallContext'
 import SSEProvider from './contexts/SSEContext'
+import useAppBadgeSync from './hooks/useAppBadgeSync'
 import { AuthProvider } from './hooks/useAuth.jsx'
 import useOnboardingGate from './hooks/useOnboardingGate'
 import useStatusBar from './hooks/useStatusBar'
@@ -134,6 +135,7 @@ const AppContent = () => {
   const location = useLocation()
   useSyncOnReconnect()
   useAnalyticsIdentity()
+  useAppBadgeSync()
 
   // Every route renders through this Outlet, so one listener here gives crash
   // reports the trail that led to the failure.
