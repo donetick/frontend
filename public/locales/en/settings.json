@@ -432,10 +432,37 @@
   },
   "bridge": {
     "title": "Donetick Bridge",
-    "description": "Donetick Bridge relays push notifications to the official Donetick mobile app through Firebase, so this self-hosted instance doesn't need its own Firebase project.",
-    "privacyNotice": "Notification content (title, body, and data) is relayed through Bridge only while a request is being processed and is never stored or logged. Bridge keeps only account, device, and delivery-count information.",
+    "description": "Connect your self-hosted instance to the official Donetick app and deliver reliable native push notifications without maintaining your own stack for it",
+    "heroEyebrow": "Built for self-hosters",
+    "heroTitle": "Keep control. Stay connected.",
+    "connectedBadge": "Bridge is active",
+    "benefits": {
+      "native": {
+        "title": "Native notifications",
+        "description": "Reach your household in the official iOS and Android apps."
+      },
+      "support": {
+        "title": "Support Donetick",
+        "description": "Your plan helps fund continued development and maintenance."
+      },
+      "simple": {
+        "title": "No Firebase setup",
+        "description": "Skip provider credentials and keep your self-hosted setup simple."
+      }
+    },
+    "privacyTitle": "Private by design",
+    "privacyNotice": "Notification content (title, body, and data) is relayed only while a request is processed and is never stored or logged. Bridge keeps only account, device, and delivery-count information.",
     "adminOnly": "Only a Donetick administrator can configure Bridge.",
-    "notConnected": "Not connected",
+    "notConnected": "Not connected yet",
+    "checkingStatus": "Checking your Bridge connection…",
+    "connectionTitle": "Your connection",
+    "connectTitle": "Connect Bridge",
+    "credentialsTitle": "Enter your instance credentials",
+    "steps": {
+      "1": "Create your Bridge account",
+      "2": "Add this Donetick instance",
+      "3": "Paste the issued credentials"
+    },
     "unnamedInstance": "Connected instance",
     "connectedAs": "Bridge account: {{email}}",
     "planFree": "Free plan",
@@ -468,7 +495,9 @@
     },
     "usage": {
       "notifications": "Notifications this period: {{used}} / {{limit}}",
-      "devices": "Active devices: {{used}} / {{limit}}"
+      "devices": "Active devices: {{used}} / {{limit}}",
+      "notificationsLabel": "Notifications this period",
+      "devicesLabel": "Active devices"
     },
     "errors": {
       "title": "Bridge error",

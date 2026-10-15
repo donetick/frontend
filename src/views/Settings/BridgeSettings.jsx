@@ -1,24 +1,33 @@
 import {
-  CheckCircle,
-  CloudOff,
-  CloudQueue,
-  ContentCopy,
-  OpenInNew,
-  Sync,
-  Warning,
+  ArrowForwardRounded,
+  CheckCircleRounded,
+  CloudDoneRounded,
+  CloudOffRounded,
+  FavoriteRounded,
+  KeyRounded,
+  LaunchRounded,
+  NotificationsActiveRounded,
+  RefreshRounded,
+  SecurityRounded,
+  SyncRounded,
+  WarningRounded,
 } from '@mui/icons-material'
 import {
   Alert,
   Box,
   Button,
-  Card,
   Chip,
   Divider,
+  FormControl,
+  FormHelperText,
+  FormLabel,
   Input,
   LinearProgress,
+  Sheet,
   Stack,
   Typography,
 } from '@mui/joy'
+import PropTypes from 'prop-types'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -35,21 +44,9 @@ import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import SettingsLayout from './SettingsLayout'
 
 const DEFAULT_BASE_URL = 'https://bridge.donetick.com'
-
-// The owner-facing Bridge web app (signup, login, instance management,
-// Stripe checkout/billing portal) -- a separate app/origin from the API
-// base above, see donetick-bridge/web and deploy/Caddyfile's
-// app.bridge.example.internal site block. This is where "Upgrade"/"Manage
-// billing" and new-account signup actually happen; this settings page only
-// stores the instanceId/instanceToken it issues.
 const BRIDGE_WEB_URL =
   import.meta.env.VITE_BRIDGE_WEB_URL || 'https://connect.donetick.com'
 
-// Maps Core's internal/bridge.Handler error `code` field (see
-// donetick-core internal/bridge/handler.go errorStatusCode) to a
-// translation key under settings.bridge.errors.*. Kept as an explicit
-// allow-list so an unrecognized code always falls back to a generic
-// message rather than silently showing nothing.
 const ERROR_CODE_KEYS = {
   REVOKED_TOKEN: 'revokedToken',
   SERVICE_UNAVAILABLE: 'serviceUnavailable',
@@ -65,23 +62,303 @@ const emptyForm = {
   instanceToken: '',
 }
 
-/**
- * Administrator-only settings for connecting this self-hosted Donetick
- * instance to Donetick Bridge, the hosted push-notification relay. Core
- * proxies every call here through its own /api/v1/bridge/* endpoints --
- * this page never talks to Bridge directly and never persists the
- * instance token in the browser (it is submitted once per
- * connect/rotate action and never stored client-side; Core is the only
- * place that holds it, encrypted-at-rest is a known gap noted in
- * donetick-bridge/work-log.md Phase 5).
- */
+const heroBackground =
+  'linear-gradient(145deg, var(--joy-palette-background-surface) 30%, var(--joy-palette-primary-softBg) 140%)'
+
+const surfaceSx = {
+  bgcolor: 'background.surface',
+  border: '1px solid',
+  borderColor: 'divider',
+  borderRadius: 'xl',
+}
+
+const benefitItems = [
+  {
+    key: 'native',
+    icon: NotificationsActiveRounded,
+  },
+  {
+    key: 'support',
+    icon: FavoriteRounded,
+  },
+  {
+    key: 'simple',
+    icon: SecurityRounded,
+  },
+]
+
+const BenefitCard = ({ benefitKey, icon: Icon, t }) => (
+  <Box
+    sx={{
+      display: 'flex',
+      flex: 1,
+      gap: 1.25,
+      minWidth: { sm: 0 },
+      p: { xs: 1.5, sm: 0 },
+      borderRadius: { xs: 'lg', sm: 0 },
+      bgcolor: { xs: 'background.level1', sm: 'transparent' },
+    }}
+  >
+    <Box
+      sx={{
+        alignItems: 'center',
+        bgcolor: 'primary.softBg',
+        borderRadius: '50%',
+        color: 'primary.plainColor',
+        display: 'flex',
+        flex: '0 0 auto',
+        height: 36,
+        justifyContent: 'center',
+        width: 36,
+        '& svg': { fontSize: 19 },
+      }}
+    >
+      <Icon />
+    </Box>
+    <Box sx={{ minWidth: 0 }}>
+      <Typography level='title-sm'>
+        {t(`bridge.benefits.${benefitKey}.title`)}
+      </Typography>
+      <Typography level='body-xs' textColor='text.secondary' sx={{ mt: 0.25 }}>
+        {t(`bridge.benefits.${benefitKey}.description`)}
+      </Typography>
+    </Box>
+  </Box>
+)
+
+BenefitCard.propTypes = {
+  benefitKey: PropTypes.string.isRequired,
+  icon: PropTypes.elementType.isRequired,
+  t: PropTypes.func.isRequired,
+}
+
+const UsageMeter = ({ label, limit, used }) => {
+  const percentage = Math.min(100, (used / (limit || 1)) * 100)
+  return (
+    <Box sx={{ flex: 1, minWidth: 0 }}>
+      <Box
+        sx={{
+          alignItems: 'baseline',
+          display: 'flex',
+          justifyContent: 'space-between',
+          mb: 0.75,
+        }}
+      >
+        <Typography level='body-xs' textColor='text.secondary'>
+          {label}
+        </Typography>
+        <Typography level='title-sm'>
+          {used}
+          <Typography level='body-xs' textColor='text.tertiary'>
+            {' '}
+            / {limit}
+          </Typography>
+        </Typography>
+      </Box>
+      <LinearProgress
+        determinate
+        value={percentage}
+        color={percentage >= 90 ? 'warning' : 'primary'}
+        sx={{ borderRadius: 'sm', height: 6 }}
+      />
+    </Box>
+  )
+}
+
+UsageMeter.propTypes = {
+  label: PropTypes.string.isRequired,
+  limit: PropTypes.number,
+  used: PropTypes.number,
+}
+
+const ConnectForm = ({
+  form,
+  onSubmit,
+  setForm,
+  submitLabel,
+  submitting,
+  t,
+}) => (
+  <Stack spacing={2}>
+    <FormControl required>
+      <FormLabel>{t('bridge.connectForm.baseUrl')}</FormLabel>
+      <Input
+        value={form.baseUrl}
+        onChange={event =>
+          setForm(current => ({ ...current, baseUrl: event.target.value }))
+        }
+        placeholder={DEFAULT_BASE_URL}
+      />
+    </FormControl>
+    <FormControl required>
+      <FormLabel>{t('bridge.connectForm.instanceId')}</FormLabel>
+      <Input
+        value={form.instanceId}
+        onChange={event =>
+          setForm(current => ({ ...current, instanceId: event.target.value }))
+        }
+        placeholder={t('bridge.connectForm.instanceIdPlaceholder')}
+      />
+    </FormControl>
+    <FormControl required>
+      <FormLabel>{t('bridge.connectForm.instanceToken')}</FormLabel>
+      <Input
+        type='password'
+        value={form.instanceToken}
+        onChange={event =>
+          setForm(current => ({
+            ...current,
+            instanceToken: event.target.value,
+          }))
+        }
+        placeholder={t('bridge.connectForm.instanceTokenPlaceholder')}
+        startDecorator={<KeyRounded fontSize='small' />}
+      />
+      <FormHelperText>
+        {t('bridge.connectForm.instanceTokenHint')}
+      </FormHelperText>
+    </FormControl>
+    <Button
+      size='lg'
+      loading={submitting}
+      onClick={onSubmit}
+      endDecorator={<ArrowForwardRounded />}
+      sx={{ alignSelf: { xs: 'stretch', sm: 'flex-start' }, px: 3 }}
+    >
+      {submitLabel}
+    </Button>
+  </Stack>
+)
+
+ConnectForm.propTypes = {
+  form: PropTypes.shape({
+    baseUrl: PropTypes.string.isRequired,
+    instanceId: PropTypes.string.isRequired,
+    instanceToken: PropTypes.string.isRequired,
+  }).isRequired,
+  onSubmit: PropTypes.func.isRequired,
+  setForm: PropTypes.func.isRequired,
+  submitLabel: PropTypes.string.isRequired,
+  submitting: PropTypes.bool.isRequired,
+  t: PropTypes.func.isRequired,
+}
+
+const BridgeIntro = ({ connected, loading, t }) => (
+  <>
+    <Sheet
+      sx={{
+        ...surfaceSx,
+        background: heroBackground,
+        overflow: 'hidden',
+        p: { xs: 2.25, sm: 3 },
+        position: 'relative',
+      }}
+    >
+      <Box
+        sx={{
+          bgcolor: 'primary.softBg',
+          borderRadius: '50%',
+          filter: 'blur(2px)',
+          height: 180,
+          opacity: 0.55,
+          position: 'absolute',
+          right: -80,
+          top: -90,
+          width: 180,
+        }}
+      />
+      <Box sx={{ maxWidth: 560, position: 'relative' }}>
+        <Chip
+          size='sm'
+          variant='soft'
+          color={connected ? 'success' : 'primary'}
+          startDecorator={
+            connected ? <CheckCircleRounded /> : <CloudDoneRounded />
+          }
+        >
+          {connected ? t('bridge.connectedBadge') : t('bridge.heroEyebrow')}
+        </Chip>
+        <Typography
+          level='h2'
+          sx={{
+            fontSize: { xs: '1.65rem', sm: '2rem' },
+            letterSpacing: '-0.03em',
+            lineHeight: 1.15,
+            mt: 1.5,
+            textWrap: 'balance',
+          }}
+        >
+          {t('bridge.heroTitle')}
+        </Typography>
+        <Typography
+          level='body-md'
+          textColor='text.secondary'
+          sx={{ maxWidth: '58ch', mt: 1, textWrap: 'pretty' }}
+        >
+          {t('bridge.description')}
+        </Typography>
+        {!connected && !loading && (
+          <Button
+            component='a'
+            href={`${BRIDGE_WEB_URL}/signup`}
+            target='_blank'
+            rel='noreferrer'
+            endDecorator={<LaunchRounded />}
+            sx={{ mt: 2.25 }}
+          >
+            {t('bridge.getStarted')}
+          </Button>
+        )}
+      </Box>
+    </Sheet>
+
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: { xs: 'column', sm: 'row' },
+        gap: { xs: 1, sm: 2.5 },
+        py: { xs: 2, sm: 2.5 },
+      }}
+    >
+      {benefitItems.map(item => (
+        <BenefitCard
+          key={item.key}
+          benefitKey={item.key}
+          icon={item.icon}
+          t={t}
+        />
+      ))}
+    </Box>
+
+    <Alert
+      color='neutral'
+      variant='soft'
+      startDecorator={<SecurityRounded />}
+      sx={{ mb: 3 }}
+    >
+      <Box>
+        <Typography level='title-sm'>{t('bridge.privacyTitle')}</Typography>
+        <Typography level='body-xs' textColor='text.secondary'>
+          {t('bridge.privacyNotice')}
+        </Typography>
+      </Box>
+    </Alert>
+  </>
+)
+
+BridgeIntro.propTypes = {
+  connected: PropTypes.bool.isRequired,
+  loading: PropTypes.bool.isRequired,
+  t: PropTypes.func.isRequired,
+}
+
 const BridgeSettings = () => {
   const { t } = useTranslation('settings')
   const { data: userProfile } = useUserProfile()
   const { showNotification } = useNotification()
 
   const [loading, setLoading] = useState(true)
-  const [status, setStatus] = useState(null) // { connected, ... } | null
+  const [status, setStatus] = useState(null)
   const [errorCode, setErrorCode] = useState(null)
   const [form, setForm] = useState(emptyForm)
   const [submitting, setSubmitting] = useState(false)
@@ -93,9 +370,9 @@ const BridgeSettings = () => {
   const refreshStatus = () => {
     setLoading(true)
     GetBridgeStatus()
-      .then(async resp => {
-        const data = await resp.json().catch(() => null)
-        if (resp.ok) {
+      .then(async response => {
+        const data = await response.json().catch(() => null)
+        if (response.ok) {
           setStatus(data)
           setErrorCode(null)
         } else {
@@ -111,19 +388,11 @@ const BridgeSettings = () => {
   }
 
   useEffect(() => {
+    // Status is remote state; this effect intentionally starts its first fetch.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (isAdmin) refreshStatus()
     else setLoading(false)
   }, [isAdmin])
-
-  if (!isAdmin) {
-    return (
-      <SettingsLayout title={t('bridge.title')}>
-        <Alert color='warning' sx={{ mt: 2 }}>
-          {t('bridge.adminOnly')}
-        </Alert>
-      </SettingsLayout>
-    )
-  }
 
   const submitConnect = async (endpointFn, successMessage) => {
     if (!form.baseUrl || !form.instanceId || !form.instanceToken) {
@@ -136,9 +405,9 @@ const BridgeSettings = () => {
     }
     setSubmitting(true)
     try {
-      const resp = await endpointFn(form)
-      const data = await resp.json().catch(() => null)
-      if (resp.ok) {
+      const response = await endpointFn(form)
+      const data = await response.json().catch(() => null)
+      if (response.ok) {
         setStatus(data)
         setErrorCode(null)
         setForm(emptyForm)
@@ -177,8 +446,8 @@ const BridgeSettings = () => {
         setConfirmModalConfig({})
         if (!isConfirmed) return
         try {
-          const resp = await DisconnectBridge()
-          if (resp.ok) {
+          const response = await DisconnectBridge()
+          if (response.ok) {
             setStatus({ connected: false })
             setErrorCode(null)
             showNotification({
@@ -197,287 +466,370 @@ const BridgeSettings = () => {
     })
   }
 
+  if (!isAdmin) {
+    return (
+      <SettingsLayout title={t('bridge.title')}>
+        <Alert color='warning' sx={{ mt: 2, maxWidth: 760 }}>
+          {t('bridge.adminOnly')}
+        </Alert>
+      </SettingsLayout>
+    )
+  }
+
   const connected = Boolean(status?.connected)
   const usage = status?.usage
 
   return (
     <SettingsLayout title={t('bridge.title')}>
-      <Box className='grid gap-4 py-4' id='bridge'>
-        <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-          {t('bridge.description')}
-        </Typography>
-        <Alert color='neutral' variant='soft' startDecorator={<CloudQueue />}>
-          {t('bridge.privacyNotice')}
-        </Alert>
+      <Box id='bridge' sx={{ maxWidth: 760, pb: 4 }}>
+        <BridgeIntro connected={connected} loading={loading} t={t} />
 
         {loading ? (
-          <LinearProgress sx={{ maxWidth: 400 }} />
-        ) : connected ? (
-          <Card sx={{ maxWidth: 560, p: 2 }}>
-            <Stack
-              direction='row'
-              alignItems='center'
-              spacing={1}
+          <Sheet sx={{ ...surfaceSx, p: { xs: 2, sm: 2.5 } }}>
+            <Typography
+              level='body-sm'
+              textColor='text.secondary'
               sx={{ mb: 1 }}
             >
-              <CheckCircle color='success' />
-              <Typography level='title-md'>
-                {status.instanceName || t('bridge.unnamedInstance')}
-              </Typography>
-              <Chip
-                size='sm'
-                color={status.plan === 'free' ? 'neutral' : 'success'}
-                variant='soft'
-              >
-                {status.plan === 'free'
-                  ? t('bridge.planFree')
-                  : t('bridge.planPlus')}
-              </Chip>
-              {!status.ownerEmailVerified && (
-                <Chip size='sm' color='warning' variant='soft'>
-                  {t('bridge.emailUnverified')}
-                </Chip>
-              )}
-            </Stack>
-            <Typography level='body-sm' sx={{ color: 'text.secondary', mb: 1 }}>
-              {t('bridge.connectedAs', { email: status.ownerEmailMasked })}
+              {t('bridge.checkingStatus')}
             </Typography>
+            <LinearProgress />
+          </Sheet>
+        ) : connected ? (
+          <Box component='section'>
+            <Typography level='title-md' sx={{ fontWeight: 650, mb: 1.25 }}>
+              {t('bridge.connectionTitle')}
+            </Typography>
+            <Sheet sx={{ ...surfaceSx, overflow: 'hidden' }}>
+              <Box sx={{ p: { xs: 2, sm: 2.5 } }}>
+                <Box
+                  sx={{
+                    alignItems: { xs: 'flex-start', sm: 'center' },
+                    display: 'flex',
+                    flexDirection: { xs: 'column', sm: 'row' },
+                    gap: 1.5,
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <Box sx={{ alignItems: 'center', display: 'flex', gap: 1.5 }}>
+                    <Box
+                      sx={{
+                        bgcolor: 'success.softBg',
+                        borderRadius: '50%',
+                        color: 'success.plainColor',
+                        display: 'grid',
+                        flex: '0 0 auto',
+                        height: 44,
+                        placeItems: 'center',
+                        width: 44,
+                      }}
+                    >
+                      <CloudDoneRounded />
+                    </Box>
+                    <Box sx={{ minWidth: 0 }}>
+                      <Typography level='title-lg' noWrap>
+                        {status.instanceName || t('bridge.unnamedInstance')}
+                      </Typography>
+                      <Typography level='body-xs' textColor='text.secondary'>
+                        {t('bridge.connectedAs', {
+                          email: status.ownerEmailMasked,
+                        })}
+                      </Typography>
+                    </Box>
+                  </Box>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75 }}>
+                    <Chip
+                      size='sm'
+                      color={status.plan === 'free' ? 'neutral' : 'success'}
+                      variant='soft'
+                    >
+                      {status.plan === 'free'
+                        ? t('bridge.planFree')
+                        : t('bridge.planPlus')}
+                    </Chip>
+                    {!status.ownerEmailVerified && (
+                      <Chip size='sm' color='warning' variant='soft'>
+                        {t('bridge.emailUnverified')}
+                      </Chip>
+                    )}
+                  </Box>
+                </Box>
 
-            {usage && (
-              <Box sx={{ my: 2 }}>
-                <Typography level='body-xs' sx={{ mb: 0.5 }}>
-                  {t('bridge.usage.notifications', {
-                    used: usage.notificationsUsed,
-                    limit: usage.notificationsLimit,
-                  })}
-                </Typography>
-                <LinearProgress
-                  determinate
-                  value={Math.min(
-                    100,
-                    (usage.notificationsUsed /
-                      (usage.notificationsLimit || 1)) *
-                      100,
-                  )}
-                  sx={{ mb: 1.5 }}
-                />
-                <Typography level='body-xs' sx={{ mb: 0.5 }}>
-                  {t('bridge.usage.devices', {
-                    used: usage.activeDevices,
-                    limit: usage.deviceLimit,
-                  })}
-                </Typography>
-                <LinearProgress
-                  determinate
-                  value={Math.min(
-                    100,
-                    (usage.activeDevices / (usage.deviceLimit || 1)) * 100,
-                  )}
-                />
+                {usage && (
+                  <Box
+                    sx={{
+                      bgcolor: 'background.level1',
+                      borderRadius: 'lg',
+                      display: 'flex',
+                      flexDirection: { xs: 'column', sm: 'row' },
+                      gap: 2.5,
+                      mt: 2.5,
+                      p: 2,
+                    }}
+                  >
+                    <UsageMeter
+                      label={t('bridge.usage.notificationsLabel')}
+                      used={usage.notificationsUsed}
+                      limit={usage.notificationsLimit}
+                    />
+                    <Divider
+                      orientation='vertical'
+                      sx={{ display: { xs: 'none', sm: 'block' } }}
+                    />
+                    <UsageMeter
+                      label={t('bridge.usage.devicesLabel')}
+                      used={usage.activeDevices}
+                      limit={usage.deviceLimit}
+                    />
+                  </Box>
+                )}
               </Box>
-            )}
 
-            <Divider sx={{ my: 1.5 }} />
-
-            <Stack direction='row' spacing={1} flexWrap='wrap' useFlexGap>
-              {status.plan === 'free' && (
+              <Divider />
+              <Box
+                sx={{
+                  alignItems: { xs: 'stretch', sm: 'center' },
+                  bgcolor: 'background.level1',
+                  display: 'flex',
+                  flexDirection: { xs: 'column', sm: 'row' },
+                  flexWrap: 'wrap',
+                  gap: 1,
+                  p: 1.5,
+                }}
+              >
+                {status.plan === 'free' && (
+                  <Button
+                    size='sm'
+                    component='a'
+                    href={BRIDGE_WEB_URL}
+                    target='_blank'
+                    rel='noreferrer'
+                    endDecorator={<LaunchRounded />}
+                  >
+                    {t('bridge.upgrade')}
+                  </Button>
+                )}
                 <Button
                   size='sm'
-                  variant='solid'
-                  color='primary'
-                  endDecorator={<OpenInNew fontSize='small' />}
+                  variant='soft'
+                  color='neutral'
                   component='a'
                   href={BRIDGE_WEB_URL}
                   target='_blank'
                   rel='noreferrer'
+                  endDecorator={<LaunchRounded />}
                 >
-                  {t('bridge.upgrade')}
+                  {t('bridge.manageBilling')}
                 </Button>
-              )}
-              <Button
-                size='sm'
-                variant='outlined'
-                endDecorator={<OpenInNew fontSize='small' />}
-                component='a'
-                href={BRIDGE_WEB_URL}
-                target='_blank'
-                rel='noreferrer'
-              >
-                {t('bridge.manageBilling')}
-              </Button>
-              <Button
-                size='sm'
-                variant='outlined'
-                startDecorator={<Sync fontSize='small' />}
-                onClick={refreshStatus}
-              >
-                {t('bridge.refresh')}
-              </Button>
-              <Button
-                size='sm'
-                variant='outlined'
-                color='neutral'
-                onClick={() => setShowRotateForm(v => !v)}
-              >
-                {t('bridge.rotateCredential')}
-              </Button>
-              <Button
-                size='sm'
-                variant='outlined'
-                color='danger'
-                onClick={handleDisconnect}
-              >
-                {t('bridge.disconnect')}
-              </Button>
-            </Stack>
+                <Button
+                  size='sm'
+                  variant='plain'
+                  color='neutral'
+                  startDecorator={<RefreshRounded />}
+                  onClick={refreshStatus}
+                >
+                  {t('bridge.refresh')}
+                </Button>
+                <Button
+                  size='sm'
+                  variant='plain'
+                  color='neutral'
+                  startDecorator={<SyncRounded />}
+                  onClick={() => setShowRotateForm(value => !value)}
+                >
+                  {t('bridge.rotateCredential')}
+                </Button>
+                <Button
+                  size='sm'
+                  variant='plain'
+                  color='danger'
+                  onClick={handleDisconnect}
+                  sx={{ ml: { sm: 'auto' } }}
+                >
+                  {t('bridge.disconnect')}
+                </Button>
+              </Box>
 
-            <Typography level='body-xs' sx={{ color: 'text.tertiary', mt: 1 }}>
+              {showRotateForm && (
+                <Box sx={{ p: { xs: 2, sm: 2.5 } }}>
+                  <Typography level='title-md'>
+                    {t('bridge.rotateCredential')}
+                  </Typography>
+                  <Typography
+                    level='body-sm'
+                    textColor='text.secondary'
+                    sx={{ mb: 2, mt: 0.5 }}
+                  >
+                    {t('bridge.rotateInstructions')}
+                  </Typography>
+                  <Box sx={{ maxWidth: 460 }}>
+                    <ConnectForm
+                      t={t}
+                      form={form}
+                      setForm={setForm}
+                      submitting={submitting}
+                      onSubmit={() =>
+                        submitConnect(
+                          RotateBridgeCredential,
+                          t('bridge.rotatedTitle'),
+                        )
+                      }
+                      submitLabel={t('bridge.rotateCredential')}
+                    />
+                  </Box>
+                </Box>
+              )}
+            </Sheet>
+            <Typography
+              level='body-xs'
+              textColor='text.tertiary'
+              sx={{ mt: 1 }}
+            >
               {t('bridge.upgradeBillingNote')}
             </Typography>
-
-            {showRotateForm && (
-              <Box sx={{ mt: 2 }}>
-                <Divider sx={{ mb: 1.5 }} />
-                <Typography level='body-sm' sx={{ mb: 1 }}>
-                  {t('bridge.rotateInstructions')}
-                </Typography>
-                <ConnectForm
-                  t={t}
-                  form={form}
-                  setForm={setForm}
-                  submitting={submitting}
-                  onSubmit={() =>
-                    submitConnect(
-                      RotateBridgeCredential,
-                      t('bridge.rotatedTitle'),
-                    )
-                  }
-                  submitLabel={t('bridge.rotateCredential')}
-                />
-              </Box>
-            )}
-          </Card>
+          </Box>
         ) : (
-          <Card sx={{ maxWidth: 560, p: 2 }}>
-            <Stack
-              direction='row'
-              alignItems='center'
-              spacing={1}
-              sx={{ mb: 1 }}
+          <Box component='section'>
+            <Box
+              sx={{
+                alignItems: 'center',
+                display: 'flex',
+                gap: 1.25,
+                mb: 1.25,
+              }}
             >
-              <CloudOff color='neutral' />
-              <Typography level='title-md'>
-                {t('bridge.notConnected')}
-              </Typography>
-            </Stack>
+              <Box
+                sx={{
+                  bgcolor: 'neutral.softBg',
+                  borderRadius: '50%',
+                  color: 'neutral.plainColor',
+                  display: 'grid',
+                  height: 36,
+                  placeItems: 'center',
+                  width: 36,
+                }}
+              >
+                <CloudOffRounded fontSize='small' />
+              </Box>
+              <Box>
+                <Typography level='title-md'>
+                  {t('bridge.connectTitle')}
+                </Typography>
+                <Typography level='body-xs' textColor='text.secondary'>
+                  {t('bridge.notConnected')}
+                </Typography>
+              </Box>
+            </Box>
 
             {errorCode && errorCode !== 'DISABLED' && (
               <Alert
                 color='warning'
                 variant='soft'
-                startDecorator={<Warning />}
+                startDecorator={<WarningRounded />}
                 sx={{ mb: 1.5 }}
               >
                 {t(`bridge.errors.${ERROR_CODE_KEYS[errorCode] || 'generic'}`)}
               </Alert>
             )}
 
-            <Alert
-              color='primary'
-              variant='soft'
-              sx={{ mb: 1.5 }}
-              endDecorator={
-                <Button
-                  size='sm'
-                  variant='solid'
-                  endDecorator={<OpenInNew fontSize='small' />}
-                  component='a'
-                  href={`${BRIDGE_WEB_URL}/signup`}
-                  target='_blank'
-                  rel='noreferrer'
+            <Sheet sx={{ ...surfaceSx, p: { xs: 2, sm: 2.5 } }}>
+              <Box
+                sx={{
+                  display: 'grid',
+                  gap: { xs: 2.5, md: 4 },
+                  gridTemplateColumns: {
+                    xs: '1fr',
+                    md: 'minmax(0, 1fr) 180px',
+                  },
+                }}
+              >
+                <Box>
+                  <Typography level='title-lg'>
+                    {t('bridge.credentialsTitle')}
+                  </Typography>
+                  <Typography
+                    level='body-sm'
+                    textColor='text.secondary'
+                    sx={{ mb: 2.5, mt: 0.5 }}
+                  >
+                    {t('bridge.connectIntro')}
+                  </Typography>
+                  <ConnectForm
+                    t={t}
+                    form={form}
+                    setForm={setForm}
+                    submitting={submitting}
+                    onSubmit={() =>
+                      submitConnect(ConnectBridge, t('bridge.connectedTitle'))
+                    }
+                    submitLabel={t('bridge.connect')}
+                  />
+                </Box>
+
+                <Box
+                  sx={{
+                    borderLeft: { md: '1px solid' },
+                    borderColor: { md: 'divider' },
+                    display: 'flex',
+                    flexDirection: { xs: 'row', md: 'column' },
+                    gap: 2,
+                    pl: { md: 3 },
+                    pt: { xs: 0.5, md: 0 },
+                  }}
                 >
-                  {t('bridge.getStarted')}
-                </Button>
-              }
+                  {[1, 2, 3].map(step => (
+                    <Box
+                      key={step}
+                      sx={{
+                        display: 'flex',
+                        flex: { xs: 1, md: 'none' },
+                        gap: 1,
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          alignItems: 'center',
+                          bgcolor: 'primary.softBg',
+                          borderRadius: '50%',
+                          color: 'primary.plainColor',
+                          display: 'flex',
+                          flex: '0 0 auto',
+                          fontSize: '0.75rem',
+                          fontWeight: 700,
+                          height: 24,
+                          justifyContent: 'center',
+                          width: 24,
+                        }}
+                      >
+                        {step}
+                      </Box>
+                      <Typography level='body-xs' textColor='text.secondary'>
+                        {t(`bridge.steps.${step}`)}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
+            </Sheet>
+
+            <Button
+              component='a'
+              href={`${BRIDGE_WEB_URL}/signup`}
+              target='_blank'
+              rel='noreferrer'
+              variant='plain'
+              size='sm'
+              endDecorator={<LaunchRounded />}
+              sx={{ mt: 1, ml: -1 }}
             >
               {t('bridge.getStartedHint')}
-            </Alert>
-            <Typography
-              level='body-sm'
-              sx={{ color: 'text.secondary', mb: 1.5 }}
-            >
-              {t('bridge.connectIntro')}
-            </Typography>
-            <ConnectForm
-              t={t}
-              form={form}
-              setForm={setForm}
-              submitting={submitting}
-              onSubmit={() =>
-                submitConnect(ConnectBridge, t('bridge.connectedTitle'))
-              }
-              submitLabel={t('bridge.connect')}
-            />
-          </Card>
+            </Button>
+          </Box>
         )}
       </Box>
       <ConfirmationModal config={confirmModalConfig} />
     </SettingsLayout>
   )
 }
-
-const ConnectForm = ({
-  form,
-  onSubmit,
-  setForm,
-  submitLabel,
-  submitting,
-  t,
-}) => (
-  <Stack spacing={1.5} sx={{ maxWidth: 420 }}>
-    <Box>
-      <Typography level='body-xs' sx={{ mb: 0.5 }}>
-        {t('bridge.connectForm.baseUrl')}
-      </Typography>
-      <Input
-        value={form.baseUrl}
-        onChange={e => setForm(f => ({ ...f, baseUrl: e.target.value }))}
-        placeholder={DEFAULT_BASE_URL}
-      />
-    </Box>
-    <Box>
-      <Typography level='body-xs' sx={{ mb: 0.5 }}>
-        {t('bridge.connectForm.instanceId')}
-      </Typography>
-      <Input
-        value={form.instanceId}
-        onChange={e => setForm(f => ({ ...f, instanceId: e.target.value }))}
-        placeholder={t('bridge.connectForm.instanceIdPlaceholder')}
-      />
-    </Box>
-    <Box>
-      <Typography level='body-xs' sx={{ mb: 0.5 }}>
-        {t('bridge.connectForm.instanceToken')}
-      </Typography>
-      <Input
-        type='password'
-        value={form.instanceToken}
-        onChange={e => setForm(f => ({ ...f, instanceToken: e.target.value }))}
-        placeholder={t('bridge.connectForm.instanceTokenPlaceholder')}
-        startDecorator={<ContentCopy fontSize='small' sx={{ opacity: 0.4 }} />}
-      />
-      <Typography level='body-xs' sx={{ color: 'text.tertiary', mt: 0.5 }}>
-        {t('bridge.connectForm.instanceTokenHint')}
-      </Typography>
-    </Box>
-    <Button
-      loading={submitting}
-      onClick={onSubmit}
-      sx={{ alignSelf: 'flex-start' }}
-    >
-      {submitLabel}
-    </Button>
-  </Stack>
-)
 
 export default BridgeSettings
