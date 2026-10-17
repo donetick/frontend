@@ -32,25 +32,28 @@ const ensureRevenueCatConfigured = async appUserID => {
         throw new Error(`RevenueCat is not configured for ${platform}`)
       }
 
+      const nextAppUserID = String(appUserID)
       const { isConfigured } = await Purchases.isConfigured()
+
       if (!isConfigured) {
-        await Purchases.configure({ apiKey, appUserID: String(appUserID) })
-        return Purchases
+        await Purchases.configure({ apiKey, appUserID: nextAppUserID })
+        return
       }
 
       const { appUserID: currentAppUserID } = await Purchases.getAppUserID()
-      if (currentAppUserID !== String(appUserID)) {
-        await Purchases.logIn({ appUserID: String(appUserID) })
+      if (currentAppUserID !== nextAppUserID) {
+        await Purchases.logIn({ appUserID: nextAppUserID })
       }
-
-      return Purchases
     })()
   }
 
+  const pendingConfiguration = configurationPromise
   try {
-    return await configurationPromise
+    await pendingConfiguration
   } finally {
-    configurationPromise = null
+    if (configurationPromise === pendingConfiguration) {
+      configurationPromise = null
+    }
   }
 }
 
@@ -65,22 +68,21 @@ export const presentNativePaywall = async ({ appUserID, invoker }) => {
   })
 
   try {
-    const Purchases = await ensureRevenueCatConfigured(appUserID)
-    const { RevenueCatUI } = await import('@revenuecat/purchases-capacitor-ui')
+    // Never return a Capacitor plugin proxy from an async function. Promise
+    // resolution probes returned values for `.then`; Capacitor interprets that
+    // probe as a native `Purchases.then()` call and the flow stops before the
+    // paywall is presented.
+    await ensureRevenueCatConfigured(appUserID)
+    const [{ Purchases }, { RevenueCatUI }] = await Promise.all([
+      import('@revenuecat/purchases-capacitor'),
+      import('@revenuecat/purchases-capacitor-ui'),
+    ])
     const { current: offering } = await Purchases.getOfferings()
-
-    if (!offering) {
-      track('paywall_result', {
-        invoker: paywallInvoker,
-        result: 'NOT_PRESENTED',
-      })
-      return 'NOT_PRESENTED'
-    }
 
     let result
     try {
       ;({ result } = await RevenueCatUI.presentPaywall({
-        offering,
+        ...(offering ? { offering } : {}),
         customVariables: { paywall_invoker: paywallInvoker },
       }))
     } finally {
