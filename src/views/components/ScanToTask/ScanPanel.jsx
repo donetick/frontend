@@ -1,4 +1,5 @@
 import {
+  ArrowForward,
   CameraAlt,
   DocumentScanner,
   PhotoCamera,
@@ -16,6 +17,7 @@ import {
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import EmptyState from '../../../components/common/EmptyState'
 import { useScanToTask } from './useScanToTask'
 
 /**
@@ -104,6 +106,19 @@ const ScanPanel = ({
     () => fileInputRef.current?.click(),
     [fileInputRef],
   )
+
+  // The recovery path when OCR/AI couldn't identify a task: rather than
+  // leaving the user stuck on the error screen, hand the photo straight to
+  // the smart input as an attachment so they can finish the task by hand.
+  const continueWithoutTask = useCallback(() => {
+    onTaskExtracted({
+      taskName: null,
+      description: null,
+      dueDate: null,
+      attachmentImage: canKeepImage ? capturedImage : null,
+    })
+    onClose()
+  }, [onTaskExtracted, onClose, canKeepImage, capturedImage])
 
   // The one action the footer renders for the current phase; null while
   // processing (nothing to do but wait) and when done (the panel closes)
@@ -301,12 +316,12 @@ const ScanPanel = ({
             </Box>
           )}
 
-          <Typography level='body-sm' sx={{ opacity: 0.7 }}>
+          <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
             {ocrProgress > 0 && ocrProgress < 100
-              ? `Reading text… ${ocrProgress}%`
+              ? t('photoTask.readingTextProgress', { progress: ocrProgress })
               : ocrProgress >= 100
-                ? 'Identifying task with AI…'
-                : 'Starting…'}
+                ? t('photoTask.identifyingTask')
+                : t('photoTask.preparingScan')}
           </Typography>
 
           {ocrProgress > 0 && ocrProgress < 100 && (
@@ -322,27 +337,45 @@ const ScanPanel = ({
         </Box>
       )}
 
-      {/* ── Error phase ── */}
+      {/* ── Error phase ──
+          Retake (the fix-it path) stays the modal footer's primary action;
+          continuing without a task is the quieter, secondary path — same
+          hierarchy CircleSetupView uses for its "join instead" offer. */}
       {phase === 'error' && (
-        <Box sx={{ py: 2 }}>
+        <Box sx={{ py: 1 }}>
           {capturedImage && (
-            <img
-              src={capturedImage}
-              alt={t('photoTask.failedScan')}
-              style={{
-                width: '100%',
-                display: 'block',
-                borderRadius: 8,
-                maxHeight: 160,
-                objectFit: 'contain',
-                opacity: 0.4,
-                marginBottom: 12,
-              }}
-            />
+            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1 }}>
+              <img
+                src={capturedImage}
+                alt={t('photoTask.failedScan')}
+                style={{
+                  maxWidth: '60%',
+                  borderRadius: 8,
+                  maxHeight: 120,
+                  objectFit: 'contain',
+                  opacity: 0.5,
+                }}
+              />
+            </Box>
           )}
-          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-            <WarningAmber color='warning' sx={{ mt: 0.25, flexShrink: 0 }} />
-            <Typography level='body-sm'>{errorMsg}</Typography>
+          <EmptyState
+            size='sm'
+            variant='error'
+            icon={<WarningAmber />}
+            title={t('photoTask.failedTitle')}
+            description={errorMsg}
+            sx={{ py: 2 }}
+          />
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 0.5 }}>
+            <Button
+              variant='plain'
+              color='neutral'
+              size='sm'
+              endDecorator={<ArrowForward fontSize='small' />}
+              onClick={continueWithoutTask}
+            >
+              {t('photoTask.continueWithoutTask')}
+            </Button>
           </Box>
         </Box>
       )}

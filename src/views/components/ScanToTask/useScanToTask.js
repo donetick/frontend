@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { useDocumentScanner } from '../../../hooks/useDocumentScanner'
 import { localAIService } from '../../../service/LocalAIService'
@@ -99,6 +100,7 @@ async function extractTaskFromOCR(ocrText) {
 
 // phases: idle | capture | processing | done | error
 export function useScanToTask() {
+  const { t } = useTranslation('chores')
   const { isNativeScanner, scanDocument } = useDocumentScanner()
   const videoRef = useRef(null)
   const canvasRef = useRef(null)
@@ -148,14 +150,14 @@ export function useScanToTask() {
       }
 
       if (!text) {
-        setErrorMsg('No text found in image. Try a clearer photo.')
+        setErrorMsg(t('photoTask.noTextFound'))
         setPhase('error')
         return
       }
 
       const task = await extractTaskFromOCR(text)
       if (!task || !task.taskName) {
-        setErrorMsg('Could not identify a task. Try a different photo.')
+        setErrorMsg(t('photoTask.noTaskIdentified'))
         setPhase('error')
         return
       }
@@ -163,9 +165,10 @@ export function useScanToTask() {
       setTaskResult(task)
       setPhase('done')
     } catch (e) {
-      setErrorMsg(e.message || 'Processing failed.')
+      setErrorMsg(e.message || t('photoTask.processingFailed'))
       setPhase('error')
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const capture = useCallback(() => {
@@ -201,7 +204,11 @@ export function useScanToTask() {
     const { cancelled, error, image } = await scanDocument()
     if (cancelled) return
     if (error || !image) {
-      setErrorMsg(error ? `Scanner error: ${error}` : 'Scan failed.')
+      setErrorMsg(
+        error
+          ? t('photoTask.scannerError', { error })
+          : t('photoTask.scanFailed'),
+      )
       setPhase('error')
       return
     }
