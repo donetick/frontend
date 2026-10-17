@@ -58,6 +58,14 @@
         "title": "رموز API",
         "description": "أنشئ وأدر رموز الوصول للتكاملات الخارجية والوصول إلى API."
       },
+      "bridge": {
+        "title": "",
+        "description": ""
+      },
+      "calendar": {
+        "title": "",
+        "description": ""
+      },
       "storage": {
         "title": "إعدادات التخزين",
         "description": "انسخ بياناتك احتياطيًا واستعدها، وأدر التخزين المحلي وتفضيلات المزامنة."
@@ -121,6 +129,13 @@
     "description": "يرتبط حسابك تلقائيًا بدائرة عند إنشائها أو الانضمام إليها. ادعُ أصدقاءك بسهولة عبر مشاركة رمز الدائرة أو الرابط أدناه. وسيصلك إشعار هنا عندما يطلب أحدهم الانضمام إلى دائرتك.",
     "memberOf": "أنت جزء من {{name}}",
     "yourCircleCode": "رمز دائرتك هو:",
+    "pendingApprovalMessage": "",
+    "cancelRequest": "",
+    "cancelRequestTitle": "",
+    "cancelRequestMessage": "",
+    "cancelRequestButton": "",
+    "requestCancelled": "",
+    "cancelRequestFailed": "",
     "copyCode": "نسخ الرمز",
     "shareInvite": "مشاركة الدعوة",
     "codeCopied": "تم نسخ الرمز إلى الحافظة",
@@ -161,6 +176,12 @@
     "acceptRequestTitle": "قبول طلب الانضمام",
     "acceptRequestMessage": "هل تريد بالتأكيد قبول {{name}} (اسم المستخدم: {{username}}) للانضمام إلى دائرتك؟",
     "requestAccepted": "تم قبول الطلب بنجاح",
+    "decline": "",
+    "declineRequestTitle": "",
+    "declineRequestMessage": "",
+    "declineRequestButton": "",
+    "requestDeclined": "",
+    "declineRequestFailed": "",
     "or": "أو",
     "joinOtherDescription": "تريد الانضمام إلى دائرة شخص آخر؟ اطلب منه رمز الدائرة أو رابط الانضمام، ثم أدخل الرمز أدناه للانضمام.",
     "enterCircleCode": "أدخل رمز الدائرة:",
@@ -361,8 +382,9 @@
     "accessToken": "رمز الوصول",
     "description": "أنشئ رمزًا لاستخدامه مع API لتحديث الأشياء التي تُطلق المهام",
     "plusNotice": "رموز API غير متاحة في الخطة الأساسية. رقِّ إلى Plus لإنشاء رموز API للتكامل مع الأنظمة الخارجية وأتمتة مهامك.",
-    "showToken": "إظهار الرمز",
-    "hideToken": "إخفاء الرمز",
+    "tokenCreatedTitle": "",
+    "tokenCreatedWarning": "",
+    "copyToken": "",
     "removeTitle": "إزالة الرمز",
     "removeMessage": "هل تريد بالتأكيد إزالة {{name}}؟",
     "removedTitle": "تمت الإزالة",
@@ -371,6 +393,124 @@
     "generateNew": "إنشاء رمز جديد",
     "nameModalTitle": "امنح رمزك الجديد اسمًا يساعدك على تذكّره.",
     "generateToken": "إنشاء الرمز"
+  },
+  "calendar": {
+    "title": "",
+    "description": "",
+    "plusTitle": "",
+    "plusNotice": "",
+    "upgrade": "",
+    "activeTitle": "",
+    "activeStatus": "",
+    "urlLabel": "",
+    "copy": "",
+    "copied": "",
+    "copyFailed": "",
+    "createdAt": "",
+    "lastUsedAt": "",
+    "neverUsed": "",
+    "keepPrivateTitle": "",
+    "keepPrivateDescription": "",
+    "manageTitle": "",
+    "rotate": "",
+    "rotateTitle": "",
+    "rotateMessage": "",
+    "rotated": "",
+    "revoke": "",
+    "revokeTitle": "",
+    "revokeMessage": "",
+    "revoked": "",
+    "inactiveTitle": "",
+    "inactiveDescription": "",
+    "generate": "",
+    "generated": "",
+    "howToTitle": "",
+    "howToDescription": "",
+    "errorTitle": "",
+    "actionFailed": "",
+    "loadFailed": ""
+  },
+  "bridge": {
+    "title": "",
+    "description": "",
+    "heroEyebrow": "",
+    "freeToStart": "",
+    "heroTitle": "",
+    "pricingSummary": "",
+    "connectedBadge": "",
+    "benefits": {
+      "native": {
+        "title": "",
+        "description": ""
+      },
+      "support": {
+        "title": "",
+        "description": ""
+      },
+      "simple": {
+        "title": "",
+        "description": ""
+      }
+    },
+    "privacyTitle": "",
+    "privacyNotice": "",
+    "adminOnly": "",
+    "notConnected": "",
+    "checkingStatus": "",
+    "connectionTitle": "",
+    "connectTitle": "",
+    "credentialsTitle": "",
+    "steps": {
+      "1": "",
+      "2": "",
+      "3": ""
+    },
+    "unnamedInstance": "",
+    "connectedAs": "",
+    "planFree": "",
+    "planPlus": "",
+    "emailUnverified": "",
+    "getStarted": "",
+    "getStartedHint": "",
+    "connectIntro": "",
+    "connect": "",
+    "connectedTitle": "",
+    "rotateCredential": "",
+    "rotateInstructions": "",
+    "rotatedTitle": "",
+    "disconnect": "",
+    "disconnectTitle": "",
+    "disconnectMessage": "",
+    "disconnectedTitle": "",
+    "refresh": "",
+    "upgrade": "",
+    "manageBilling": "",
+    "upgradeBillingNote": "",
+    "connectForm": {
+      "baseUrl": "",
+      "instanceId": "",
+      "instanceIdPlaceholder": "",
+      "instanceToken": "",
+      "instanceTokenPlaceholder": "",
+      "instanceTokenHint": "",
+      "required": ""
+    },
+    "usage": {
+      "notifications": "",
+      "devices": "",
+      "notificationsLabel": "",
+      "devicesLabel": ""
+    },
+    "errors": {
+      "title": "",
+      "generic": "",
+      "revokedToken": "",
+      "serviceUnavailable": "",
+      "rateLimited": "",
+      "quotaExceeded": "",
+      "deviceLimitReached": "",
+      "validationError": ""
+    }
   },
   "storage": {
     "title": "إعدادات التخزين",
@@ -523,7 +663,7 @@
     "formats": {
       "mdy": "MM/DD/YYYY (الولايات المتحدة)",
       "dmy": "DD/MM/YYYY (أوروبا)",
-      "ymd": "YYYY-MM-DD (ISO)",
+      "ymd": "",
       "long": "تنسيق طويل (مثال: 1 يناير 2024)",
       "short": "تنسيق قصير (مثال: 1 ينا 2024)"
     },
@@ -597,7 +737,8 @@
     "reasonThingTriggers": "تشغيل المهام تلقائيًا عند تغيير حالة شيء ما هي ميزة Plus.",
     "reasonProjectLimit": "تتضمن خطتك الحالية {{projectLimit}} مشاريع. قم بالترقية إلى Plus لإنشاء العدد الذي تحتاجه.",
     "reasonQuickFilterLimit": "تتضمن خطتك الحالية {{filterLimit}} فلاتر سريعة محفوظة. قم بالترقية إلى Plus للحصول على فلاتر غير محدودة.",
-    "reasonFileUpload": "إرفاق الملفات والصور هي ميزة Plus. قم بالترقية إلى Plus لإضافة الصور والمسح الضوئي والمستندات إلى مهامك."
+    "reasonFileUpload": "إرفاق الملفات والصور هي ميزة Plus. قم بالترقية إلى Plus لإضافة الصور والمسح الضوئي والمستندات إلى مهامك.",
+    "reasonCalendarSync": ""
   },
   "childUsers": {
     "errNameRequired": "اسم الحساب الفرعي مطلوب",
