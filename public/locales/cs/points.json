@@ -1,76 +1,86 @@
 {
-  "redeem": "Uplatnit body",
+  "redeem": "",
+  "sections": {
+    "overview": ""
+  },
   "redeemModal": {
-    "redeemButton": "Uplatnit",
-    "pointsAvailable": "Dostupné body: {{count}}",
-    "pointsToRedeem": "Body k uplatnění",
-    "placeholder": "Zadejte body...",
-    "cannotExceed": "Nelze překročit dostupné body",
-    "quickAdd": "Rychle přidat:",
-    "aboutToRedeem": "Chystáte se uplatnit",
-    "amount": "{{count}} b.",
-    "remaining": "Zbývá: {{count}} b."
+    "redeemButton": "",
+    "pointsAvailable": "",
+    "pointsToRedeem": "",
+    "placeholder": "",
+    "cannotExceed": "",
+    "quickAdd": "",
+    "aboutToRedeem": "",
+    "amount": "",
+    "remaining": ""
   },
   "leaderboard": {
-    "titlePoints": "Žebříček bodů",
-    "titleTasks": "Žebříček úkolů",
-    "subtitlePoints": "Pořadí podle bodů získaných ve zvoleném období",
-    "subtitleTasks": "Pořadí podle úkolů splněných ve zvoleném období",
-    "modePoints": "Body",
-    "modeTasks": "Úkoly",
-    "you": "Vy",
-    "tasksAndAvg": "Úkoly: {{tasks}} • průměrně {{avg}} na úkol",
-    "available": "Dostupné: {{count}}",
-    "points_one": "{{count}} bod",
-    "points_other": "{{count}} bodů"
+    "titlePoints": "",
+    "titleTasks": "",
+    "subtitlePoints": "",
+    "subtitleTasks": "",
+    "modePoints": "",
+    "modeTasks": "",
+    "you": "",
+    "tasksAndAvg": "",
+    "available": "",
+    "points_one": "",
+    "points_few": "",
+    "points_many": "",
+    "points_other": ""
   },
   "tabs": {
-    "short7d": "7 d",
-    "short6m": "6 m",
-    "shortAll": "Vše",
-    "days7": "7 dní",
-    "months6": "6 měsíců",
-    "allTime": "Celkově",
-    "short30d": "30D",
-    "days30": "30 dnů"
+    "short7d": "",
+    "short6m": "",
+    "shortAll": "",
+    "days7": "",
+    "months6": "",
+    "allTime": "",
+    "short30d": "",
+    "days30": ""
   },
   "filter": {
-    "analysisTitle": "Filtr a analýza",
-    "title": "Filtrovat body",
-    "showFor": "Zobrazit body pro:",
-    "timePeriod": "Období:"
+    "analysisTitle": "",
+    "title": "",
+    "showFor": "",
+    "timePeriod": ""
   },
   "cards": {
     "available": {
-      "title": "Dostupné",
-      "subtext": "Připraveno k uplatnění"
+      "title": "",
+      "subtext": ""
     },
     "redeemed": {
-      "title": "Uplatněné",
-      "subtext": "Dříve použité"
+      "title": "",
+      "subtext": ""
     },
     "total": {
-      "title": "Celkem",
-      "subtext": "Získáno celkově"
+      "title": "",
+      "subtext": ""
     },
     "period": {
-      "title": "Body za období",
-      "allTime": "Celkově",
-      "last6Months": "Posledních 6 měsíců",
-      "lastDays_one": "Poslední {{count}} den",
-      "lastDays_other": "Posledních {{count}} dní"
+      "title": "",
+      "allTime": "",
+      "last6Months": "",
+      "lastDays_one": "",
+      "lastDays_few": "",
+      "lastDays_many": "",
+      "lastDays_other": ""
     }
   },
   "summary": {
-    "showingFor": "Zobrazeny body pro",
-    "unknownUser": "Neznámý uživatel",
-    "overThe": "za období",
-    "allTime": "celkově",
-    "last6Months": "posledních 6 měsíců",
-    "lastDays_one": "poslední {{count}} den",
-    "lastDays_other": "posledních {{count}} dní"
+    "showingFor": "",
+    "selectUser": "",
+    "unknownUser": "",
+    "overThe": "",
+    "allTime": "",
+    "last6Months": "",
+    "lastDays_one": "",
+    "lastDays_few": "",
+    "lastDays_many": "",
+    "lastDays_other": ""
   },
   "trend": {
-    "title": "Vývoj bodů"
+    "title": ""
   }
 }
