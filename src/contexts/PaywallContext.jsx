@@ -3,6 +3,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from 'react'
@@ -12,6 +13,7 @@ import { useUserProfile } from '../queries/UserQueries'
 import { isPlusAccount } from '../utils/Helpers'
 import {
   isNativePurchasePlatform,
+  prepareNativePaywall,
   presentNativePaywall,
 } from '../utils/NativePaywall'
 
@@ -57,6 +59,17 @@ export const PaywallProvider = ({ children }) => {
   // allowance) must wait for this, while the click-time gates can treat an
   // unknown plan as free — the worst case there is a dismissable modal.
   const isPlanKnown = Boolean(userProfile)
+
+  useEffect(() => {
+    // Native imports are local app assets, but RevenueCat configuration and
+    // offering retrieval may require store/network work. Warm both once the
+    // signed-in free user is known so the first paywall opens promptly.
+    if (!userProfile?.id || isPlus || !isNativePurchasePlatform()) return
+
+    prepareNativePaywall(userProfile.id).catch(error =>
+      console.error('Failed to prepare native paywall:', error),
+    )
+  }, [isPlus, userProfile?.id])
 
   const showPaywall = useCallback(
     nextReason => {
