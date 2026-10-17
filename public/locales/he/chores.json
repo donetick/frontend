@@ -627,7 +627,15 @@
     "dueDate": "תאריך יעד: {{date}}",
     "hideRawText": "הסתר טקסט גולמי",
     "showRawText": "הצג טקסט גולמי",
-    "cameraUnavailableUseUpload": "המצלמה אינה זמינה — השתמש בהעלאה במקום"
+    "cameraUnavailableUseUpload": "המצלמה אינה זמינה — השתמש בהעלאה במקום",
+    "noTextFound": "לא נמצא טקסט בתמונה. נסה תמונה ברורה יותר.",
+    "noTaskIdentified": "לא ניתן לזהות משימה. נסה תמונה אחרת.",
+    "processingFailed": "העיבוד נכשל.",
+    "scannerError": "שגיאת סורק: {{error}}",
+    "scanFailed": "הסריקה נכשלה.",
+    "preparingScan": "מתחיל…",
+    "failedTitle": "לא נמצאה משימה",
+    "continueWithoutTask": "המשך ללא משימה"
   },
   "descriptionPlaceholder": "",
   "notificationTemplate": {
@@ -793,7 +801,10 @@
     "processing": "",
     "create": "",
     "descriptionLabel": "Description:",
-    "subtasksLabel": "Subtasks:"
+    "subtasksLabel": "Subtasks:",
+    "createAnother": "צור עוד אחת",
+    "createAndAddAnother": "צור והוסף עוד",
+    "createAndClose": "צור וסגור"
   },
   "repeat": {
     "days": {

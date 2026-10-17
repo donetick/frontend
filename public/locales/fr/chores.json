@@ -627,7 +627,15 @@
     "dueDate": "Échéance : {{date}}",
     "hideRawText": "Masquer le texte brut",
     "showRawText": "Afficher le texte brut",
-    "cameraUnavailableUseUpload": "Caméra non disponible — utilisez Téléverser à la place"
+    "cameraUnavailableUseUpload": "Caméra non disponible — utilisez Téléverser à la place",
+    "noTextFound": "Aucun texte trouvé dans l’image. Essayez une photo plus nette.",
+    "noTaskIdentified": "Impossible d’identifier une tâche. Essayez une autre photo.",
+    "processingFailed": "Échec du traitement.",
+    "scannerError": "Erreur du scanner : {{error}}",
+    "scanFailed": "Échec de la numérisation.",
+    "preparingScan": "Démarrage…",
+    "failedTitle": "Aucune tâche trouvée",
+    "continueWithoutTask": "Continuer sans tâche"
   },
   "descriptionPlaceholder": "Saisissez une description...",
   "notificationTemplate": {
@@ -793,7 +801,10 @@
     "processing": "Traitement en cours",
     "create": "Créer",
     "descriptionLabel": "Description :",
-    "subtasksLabel": "Sous-tâches :"
+    "subtasksLabel": "Sous-tâches :",
+    "createAnother": "Créer une autre",
+    "createAndAddAnother": "Créer et en ajouter une autre",
+    "createAndClose": "Créer et fermer"
   },
   "repeat": {
     "days": {

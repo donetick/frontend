@@ -186,6 +186,10 @@ const SmartTaskTitleInput = ({
       }
     } else {
       if (e.key === 'Enter') {
+        // Cmd/Ctrl+Enter is handled by a window-level shortcut (create &
+        // close) — leave it alone here so that handler is the only one to
+        // fire, instead of this one creating-and-continuing at the same time.
+        if (e.ctrlKey || e.metaKey) return
         e.preventDefault()
         if (e.shiftKey) {
           if (onShiftEnterPressed) {

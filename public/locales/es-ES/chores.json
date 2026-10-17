@@ -113,7 +113,10 @@
     "title": "Crear nueva tarea",
     "useTask": "Usar tarea",
     "descriptionLabel": "Description:",
-    "subtasksLabel": "Subtasks:"
+    "subtasksLabel": "Subtasks:",
+    "createAnother": "Crear otra",
+    "createAndAddAnother": "Crear y añadir otra",
+    "createAndClose": "Crear y cerrar"
   },
   "advancedOptions": {
     "assignStrategy": "Estrategia de asignación",
@@ -877,7 +880,15 @@
     "dueDate": "Vence: {{date}}",
     "hideRawText": "Ocultar texto sin procesar",
     "showRawText": "Mostrar texto sin procesar",
-    "cameraUnavailableUseUpload": "Cámara no disponible — usa Subir en su lugar"
+    "cameraUnavailableUseUpload": "Cámara no disponible — usa Subir en su lugar",
+    "noTextFound": "No se encontró texto en la imagen. Prueba con una foto más nítida.",
+    "noTaskIdentified": "No se pudo identificar una tarea. Prueba con otra foto.",
+    "processingFailed": "Error al procesar.",
+    "scannerError": "Error del escáner: {{error}}",
+    "scanFailed": "Error al escanear.",
+    "preparingScan": "Iniciando…",
+    "failedTitle": "No se encontró ninguna tarea",
+    "continueWithoutTask": "Continuar sin tarea"
   },
   "priority": {
     "high": "Alta",

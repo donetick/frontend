@@ -627,7 +627,15 @@
     "dueDate": "Vervalt: {{date}}",
     "hideRawText": "Ruwe tekst verbergen",
     "showRawText": "Ruwe tekst weergeven",
-    "cameraUnavailableUseUpload": "Camera niet beschikbaar — gebruik in plaats daarvan Uploaden"
+    "cameraUnavailableUseUpload": "Camera niet beschikbaar — gebruik in plaats daarvan Uploaden",
+    "noTextFound": "Geen tekst gevonden in de afbeelding. Probeer een scherpere foto.",
+    "noTaskIdentified": "Kan geen taak herkennen. Probeer een andere foto.",
+    "processingFailed": "Verwerking mislukt.",
+    "scannerError": "Scannerfout: {{error}}",
+    "scanFailed": "Scannen mislukt.",
+    "preparingScan": "Starten…",
+    "failedTitle": "Geen taak gevonden",
+    "continueWithoutTask": "Doorgaan zonder taak"
   },
   "descriptionPlaceholder": "",
   "notificationTemplate": {
@@ -793,7 +801,10 @@
     "processing": "",
     "create": "",
     "descriptionLabel": "Description:",
-    "subtasksLabel": "Subtasks:"
+    "subtasksLabel": "Subtasks:",
+    "createAnother": "Nog een maken",
+    "createAndAddAnother": "Maken en nog een toevoegen",
+    "createAndClose": "Maken en sluiten"
   },
   "repeat": {
     "days": {

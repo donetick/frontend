@@ -627,7 +627,15 @@
     "dueDate": "截止日期：{{date}}",
     "hideRawText": "隐藏原始文本",
     "showRawText": "显示原始文本",
-    "cameraUnavailableUseUpload": "相机不可用 — 请改用上传"
+    "cameraUnavailableUseUpload": "相机不可用 — 请改用上传",
+    "noTextFound": "未在图片中找到文字。请换一张更清晰的照片。",
+    "noTaskIdentified": "无法识别任务。请换一张照片试试。",
+    "processingFailed": "处理失败。",
+    "scannerError": "扫描器错误：{{error}}",
+    "scanFailed": "扫描失败。",
+    "preparingScan": "正在启动…",
+    "failedTitle": "未找到任务",
+    "continueWithoutTask": "不使用任务继续"
   },
   "descriptionPlaceholder": "Enter description...",
   "notificationTemplate": {
@@ -793,7 +801,10 @@
     "processing": "Processing",
     "create": "Create",
     "descriptionLabel": "Description:",
-    "subtasksLabel": "Subtasks:"
+    "subtasksLabel": "Subtasks:",
+    "createAnother": "再创建一个",
+    "createAndAddAnother": "创建并再添加一个",
+    "createAndClose": "创建并关闭"
   },
   "repeat": {
     "days": {

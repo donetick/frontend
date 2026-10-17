@@ -627,7 +627,15 @@
     "dueDate": "Termin: {{date}}",
     "hideRawText": "Ukryj surowy tekst",
     "showRawText": "Pokaż surowy tekst",
-    "cameraUnavailableUseUpload": "Aparat niedostępny — użyj zamiast tego przesyłania"
+    "cameraUnavailableUseUpload": "Aparat niedostępny — użyj zamiast tego przesyłania",
+    "noTextFound": "Nie znaleziono tekstu na zdjęciu. Spróbuj wyraźniejszego zdjęcia.",
+    "noTaskIdentified": "Nie udało się rozpoznać zadania. Spróbuj innego zdjęcia.",
+    "processingFailed": "Przetwarzanie nie powiodło się.",
+    "scannerError": "Błąd skanera: {{error}}",
+    "scanFailed": "Skanowanie nie powiodło się.",
+    "preparingScan": "Uruchamianie…",
+    "failedTitle": "Nie znaleziono zadania",
+    "continueWithoutTask": "Kontynuuj bez zadania"
   },
   "descriptionPlaceholder": "Wprowadź opis...",
   "notificationTemplate": {
@@ -793,7 +801,10 @@
     "processing": "Przetwarzanie",
     "create": "Utwórz",
     "descriptionLabel": "Description:",
-    "subtasksLabel": "Subtasks:"
+    "subtasksLabel": "Subtasks:",
+    "createAnother": "Utwórz kolejne",
+    "createAndAddAnother": "Utwórz i dodaj kolejne",
+    "createAndClose": "Utwórz i zamknij"
   },
   "repeat": {
     "days": {

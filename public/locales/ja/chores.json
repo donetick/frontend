@@ -627,7 +627,15 @@
     "dueDate": "期限: {{date}}",
     "hideRawText": "元のテキストを非表示",
     "showRawText": "元のテキストを表示",
-    "cameraUnavailableUseUpload": "カメラが利用できません — 代わりにアップロードを使用してください"
+    "cameraUnavailableUseUpload": "カメラが利用できません — 代わりにアップロードを使用してください",
+    "noTextFound": "画像からテキストが見つかりませんでした。もっと鮮明な写真をお試しください。",
+    "noTaskIdentified": "タスクを特定できませんでした。別の写真をお試しください。",
+    "processingFailed": "処理に失敗しました。",
+    "scannerError": "スキャナーエラー: {{error}}",
+    "scanFailed": "スキャンに失敗しました。",
+    "preparingScan": "開始中…",
+    "failedTitle": "タスクが見つかりませんでした",
+    "continueWithoutTask": "タスクなしで続行"
   },
   "descriptionPlaceholder": "",
   "notificationTemplate": {
@@ -793,7 +801,10 @@
     "processing": "",
     "create": "",
     "descriptionLabel": "Description:",
-    "subtasksLabel": "Subtasks:"
+    "subtasksLabel": "Subtasks:",
+    "createAnother": "続けて作成",
+    "createAndAddAnother": "作成して続けて追加",
+    "createAndClose": "作成して閉じる"
   },
   "repeat": {
     "days": {
