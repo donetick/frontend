@@ -1,0 +1,55 @@
+{
+  "blurb": "",
+  "redeem": "",
+  "notEnoughPoints": "",
+  "approve": "",
+  "reject": "",
+  "actions": {
+    "menu": ""
+  },
+  "tabs": {
+    "store": "",
+    "requests": ""
+  },
+  "status": {
+    "pending": "",
+    "approved": "",
+    "rejected": ""
+  },
+  "delete": {
+    "title": "",
+    "message": ""
+  },
+  "redeemConfirm": {
+    "title": "",
+    "message": ""
+  },
+  "requests": {
+    "emptyTitle": "",
+    "emptyDescription": ""
+  },
+  "modal": {
+    "errorEmptyName": "",
+    "errorInvalidCost": "",
+    "saveFailedTitle": "",
+    "saveFailedMessage": "",
+    "name": "",
+    "description": "",
+    "pointsCost": "",
+    "active": "",
+    "editTitle": "",
+    "addTitle": "",
+    "saveChanges": "",
+    "addReward": ""
+  },
+  "view": {
+    "subtitle": "",
+    "availableBalance": "",
+    "pointsLabel": "",
+    "rewardFallbackDescription": "",
+    "emptyTitle": "",
+    "emptyDescription": "",
+    "createReward": ""
+  },
+  "pointsCost_other": ""
+}

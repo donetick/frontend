@@ -1,14 +1,14 @@
 {
-  "save": "שמור",
-  "cancel": "ביטול",
-  "delete": "מחיקה",
-  "edit": "עריכה",
-  "close": "סגירה",
-  "confirm": "אישור",
-  "loading": "טוען...",
-  "error": "שגיאה",
-  "success": "הצלחה",
-  "warning": "אזהרה",
+  "save": "",
+  "cancel": "",
+  "delete": "",
+  "edit": "",
+  "close": "",
+  "confirm": "",
+  "loading": "",
+  "error": "",
+  "success": "",
+  "warning": "",
   "colors": {
     "Salmon": "",
     "Teal": "",
@@ -35,85 +35,87 @@
     "Ash": "",
     "Sand": ""
   },
-  "refresh": "רענון",
-  "copy": "העתקה",
-  "copied": "הועתק!",
-  "settings": "הגדרות",
-  "yes": "כן",
-  "no": "לא",
-  "back": "חזרה",
-  "backToCalendar": "חזרה ללוח השנה",
-  "logout": "התנתקות",
-  "version": "גרסה",
+  "refresh": "",
+  "copy": "",
+  "copied": "",
+  "settings": "",
+  "yes": "",
+  "no": "",
+  "back": "",
+  "backToCalendar": "",
+  "logout": "",
+  "version": "",
   "navigation": {
-    "search": "חיפוש",
-    "allTasks": "משימות",
-    "home": "סקירה",
-    "tasks": "משימות",
+    "search": "",
+    "allTasks": "",
+    "home": "",
+    "tasks": "",
     "more": "",
-    "mobileNavigation": "ניווט ראשי",
-    "archived": "בארכיון",
-    "things": "דברים",
-    "labels": "תגיות",
-    "projects": "פרויקטים",
-    "filters": "מסננים",
-    "activities": "פעילויות",
-    "points": "נקודות",
-    "settings": "הגדרות",
+    "mobileNavigation": "",
+    "archived": "",
+    "things": "",
+    "labels": "",
+    "projects": "",
+    "filters": "",
+    "activities": "",
+    "points": "",
+    "rewards": "",
+    "settings": "",
     "reportBug": "",
-    "openMenu": "פתח תפריט",
-    "collapseMenu": "כווץ תפריט",
-    "expandMenu": "הרחב תפריט",
-    "primaryNavigation": "ניווט ראשי",
-    "profile": "פרופיל"
+    "openMenu": "",
+    "collapseMenu": "",
+    "expandMenu": "",
+    "primaryNavigation": "",
+    "profile": ""
   },
   "search": {
-    "title": "חיפוש",
-    "placeholder": "חיפוש ב-Donetick",
-    "inputAriaLabel": "חיפוש במשימות, בהיסטוריה, בפרויקטים, בתגיות ובהגדרות",
-    "deviceNote": "חיפוש בתוכן הזמין במכשיר הזה",
-    "escape": "Esc",
-    "recent": "חיפושים אחרונים",
+    "title": "",
+    "placeholder": "",
+    "inputAriaLabel": "",
+    "deviceNote": "",
+    "escape": "",
+    "recent": "",
     "empty": {
-      "title": "אין התאמות ישירות",
-      "subtitle": "עדיין תוכלו לסנן את רשימת המשימות באמצעות החיפוש הזה.",
+      "title": "",
+      "subtitle": "",
       "actionsSubtitle": ""
     },
     "groups": {
-      "tasks": "משימות",
-      "history": "היסטוריה",
-      "projects": "פרויקטים",
-      "labels": "תגיות",
-      "people": "אנשים",
-      "settings": "הגדרות",
-      "actions": "פעולות מהירות"
+      "tasks": "",
+      "history": "",
+      "projects": "",
+      "labels": "",
+      "people": "",
+      "settings": "",
+      "actions": ""
     },
     "actions": {
-      "quickAction": "פעולה מהירה",
-      "navigation": "ניווט",
-      "createTask": "יצירת משימה",
+      "quickAction": "",
+      "navigation": "",
+      "createTask": "",
       "createLabel": "",
       "createProject": "",
       "createFilter": "",
-      "viewAllTasks": "הצגת כל המשימות",
-      "viewArchivedTasks": "הצגת משימות שבארכיון",
+      "viewAllTasks": "",
+      "viewArchivedTasks": "",
       "viewThings": "",
       "viewLabels": "",
       "viewProjects": "",
       "viewFilters": "",
       "viewActivities": "",
       "viewPoints": "",
-      "openSettings": "פתיחת הגדרות",
-      "filterTasks": "הצגת משימות התואמות ל־„{{query}}“",
-      "filterTasksSubtitle": "סינון רשימת המשימות"
+      "openSettings": "",
+      "filterTasks": "",
+      "filterTasksSubtitle": ""
     },
     "footer": {
-      "navigate": "ניווט",
-      "open": "פתיחה",
-      "results_one": "{{count}} תוצאה",
-      "results_other": "{{count}} תוצאות",
-      "typeToSearch": "הקלידו כדי לחפש",
-      "slashHint": ""
+      "navigate": "",
+      "open": "",
+      "typeToSearch": "",
+      "slashHint": "",
+      "results_one": "",
+      "results_two": "",
+      "results_other": ""
     },
     "modes": {
       "actions": {
@@ -130,49 +132,49 @@
     "acknowledge": ""
   },
   "feedback": {
-    "later": "אולי מאוחר יותר",
+    "later": "",
     "sentiment": {
-      "title": "איך Donetick עובד עבורכם?",
-      "subtitle": "התשובה שלכם עוזרת לנו להחליט מה לפתח בהמשך.",
+      "title": "",
+      "subtitle": "",
       "options": {
-        "love": "אני אוהב/ת את זה",
-        "okay": "בסדר",
-        "issues": "נתקלתי בבעיות"
+        "love": "",
+        "okay": "",
+        "issues": ""
       }
     },
     "categories": {
-      "bugs": "באגים",
-      "missingFeature": "תכונה חסרה",
-      "tooComplicated": "מסובך מדי",
-      "slow": "איטי",
-      "notifications": "התראות",
-      "ai": "AI",
-      "other": "אחר"
+      "bugs": "",
+      "missingFeature": "",
+      "tooComplicated": "",
+      "slow": "",
+      "notifications": "",
+      "ai": "",
+      "other": ""
     },
     "details": {
-      "title": "מה נוכל לשפר?",
-      "messageLabel": "ספרו לנו עוד",
-      "messagePlaceholder": "מה קרה, או מה היה הופך את השימוש לטוב יותר?",
-      "contextNote": "נצרף את גרסת האפליקציה, המכשיר והפלטפורמה כדי שנוכל לשחזר בעיות.",
-      "submit": "שליחת משוב",
-      "contextNoteSelfHosted": "אתם משתמשים בשרת עצמאי, לכן שום דבר לא נשלח מהשרת שלכם — נפתח עבורכם דיווח GitHub מלא מראש, שתוכלו לבדוק ולערוך לפני השליחה.",
-      "submitSelfHosted": "המשך ל-GitHub"
+      "title": "",
+      "messageLabel": "",
+      "messagePlaceholder": "",
+      "contextNote": "",
+      "submit": "",
+      "contextNoteSelfHosted": "",
+      "submitSelfHosted": ""
     },
     "review": {
-      "title": "שמחים שאתם נהנים מ-Donetick!",
-      "subtitle": "דירוג או כוכב עוזרים לאנשים אחרים למצוא את Donetick.",
-      "github": "מתן כוכב ב-GitHub",
-      "appStore": "דירוג ב-App Store",
-      "playStore": "דירוג ב-Google Play"
+      "title": "",
+      "subtitle": "",
+      "github": "",
+      "appStore": "",
+      "playStore": ""
     },
     "thanks": {
-      "title": "תודה על המשוב",
-      "subtitle": "אנחנו קוראים כל תגובה והיא עוזרת לנו להחליט על מה לעבוד בהמשך."
+      "title": "",
+      "subtitle": ""
     },
     "github": {
-      "title": "דיווח ב-GitHub",
-      "subtitle": "מילאנו עבורכם דיווח עם ההערות ופרטי הגרסה. שום דבר עדיין לא נשלח — תוכלו לבדוק את הדיווח ולפרסם אותו כשתהיו מוכנים.",
-      "open": "פתיחת הדיווח"
+      "title": "",
+      "subtitle": "",
+      "open": ""
     }
   },
   "done": "",
@@ -201,7 +203,7 @@
   "loadingSlow": "",
   "navigateBack": "",
   "bottomNav": "",
-  "profile": "פרופיל",
+  "profile": "",
   "autocompletePlaceholder": "",
   "errorScreen": {
     "title": "",
@@ -225,7 +227,7 @@
     "invitePeople": "",
     "addMembers": "",
     "sidePanelSettings": "",
-    "sidePanelSettingsDescription": "התאמה אישית של פריסה וכרטיסים",
+    "sidePanelSettingsDescription": "",
     "planFree": "",
     "planPlus": "",
     "planPlusExpiring": "",
@@ -330,29 +332,31 @@
     "checkingServer": "",
     "retryingIn": "",
     "syncNow": "",
-    "pendingSyncLabel_one": "",
-    "pendingSyncLabel_other": "",
     "pendingActionsTitle": "",
+    "cancelActionAria": "",
+    "pendingSyncLabel_one": "",
+    "pendingSyncLabel_two": "",
+    "pendingSyncLabel_other": "",
     "actionsWaitingToSync_one": "",
-    "actionsWaitingToSync_other": "",
-    "cancelActionAria": ""
+    "actionsWaitingToSync_two": "",
+    "actionsWaitingToSync_other": ""
   },
   "attachments": "",
   "fileNumbered": "",
   "noAttachmentsTitle": "",
   "noAttachmentsDescription": "",
   "kbSize": "",
-  "logoAlt": "לוגו",
+  "logoAlt": "",
   "notification": {
-    "error": "שגיאה",
-    "success": "הצלחה",
-    "undoneSuccessfully": "בוטל בהצלחה",
-    "warning": "אזהרה",
-    "information": "מידע",
-    "title": "התראה",
-    "unknown": "התראה לא ידועה",
-    "undo": "בטל",
-    "dismiss": "סגור"
+    "error": "",
+    "success": "",
+    "undoneSuccessfully": "",
+    "warning": "",
+    "information": "",
+    "title": "",
+    "unknown": "",
+    "undo": "",
+    "dismiss": ""
   },
   "onboarding": {
     "sources": {
@@ -361,7 +365,7 @@
       "type": ""
     },
     "voiceWave": {
-      "listening": "מאזין…"
+      "listening": ""
     },
     "capture": {
       "voiceCaption": "",
@@ -512,7 +516,7 @@
     "collecting": "",
     "privacyNote": "",
     "send": "",
-    "cancel": "ביטול",
+    "cancel": "",
     "notNow": "",
     "sentTitle": "",
     "sentBody": "",
@@ -522,9 +526,9 @@
     "githubTitle": "",
     "githubBody": "",
     "openIssue": "",
-    "copied": "הועתק",
+    "copied": "",
     "copyInstead": "",
-    "close": "סגירה"
+    "close": ""
   },
   "circleSetup": {
     "inviteTitle": "",
@@ -538,7 +542,7 @@
     "joinInstead": "",
     "codePlaceholder": "",
     "joinButton": "",
-    "back": "חזרה",
+    "back": "",
     "codeCopied": "",
     "linkCopied": "",
     "requestSentTitle": "",
@@ -574,11 +578,9 @@
     "moreCount": ""
   },
   "filterBar": {
-    "filtersButton": "מסננים",
+    "filtersButton": "",
     "clearAllButton": "",
     "doneButton": "",
-    "showResults_one": "",
-    "showResults_other": "",
     "selectedCount": "",
     "dateRangeFallback": "",
     "fromDate": "",
@@ -589,7 +591,10 @@
     "presetLast7Days": "",
     "presetThisMonth": "",
     "presetLast30Days": "",
-    "presetLast3Months": ""
+    "presetLast3Months": "",
+    "showResults_one": "",
+    "showResults_two": "",
+    "showResults_other": ""
   },
   "workspaceReady": {
     "allSetNamed": "",
@@ -608,15 +613,18 @@
     "verdict": {
       "late": {
         "title_one": "",
+        "title_two": "",
         "title_other": ""
       },
       "review": {
         "title": "",
         "body_one": "",
+        "body_two": "",
         "body_other": ""
       },
       "today": {
         "title_one": "",
+        "title_two": "",
         "title_other": ""
       },
       "clear": {
@@ -667,34 +675,41 @@
     "circle": {
       "title": "",
       "action": "",
-      "open_one": "",
-      "open_other": "",
-      "late_one": "",
-      "late_other": "",
-      "done_one": "",
-      "done_other": "",
       "caughtUp": "",
       "emptyTitle": "",
       "emptyBody": "",
-      "emptyAction": ""
+      "emptyAction": "",
+      "open_one": "",
+      "open_two": "",
+      "open_other": "",
+      "late_one": "",
+      "late_two": "",
+      "late_other": "",
+      "done_one": "",
+      "done_two": "",
+      "done_other": ""
     },
     "projects": {
-      "title": "פרויקטים",
+      "title": "",
       "action": "",
+      "clear": "",
       "tasks_one": "",
+      "tasks_two": "",
       "tasks_other": "",
       "tasksOverdue_one": "",
+      "tasksOverdue_two": "",
       "tasksOverdue_other": "",
       "tasksUnplanned_one": "",
-      "tasksUnplanned_other": "",
-      "clear": ""
+      "tasksUnplanned_two": "",
+      "tasksUnplanned_other": ""
     },
     "filters": {
-      "title": "מסננים",
+      "title": "",
       "action": "",
+      "clear": "",
       "tasks_one": "",
-      "tasks_other": "",
-      "clear": ""
+      "tasks_two": "",
+      "tasks_other": ""
     },
     "capture": {
       "placeholder": "",

@@ -1,14 +1,14 @@
 {
-  "save": "Save",
-  "cancel": "Cancel",
-  "delete": "Delete",
-  "edit": "Edit",
-  "close": "Close",
-  "confirm": "Confirm",
-  "loading": "Loading...",
-  "error": "Error",
-  "success": "Success",
-  "warning": "Warning",
+  "save": "",
+  "cancel": "",
+  "delete": "",
+  "edit": "",
+  "close": "",
+  "confirm": "",
+  "loading": "",
+  "error": "",
+  "success": "",
+  "warning": "",
   "colors": {
     "Salmon": "",
     "Teal": "",
@@ -35,85 +35,85 @@
     "Ash": "",
     "Sand": ""
   },
-  "refresh": "Refresh",
-  "copy": "Copy",
-  "copied": "Copied!",
-  "settings": "Settings",
-  "yes": "Yes",
-  "no": "No",
-  "back": "Back",
-  "backToCalendar": "Back to Calendar",
-  "logout": "Logout",
-  "version": "Version",
+  "refresh": "",
+  "copy": "",
+  "copied": "",
+  "settings": "",
+  "yes": "",
+  "no": "",
+  "back": "",
+  "backToCalendar": "",
+  "logout": "",
+  "version": "",
   "navigation": {
-    "search": "搜索",
-    "allTasks": "任务",
-    "home": "概览",
+    "search": "",
+    "allTasks": "",
+    "home": "",
     "tasks": "",
     "more": "",
     "mobileNavigation": "",
-    "archived": "Archived",
-    "things": "Things",
-    "labels": "Labels",
-    "projects": "Projects",
-    "filters": "Filters",
-    "activities": "Activities",
-    "points": "Points",
-    "settings": "Settings",
-    "reportBug": "Report a Bug",
-    "openMenu": "打开菜单",
-    "collapseMenu": "收起菜单",
-    "expandMenu": "展开菜单",
-    "primaryNavigation": "主导航",
-    "profile": "个人资料"
+    "archived": "",
+    "things": "",
+    "labels": "",
+    "projects": "",
+    "filters": "",
+    "activities": "",
+    "points": "",
+    "rewards": "",
+    "settings": "",
+    "reportBug": "",
+    "openMenu": "",
+    "collapseMenu": "",
+    "expandMenu": "",
+    "primaryNavigation": "",
+    "profile": ""
   },
   "search": {
-    "title": "搜索",
-    "placeholder": "搜索 Donetick",
-    "inputAriaLabel": "搜索任务、历史、项目、标签和设置",
-    "deviceNote": "正在搜索此设备上可用的内容",
-    "escape": "Esc",
-    "recent": "最近",
+    "title": "",
+    "placeholder": "",
+    "inputAriaLabel": "",
+    "deviceNote": "",
+    "escape": "",
+    "recent": "",
     "empty": {
-      "title": "没有直接匹配的结果",
-      "subtitle": "你仍然可以用此搜索筛选任务列表。",
+      "title": "",
+      "subtitle": "",
       "actionsSubtitle": ""
     },
     "groups": {
-      "tasks": "任务",
-      "history": "备注",
-      "projects": "项目",
-      "labels": "标签",
-      "people": "成员",
-      "settings": "设置",
-      "actions": "快捷操作"
+      "tasks": "",
+      "history": "",
+      "projects": "",
+      "labels": "",
+      "people": "",
+      "settings": "",
+      "actions": ""
     },
     "actions": {
-      "quickAction": "快捷操作",
-      "navigation": "导航",
-      "createTask": "创建任务",
+      "quickAction": "",
+      "navigation": "",
+      "createTask": "",
       "createLabel": "",
       "createProject": "",
       "createFilter": "",
-      "viewAllTasks": "查看所有任务",
-      "viewArchivedTasks": "查看已归档任务",
+      "viewAllTasks": "",
+      "viewArchivedTasks": "",
       "viewThings": "",
       "viewLabels": "",
       "viewProjects": "",
       "viewFilters": "",
       "viewActivities": "",
       "viewPoints": "",
-      "openSettings": "打开设置",
-      "filterTasks": "显示匹配“{{query}}”的任务",
-      "filterTasksSubtitle": "筛选任务列表"
+      "openSettings": "",
+      "filterTasks": "",
+      "filterTasksSubtitle": ""
     },
     "footer": {
-      "navigate": "导航",
-      "open": "打开",
-      "results_one": "{{count}} result",
-      "results_other": "{{count}} 个结果",
-      "typeToSearch": "输入以搜索",
-      "slashHint": ""
+      "navigate": "",
+      "open": "",
+      "typeToSearch": "",
+      "slashHint": "",
+      "results_other": ""
     },
     "modes": {
       "actions": {
@@ -123,67 +123,67 @@
     }
   },
   "policyUpdate": {
-    "title": "We've updated our Privacy Policy and Terms",
-    "subtitle": "Please take a moment to review them. By continuing to use Donetick, you accept the updated documents.",
-    "readPrivacy": "Privacy Policy",
-    "readTerms": "Terms",
-    "acknowledge": "Got it"
+    "title": "",
+    "subtitle": "",
+    "readPrivacy": "",
+    "readTerms": "",
+    "acknowledge": ""
   },
   "feedback": {
-    "later": "Maybe later",
+    "later": "",
     "sentiment": {
-      "title": "How's Donetick working for you?",
-      "subtitle": "Your answer helps us decide what to build next.",
+      "title": "",
+      "subtitle": "",
       "options": {
-        "love": "Love it",
-        "okay": "It's okay",
-        "issues": "Having issues"
+        "love": "",
+        "okay": "",
+        "issues": ""
       }
     },
     "categories": {
-      "bugs": "Bugs",
-      "missingFeature": "Missing feature",
-      "tooComplicated": "Too complicated",
-      "slow": "Slow",
-      "notifications": "Notifications",
-      "ai": "AI",
-      "other": "Other"
+      "bugs": "",
+      "missingFeature": "",
+      "tooComplicated": "",
+      "slow": "",
+      "notifications": "",
+      "ai": "",
+      "other": ""
     },
     "details": {
-      "title": "What could we improve?",
-      "messageLabel": "Tell us more",
-      "messagePlaceholder": "What happened, or what would make this better?",
-      "contextNote": "We'll include your app version, device and platform so we can reproduce issues.",
-      "submit": "Send feedback",
-      "contextNoteSelfHosted": "You're on a self-hosted instance, so nothing is sent from your server — we'll open a pre-filled GitHub issue you can review and edit first.",
-      "submitSelfHosted": "Continue to GitHub"
+      "title": "",
+      "messageLabel": "",
+      "messagePlaceholder": "",
+      "contextNote": "",
+      "submit": "",
+      "contextNoteSelfHosted": "",
+      "submitSelfHosted": ""
     },
     "review": {
-      "title": "Glad you're enjoying it!",
-      "subtitle": "A rating or a star helps other people find Donetick.",
-      "github": "Star on GitHub",
-      "appStore": "Rate on the App Store",
-      "playStore": "Rate on Google Play"
+      "title": "",
+      "subtitle": "",
+      "github": "",
+      "appStore": "",
+      "playStore": ""
     },
     "thanks": {
-      "title": "Thanks for the feedback",
-      "subtitle": "We read every response and it shapes what we work on next."
+      "title": "",
+      "subtitle": ""
     },
     "github": {
-      "title": "Report it on GitHub",
-      "subtitle": "We've filled in an issue with your notes and version details. Nothing has been sent yet — review it and post when you're ready.",
-      "open": "Open the issue"
+      "title": "",
+      "subtitle": "",
+      "open": ""
     }
   },
-  "done": "Done",
-  "clearAll": "Clear all",
+  "done": "",
+  "clearAll": "",
   "upload": {
-    "quotaTitle": "Storage Quota Exceeded",
-    "quotaMessage": "You have exceeded your quota for uploading files.",
-    "tooLargeTitle": "File Too Large",
-    "tooLargeMessage": "The file you are trying to upload is too large.",
-    "deniedTitle": "Permission Denied",
-    "deniedMessage": "You do not have permission to upload files.",
+    "quotaTitle": "",
+    "quotaMessage": "",
+    "tooLargeTitle": "",
+    "tooLargeMessage": "",
+    "deniedTitle": "",
+    "deniedMessage": "",
     "plusFeatureTitle": "",
     "plusFeatureMessage": "",
     "upgradeTitle": "",
@@ -192,27 +192,27 @@
     "failedMessage": "",
     "processingMessage": ""
   },
-  "getStarted": "Get Started!",
-  "imageLoadFailed": "Failed to load image.",
-  "typeHere": "Type in here…",
-  "summaryOfChores": "This is a summary of your chores",
-  "loadingOffline": "You are offline",
-  "loadingOfflineSub": "This not available while offline. Please check your internet connection and try again.",
-  "loadingSlow": "This is taking longer than usual. There might be an issue.",
-  "navigateBack": "Navigate Back",
-  "bottomNav": "Bottom Navigation",
-  "profile": "Profile",
-  "autocompletePlaceholder": "Type here...",
+  "getStarted": "",
+  "imageLoadFailed": "",
+  "typeHere": "",
+  "summaryOfChores": "",
+  "loadingOffline": "",
+  "loadingOfflineSub": "",
+  "loadingSlow": "",
+  "navigateBack": "",
+  "bottomNav": "",
+  "profile": "",
+  "autocompletePlaceholder": "",
   "errorScreen": {
-    "title": "Something went wrong",
-    "fallback": "An unexpected error occurred. Try reloading — it usually fixes it.",
-    "tryAgain": "Try again",
-    "home": "Home",
-    "login": "Login",
-    "hideDetails": "Hide error details",
-    "showDetails": "Show error details",
-    "copyToClipboard": "Copy to clipboard",
-    "copied": "Error details copied to clipboard",
+    "title": "",
+    "fallback": "",
+    "tryAgain": "",
+    "home": "",
+    "login": "",
+    "hideDetails": "",
+    "showDetails": "",
+    "copyToClipboard": "",
+    "copied": "",
     "reportProblem": "",
     "reportHint": "",
     "collectingDetails": ""
@@ -225,7 +225,7 @@
     "invitePeople": "",
     "addMembers": "",
     "sidePanelSettings": "",
-    "sidePanelSettingsDescription": "自定义布局和卡片",
+    "sidePanelSettingsDescription": "",
     "planFree": "",
     "planPlus": "",
     "planPlusExpiring": "",
@@ -330,29 +330,27 @@
     "checkingServer": "",
     "retryingIn": "",
     "syncNow": "",
-    "pendingSyncLabel_one": "",
-    "pendingSyncLabel_other": "",
     "pendingActionsTitle": "",
-    "actionsWaitingToSync_one": "",
-    "actionsWaitingToSync_other": "",
-    "cancelActionAria": ""
+    "cancelActionAria": "",
+    "pendingSyncLabel_other": "",
+    "actionsWaitingToSync_other": ""
   },
   "attachments": "",
   "fileNumbered": "",
   "noAttachmentsTitle": "",
   "noAttachmentsDescription": "",
   "kbSize": "",
-  "logoAlt": "徽标",
+  "logoAlt": "",
   "notification": {
-    "error": "错误",
-    "success": "成功",
-    "undoneSuccessfully": "已成功撤销",
-    "warning": "警告",
-    "information": "信息",
-    "title": "通知",
-    "unknown": "未知通知",
-    "undo": "撤销",
-    "dismiss": "关闭"
+    "error": "",
+    "success": "",
+    "undoneSuccessfully": "",
+    "warning": "",
+    "information": "",
+    "title": "",
+    "unknown": "",
+    "undo": "",
+    "dismiss": ""
   },
   "onboarding": {
     "sources": {
@@ -361,7 +359,7 @@
       "type": ""
     },
     "voiceWave": {
-      "listening": "正在聆听…"
+      "listening": ""
     },
     "capture": {
       "voiceCaption": "",
@@ -577,8 +575,6 @@
     "filtersButton": "",
     "clearAllButton": "",
     "doneButton": "",
-    "showResults_one": "",
-    "showResults_other": "",
     "selectedCount": "",
     "dateRangeFallback": "",
     "fromDate": "",
@@ -589,7 +585,8 @@
     "presetLast7Days": "",
     "presetThisMonth": "",
     "presetLast30Days": "",
-    "presetLast3Months": ""
+    "presetLast3Months": "",
+    "showResults_other": ""
   },
   "workspaceReady": {
     "allSetNamed": "",
@@ -607,16 +604,13 @@
     },
     "verdict": {
       "late": {
-        "title_one": "",
         "title_other": ""
       },
       "review": {
         "title": "",
-        "body_one": "",
         "body_other": ""
       },
       "today": {
-        "title_one": "",
         "title_other": ""
       },
       "clear": {
@@ -667,34 +661,27 @@
     "circle": {
       "title": "",
       "action": "",
-      "open_one": "",
-      "open_other": "",
-      "late_one": "",
-      "late_other": "",
-      "done_one": "",
-      "done_other": "",
       "caughtUp": "",
       "emptyTitle": "",
       "emptyBody": "",
-      "emptyAction": ""
+      "emptyAction": "",
+      "open_other": "",
+      "late_other": "",
+      "done_other": ""
     },
     "projects": {
       "title": "",
       "action": "",
-      "tasks_one": "",
+      "clear": "",
       "tasks_other": "",
-      "tasksOverdue_one": "",
       "tasksOverdue_other": "",
-      "tasksUnplanned_one": "",
-      "tasksUnplanned_other": "",
-      "clear": ""
+      "tasksUnplanned_other": ""
     },
     "filters": {
       "title": "",
       "action": "",
-      "tasks_one": "",
-      "tasks_other": "",
-      "clear": ""
+      "clear": "",
+      "tasks_other": ""
     },
     "capture": {
       "placeholder": "",

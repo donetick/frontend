@@ -17,19 +17,19 @@
     "Sunshine": "Soleil",
     "Coral": "Corail",
     "Lavender": "Lavande",
-    "Rose": "Rose",
+    "Rose": "",
     "Charcoal": "Anthracite",
     "Sienna": "Terre de Sienne",
     "Mint": "Menthe",
     "Amber": "Ambre",
-    "Cobalt": "Cobalt",
+    "Cobalt": "",
     "Emerald": "Émeraude",
     "Peach": "Pêche",
     "Ocean": "Océan",
     "Mustard": "Moutarde",
     "Ruby": "Rubis",
     "Periwinkle": "Pervenche",
-    "Turquoise": "Turquoise",
+    "Turquoise": "",
     "Lime": "Vert citron",
     "Blush": "Rose poudré",
     "Ash": "Cendre",
@@ -44,7 +44,7 @@
   "back": "Retour",
   "backToCalendar": "Retour au calendrier",
   "logout": "Déconnexion",
-  "version": "Version",
+  "version": "",
   "navigation": {
     "search": "Recherche",
     "allTasks": "Tâches",
@@ -58,7 +58,8 @@
     "projects": "Projets",
     "filters": "Filtres",
     "activities": "Activités",
-    "points": "Points",
+    "points": "",
+    "rewards": "",
     "settings": "Paramètres",
     "reportBug": "Signaler un problème",
     "openMenu": "Ouvrir le menu",
@@ -90,7 +91,7 @@
     },
     "actions": {
       "quickAction": "Action rapide",
-      "navigation": "Navigation",
+      "navigation": "",
       "createTask": "Créer une tâche",
       "createLabel": "Créer une étiquette",
       "createProject": "Créer un projet",
@@ -110,10 +111,10 @@
     "footer": {
       "navigate": "Naviguer",
       "open": "Ouvrir",
-      "results_one": "{{count}} résultat",
-      "results_other": "{{count}} résultats",
       "typeToSearch": "Saisissez du texte pour rechercher",
-      "slashHint": "/ pour aller à une vue"
+      "slashHint": "/ pour aller à une vue",
+      "results_one": "{{count}} résultat",
+      "results_other": "{{count}} résultats"
     },
     "modes": {
       "actions": {
@@ -145,7 +146,7 @@
       "missingFeature": "Fonctionnalités manquantes",
       "tooComplicated": "Trop compliqué",
       "slow": "Lent",
-      "notifications": "Notifications",
+      "notifications": "",
       "ai": "IA",
       "other": "Autres"
     },
@@ -227,7 +228,7 @@
     "sidePanelSettings": "Paramètres du panneau latéral",
     "sidePanelSettingsDescription": "Personnaliser la mise en page et les cartes",
     "planFree": "Basic",
-    "planPlus": "Plus",
+    "planPlus": "",
     "planPlusExpiring": "Plus (expire bientôt)",
     "switchUser": "Changer d'utilisateur",
     "impersonateUser": "Emprunter une identité",
@@ -330,26 +331,26 @@
     "checkingServer": "Vérification du serveur...",
     "retryingIn": "Nouvelle tentative dans {{seconds}} s",
     "syncNow": "Synchroniser maintenant",
+    "pendingActionsTitle": "Actions en attente",
+    "cancelActionAria": "Annuler {{label}}",
     "pendingSyncLabel_one": "{{count}} action en attente de synchronisation",
     "pendingSyncLabel_other": "{{count}} actions en attente de synchronisation",
-    "pendingActionsTitle": "Actions en attente",
     "actionsWaitingToSync_one": "{{count}} action en attente de synchronisation.",
-    "actionsWaitingToSync_other": "{{count}} actions en attente de synchronisation.",
-    "cancelActionAria": "Annuler {{label}}"
+    "actionsWaitingToSync_other": "{{count}} actions en attente de synchronisation."
   },
   "attachments": "Pièces jointes",
   "fileNumbered": "Fichier {{index}}",
   "noAttachmentsTitle": "Aucune pièce jointe",
   "noAttachmentsDescription": "Les photos et fichiers ajoutés à cette tâche apparaîtront ici.",
   "kbSize": "{{size}} Ko",
-  "logoAlt": "Logo",
+  "logoAlt": "",
   "notification": {
     "error": "Erreur",
     "success": "Succès",
     "undoneSuccessfully": "Annulé avec succès",
     "warning": "Avertissement",
-    "information": "Information",
-    "title": "Notification",
+    "information": "",
+    "title": "",
     "unknown": "Notification inconnue",
     "undo": "Annuler",
     "dismiss": "Fermer"
@@ -477,7 +478,7 @@
       "continue": "Continuer",
       "skip": "Ignorer",
       "sources": {
-        "appStore": "App Store / Google Play",
+        "appStore": "",
         "reddit": "Reddit ou un forum",
         "friend": "Amis ou famille",
         "video": "YouTube ou TikTok",
@@ -577,8 +578,6 @@
     "filtersButton": "Filtres",
     "clearAllButton": "Tout effacer",
     "doneButton": "Terminé",
-    "showResults_one": "Afficher {{count}} résultat",
-    "showResults_other": "Afficher {{count}} résultats",
     "selectedCount": "Sélection : {{count}}",
     "dateRangeFallback": "Plage de dates",
     "fromDate": "À partir du {{date}}",
@@ -589,7 +588,9 @@
     "presetLast7Days": "7 derniers jours",
     "presetThisMonth": "Ce mois-ci",
     "presetLast30Days": "30 derniers jours",
-    "presetLast3Months": "3 derniers mois"
+    "presetLast3Months": "3 derniers mois",
+    "showResults_one": "Afficher {{count}} résultat",
+    "showResults_other": "Afficher {{count}} résultats"
   },
   "workspaceReady": {
     "allSetNamed": "Tout est prêt, {{name}}",
@@ -667,34 +668,34 @@
     "circle": {
       "title": "Votre cercle",
       "action": "Gérer le cercle",
+      "caughtUp": "Rien à faire",
+      "emptyTitle": "Personne d'autre pour l'instant",
+      "emptyBody": "Invitez les personnes avec qui vous partagez les tâches : cet écran montrera qui s'occupe de quoi.",
+      "emptyAction": "Inviter dans votre cercle",
       "open_one": "{{count}} à faire",
       "open_other": "{{count}} à faire",
       "late_one": "{{count}} en retard",
       "late_other": "{{count}} en retard",
       "done_one": "{{count}} terminée",
-      "done_other": "{{count}} terminées",
-      "caughtUp": "Rien à faire",
-      "emptyTitle": "Personne d'autre pour l'instant",
-      "emptyBody": "Invitez les personnes avec qui vous partagez les tâches : cet écran montrera qui s'occupe de quoi.",
-      "emptyAction": "Inviter dans votre cercle"
+      "done_other": "{{count}} terminées"
     },
     "projects": {
       "title": "Projets",
       "action": "Tous les projets",
+      "clear": "Rien à faire",
       "tasks_one": "{{count}} tâche",
       "tasks_other": "{{count}} tâches",
       "tasksOverdue_one": "{{count}} tâche, dont {{overdue}} en retard",
       "tasksOverdue_other": "{{count}} tâches, dont {{overdue}} en retard",
       "tasksUnplanned_one": "{{count}} tâche, dont {{unplanned}} sans échéance",
-      "tasksUnplanned_other": "{{count}} tâches, dont {{unplanned}} sans échéance",
-      "clear": "Rien à faire"
+      "tasksUnplanned_other": "{{count}} tâches, dont {{unplanned}} sans échéance"
     },
     "filters": {
       "title": "Filtres",
       "action": "Tous les filtres",
+      "clear": "Aucun résultat",
       "tasks_one": "{{count}} résultat",
-      "tasks_other": "{{count}} résultats",
-      "clear": "Aucun résultat"
+      "tasks_other": "{{count}} résultats"
     },
     "capture": {
       "placeholder": "Ajouter une tâche...",

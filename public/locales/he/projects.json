@@ -30,9 +30,6 @@
     "Computer": ""
   },
   "defaultChip": "",
-  "tasks_one": "",
-  "tasks_other": "",
-  "shared": "",
   "delete": {
     "title": "",
     "message": ""
@@ -49,7 +46,7 @@
   "blurb": "",
   "defaultDescription": "",
   "selector": {
-    "title": "פרויקטים",
+    "title": "",
     "createNew": "",
     "createNewDescription": "",
     "manage": "",
@@ -67,6 +64,66 @@
     "descriptionLabel": "",
     "iconLabel": "",
     "selectIcon": "",
-    "colorLabel": ""
-  }
+    "colorLabel": "",
+    "editTitle": "",
+    "createTitle": "",
+    "update": "",
+    "create": ""
+  },
+  "visibility": {
+    "label": "",
+    "ownerOnly": "",
+    "changeHint": "",
+    "private": {
+      "title": "",
+      "description": ""
+    },
+    "members": {
+      "title": "",
+      "description": "",
+      "pickerTitle": "",
+      "noCandidates": "",
+      "emptyHint": "",
+      "hint_one": "",
+      "hint_two": "",
+      "hint_other": ""
+    },
+    "circle": {
+      "title": "",
+      "description": ""
+    },
+    "chip": {
+      "private": "",
+      "everyone": "",
+      "members_one": "",
+      "members_two": "",
+      "members_other": ""
+    },
+    "review": {
+      "title": "",
+      "back": "",
+      "confirm": "",
+      "you": "",
+      "audienceMembers": "",
+      "audienceMembersNone": "",
+      "loseAccess": "",
+      "gainAccess": "",
+      "opensToCircle": "",
+      "removedAssignees": "",
+      "addedAssignees": "",
+      "nowAssigned": "",
+      "nowUnassigned": "",
+      "keepsHistory": "",
+      "previewFailed": "",
+      "loseAccessHint_one": "",
+      "loseAccessHint_two": "",
+      "loseAccessHint_other": "",
+      "assignmentChanges_one": "",
+      "assignmentChanges_two": "",
+      "assignmentChanges_other": ""
+    }
+  },
+  "tasks_one": "",
+  "tasks_two": "",
+  "tasks_other": ""
 }

@@ -59,6 +59,7 @@
     "filters": "الفلاتر",
     "activities": "الأنشطة",
     "points": "النقاط",
+    "rewards": "",
     "settings": "الإعدادات",
     "reportBug": "الإبلاغ عن مشكلة",
     "openMenu": "فتح القائمة",
@@ -72,7 +73,7 @@
     "placeholder": "ابحث في Donetick",
     "inputAriaLabel": "ابحث في المهام والسجل والمشاريع والتسميات والإعدادات",
     "deviceNote": "يتم البحث في المحتوى المتوفر على هذا الجهاز",
-    "escape": "Esc",
+    "escape": "",
     "recent": "الأخيرة",
     "empty": {
       "title": "لا توجد نتائج مطابقة",
@@ -110,10 +111,14 @@
     "footer": {
       "navigate": "تنقل",
       "open": "فتح",
-      "results_one": "نتيجة واحدة",
-      "results_other": "{{count}} نتيجة",
       "typeToSearch": "اكتب للبحث",
-      "slashHint": "/ للقفز إلى طريقة العرض"
+      "slashHint": "/ للقفز إلى طريقة العرض",
+      "results_zero": "",
+      "results_one": "نتيجة واحدة",
+      "results_two": "",
+      "results_few": "",
+      "results_many": "",
+      "results_other": "{{count}} نتيجة"
     },
     "modes": {
       "actions": {
@@ -146,7 +151,7 @@
       "tooComplicated": "معقدة جداً",
       "slow": "بطيء",
       "notifications": "الإشعارات",
-      "ai": "AI",
+      "ai": "",
       "other": "اخرى"
     },
     "details": {
@@ -290,7 +295,7 @@
     "descending": "تنازلي",
     "filter": "تصفية"
   },
-  "versionInfo": "V{{version}} (API: {{apiVersion}})",
+  "versionInfo": "",
   "apiVersionUnavailable": "غير متاح",
   "sync": {
     "aria": "فتح حالة المزامنة والشبكة",
@@ -330,12 +335,20 @@
     "checkingServer": "التحقق من الخادم...",
     "retryingIn": "إعادة المحاولة في {{seconds}}ثانية",
     "syncNow": "المزامنة الآن",
-    "pendingSyncLabel_one": "{{count}} في انتظار إجراء المزامنة",
-    "pendingSyncLabel_other": "{{count}} إجراءات معلقة للمزامنة",
     "pendingActionsTitle": "الإجراءات المعلقة",
+    "cancelActionAria": "إلغاء {{label}}",
+    "pendingSyncLabel_zero": "",
+    "pendingSyncLabel_one": "{{count}} في انتظار إجراء المزامنة",
+    "pendingSyncLabel_two": "",
+    "pendingSyncLabel_few": "",
+    "pendingSyncLabel_many": "",
+    "pendingSyncLabel_other": "{{count}} إجراءات معلقة للمزامنة",
+    "actionsWaitingToSync_zero": "",
     "actionsWaitingToSync_one": "إجراء {{count}} في انتظار المزامنة.",
-    "actionsWaitingToSync_other": "{{count}} إجراءات بانتظار المزامنة.",
-    "cancelActionAria": "إلغاء {{label}}"
+    "actionsWaitingToSync_two": "",
+    "actionsWaitingToSync_few": "",
+    "actionsWaitingToSync_many": "",
+    "actionsWaitingToSync_other": "{{count}} إجراءات بانتظار المزامنة."
   },
   "attachments": "المرفقات",
   "fileNumbered": "الملف {{index}}",
@@ -577,8 +590,6 @@
     "filtersButton": "فلاتر",
     "clearAllButton": "مسح الكل",
     "doneButton": "تم",
-    "showResults_one": "إظهار النتيجة {{count}}",
-    "showResults_other": "إظهار النتائج {{count}}",
     "selectedCount": "تم تحديد {{count}}",
     "dateRangeFallback": "النطاق الزمني",
     "fromDate": "من {{date}}",
@@ -589,7 +600,13 @@
     "presetLast7Days": "آخر 7 أيام",
     "presetThisMonth": "هذا الشهر",
     "presetLast30Days": "آخر 30 يوم",
-    "presetLast3Months": "آخر 3 أشهر"
+    "presetLast3Months": "آخر 3 أشهر",
+    "showResults_zero": "",
+    "showResults_one": "إظهار النتيجة {{count}}",
+    "showResults_two": "",
+    "showResults_few": "",
+    "showResults_many": "",
+    "showResults_other": "إظهار النتائج {{count}}"
   },
   "workspaceReady": {
     "allSetNamed": "لقد تم تعيينك، {{name}}",
@@ -607,16 +624,28 @@
     },
     "verdict": {
       "late": {
+        "title_zero": "",
         "title_one": "{{count}} مهمة تحتاج إلى الانتباه.",
+        "title_two": "",
+        "title_few": "",
+        "title_many": "",
         "title_other": "{{count}} مهام متأخرة"
       },
       "review": {
         "title": "شيء ما لاستعراض الاحتياجات.",
+        "body_zero": "",
         "body_one": "المهام المنجزة {{count}} في انتظار أن يتم تسجيل الدخول.",
+        "body_two": "",
+        "body_few": "",
+        "body_many": "",
         "body_other": "المهام المنجزة {{count}} في انتظار أن يتم تسجيل الدخول."
       },
       "today": {
+        "title_zero": "",
         "title_one": "{{count}} مهمة مستحقة اليوم.",
+        "title_two": "",
+        "title_few": "",
+        "title_many": "",
         "title_other": "{{count}} مهام مستحقة اليوم"
       },
       "clear": {
@@ -667,34 +696,62 @@
     "circle": {
       "title": "دائرتك",
       "action": "إدارة الدائرة",
-      "open_one": "{{count}} مهمة مفتوحة",
-      "open_other": "{{count}} مهام مفتوحة",
-      "late_one": "{{count}} مهمة متأخرة",
-      "late_other": "{{count}} مهام متأخرة",
-      "done_one": "{{count}} مهمة مكتملة",
-      "done_other": "{{count}} مهام مكتملة",
       "caughtUp": "الكل واضح",
       "emptyTitle": "لا أحد آخر هنا بعد",
       "emptyBody": "قم بدعوة الأشخاص الذين تشارك في الأعباء معهم، وستظهر هذه الشاشة من يحملون ما يحملونه.",
-      "emptyAction": "دعوة إلى دائرتك"
+      "emptyAction": "دعوة إلى دائرتك",
+      "open_zero": "",
+      "open_one": "{{count}} مهمة مفتوحة",
+      "open_two": "",
+      "open_few": "",
+      "open_many": "",
+      "open_other": "{{count}} مهام مفتوحة",
+      "late_zero": "",
+      "late_one": "{{count}} مهمة متأخرة",
+      "late_two": "",
+      "late_few": "",
+      "late_many": "",
+      "late_other": "{{count}} مهام متأخرة",
+      "done_zero": "",
+      "done_one": "{{count}} مهمة مكتملة",
+      "done_two": "",
+      "done_few": "",
+      "done_many": "",
+      "done_other": "{{count}} مهام مكتملة"
     },
     "projects": {
       "title": "المشاريع",
       "action": "جميع المشاريع",
+      "clear": "الكل واضح",
+      "tasks_zero": "",
       "tasks_one": "مهمة {{count}}",
+      "tasks_two": "",
+      "tasks_few": "",
+      "tasks_many": "",
       "tasks_other": "مهام {{count}}",
+      "tasksOverdue_zero": "",
       "tasksOverdue_one": "{{count}} مهمة، منها {{overdue}} متأخرة",
+      "tasksOverdue_two": "",
+      "tasksOverdue_few": "",
+      "tasksOverdue_many": "",
       "tasksOverdue_other": "{{count}} مهام، منها {{overdue}} متأخرة",
+      "tasksUnplanned_zero": "",
       "tasksUnplanned_one": "{{count}} مهمة، منها {{unplanned}} غير مخططة",
-      "tasksUnplanned_other": "{{count}} مهام، منها {{unplanned}} غير مخططة",
-      "clear": "الكل واضح"
+      "tasksUnplanned_two": "",
+      "tasksUnplanned_few": "",
+      "tasksUnplanned_many": "",
+      "tasksUnplanned_other": "{{count}} مهام، منها {{unplanned}} غير مخططة"
     },
     "filters": {
       "title": "فلاتر",
       "action": "جميع الفلاتر",
+      "clear": "لا يوجد تطابق",
+      "tasks_zero": "",
       "tasks_one": "{{count}} مهمة",
-      "tasks_other": "{{count}} مهام",
-      "clear": "لا يوجد تطابق"
+      "tasks_two": "",
+      "tasks_few": "",
+      "tasks_many": "",
+      "tasks_other": "{{count}} مهام"
     },
     "capture": {
       "placeholder": "إضافة مهمة…",
