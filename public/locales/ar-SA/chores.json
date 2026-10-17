@@ -627,7 +627,15 @@
     "dueDate": "الاستحقاق: {{date}}",
     "hideRawText": "إخفاء النص الخام",
     "showRawText": "إظهار النص الخام",
-    "cameraUnavailableUseUpload": "الكاميرا غير متاحة — استخدم الرفع بدلاً من ذلك"
+    "cameraUnavailableUseUpload": "الكاميرا غير متاحة — استخدم الرفع بدلاً من ذلك",
+    "noTextFound": "لم يتم العثور على نص في الصورة. جرّب صورة أوضح.",
+    "noTaskIdentified": "تعذّر تحديد مهمة. جرّب صورة أخرى.",
+    "processingFailed": "فشلت المعالجة.",
+    "scannerError": "خطأ في الماسح: {{error}}",
+    "scanFailed": "فشل الفحص.",
+    "preparingScan": "جارٍ البدء…",
+    "failedTitle": "تعذّر العثور على مهمة",
+    "continueWithoutTask": "المتابعة بدون مهمة"
   },
   "descriptionPlaceholder": "Enter description...",
   "notificationTemplate": {
@@ -793,7 +801,10 @@
     "processing": "Processing",
     "create": "Create",
     "descriptionLabel": "Description:",
-    "subtasksLabel": "Subtasks:"
+    "subtasksLabel": "Subtasks:",
+    "createAnother": "إنشاء مهمة أخرى",
+    "createAndAddAnother": "إنشاء وإضافة أخرى",
+    "createAndClose": "إنشاء وإغلاق"
   },
   "repeat": {
     "days": {

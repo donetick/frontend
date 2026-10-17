@@ -627,7 +627,15 @@
     "dueDate": "Termín: {{date}}",
     "hideRawText": "Skrýt surový text",
     "showRawText": "Zobrazit surový text",
-    "cameraUnavailableUseUpload": "Fotoaparát není k dispozici — použijte místo toho nahrání"
+    "cameraUnavailableUseUpload": "Fotoaparát není k dispozici — použijte místo toho nahrání",
+    "noTextFound": "Na obrázku nebyl nalezen žádný text. Zkuste ostřejší fotku.",
+    "noTaskIdentified": "Nepodařilo se rozpoznat úkol. Zkuste jinou fotku.",
+    "processingFailed": "Zpracování se nezdařilo.",
+    "scannerError": "Chyba skeneru: {{error}}",
+    "scanFailed": "Skenování se nezdařilo.",
+    "preparingScan": "Spouštění…",
+    "failedTitle": "Úkol se nepodařilo najít",
+    "continueWithoutTask": "Pokračovat bez úkolu"
   },
   "descriptionPlaceholder": "Zadejte popis...",
   "notificationTemplate": {
@@ -793,7 +801,10 @@
     "processing": "Zpracovávání",
     "create": "Vytvořit",
     "descriptionLabel": "Description:",
-    "subtasksLabel": "Subtasks:"
+    "subtasksLabel": "Subtasks:",
+    "createAnother": "Vytvořit další",
+    "createAndAddAnother": "Vytvořit a přidat další",
+    "createAndClose": "Vytvořit a zavřít"
   },
   "repeat": {
     "days": {

@@ -627,7 +627,15 @@
     "dueDate": "Срок: {{date}}",
     "hideRawText": "Скрыть исходный текст",
     "showRawText": "Показать исходный текст",
-    "cameraUnavailableUseUpload": "Камера недоступна — используйте загрузку вместо этого"
+    "cameraUnavailableUseUpload": "Камера недоступна — используйте загрузку вместо этого",
+    "noTextFound": "На изображении не найден текст. Попробуйте более чёткое фото.",
+    "noTaskIdentified": "Не удалось распознать задачу. Попробуйте другое фото.",
+    "processingFailed": "Не удалось обработать.",
+    "scannerError": "Ошибка сканера: {{error}}",
+    "scanFailed": "Ошибка сканирования.",
+    "preparingScan": "Запуск…",
+    "failedTitle": "Задача не найдена",
+    "continueWithoutTask": "Продолжить без задачи"
   },
   "descriptionPlaceholder": "Введите описание...",
   "notificationTemplate": {
@@ -793,7 +801,10 @@
     "processing": "Обработка",
     "create": "Создать",
     "descriptionLabel": "Description:",
-    "subtasksLabel": "Subtasks:"
+    "subtasksLabel": "Subtasks:",
+    "createAnother": "Создать ещё",
+    "createAndAddAnother": "Создать и добавить ещё",
+    "createAndClose": "Создать и закрыть"
   },
   "repeat": {
     "days": {

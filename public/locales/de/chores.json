@@ -627,7 +627,15 @@
     "dueDate": "Fällig: {{date}}",
     "hideRawText": "Rohtext ausblenden",
     "showRawText": "Rohtext anzeigen",
-    "cameraUnavailableUseUpload": "Kamera nicht verfügbar — stattdessen hochladen"
+    "cameraUnavailableUseUpload": "Kamera nicht verfügbar — stattdessen hochladen",
+    "noTextFound": "Kein Text im Bild gefunden. Bitte ein schärferes Foto verwenden.",
+    "noTaskIdentified": "Keine Aufgabe erkannt. Bitte ein anderes Foto verwenden.",
+    "processingFailed": "Verarbeitung fehlgeschlagen.",
+    "scannerError": "Scannerfehler: {{error}}",
+    "scanFailed": "Scan fehlgeschlagen.",
+    "preparingScan": "Wird gestartet…",
+    "failedTitle": "Keine Aufgabe gefunden",
+    "continueWithoutTask": "Ohne Aufgabe fortfahren"
   },
   "descriptionPlaceholder": "Beschreibung eingeben...",
   "notificationTemplate": {
@@ -793,7 +801,10 @@
     "processing": "Verarbeitung läuft",
     "create": "Erstellen",
     "descriptionLabel": "Beschreibung:",
-    "subtasksLabel": "Unteraufgaben:"
+    "subtasksLabel": "Unteraufgaben:",
+    "createAnother": "Weitere erstellen",
+    "createAndAddAnother": "Erstellen & weitere hinzufügen",
+    "createAndClose": "Erstellen & schließen"
   },
   "repeat": {
     "days": {
