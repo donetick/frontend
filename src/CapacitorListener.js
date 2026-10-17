@@ -356,7 +356,7 @@ const registerCapacitorListeners = navigate => {
   // On iOS, dismissing SFSafariViewController can leave the WebView laid out
   // underneath the status bar even though overlaysWebView is disabled.
   Browser.addListener('browserFinished', () => {
-    void statusBarManager.restoreAfterBrowserDismissal()
+    void statusBarManager.restoreAfterNativeOverlayDismissal()
   })
 
   mobileApp.addListener('backButton', ({ canGoBack }) => {

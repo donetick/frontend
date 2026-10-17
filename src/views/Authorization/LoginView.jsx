@@ -21,6 +21,7 @@ import { useUserProfile } from '../../queries/UserQueries.jsx'
 import { useNotification } from '../../service/NotificationProvider'
 import { apiClient } from '../../utils/ApiClient'
 import { getPendingInvite } from '../../utils/PendingInvite'
+import statusBarManager from '../../utils/StatusBarManager'
 import { saveTokens } from '../../utils/TokenStorage'
 import { buildChildUsername, getUserDisplayInfo } from '../../utils/UserHelpers'
 import {
@@ -640,6 +641,12 @@ const LoginView = () => {
                       error?.message ? `: ${error.message}` : ''
                     }`,
                   })
+                } finally {
+                  // Google's flow goes through a full-screen native sheet on
+                  // iOS, which can leave the WebView laid out under the
+                  // status bar once dismissed — same as
+                  // SFSafariViewController.
+                  void statusBarManager.restoreAfterNativeOverlayDismissal()
                 }
               }}
             >
@@ -669,6 +676,9 @@ const LoginView = () => {
                           provider: 'Apple',
                         }),
                       })
+                    })
+                    .finally(() => {
+                      void statusBarManager.restoreAfterNativeOverlayDismissal()
                     })
                 }}
               >
