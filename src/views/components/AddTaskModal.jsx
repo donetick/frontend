@@ -311,6 +311,10 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
     return combined ? moment(combined).format('YYYY-MM-DDTHH:mm:ss') : null
   }, [dueDateOnly, dueTime, useCustomTime])
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
+  // Once "Create & add another" is picked, the primary button switches to
+  // that action for the rest of this modal session (until it closes) —
+  // picking it once means the user is batching tasks, not just this one.
+  const [continuousMode, setContinuousMode] = useState(false)
   const [projectId, setProjectId] = useState(getInitialProject)
   const selectedProject = useMemo(
     () =>
@@ -881,8 +885,12 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
     }
   }
 
+  // Plain Enter is the fast path for entering several tasks in a row: create
+  // this one and leave the form open and blank for the next. Cmd+Enter (the
+  // window-level handler below) and the footer's Create button still close
+  // the modal.
   const handleEnterPressed = () => {
-    submitChore()
+    submitChore(true)
   }
 
   // The scan keeps its source image when asked: upload it against the draft so
@@ -1002,14 +1010,10 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
     }
   }
 
-  const handleCloseModal = forceRefetch => {
-    onClose(forceRefetch)
-    setShowScan(false)
-    setShowVoice(false)
-    setVoiceState({ segments: [], isListening: false })
-    setScanState({ phase: 'idle', primaryAction: null })
-    setCreatingVoiceTasks(false)
-    setIsAttachingScan(false)
+  // Clears everything a single task entry filled in, leaving the modal (and
+  // the selected project) as-is — used both on close and by "create & add
+  // another" to hand back a blank form without losing the project context.
+  const resetFormFields = () => {
     setTaskText('')
     setTaskTitle('')
     setFrequency(null)
@@ -1023,10 +1027,8 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
     setLabelsV2([])
     setAssignees([])
     assigneesFromMentionRef.current = false
-    // The modal closes without a final parse, so drop the highlight identities
-    // here or nothing would animate on the next open
+    // Dropped here too or nothing would animate on the next task's parse
     prevHighlightKeysRef.current = new Set()
-    setProjectId(getInitialProject())
     setDeadlineOffset(-1)
     setRequireApproval(false)
     setCompletionWindow(-1)
@@ -1041,7 +1043,20 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
     taskSourceRef.current = 'quick_add'
   }
 
-  const createChore = () => {
+  const handleCloseModal = forceRefetch => {
+    onClose(forceRefetch)
+    setShowScan(false)
+    setShowVoice(false)
+    setVoiceState({ segments: [], isListening: false })
+    setScanState({ phase: 'idle', primaryAction: null })
+    setCreatingVoiceTasks(false)
+    setIsAttachingScan(false)
+    resetFormFields()
+    setProjectId(getInitialProject())
+    setContinuousMode(false)
+  }
+
+  const createChore = (andContinue = false) => {
     // A scanned attachment still uploading would be orphaned by the create
     if (isAttachingScan) return
 
@@ -1148,18 +1163,24 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
             nextDueDate: chore.dueDate,
           })
         }
-        setTaskText('')
       })
       .catch(error => {
         console.error('Error creating chore:', error)
       })
-    handleCloseModal(false)
+
+    // The create fires above without waiting on the network, so the next
+    // blank entry (or the closed modal) shows up immediately either way.
+    if (andContinue) {
+      resetFormFields()
+    } else {
+      handleCloseModal(false)
+    }
   }
 
   // All submit paths (Enter, Cmd+Enter, footer button) go through here: a
   // debounce may still be holding the parse of the latest text, and creating
   // from pre-parse state would drop the tail of what the user typed.
-  const submitChore = () => {
+  const submitChore = (andContinue = false) => {
     if (parseTimerRef.current) {
       clearTimeout(parseTimerRef.current)
       parseTimerRef.current = null
@@ -1167,7 +1188,7 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
     }
     // Read through latestRef: after the flush, this render's createChore
     // closure is stale
-    latestRef.current.createChore()
+    latestRef.current.createChore(andContinue)
   }
 
   latestRef.current = {
@@ -1303,18 +1324,78 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
               </Button>
             )}
             {!showScan && !showVoice && (
-              <Button
-                variant='solid'
-                color='primary'
-                loading={isAttachingScan}
-                disabled={!taskTitle.trim() || isAttachingScan}
-                onClick={submitChore}
-              >
-                {t('addTask.create')}
-                {showKeyboardShortcuts && (
-                  <KeyboardShortcutHint shortcut='Enter' sx={{ ml: 1 }} />
-                )}
-              </Button>
+              <Box sx={{ display: 'flex' }}>
+                <Button
+                  variant='solid'
+                  color='primary'
+                  loading={isAttachingScan}
+                  disabled={!taskTitle.trim() || isAttachingScan}
+                  onClick={() => submitChore(continuousMode)}
+                  sx={{
+                    borderTopRightRadius: 0,
+                    borderBottomRightRadius: 0,
+                  }}
+                >
+                  {continuousMode
+                    ? t('addTask.createAnother')
+                    : t('addTask.create')}
+                  {showKeyboardShortcuts && (
+                    <KeyboardShortcutHint shortcut='Enter' sx={{ ml: 1 }} />
+                  )}
+                </Button>
+                <Dropdown>
+                  <MenuButton
+                    slots={{ root: Button }}
+                    slotProps={{
+                      root: {
+                        variant: 'solid',
+                        color: 'primary',
+                        disabled: !taskTitle.trim() || isAttachingScan,
+                      },
+                    }}
+                    sx={{
+                      borderTopLeftRadius: 0,
+                      borderBottomLeftRadius: 0,
+                      borderLeft: '1px solid rgba(255, 255, 255, 0.4)',
+                      minWidth: 0,
+                      px: 0.75,
+                    }}
+                  >
+                    <KeyboardArrowDown sx={{ fontSize: 18 }} />
+                  </MenuButton>
+                  <Menu
+                    placement='top-end'
+                    sx={{ zIndex: 'calc(var(--joy-zIndex-modal) + 1)' }}
+                  >
+                    {continuousMode ? (
+                      <MenuItem
+                        onClick={() => {
+                          setContinuousMode(false)
+                          submitChore(false)
+                        }}
+                      >
+                        {t('addTask.createAndClose')}
+                      </MenuItem>
+                    ) : (
+                      <MenuItem
+                        onClick={() => {
+                          setContinuousMode(true)
+                          submitChore(true)
+                        }}
+                      >
+                        {t('addTask.createAndAddAnother')}
+                        {showKeyboardShortcuts && (
+                          <KeyboardShortcutHint
+                            shortcut='Enter'
+                            withCmd={false}
+                            sx={{ ml: 1 }}
+                          />
+                        )}
+                      </MenuItem>
+                    )}
+                  </Menu>
+                </Dropdown>
+              </Box>
             )}
           </ModalActions>
         }

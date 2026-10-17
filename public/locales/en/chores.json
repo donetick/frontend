@@ -629,7 +629,15 @@
     "dueDate": "Due: {{date}}",
     "hideRawText": "Hide Raw Text",
     "showRawText": "Show Raw Text",
-    "cameraUnavailableUseUpload": "Camera not available — use Upload instead"
+    "cameraUnavailableUseUpload": "Camera not available — use Upload instead",
+    "noTextFound": "No text found in image. Try a clearer photo.",
+    "noTaskIdentified": "Could not identify a task. Try a different photo.",
+    "processingFailed": "Processing failed.",
+    "scannerError": "Scanner error: {{error}}",
+    "scanFailed": "Scan failed.",
+    "preparingScan": "Starting…",
+    "failedTitle": "Couldn't find a task",
+    "continueWithoutTask": "Continue without a task"
   },
   "descriptionPlaceholder": "Enter description...",
   "notificationTemplate": {
@@ -794,7 +802,10 @@
     "createCount": "Create {{count}} Tasks",
     "useTask": "Use Task",
     "processing": "Processing",
-    "create": "Create"
+    "create": "Create",
+    "createAnother": "Create another",
+    "createAndAddAnother": "Create & add another",
+    "createAndClose": "Create & close"
   },
   "repeat": {
     "days": {
