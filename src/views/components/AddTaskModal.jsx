@@ -1068,8 +1068,10 @@ const TaskInput = ({
       const sharedText = textItem?.url || textItem?.title || ''
       const sharedSubject =
         textItem?.title && textItem.title !== sharedText ? textItem.title : null
-      const fileItems = items.filter(
-        item => item.url && item.type !== 'text/plain',
+      const attachmentItems = items.filter(item =>
+        item.type === 'text/plain'
+          ? item.url || item.description || item.title
+          : item.url,
       )
 
       // A shared file's title is normally just its filename. Leave the task
@@ -1082,12 +1084,12 @@ const TaskInput = ({
         setHasDescription(true)
       }
 
-      setIsAttachingScan(fileItems.length > 0)
+      setIsAttachingScan(attachmentItems.length > 0)
       let analyzedFile = null
       let analysisRun = null
 
       try {
-        for (const item of fileItems) {
+        for (const item of attachmentItems) {
           try {
             const file = await sharedItemToFile(item)
             if (!file) continue

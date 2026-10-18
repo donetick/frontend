@@ -75,7 +75,22 @@ const base64ToBlob = (data, type) => {
 }
 
 export const sharedItemToFile = async item => {
-  if (!item?.url || item.type === 'text/plain') return null
+  if (!item) return null
+
+  if (item.type === 'text/plain') {
+    const content = item.url || item.description || item.title
+    if (!content) return null
+
+    // Native share APIs expose selected text and web links as text rather than
+    // files. Materialize that value so it follows the same draft-attachment
+    // flow as documents, audio, and video.
+    const isLink = /^https?:\/\//i.test(content)
+    return new File([content], isLink ? 'shared-link.txt' : 'shared-text.txt', {
+      type: 'text/plain',
+    })
+  }
+
+  if (!item.url) return null
 
   const name = item.title || `shared-${Date.now()}`
   let blob
