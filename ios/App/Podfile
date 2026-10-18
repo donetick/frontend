@@ -17,6 +17,7 @@ def capacitor_pods
   pod 'CapacitorApp', :path => '../../node_modules/@capacitor/app'
   pod 'CapacitorBrowser', :path => '../../node_modules/@capacitor/browser'
   pod 'CapacitorDevice', :path => '../../node_modules/@capacitor/device'
+  pod 'CapacitorFilesystem', :path => '../../node_modules/@capacitor/filesystem'
   pod 'CapacitorHaptics', :path => '../../node_modules/@capacitor/haptics'
   pod 'CapacitorLocalLlm', :path => '../../node_modules/@capacitor/local-llm'
   pod 'CapacitorLocalNotifications', :path => '../../node_modules/@capacitor/local-notifications'
@@ -25,12 +26,14 @@ def capacitor_pods
   pod 'CapacitorPushNotifications', :path => '../../node_modules/@capacitor/push-notifications'
   pod 'CapacitorShare', :path => '../../node_modules/@capacitor/share'
   pod 'CapacitorStatusBar', :path => '../../node_modules/@capacitor/status-bar'
+  pod 'CapawesomeCapacitorBadge', :path => '../../node_modules/@capawesome/capacitor-badge'
   pod 'CapgoCapacitorDocumentScanner', :path => '../../node_modules/@capgo/capacitor-document-scanner'
   pod 'CapgoCapacitorNfc', :path => '../../node_modules/@capgo/capacitor-nfc'
   pod 'CapgoCapacitorSocialLogin', :path => '../../node_modules/@capgo/capacitor-social-login'
   pod 'JcesarmobileCapacitorOcr', :path => '../../node_modules/@jcesarmobile/capacitor-ocr'
   pod 'RevenuecatPurchasesCapacitor', :path => '../../node_modules/@revenuecat/purchases-capacitor'
   pod 'RevenuecatPurchasesCapacitorUi', :path => '../../node_modules/@revenuecat/purchases-capacitor-ui'
+  pod 'SupernotesCapacitorSendIntent', :path => '../../node_modules/@supernotes/capacitor-send-intent'
   pod 'CapacitorPluginSafeArea', :path => '../../node_modules/capacitor-plugin-safe-area'
 end
 

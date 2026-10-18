@@ -25,6 +25,17 @@
   "activeWork": "Active Work",
   "breakTime": "Break Time",
   "workSessions": "Work Sessions",
+  "timeline": {
+    "started": "Started: {{time}}",
+    "ended": "Ended: {{time}}",
+    "now": "Now: {{time}}",
+    "active": "Active: {{percent}}%",
+    "emptyState": "No activity timeline available. Start working to see your activity pattern.",
+    "workSessionsCount": "Work Sessions ({{count}})",
+    "sessionNumber": "Session #{{number}}",
+    "ongoing": "→ ongoing",
+    "durationAutoCalculated": "Duration (Auto-calculated)"
+  },
   "totalTime": "Total Time",
   "distribution": "Work vs Break Distribution",
   "noActiveTime": "No active time yet",

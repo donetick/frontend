@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
 import { getIconComponent } from '../../../utils/ProjectIcons'
+import { ProjectAccessIcon } from '../../Projects/ProjectVisibilityField'
 import { DEFAULT_PROJECT_ID } from '../useHomeSummary'
 
 // Two rows of two on mobile. A fifth project would push the section past the
@@ -120,6 +121,10 @@ const ProjectStrip = ({ projects }) => {
               {project.id === DEFAULT_PROJECT_ID && !project.name
                 ? t('chores:toolbar.defaultProject')
                 : project.name}
+              <ProjectAccessIcon
+                project={project}
+                sx={{ fontSize: 12, ml: 0.5, verticalAlign: 'text-bottom' }}
+              />
             </Typography>
             {/* noWrap, because a second line here would make this cell taller
                 than the one beside it and the whole grid row with it. */}

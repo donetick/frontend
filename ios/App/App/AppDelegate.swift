@@ -2,10 +2,12 @@ import UIKit
 import Capacitor
 import FirebaseCore
 import FirebaseMessaging
+import SupernotesCapacitorSendIntent
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
+    private let shareStore = ShareStore.store
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
@@ -36,8 +38,36 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
-        // Called when the app was launched with a url. Feel free to add additional processing here,
-        // but if you want the App API to support tracking app url opens, make sure to keep this call
+        // The share extension copies files into the shared App Group and opens
+        // donetick://share with one repeated set of query parameters per item.
+        if url.scheme == "donetick", url.host == "share",
+           let queryItems = URLComponents(url: url, resolvingAgainstBaseURL: true)?.queryItems {
+            let titles = queryItems.filter { $0.name == "title" }
+            let descriptions = queryItems.filter { $0.name == "description" }
+            let types = queryItems.filter { $0.name == "type" }
+            let urls = queryItems.filter { $0.name == "url" }
+            let count = [titles.count, descriptions.count, types.count, urls.count].min() ?? 0
+
+            shareStore.shareItems.removeAll()
+            if count > 0 {
+                for index in 0..<count {
+                    var item = JSObject()
+                    item["title"] = titles[index].value ?? ""
+                    item["description"] = descriptions[index].value ?? ""
+                    item["type"] = types[index].value ?? ""
+                    item["url"] = urls[index].value ?? ""
+                    shareStore.shareItems.append(item)
+                }
+            }
+            shareStore.processed = false
+            NotificationCenter.default.post(
+                name: Notification.Name("triggerSendIntent"),
+                object: nil
+            )
+        }
+
+        // Keep Capacitor App's appUrlOpen behavior for every URL, including the
+        // share URL (the JS deep-link handler safely ignores its host).
         return ApplicationDelegateProxy.shared.application(app, open: url, options: options)
     }
 

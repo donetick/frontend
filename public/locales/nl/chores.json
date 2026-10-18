@@ -9,7 +9,7 @@
   "dueDate": "Vervaldatum",
   "assignedTo": "Toegewezen aan",
   "priority": "Prioriteit",
-  "status": "",
+  "status": "Status",
   "description": "Beschrijving",
   "choreView": {
     "assignment": "Toewijzing",
@@ -20,7 +20,7 @@
     "statistics": "Statistieken",
     "completed": "Voltooid",
     "times": "keer",
-    "details": "",
+    "details": "Details",
     "createdBy": "Aangemaakt door",
     "na": "N/B",
     "taskCompleted": "Taak Voltooid",
@@ -111,10 +111,12 @@
     "unableChangeAssignee": "",
     "availableToCompleteStarting": "",
     "delegateToSomeoneElse": "",
-    "selectAPerformer": ""
+    "selectAPerformer": "",
+    "notFoundTitle": "Taak niet beschikbaar",
+    "notFoundDescription": "Deze taak is mogelijk verwijderd of wordt niet meer met jou gedeeld."
   },
   "toolbar": {
-    "defaultProject": "",
+    "defaultProject": "Default Project",
     "everyone": "",
     "mine": "",
     "availableToMe": "",
@@ -134,10 +136,14 @@
       "assignee": ""
     },
     "display": "",
-    "displayOptions": ""
+    "displayOptions": "",
+    "moreSaveOptions": "Meer opslagopties",
+    "showCount": "{{count}} weergeven",
+    "done": "Klaar",
+    "savedFilters": "Opgeslagen filters"
   },
   "sort": {
-    "assignedToMe": "",
+    "assignedToMe": "Assigned to me",
     "smart": "",
     "createdDate": "",
     "updatedDate": "",
@@ -271,7 +277,9 @@
       "skipTitle": "",
       "skippedTitle": "",
       "skipFailedTitle": ""
-    }
+    },
+    "failAssignTitle": "",
+    "failAssignMessage": ""
   },
   "archived": {
     "restoredTitle": "",
@@ -337,7 +345,7 @@
     "noMatchFilters": "",
     "emptyTitle": "",
     "emptyDescription": "",
-    "backToTasks": ""
+    "backToTasks": "Terug naar taken"
   },
   "edit": {
     "deleteConfirm": ""
@@ -611,7 +619,23 @@
     "keepAsAttachment": "",
     "altCaptured": "",
     "altProcessing": "",
-    "taskIdentified": ""
+    "taskIdentified": "",
+    "runningNativeOcr": "Running native OCR…",
+    "identifyingTask": "Identifying task with AI…",
+    "tapToScanHint": "Tik op \"Document scannen\" om de scanner te openen",
+    "readingTextProgress": "Tekst lezen uit afbeelding… {{progress}}%",
+    "dueDate": "Vervalt: {{date}}",
+    "hideRawText": "Ruwe tekst verbergen",
+    "showRawText": "Ruwe tekst weergeven",
+    "cameraUnavailableUseUpload": "Camera niet beschikbaar — gebruik in plaats daarvan Uploaden",
+    "noTextFound": "Geen tekst gevonden in de afbeelding. Probeer een scherpere foto.",
+    "noTaskIdentified": "Kan geen taak herkennen. Probeer een andere foto.",
+    "processingFailed": "Verwerking mislukt.",
+    "scannerError": "Scannerfout: {{error}}",
+    "scanFailed": "Scannen mislukt.",
+    "preparingScan": "Starten…",
+    "failedTitle": "Geen taak gevonden",
+    "continueWithoutTask": "Doorgaan zonder taak"
   },
   "descriptionPlaceholder": "",
   "notificationTemplate": {
@@ -728,7 +752,7 @@
     "rescheduleFromCompletion": "",
     "rescheduleFromCompletionHelp": "",
     "notifications": "",
-    "notificationsPlanWarning": "",
+    "notificationsPlanWarning": "Task notifications are not available in the Basic plan. Upgrade to Plus to receive reminders when tasks are due or completed.",
     "notifyForTask": "",
     "notifyForTaskHelp": "",
     "notificationSchedule": "",
@@ -759,7 +783,10 @@
     "updatedBy": "",
     "archive": "",
     "unarchive": "",
-    "create": ""
+    "create": "",
+    "alwaysDueHint": "Deze taak heeft geen vervaldatum en is altijd beschikbaar om te voltooien",
+    "notifyForTaskUnavailable": "Meldingen zijn niet beschikbaar voor trigger-gebaseerde of altijd beschikbare taken",
+    "notificationsFreePlanNote": "Je abonnement bevat een herinnering op de vervaldatum. Plus voegt herinneringen vóór de datum en opvolgherrinneringen daarna toe."
   },
   "addTask": {
     "title": "",
@@ -772,7 +799,24 @@
     "createCount": "",
     "useTask": "",
     "processing": "",
-    "create": ""
+    "create": "",
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:",
+    "createAnother": "Nog een maken",
+    "createAndAddAnother": "Maken en nog een toevoegen",
+    "createAndClose": "Maken en sluiten",
+    "findingDetails": "Taakdetails zoeken in je foto…",
+    "findingDetailsHint": "Je kunt doorgaan met bewerken terwijl we zoeken.",
+    "detailsFound": "We hebben taakdetails gevonden",
+    "suggestedDue": "Voorgestelde einddatum: {{date}}",
+    "useSuggestion": "Suggestie gebruiken",
+    "useAndKeepAttachment": "Suggestie gebruiken & foto behouden",
+    "dismissSuggestion": "Suggestie negeren",
+    "noDetailsFound": "Geen taakdetails gevonden",
+    "analysisFailed": "We konden deze foto niet analyseren",
+    "attachmentStillAdded": "Je foto is nog steeds toegevoegd.",
+    "continueManually": "Je kunt de taak handmatig blijven aanmaken.",
+    "dismissAnalysis": "Fotoanalyse negeren"
   },
   "repeat": {
     "days": {
@@ -804,11 +848,13 @@
       "monthly": "",
       "yearly": "",
       "adaptive": "",
-      "custom": ""
+      "custom": "",
+      "always": "Altijd"
     },
     "freqMessage": {
       "adaptive": "",
-      "custom": ""
+      "custom": "",
+      "always": "Deze taak heeft geen vervaldatum en blijft op elk moment beschikbaar om te voltooien. Ze wordt niet gearchiveerd na voltooiing."
     },
     "weekPattern": {
       "every_week": "",
@@ -860,7 +906,7 @@
     "repeatOn": "",
     "triggerLabel": "",
     "triggerHelp": "",
-    "triggerPlanWarning": "",
+    "triggerPlanWarning": "Thing-based triggers are not available in the Basic plan. Upgrade to Plus to automatically trigger tasks when device states change.",
     "previewEvery": "",
     "previewOccurrence": "",
     "defaultTime": "",
@@ -1035,5 +1081,7 @@
     "today": "",
     "yesterday": "",
     "noteTitle": ""
-  }
+  },
+  "tasksForDate": "Taken voor {{date}}",
+  "createSuggestion": "\"{{value}}\" maken"
 }

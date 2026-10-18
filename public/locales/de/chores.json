@@ -111,7 +111,9 @@
     "unableChangeAssignee": "Zuständige Person konnte nicht geändert werden",
     "availableToCompleteStarting": "Ab {{date}} erledigbar",
     "delegateToSomeoneElse": "An jemand anderen übertragen",
-    "selectAPerformer": "Wähle eine ausführende Person"
+    "selectAPerformer": "Wähle eine ausführende Person",
+    "notFoundTitle": "Aufgabe nicht verfügbar",
+    "notFoundDescription": "Diese Aufgabe wurde möglicherweise gelöscht oder wird nicht mehr mit dir geteilt."
   },
   "toolbar": {
     "defaultProject": "Standardprojekt",
@@ -134,7 +136,11 @@
       "assignee": "Zugewiesene Person"
     },
     "display": "Anzeige",
-    "displayOptions": "Anzeigeoptionen"
+    "displayOptions": "Anzeigeoptionen",
+    "moreSaveOptions": "Weitere Speicheroptionen",
+    "showCount": "{{count}} anzeigen",
+    "done": "Fertig",
+    "savedFilters": "Gespeicherte Filter"
   },
   "sort": {
     "assignedToMe": "Mir zugewiesen",
@@ -271,7 +277,9 @@
       "skipTitle": "Aufgaben überspringen",
       "skippedTitle": "⏭️ Aufgaben übersprungen",
       "skipFailedTitle": "Das Überspringen mehrere Aufgaben ist fehlgeschlagen"
-    }
+    },
+    "failAssignTitle": "Zuweisung fehlgeschlagen",
+    "failAssignMessage": "Aufgabe konnte nicht zugewiesen werden"
   },
   "archived": {
     "restoredTitle": "Aufgabe wiederhergestellt",
@@ -314,7 +322,7 @@
     "selected_one": "{{count}} Aufgabe ausgewählt",
     "selected_other": "{{count}} Aufgaben ausgewählt",
     "selectAllTitle": "Alle sichtbaren Aufgaben auswählen (Strg+A)",
-    "selectSectionTitle": "",
+    "selectSectionTitle": "Alle Aufgaben in diesem Abschnitt auswählen",
     "all": "Alle",
     "closeMultiSelect": "Mehrfachauswahl schließen (Esc)",
     "clearMultiSelect": "Auswahl aufheben (Esc)",
@@ -329,7 +337,7 @@
     "matching": " passend zu „{{term}}“",
     "filtersTitle": "Filter",
     "sortArchivedDate": "Archivierungsdatum",
-    "sortName": "",
+    "sortName": "Name",
     "sortPriority": "Priorität",
     "sortDueDate": "Fälligkeitsdatum",
     "noMatchTitle": "Keine passenden archivierten Aufgaben",
@@ -385,7 +393,7 @@
     "labelsHint": "Tippen zum Hinzufügen · erneut tippen zum Entfernen",
     "done": "Fertig",
     "noPriority": "Keine",
-    "dueDateTitle": ""
+    "dueDateTitle": "Fälligkeitsdatum für {{count}} Aufgabe(n)"
   },
   "remind": {
     "title": "Erinnerungen",
@@ -394,7 +402,7 @@
     "unitMin": "Min",
     "unitHr": "Std",
     "unitDay": "Tag",
-    "duration_one": "",
+    "duration_one": "{{count}} {{unit}}",
     "duration_other": "{{count}} {{unit}}",
     "before": "vorher",
     "after": "danach",
@@ -611,7 +619,23 @@
     "keepAsAttachment": "Foto als Anhang behalten",
     "altCaptured": "Erfasstes Dokument",
     "altProcessing": "Verarbeitung läuft",
-    "taskIdentified": "Aufgabe erkannt"
+    "taskIdentified": "Aufgabe erkannt",
+    "runningNativeOcr": "Native Texterkennung wird ausgeführt…",
+    "identifyingTask": "Aufgabe wird mit KI identifiziert…",
+    "tapToScanHint": "Tippe auf \"Dokument scannen\", um den Scanner zu öffnen",
+    "readingTextProgress": "Text wird aus Bild gelesen… {{progress}} %",
+    "dueDate": "Fällig: {{date}}",
+    "hideRawText": "Rohtext ausblenden",
+    "showRawText": "Rohtext anzeigen",
+    "cameraUnavailableUseUpload": "Kamera nicht verfügbar — stattdessen hochladen",
+    "noTextFound": "Kein Text im Bild gefunden. Bitte ein schärferes Foto verwenden.",
+    "noTaskIdentified": "Keine Aufgabe erkannt. Bitte ein anderes Foto verwenden.",
+    "processingFailed": "Verarbeitung fehlgeschlagen.",
+    "scannerError": "Scannerfehler: {{error}}",
+    "scanFailed": "Scan fehlgeschlagen.",
+    "preparingScan": "Wird gestartet…",
+    "failedTitle": "Keine Aufgabe gefunden",
+    "continueWithoutTask": "Ohne Aufgabe fortfahren"
   },
   "descriptionPlaceholder": "Beschreibung eingeben...",
   "notificationTemplate": {
@@ -666,7 +690,7 @@
     "deleteAttachmentFailed": "Anhang konnte nicht gelöscht werden.",
     "deleteChoreFailed": "Aufgabe konnte nicht gelöscht werden: {{error}}",
     "deleteChoreTitle": "Aufgabe löschen",
-    "name": "",
+    "name": "Name",
     "nameDesc": "Wie heißt diese Aufgabe?",
     "description": "Beschreibung",
     "descriptionDesc": "Worum geht es bei dieser Aufgabe?",
@@ -759,7 +783,10 @@
     "updatedBy": "Aktualisiert von",
     "archive": "Archivieren",
     "unarchive": "Archivierung aufheben",
-    "create": "Erstellen"
+    "create": "Erstellen",
+    "alwaysDueHint": "Diese Aufgabe hat kein Fälligkeitsdatum und ist jederzeit verfügbar",
+    "notifyForTaskUnavailable": "Benachrichtigungen sind für auslöserbasierte oder immer verfügbare Aufgaben nicht möglich",
+    "notificationsFreePlanNote": "Ihr Tarif enthält eine Erinnerung am Fälligkeitsdatum. Plus fügt Erinnerungen vor dem Termin und Nachfass‑Erinnerungen danach hinzu."
   },
   "addTask": {
     "title": "Neue Aufgabe erstellen",
@@ -772,7 +799,24 @@
     "createCount": "{{count}} Aufgaben erstellen",
     "useTask": "Aufgabe übernehmen",
     "processing": "Verarbeitung läuft",
-    "create": "Erstellen"
+    "create": "Erstellen",
+    "descriptionLabel": "Beschreibung:",
+    "subtasksLabel": "Unteraufgaben:",
+    "createAnother": "Weitere erstellen",
+    "createAndAddAnother": "Erstellen & weitere hinzufügen",
+    "createAndClose": "Erstellen & schließen",
+    "findingDetails": "Suche Aufgabendetails aus deinem Foto…",
+    "findingDetailsHint": "Du kannst währenddessen weiter bearbeiten.",
+    "detailsFound": "Wir haben Aufgabendetails gefunden",
+    "suggestedDue": "Vorgeschlagenes Fälligkeitsdatum: {{date}}",
+    "useSuggestion": "Vorschlag verwenden",
+    "useAndKeepAttachment": "Vorschlag verwenden & Foto behalten",
+    "dismissSuggestion": "Vorschlag verwerfen",
+    "noDetailsFound": "Keine Aufgabendetails gefunden",
+    "analysisFailed": "Dieses Foto konnte nicht analysiert werden",
+    "attachmentStillAdded": "Dein Foto ist weiterhin angehängt.",
+    "continueManually": "Du kannst die Aufgabe weiterhin manuell erstellen.",
+    "dismissAnalysis": "Fotoanalyse verwerfen"
   },
   "repeat": {
     "days": {
@@ -788,14 +832,14 @@
       "january": "Januar",
       "february": "Februar",
       "march": "März",
-      "april": "",
+      "april": "April",
       "may": "Mai",
       "june": "Juni",
       "july": "Juli",
-      "august": "",
-      "september": "",
+      "august": "August",
+      "september": "September",
       "october": "Oktober",
-      "november": "",
+      "november": "November",
       "december": "Dezember"
     },
     "freqType": {
@@ -804,11 +848,13 @@
       "monthly": "Monatlich",
       "yearly": "Jährlich",
       "adaptive": "Adaptiv",
-      "custom": "Benutzerdefiniert"
+      "custom": "Benutzerdefiniert",
+      "always": "Immer"
     },
     "freqMessage": {
       "adaptive": "Diese Aufgabe wird dynamisch anhand vorheriger Abschlussdaten geplant.",
-      "custom": "Diese Aufgabe wird anhand einer benutzerdefinierten Häufigkeit geplant."
+      "custom": "Diese Aufgabe wird anhand einer benutzerdefinierten Häufigkeit geplant.",
+      "always": "Diese Aufgabe hat kein Fälligkeitsdatum und bleibt jederzeit verfügbar. Sie wird nach Abschluss nicht archiviert."
     },
     "weekPattern": {
       "every_week": "Jede Woche",
@@ -874,17 +920,17 @@
       "sunday": "So"
     },
     "monthsShort": {
-      "january": "",
-      "february": "",
+      "january": "Jan",
+      "february": "Feb",
       "march": "Mär",
-      "april": "",
+      "april": "Apr",
       "may": "Mai",
-      "june": "",
-      "july": "",
-      "august": "",
-      "september": "",
+      "june": "Jun",
+      "july": "Jul",
+      "august": "Aug",
+      "september": "Sep",
       "october": "Okt",
-      "november": "",
+      "november": "Nov",
       "december": "Dez"
     },
     "occurrenceShort": {
@@ -951,14 +997,14 @@
       "2": "In Bearbeitung",
       "3": "Genehmigung ausstehend"
     },
-    "anyOf": "",
+    "anyOf": "Beliebige von",
     "include": "Einschließen",
     "exclude": "Ausschließen",
     "has": "Hat",
     "doesntHave": "Hat nicht",
     "assignee": "Zugewiesene Person",
     "createdBy": "Erstellt von",
-    "statusHeading": "",
+    "statusHeading": "Status",
     "priority": "Priorität",
     "dueDate": "Fälligkeitsdatum",
     "labels": "Beschriftungen",
@@ -966,7 +1012,7 @@
     "defaultProject": "Standardprojekt",
     "points": "Punkte",
     "project": "Projekt",
-    "filterFallback": "",
+    "filterFallback": "Filter",
     "notPrefix": "Nicht ",
     "customDueDate": "Benutzerdefiniert",
     "clear": "Zurücksetzen"
@@ -1035,5 +1081,7 @@
     "today": "Heute",
     "yesterday": "Gestern",
     "noteTitle": "Notiz - {{choreName}}"
-  }
+  },
+  "tasksForDate": "Aufgaben für {{date}}",
+  "createSuggestion": "\"{{value}}\" erstellen"
 }

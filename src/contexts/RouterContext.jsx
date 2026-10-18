@@ -1,10 +1,11 @@
-import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom'
 
 import App from '@/App'
 import ChoreEdit from '@/views/ChoreEdit/ChoreEdit'
 import Error from '@/views/Error'
 import AccountSettings from '@/views/Settings/AccountSettings'
 import AdvancedSettings from '@/views/Settings/AdvancedSettings'
+import BridgeSettings from '@/views/Settings/BridgeSettings'
 import ChildUserSettings from '@/views/Settings/ChildUserSettings'
 import CircleSettings from '@/views/Settings/CircleSettings'
 import DeveloperSettings from '@/views/Settings/DeveloperSettings'
@@ -42,6 +43,7 @@ import PaymentSuccessView from '../views/Payments/PaymentSuccessView'
 import PrivacyPolicyView from '../views/PrivacyPolicy/PrivacyPolicyView'
 import ProjectView from '../views/Projects/ProjectView'
 import APITokenSettings from '../views/Settings/APITokenSettings'
+import CalendarSettings from '../views/Settings/CalendarSettings'
 import HomeSectionsSettings from '../views/Settings/HomeSectionsSettings'
 import LayoutSettings from '../views/Settings/LayoutSettings'
 import LocalizationSettings from '../views/Settings/LocalizationSettings'
@@ -111,6 +113,14 @@ const Router = createBrowserRouter([
           {
             path: 'apitokens',
             element: <APITokenSettings />,
+          },
+          {
+            path: 'bridge',
+            element: <BridgeSettings />,
+          },
+          {
+            path: 'calendar',
+            element: <CalendarSettings />,
           },
           {
             path: 'storage',
@@ -282,6 +292,10 @@ const Router = createBrowserRouter([
       {
         path: 'labels/:labelId',
         element: <LabelDetailView />,
+      },
+      {
+        path: 'rewards/',
+        element: <Navigate to='/points?tab=rewards' replace />,
       },
       {
         path: 'projects/',

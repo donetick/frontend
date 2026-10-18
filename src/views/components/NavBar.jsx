@@ -8,6 +8,7 @@ import {
   History,
   ListAlt,
   Logout,
+  MenuOpenRounded,
   MenuRounded,
   ReportProblem,
   SearchRounded,
@@ -34,19 +35,32 @@ import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 
 import { version } from '../../../package.json'
+import DoneTickLogo from '../../assets/logo.svg'
 import UserProfileAvatar from '../../components/UserProfileAvatar'
+import { useNavBarTitleContext } from '../../contexts/NavBarTitleContext'
 import { useScrollDirection } from '../../hooks/useScrollDirection'
 import { useResource } from '../../queries/ResourceQueries'
 import { useGlobalSearch } from '../../search/GlobalSearchContext'
 import { apiClient } from '../../utils/ApiClient'
 import ErrorReportModal from '../Modals/ErrorReportModal'
 import NavBarLink from './NavBarLink'
+import NavBarResourceSwitcher from './NavBarResourceSwitcher'
 import { OPEN_NAVIGATION_DRAWER_EVENT } from './navigationEvents'
 import SyncStatusIndicator from './SyncStatusIndicator'
 
 const COMPACT_NAV_WIDTH = 60
 const EXPANDED_NAV_WIDTH = 232
 const PUBLIC_PAGES = ['/landing', '/privacy', '/terms']
+const NAVBAR_TITLE_KEYS = {
+  '/activities': 'navigation.activities',
+  '/archived': 'navigation.archived',
+  '/chores': 'navigation.allTasks',
+  '/filters': 'navigation.filters',
+  '/labels': 'navigation.labels',
+  '/points': 'navigation.points',
+  '/projects': 'navigation.projects',
+  '/things': 'navigation.things',
+}
 const SHELL_FREE_PAGES = [
   '/signup',
   '/login',
@@ -64,6 +78,7 @@ const SHELL_FREE_PAGES = [
 const NavBar = () => {
   const { t } = useTranslation('common')
   const { data: resource } = useResource()
+  const { navBarConfig } = useNavBarTitleContext()
   const { openSearch } = useGlobalSearch()
   const navigate = useNavigate()
   const location = useLocation()
@@ -76,6 +91,16 @@ const NavBar = () => {
   const isMobile = useMediaQuery('(max-width:768px)')
   const isDesktop = useMediaQuery('(min-width:1024px)')
   const headerHidden = useScrollDirection({ enabled: !isDesktop })
+  const normalizedPath =
+    location.pathname.length > 1
+      ? location.pathname.replace(/\/$/, '')
+      : location.pathname
+  const navbarTitleKey = NAVBAR_TITLE_KEYS[normalizedPath]
+  const supportsDynamicNavBar =
+    normalizedPath === '/chores' || /^\/labels\/[^/]+$/.test(normalizedPath)
+  const dynamicNavBarConfig = supportsDynamicNavBar ? navBarConfig : null
+  const navbarTitle =
+    dynamicNavBarConfig?.title || (navbarTitleKey ? t(navbarTitleKey) : null)
 
   useEffect(() => {
     const handleOpenDrawer = () => setDrawerOpen(true)
@@ -84,17 +109,11 @@ const NavBar = () => {
       window.removeEventListener(OPEN_NAVIGATION_DRAWER_EVENT, handleOpenDrawer)
   }, [])
 
-  // --app-navigation-width is the reserved rail width: it stays compact so page
-  // content doesn't reflow when the rail expands over it. --app-navigation-offset
-  // is the rail's *actual* current width, for overlays (FABs) that must stay
-  // clear of it even while expanded.
+  // Keep page content and overlays clear of the navigation's current width.
   useEffect(() => {
     const style = document.documentElement.style
     const live = desktopExpanded ? EXPANDED_NAV_WIDTH : COMPACT_NAV_WIDTH
-    style.setProperty(
-      '--app-navigation-width',
-      isDesktop ? `${COMPACT_NAV_WIDTH}px` : '0px',
-    )
+    style.setProperty('--app-navigation-width', isDesktop ? `${live}px` : '0px')
     style.setProperty(
       '--app-navigation-offset',
       isDesktop ? `${live}px` : '0px',
@@ -400,7 +419,9 @@ const NavBar = () => {
             aria-hidden='true'
             sx={{
               flexShrink: 0,
-              width: COMPACT_NAV_WIDTH,
+              transition: 'width 200ms ease',
+              width: desktopExpanded ? EXPANDED_NAV_WIDTH : COMPACT_NAV_WIDTH,
+              '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
             }}
           />
           <Sheet
@@ -471,27 +492,55 @@ const NavBar = () => {
                   }}
                   sx={{ flexShrink: 0 }}
                 >
-                  <MenuRounded />
+                  {desktopExpanded ? (
+                    <MenuOpenRounded className='rtl-flip' />
+                  ) : (
+                    <MenuRounded />
+                  )}
                 </IconButton>
               </Tooltip>
               {desktopExpanded && (
-                <Typography
-                  component='div'
-                  level='title-lg'
+                <Box
                   sx={{
-                    color: 'text.primary',
-                    fontFamily: 'var(--joy-fontFamily-display)',
-                    fontWeight: 800,
-                    letterSpacing: '-0.045em',
-                    lineHeight: 1,
-                    userSelect: 'none',
+                    alignItems: 'center',
+                    display: 'flex',
+                    gap: 1,
+                    minWidth: 0,
                   }}
                 >
-                  Done
-                  <Box component='span' sx={{ color: 'primary.500' }}>
-                    tick
-                  </Box>
-                </Typography>
+                  <Box
+                    aria-hidden='true'
+                    component='img'
+                    src={DoneTickLogo}
+                    sx={{
+                      display: 'block',
+                      flexShrink: 0,
+                      height: 28,
+                      width: 28,
+                    }}
+                  />
+                  <Typography
+                    component='div'
+                    level='title-md'
+                    dir='ltr'
+                    sx={{
+                      alignItems: 'center',
+                      color: 'text.primary',
+                      display: 'flex',
+                      fontFamily: 'var(--joy-fontFamily-body)',
+                      fontWeight: 700,
+                      letterSpacing: '-0.015em',
+                      lineHeight: 1,
+                      minHeight: 28,
+                      userSelect: 'none',
+                    }}
+                  >
+                    Done
+                    <Box component='span' sx={{ color: '#06b6d4' }}>
+                      tick
+                    </Box>
+                  </Typography>
+                </Box>
               )}
             </Box>
             <Box
@@ -541,7 +590,29 @@ const NavBar = () => {
             }}
           >
             {getMenuIcon()}
-            <Box sx={{ flex: 1 }} />
+            {dynamicNavBarConfig?.selector ? (
+              <NavBarResourceSwitcher
+                selector={dynamicNavBarConfig.selector}
+                title={navbarTitle}
+              />
+            ) : navbarTitle ? (
+              <Typography
+                component='h1'
+                level='title-md'
+                sx={{
+                  flex: 1,
+                  fontWeight: 'lg',
+                  minWidth: 0,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {navbarTitle}
+              </Typography>
+            ) : (
+              <Box sx={{ flex: 1 }} />
+            )}
             <SyncStatusIndicator />
             <UserProfileAvatar />
           </Sheet>

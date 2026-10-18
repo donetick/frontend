@@ -21,12 +21,13 @@ import {
   Stack,
   Typography,
 } from '@mui/joy'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
 import { SETTINGS_SECTIONS } from '../../constants/settingsSections'
 import { useUserProfile } from '../../queries/UserQueries'
+import { isCloudInstance } from '../../service/FeedbackService'
 import { isPlusAccount } from '../../utils/Helpers'
 import { isParentUser } from '../../utils/UserHelpers'
 import ErrorReportModal from '../Modals/ErrorReportModal'
@@ -38,10 +39,19 @@ const SettingsOverview = () => {
   const { data: userProfile } = useUserProfile()
   const [feedbackOpen, setFeedbackOpen] = useState(false)
   const [bugReportOpen, setBugReportOpen] = useState(false)
+  // Bridge is a relay for self-hosted instances; donetick.com users have no
+  // use for it since their server already has direct push access.
+  const [isCloud, setIsCloud] = useState(false)
+
+  useEffect(() => {
+    isCloudInstance().then(setIsCloud)
+  }, [])
 
   const settingsCards = [
     ...SETTINGS_SECTIONS.filter(
-      section => !section.nativeOnly || Capacitor.isNativePlatform(),
+      section =>
+        (!section.nativeOnly || Capacitor.isNativePlatform()) &&
+        (section.id !== 'bridge' || !isCloud),
     ).map(({ icon: Icon, id, isBeta }) => ({
       id,
       title: t(`overview.sections.${id}.title`),

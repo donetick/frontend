@@ -1,4 +1,3 @@
-import { Capacitor } from '@capacitor/core'
 import { Delete, Refresh } from '@mui/icons-material'
 import {
   Box,
@@ -26,6 +25,7 @@ import { useNavigate } from 'react-router-dom'
 import RealTimeSettings from '../../components/RealTimeSettings'
 import SubscriptionModal from '../../components/SubscriptionModal'
 import { useLocalization } from '../../contexts/LocalizationContext'
+import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
 import Logo from '../../Logo'
 import { useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
@@ -43,6 +43,11 @@ import {
   UpdatePassword,
 } from '../../utils/Fetcher'
 import { isPlusAccount } from '../../utils/Helpers'
+import {
+  isNativePurchasePlatform,
+  NATIVE_PAYWALL_INVOKER,
+  presentNativePaywall,
+} from '../../utils/NativePaywall'
 import LoadingComponent from '../components/Loading'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import NativeCancelSubscriptionModal from '../Modals/Inputs/NativeCancelSubscriptionModal'
@@ -61,6 +66,7 @@ import ThemeToggle from './ThemeToggle'
 const Settings = () => {
   const { t } = useTranslation('settings')
   const { data: userProfile } = useUserProfile()
+  const { showPaywall } = usePaywall()
   const queryClient = useQueryClient()
   const { showNotification } = useNotification()
   const navigate = useNavigate()
@@ -139,21 +145,6 @@ const Settings = () => {
       setCircleMembers(data.res ? data.res : [])
     })
   }, [])
-  useEffect(() => {
-    async function configurePurchases() {
-      if (Capacitor.isNativePlatform() && userProfile) {
-        await Purchases.configure({
-          apiKey:
-            Capacitor.getPlatform() === 'ios'
-              ? import.meta.env.VITE_REACT_APP_REVENUECAT_API_KEY_IOS
-              : import.meta.env.VITE_REACT_APP_REVENUECAT_API_KEY_ANDROID,
-          appUserID: String(userProfile?.id),
-        })
-      }
-    }
-    configurePurchases()
-  }, [userProfile])
-
   // useEffect when circleMembers and userprofile:
   useEffect(() => {
     if (userProfile && userProfile.id) {
@@ -632,15 +623,14 @@ const Settings = () => {
             <Typography level='body-md' mt={-1}>
               {t('advanced.webhookDescription')}
             </Typography>
-            {!isPlusAccount(userProfile) && (
-              <Typography level='body-sm' color='warning' sx={{ mt: 1 }}>
-                {t('advanced.webhookPlusNotice')}
-              </Typography>
-            )}
             <FormControl sx={{ mt: 1 }}>
               <Checkbox
                 checked={webhookURL !== null}
                 onClick={() => {
+                  if (!isPlusAccount(userProfile)) {
+                    showPaywall(PAYWALL_REASON.WEBHOOKS)
+                    return
+                  }
                   if (webhookURL === null) {
                     setWebhookURL('')
                   } else {
@@ -649,21 +639,9 @@ const Settings = () => {
                 }}
                 variant='soft'
                 label={t('advanced.webhookToggle')}
-                disabled={!isPlusAccount(userProfile)}
                 overlay
               />
-              <FormHelperText
-                sx={{
-                  opacity: !isPlusAccount(userProfile) ? 0.5 : 1,
-                }}
-              >
-                {t('advanced.webhookHelper')}{' '}
-                {userProfile && !isPlusAccount(userProfile) && (
-                  <Chip variant='soft' color='warning'>
-                    {t('common.plusFeature')}
-                  </Chip>
-                )}
-              </FormHelperText>
+              <FormHelperText>{t('advanced.webhookHelper')}</FormHelperText>
             </FormControl>
 
             {webhookURL !== null && (
@@ -703,7 +681,6 @@ const Settings = () => {
                       }
                     })
                   }}
-                  disabled={!isPlusAccount(userProfile)}
                 >
                   {t('common.save')}
                 </Button>
@@ -739,14 +716,11 @@ const Settings = () => {
                 userProfile?.subscription !== 'cancelled')
             }
             onClick={async () => {
-              if (Capacitor.isNativePlatform()) {
+              if (isNativePurchasePlatform()) {
                 try {
-                  const { RevenueCatUI } =
-                    await import('@revenuecat/purchases-capacitor-ui')
-
-                  const offering = await Purchases.getOfferings()
-                  await RevenueCatUI.presentPaywall({
-                    offering: offering.current,
+                  await presentNativePaywall({
+                    appUserID: userProfile.id,
+                    invoker: NATIVE_PAYWALL_INVOKER.SETTINGS,
                   })
 
                   // Check if user now has entitlement after paywall interaction
@@ -956,6 +930,7 @@ const Settings = () => {
 
       <SubscriptionModal
         open={subscriptionModal}
+        invoker={NATIVE_PAYWALL_INVOKER.SETTINGS}
         onClose={() => setSubscriptionModal(false)}
       />
 

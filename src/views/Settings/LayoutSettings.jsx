@@ -49,6 +49,10 @@ import {
   getDefaultView,
   saveDefaultView,
 } from '../../utils/DefaultViewConfig'
+import {
+  setSinglePageTaskEditor,
+  useSinglePageTaskEditor,
+} from '../../utils/TaskEditorPreferences'
 import { isMobileBottomNavEligible } from '../components/MobileBottomNav'
 import SettingsLayout from './SettingsLayout'
 import SidepanelSettings from './SidepanelSettings'
@@ -71,6 +75,7 @@ const LayoutSettings = () => {
   // The nav item labels are the ones the bar itself renders, and those live
   // in the shared `common` namespace — reuse them rather than retranslating.
   const { t } = useTranslation(['settings', 'common'])
+  const singlePageTaskEditor = useSinglePageTaskEditor()
   const isMobile = useMediaQuery('(max-width:768px)')
   const bottomNavEligible = isMobileBottomNavEligible(isMobile)
   // Same breakpoint Sidepanel itself checks before rendering.
@@ -356,6 +361,30 @@ const LayoutSettings = () => {
             </Box>
           </Box>
         )}
+
+        <Box
+          sx={{
+            mt: 2,
+            pt: 3,
+            borderTop: '1px solid var(--joy-palette-divider)',
+          }}
+        >
+          <Typography level='title-md' sx={{ fontWeight: 600, mb: 2 }}>
+            Task editor
+          </Typography>
+          <FormControl>
+            <Checkbox
+              checked={singlePageTaskEditor}
+              onChange={event => setSinglePageTaskEditor(event.target.checked)}
+              variant='soft'
+              label='Show task editor on one page'
+            />
+            <FormHelperText>
+              Show all task settings in one scrolling page instead of separate
+              steps. Saved for this device/browser.
+            </FormHelperText>
+          </FormControl>
+        </Box>
 
         {/* Mirror image of the bottom bar: the sidepanel only renders from
             `lg` up, so it is configurable exactly where it exists. */}

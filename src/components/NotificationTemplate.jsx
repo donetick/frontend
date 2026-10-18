@@ -2,9 +2,8 @@ import { Save } from '@mui/icons-material'
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
 import InfoIcon from '@mui/icons-material/Info'
-import NotificationsIcon from '@mui/icons-material/Notifications'
+import NotificationsOutlined from '@mui/icons-material/NotificationsOutlined'
 import Alert from '@mui/joy/Alert'
-import Badge from '@mui/joy/Badge'
 import Box from '@mui/joy/Box'
 import Button from '@mui/joy/Button'
 import IconButton from '@mui/joy/IconButton'
@@ -15,226 +14,171 @@ import Typography from '@mui/joy/Typography'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { NOTIFICATION_TYPE, TASK_COLOR } from '../utils/Colors'
+import { PAYWALL_REASON, usePaywall } from '../contexts/PaywallContext'
 import { TIME_UNITS } from '../utils/DurationUtils'
+import { sanitizeRemindersForPlan } from '../utils/entitlements'
 
-const timeUnits = TIME_UNITS
+const timingOptions = ['before', 'ondue', 'after']
 
-const timingOptions = [
-  { value: 'before' },
-  { value: 'ondue' },
-  { value: 'after' },
-]
+function getInitialNotifications(value) {
+  if (Array.isArray(value?.templates)) return value.templates
 
-function getRelativeLabel(notification, t) {
-  const { unit, value } = notification
-  const numericValue = Number(value)
-  if (numericValue === 0) {
-    return t('notificationTemplate.onDueDate')
+  try {
+    const saved = JSON.parse(
+      localStorage.getItem('defaultNotificationTemplate'),
+    )
+    return Array.isArray(saved) ? saved : []
+  } catch {
+    return []
   }
-  const unitName = t(`notificationTemplate.unitName.${unit}`)
-  const absValue = Math.abs(numericValue)
-  return numericValue < 0
-    ? t('notificationTemplate.beforeDue', { count: absValue, unit: unitName })
-    : t('notificationTemplate.afterDue', { count: absValue, unit: unitName })
 }
 
-// Helper functions to convert between internal value and UI representation
 function getUIRepresentation(notification) {
   const numericValue = Number(notification.value)
+
   if (numericValue === 0) {
-    return { timing: 'ondue', displayValue: 0, unit: notification.unit }
-  } else if (numericValue < 0) {
-    return {
-      timing: 'before',
-      displayValue: Math.abs(numericValue),
-      unit: notification.unit,
-    }
-  } else {
-    return {
-      timing: 'after',
-      displayValue: numericValue,
-      unit: notification.unit,
-    }
+    return { timing: 'ondue', displayValue: 0, unit: notification.unit || 'm' }
+  }
+
+  return {
+    timing: numericValue < 0 ? 'before' : 'after',
+    displayValue: Math.abs(numericValue),
+    unit: notification.unit,
   }
 }
 
 function getInternalValue(timing, displayValue) {
   if (timing === 'ondue') return 0
   if (timing === 'before') return -Math.abs(displayValue)
-  return Math.abs(displayValue) // 'after'
+  return Math.abs(displayValue)
 }
 
 const NotificationTemplate = ({
   maxNotifications = 5,
-  // ChoreEdit gates this editor behind its own on/off switch, so the last row
-  // must stay put — `notification: true` with no templates is not a valid task.
-  // Consumers that own an empty state themselves pass 0.
+  // ChoreEdit owns the on/off state and must retain at least one reminder.
+  // Consumers with their own empty state can pass 0.
   minNotifications = 1,
   onChange,
-  showTimeline = true,
   value,
 }) => {
   const { t } = useTranslation('chores')
-  const [notifications, setNotifications] = useState(
-    value?.templates ||
-      JSON.parse(localStorage.getItem('defaultNotificationTemplate')) ||
-      [],
+  const { isPlanKnown, isPlus, showPaywall } = usePaywall()
+  const [notifications, setNotifications] = useState(() =>
+    getInitialNotifications(value),
   )
-
   const notificationsRef = useRef(notifications)
   const [draftValues, setDraftValues] = useState({})
-
   const [error, setError] = useState(null)
   const [showSaveDefault, setShowSaveDefault] = useState(false)
-  // Create a map of notification indices for timeline display
-  const [notificationIndexMap, setNotificationIndexMap] = useState({})
 
-  const updateNotificationIndices = useCallback(() => {
-    // Convert notifications to minutes for proper chronological sorting
-    const convertToMinutes = (value, unit) => {
-      const numericValue = Number(value)
-      if (numericValue === 0) return 0
-      let minutes = Math.abs(numericValue)
-      if (unit === 'h') minutes *= 60
-      if (unit === 'd') minutes *= 24 * 60
-      return numericValue < 0 ? -minutes : minutes
-    }
+  const requirePlus = useCallback(() => {
+    if (isPlus) return true
+    showPaywall(PAYWALL_REASON.ADVANCED_REMINDERS)
+    return false
+  }, [isPlus, showPaywall])
 
-    // Sort notifications for consistent ordering by actual time duration
-    const sorted = [...notifications].sort((a, b) => {
-      const aMinutes = convertToMinutes(a.value, a.unit)
-      const bMinutes = convertToMinutes(b.value, b.unit)
-      return aMinutes - bMinutes
-    })
-
-    const indexMap = {}
-    // Map original array indices to their chronological position numbers
-    notifications.forEach((originalNotification, originalIdx) => {
-      const chronologicalPosition = sorted.findIndex(
-        sortedNotification =>
-          Number(sortedNotification.value) ===
-            Number(originalNotification.value) &&
-          sortedNotification.unit === originalNotification.unit,
-      )
-      indexMap[originalIdx] = chronologicalPosition + 1
-    })
-
-    setNotificationIndexMap(indexMap)
-  }, [notifications])
-
-  // Sort notifications and update the index mapping
-  useEffect(() => {
-    updateNotificationIndices()
-  }, [updateNotificationIndices])
-
-  // Notify parent component of changes including the template name
-  useEffect(() => {
-    if (onChange) {
-      onChange({ notifications })
-    }
-  }, [notifications, onChange])
-
-  // Validates if a notification configuration already exists
-  const isDuplicate = (notification, currentIdx = -1, list = notifications) => {
-    return list.some((n, idx) => {
-      if (idx === currentIdx) return false
-
-      return (
-        Number(n.value) === Number(notification.value) &&
-        n.unit === notification.unit
-      )
-    })
+  const commitNotifications = updated => {
+    setNotifications(updated)
+    notificationsRef.current = updated
+    setError(null)
+    setShowSaveDefault(true)
   }
 
+  // Defaults created while subscribed may contain advanced reminders. Remove
+  // those once the current plan is known so the editor matches what can save.
+  useEffect(() => {
+    if (!isPlanKnown || isPlus) return
+
+    setNotifications(previous => {
+      const allowed = sanitizeRemindersForPlan(previous, false)
+      if (allowed.length === previous.length) return previous
+      notificationsRef.current = allowed
+      return allowed
+    })
+  }, [isPlanKnown, isPlus])
+
+  useEffect(() => {
+    onChange?.({ notifications })
+  }, [notifications, onChange])
+
+  const isDuplicate = (notification, currentIdx = -1, list = notifications) =>
+    list.some(
+      (item, idx) =>
+        idx !== currentIdx &&
+        Number(item.value) === Number(notification.value) &&
+        item.unit === notification.unit,
+    )
+
   const getSmartSuggestion = type => {
-    let suggestions = []
-    if (type === 'reminder' || type === 'before') {
-      suggestions = [
-        { value: -1, unit: 'd' },
-        { value: -3, unit: 'h' },
-        { value: -30, unit: 'm' },
-      ]
-    } else if (type === 'followup' || type === 'after') {
-      suggestions = [
-        { value: 1, unit: 'd' },
-        { value: 3, unit: 'd' },
-        { value: 7, unit: 'd' },
-      ]
-    }
+    const suggestions =
+      type === 'reminder' || type === 'before'
+        ? [
+            { value: -1, unit: 'd' },
+            { value: -3, unit: 'h' },
+            { value: -30, unit: 'm' },
+          ]
+        : [
+            { value: 1, unit: 'd' },
+            { value: 3, unit: 'd' },
+            { value: 7, unit: 'd' },
+          ]
+
     return suggestions.find(
       suggestion => !isDuplicate(suggestion, -1, notificationsRef.current),
     )
   }
 
-  const handleChange = (idx, field, value) => {
-    const currentNotification = notifications[idx]
-    const uiRep = getUIRepresentation(currentNotification)
+  const handleChange = (idx, field, nextValue) => {
+    const currentNotification = notificationsRef.current[idx]
+    if (!currentNotification || nextValue === null) return
 
-    let updatedUIRep = { ...uiRep }
-    let updatedNotification = { ...currentNotification }
+    const ui = getUIRepresentation(currentNotification)
 
-    // Update the UI representation based on the field being changed
     if (field === 'timing') {
-      updatedUIRep.timing = value
-      // Reset display value when switching to "On Due"
-      if (value === 'ondue') {
-        updatedUIRep.displayValue = 0
+      if (nextValue !== 'ondue' && !requirePlus()) return
+      ui.timing = nextValue
+
+      if (nextValue === 'ondue') {
+        ui.displayValue = 0
+        ui.unit = 'm'
       } else if (Number(currentNotification.value) === 0) {
-        const suggestion = getSmartSuggestion(value)
-        if (suggestion) {
-          updatedUIRep.displayValue = Math.abs(suggestion.value)
-          updatedUIRep.unit = suggestion.unit
-        } else {
-          updatedUIRep.displayValue = 1
-          updatedUIRep.unit = 'h'
-        }
+        const suggestion = getSmartSuggestion(nextValue)
+        ui.displayValue = Math.abs(suggestion?.value ?? 1)
+        ui.unit = suggestion?.unit ?? 'h'
       }
     } else if (field === 'displayValue') {
-      updatedUIRep.displayValue = Math.max(0, Number(value))
+      ui.displayValue = Math.max(0, Number(nextValue))
     } else if (field === 'unit') {
-      updatedUIRep.unit = value
-      updatedNotification.unit = value
+      ui.unit = nextValue
     }
 
-    // Convert back to internal representation
-    const newInternalValue = getInternalValue(
-      updatedUIRep.timing,
-      updatedUIRep.displayValue,
-    )
-    updatedNotification = {
-      ...updatedNotification,
-      value: newInternalValue,
-      unit: updatedUIRep.unit,
+    const updatedNotification = {
+      ...currentNotification,
+      value: getInternalValue(ui.timing, ui.displayValue),
+      unit: ui.unit,
     }
-
-    const updated = notifications.map((n, i) =>
-      i === idx ? updatedNotification : n,
+    const updated = notificationsRef.current.map((item, itemIdx) =>
+      itemIdx === idx ? updatedNotification : item,
     )
-    setNotifications(updated)
-    notificationsRef.current = updated
-    setError(null)
+
+    commitNotifications(updated)
   }
 
-  const handleBlur = idx => {
+  const validateNotification = idx => {
     const currentList = notificationsRef.current
-    const currentNotification = currentList[idx]
-
-    if (!currentNotification) return
-
-    if (isDuplicate(currentNotification, idx, currentList)) {
+    const notification = currentList[idx]
+    if (notification && isDuplicate(notification, idx, currentList)) {
       setError(t('notificationTemplate.errDuplicate'))
-      return
     }
   }
 
   const addSmartNotification = type => {
-    if (notifications.length >= maxNotifications) return
-    setShowSaveDefault(true)
-    let newNotification
+    if (notificationsRef.current.length >= maxNotifications) return
+    if (type !== 'due' && !requirePlus()) return
 
+    let newNotification
     if (type === 'due') {
-      if (notificationsRef.current.some(n => Number(n.value) === 0)) {
+      if (notificationsRef.current.some(item => Number(item.value) === 0)) {
         setError(t('notificationTemplate.errOneDue'))
         return
       }
@@ -247,208 +191,26 @@ const NotificationTemplate = ({
       }
     }
 
-    // Add the new notification to the end (don't sort, keep form order)
-    const updatedNotifications = [...notifications, newNotification]
-
-    setNotifications(updatedNotifications)
-    notificationsRef.current = updatedNotifications
-    setError(null)
+    commitNotifications([...notificationsRef.current, newNotification])
   }
 
   const removeNotification = idx => {
-    const updated = notifications.filter((_, i) => i !== idx)
-    setNotifications(updated)
-    notificationsRef.current = updated
-
-    setDraftValues(prev => {
-      const next = { ...prev }
-      delete next[idx]
+    commitNotifications(
+      notificationsRef.current.filter((_, itemIdx) => itemIdx !== idx),
+    )
+    setDraftValues(previous => {
+      const next = {}
+      Object.entries(previous).forEach(([key, draft]) => {
+        const numericKey = Number(key)
+        if (numericKey < idx) next[numericKey] = draft
+        if (numericKey > idx) next[numericKey - 1] = draft
+      })
       return next
     })
-
-    // No direct onChange here: consumers expect { notifications }, and the
-    // effect below already emits that shape once the state settles.
-    setShowSaveDefault(true)
   }
 
-  const renderTimeline = () => {
-    // Convert notifications to minutes for proper chronological sorting
-    const convertToMinutes = (value, unit) => {
-      const numericValue = Number(value)
-      if (numericValue === 0) return 0
-      let minutes = Math.abs(numericValue)
-      if (unit === 'h') minutes *= 60
-      if (unit === 'd') minutes *= 24 * 60
-      return numericValue < 0 ? -minutes : minutes
-    }
-
-    // Sort notifications chronologically by actual time (in minutes)
-    const sorted = [...notifications].sort((a, b) => {
-      const aMinutes = convertToMinutes(a.value, a.unit)
-      const bMinutes = convertToMinutes(b.value, b.unit)
-      return aMinutes - bMinutes
-    })
-
-    // Get min and max notification times in minutes for dynamic scaling
-    const minutesValues = sorted.map(n => convertToMinutes(n.value, n.unit))
-    const minBefore = Math.min(0, ...minutesValues) // Default to 0 if no "before" notifications
-    const maxAfter = Math.max(0, ...minutesValues) // Default to 0 if no "after" notifications
-
-    const getPositionPercent = (value, unit) => {
-      const minutes = convertToMinutes(value, unit)
-
-      // Due date is always at center (50%)
-      if (minutes === 0) return 50
-
-      // For notifications before due date (negative values)
-      if (minutes < 0) {
-        if (minBefore === 0) return 30 // Default position if no before notifications
-        // Scale between 10% (furthest left) and 45% (closest to due)
-        return 45 - (Math.abs(minutes) / Math.abs(minBefore)) * 35
-      }
-
-      // For notifications after due date (positive values)
-      if (maxAfter === 0) return 70 // Default position if no after notifications
-      // Scale between 55% (closest to due) and 90% (furthest right)
-      return 55 + (minutes / maxAfter) * 35
-    }
-
-    return (
-      <Box sx={{ mt: 3, mb: 2 }}>
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            position: 'relative',
-            height: 90,
-            bgcolor: 'background.surface',
-            borderRadius: 'md',
-            border: '1px solid',
-            borderColor: 'neutral.outlinedBorder',
-            p: 2,
-            transition: 'height 0.3s ease',
-            // '&:hover': {
-            //   height: 130,
-            // },
-          }}
-        >
-          {/* Timeline line */}
-          <Box
-            sx={{
-              position: 'relative',
-              width: '100%',
-              height: 3,
-              bgcolor: 'neutral.outlinedBorder',
-              mt: 2,
-            }}
-          >
-            {/* Due date marker */}
-            <Box
-              sx={{
-                position: 'absolute',
-                left: '50%',
-                height: 16,
-                width: 3,
-                bgcolor: 'warning.500',
-                top: -8,
-                transform: 'translateX(-50%)',
-                borderRadius: 'sm',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-              }}
-            >
-              <Typography
-                level={'body-xs'}
-                sx={{
-                  mt: 4,
-                  fontWeight: 'md',
-                  color: 'warning.700',
-                  fontSize: '0.6rem',
-                }}
-              >
-                {t('group.dueDate')}
-              </Typography>
-            </Box>
-
-            {/* Notification markers */}
-            {sorted.map((n, i) => {
-              // Calculate position based on actual time duration
-              const percent = getPositionPercent(n.value, n.unit)
-
-              return (
-                <Box
-                  key={i}
-                  sx={{
-                    position: 'absolute',
-                    left: `${percent}%`,
-                    transform: 'translateX(-50%)',
-                    color:
-                      convertToMinutes(n.value, n.unit) < 0
-                        ? TASK_COLOR.SCHEDULED
-                        : convertToMinutes(n.value, n.unit) === 0
-                          ? TASK_COLOR.TODAY
-                          : TASK_COLOR.LATE,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    transition: 'all 0.3s ease',
-                    cursor: 'pointer',
-                    opacity: 0.85,
-                    '&:hover': {
-                      opacity: 1,
-                      transform: 'translateX(-50%) scale(1.1)',
-                      zIndex: 10,
-                    },
-                  }}
-                  title={getRelativeLabel(n, t)}
-                >
-                  <Badge
-                    badgeContent={
-                      notificationIndexMap[
-                        notifications.findIndex(
-                          original =>
-                            Number(original.value) === Number(n.value) &&
-                            original.unit === n.unit,
-                        )
-                      ] || i + 1
-                    }
-                    size={'sm'}
-                    variant={'solid'}
-                    sx={{
-                      '--Badge-paddingX': '4px',
-                      '--Badge-minHeight': '16px',
-                      '--Badge-fontSize': '0.65rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      '& .MuiBadge-badge': {
-                        background:
-                          convertToMinutes(n.value, n.unit) < 0
-                            ? NOTIFICATION_TYPE.PREDUE
-                            : convertToMinutes(n.value, n.unit) === 0
-                              ? NOTIFICATION_TYPE.DUE_DATE
-                              : NOTIFICATION_TYPE.POSTDUE,
-                        color: 'white',
-                      },
-                    }}
-                  >
-                    <NotificationsIcon
-                      fontSize={'small'}
-                      sx={{
-                        height: 18,
-                        width: 18,
-                      }}
-                    />
-                  </Badge>
-                </Box>
-              )
-            })}
-          </Box>
-        </Box>
-      </Box>
-    )
-  }
+  const hasDueReminder = notifications.some(item => Number(item.value) === 0)
+  const hasReachedLimit = notifications.length >= maxNotifications
 
   return (
     <Box>
@@ -456,302 +218,194 @@ const NotificationTemplate = ({
         <Alert
           variant='soft'
           color='danger'
-          sx={{ mb: 2 }}
+          sx={{ mb: 1.5 }}
           startDecorator={<InfoIcon />}
         >
           {error}
         </Alert>
       )}
 
-      {notifications
-        .map((n, idx) => ({ notification: n, originalIndex: idx }))
-        .sort((a, b) => {
-          const aBadgeNumber = notificationIndexMap[a.originalIndex] || 0
-          const bBadgeNumber = notificationIndexMap[b.originalIndex] || 0
-          return aBadgeNumber - bBadgeNumber
-        })
-        .map(({ notification: n, originalIndex: idx }) => {
-          // Get ordered badge number from timeline sorting
-          const badgeNumber = notificationIndexMap[idx]
-          const uiRep = getUIRepresentation(n)
-
-          // Check if an "On Due" notification exists anywhere else in the list
-          const hasOnDueElsewhere = notificationsRef.current.some(
-            (notif, i) => i !== idx && Number(notif.value) === 0,
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+        {notifications.map((notification, idx) => {
+          const ui = getUIRepresentation(notification)
+          const hasOnDueElsewhere = notifications.some(
+            (item, itemIdx) => itemIdx !== idx && Number(item.value) === 0,
           )
 
-          const getNotificationColors = value => {
-            if (Number(value) < 0) {
-              return {
-                bgColor: NOTIFICATION_TYPE.PREDUE,
-                lightBg: `${NOTIFICATION_TYPE.PREDUE}20`,
-                borderColor: `${NOTIFICATION_TYPE.PREDUE}40`,
-                textColor: NOTIFICATION_TYPE.PREDUE,
-              }
-            } else if (Number(value) === 0) {
-              return {
-                bgColor: NOTIFICATION_TYPE.DUE_DATE,
-                lightBg: `${NOTIFICATION_TYPE.DUE_DATE}20`,
-                borderColor: `${NOTIFICATION_TYPE.DUE_DATE}40`,
-                textColor: NOTIFICATION_TYPE.DUE_DATE,
-              }
-            } else {
-              return {
-                bgColor: NOTIFICATION_TYPE.POSTDUE,
-                lightBg: `${NOTIFICATION_TYPE.POSTDUE}20`,
-                borderColor: `${NOTIFICATION_TYPE.POSTDUE}40`,
-                textColor: NOTIFICATION_TYPE.POSTDUE,
-              }
-            }
-          }
-
-          const colors = getNotificationColors(n.value)
-
           return (
-            <Box key={idx} sx={{ position: 'relative' }}>
-              <Badge
-                badgeContent={badgeNumber}
-                size={'sm'}
-                sx={{
-                  '--Badge-minHeight': '16px',
-                  '--Badge-fontSize': '0.7rem',
-                  '--Badge-paddingX': '5px',
-                  top: 10,
-                  left: 10,
-                  '& .MuiBadge-badge': {
-                    background: colors.bgColor,
-                    color: 'white',
-                  },
-                }}
+            <Box
+              key={idx}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                minHeight: 48,
+                px: 1.25,
+                py: 0.75,
+                border: '1px solid',
+                borderColor: 'neutral.outlinedBorder',
+                borderRadius: 'md',
+                bgcolor: 'background.surface',
+              }}
+            >
+              <NotificationsOutlined
+                color='action'
+                sx={{ fontSize: 20, flexShrink: 0 }}
               />
+
               <Box
                 sx={{
-                  mb: 1.5,
-                  p: 2,
-                  borderRadius: 8,
-                  border: '1px solid',
-                  borderColor: 'neutral.outlinedBorder',
-                  background: 'background.surface',
-                  transition: 'all 0.2s ease',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 1.5,
+                  gap: 0.75,
+                  flex: 1,
+                  minWidth: 0,
+                  flexWrap: 'wrap',
                 }}
               >
-                <Box
-                  sx={{
-                    minWidth: 0,
-                    flex: '1',
-                    display: { xs: 'none', md: 'flex' }, // Show only on md and up
-                  }}
-                >
-                  <Typography
-                    level='body-sm'
-                    sx={{
-                      fontWeight: 600,
-                      color: 'text.primary',
-                      fontSize: 14,
-                    }}
-                  >
-                    {getRelativeLabel(n, t)}
+                {ui.timing === 'ondue' ? (
+                  <Typography level='body-sm' sx={{ fontWeight: 600 }}>
+                    {t('notificationTemplate.onDueDate')}
                   </Typography>
-                </Box>
-
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1,
-                    flexShrink: 0,
-                  }}
-                >
-                  <Select
-                    value={uiRep.timing}
-                    onChange={(_, value) => handleChange(idx, 'timing', value)}
-                    onBlur={() => handleBlur(idx)}
-                    sx={{ minWidth: 80 }}
-                    size={'sm'}
-                  >
-                    {timingOptions.map(opt => (
-                      <Option
-                        key={opt.value}
-                        value={opt.value}
-                        disabled={opt.value === 'ondue' && hasOnDueElsewhere}
-                      >
-                        {t(`notificationTemplate.timing.${opt.value}`)}
-                      </Option>
-                    ))}
-                  </Select>
-                  <Input
-                    type={'number'}
-                    min={0}
-                    value={
-                      draftValues[idx] !== undefined
-                        ? draftValues[idx]
-                        : uiRep.displayValue
-                    }
-                    disabled={uiRep.timing === 'ondue'}
-                    onChange={e => {
-                      const val = e.target.value
-                      if (val.includes('-')) return
-
-                      setDraftValues(prev => ({ ...prev, [idx]: val }))
-
-                      // Keep the canonical template state in sync while typing so
-                      // save actions don't depend on blur firing first.
-                      if (val === '') return
-                      const numericVal = Number(val)
-                      if (!Number.isFinite(numericVal)) return
-                      handleChange(idx, 'displayValue', numericVal)
-                    }}
-                    onKeyDown={e => {
-                      if (['-', 'e', '+', '.'].includes(e.key)) {
-                        e.preventDefault()
+                ) : (
+                  <>
+                    <Select
+                      value={ui.timing}
+                      onChange={(_, nextTiming) =>
+                        handleChange(idx, 'timing', nextTiming)
                       }
-                    }}
-                    onBlur={e => {
-                      let val = e.target.value
+                      onBlur={() => validateNotification(idx)}
+                      size='sm'
+                      variant='plain'
+                      sx={{ minWidth: 82 }}
+                    >
+                      {timingOptions.map(option => (
+                        <Option
+                          key={option}
+                          value={option}
+                          disabled={option === 'ondue' && hasOnDueElsewhere}
+                        >
+                          {t(`notificationTemplate.timing.${option}`)}
+                        </Option>
+                      ))}
+                    </Select>
+                    <Input
+                      type='number'
+                      slotProps={{ input: { min: 1, inputMode: 'numeric' } }}
+                      value={
+                        draftValues[idx] !== undefined
+                          ? draftValues[idx]
+                          : ui.displayValue
+                      }
+                      onChange={event => {
+                        const draft = event.target.value
+                        if (draft.includes('-')) return
+                        setDraftValues(previous => ({
+                          ...previous,
+                          [idx]: draft,
+                        }))
 
-                      const numericVal = Number(val)
-                      val =
-                        numericVal <= 0
-                          ? hasOnDueElsewhere
-                            ? 1
-                            : 0
-                          : numericVal
-
-                      handleChange(idx, 'displayValue', val)
-                      setDraftValues(prev => {
-                        const next = { ...prev }
-                        delete next[idx]
-                        return next
-                      })
-                      handleBlur(idx)
-                    }}
-                    sx={{
-                      width: 60,
-                      opacity: uiRep.timing === 'ondue' ? 0.6 : 1,
-                    }}
-                    size={'sm'}
-                    placeholder='0'
-                  />
-                  <Select
-                    value={n.unit}
-                    disabled={uiRep.timing === 'ondue'}
-                    onChange={(_, value) => handleChange(idx, 'unit', value)}
-                    onBlur={() => handleBlur(idx)}
-                    sx={{
-                      minWidth: 70,
-                      opacity: uiRep.timing === 'ondue' ? 0.6 : 1,
-                    }}
-                    size={'sm'}
-                  >
-                    {timeUnits.map(opt => (
-                      <Option key={opt.value} value={opt.value}>
-                        {t(`notificationTemplate.unitShort.${opt.value}`)}
-                      </Option>
-                    ))}
-                  </Select>
-                  <IconButton
-                    onClick={() => removeNotification(idx)}
-                    disabled={notifications.length <= minNotifications}
-                    color={'danger'}
-                    size={'sm'}
-                    variant={'soft'}
-                    sx={{
-                      transition: 'all 0.2s ease',
-                      '&:hover': {
-                        transform: 'scale(1.1)',
-                      },
-                    }}
-                  >
-                    <DeleteIcon fontSize={'small'} />
-                  </IconButton>
-                </Box>
+                        if (draft !== '' && Number.isFinite(Number(draft))) {
+                          handleChange(idx, 'displayValue', Number(draft))
+                        }
+                      }}
+                      onKeyDown={event => {
+                        if (['-', 'e', '+', '.'].includes(event.key)) {
+                          event.preventDefault()
+                        }
+                      }}
+                      onBlur={event => {
+                        handleChange(
+                          idx,
+                          'displayValue',
+                          Math.max(1, Number(event.target.value) || 1),
+                        )
+                        setDraftValues(previous => {
+                          const next = { ...previous }
+                          delete next[idx]
+                          return next
+                        })
+                        validateNotification(idx)
+                      }}
+                      sx={{ width: 58 }}
+                      size='sm'
+                    />
+                    <Select
+                      value={ui.unit}
+                      onChange={(_, unit) => handleChange(idx, 'unit', unit)}
+                      onBlur={() => validateNotification(idx)}
+                      sx={{ minWidth: 72 }}
+                      size='sm'
+                      variant='plain'
+                    >
+                      {TIME_UNITS.map(option => (
+                        <Option key={option.value} value={option.value}>
+                          {t(`notificationTemplate.unitShort.${option.value}`)}
+                        </Option>
+                      ))}
+                    </Select>
+                  </>
+                )}
               </Box>
+
+              <IconButton
+                onClick={() => removeNotification(idx)}
+                disabled={notifications.length <= minNotifications}
+                color='neutral'
+                size='sm'
+                variant='plain'
+              >
+                <DeleteIcon fontSize='small' />
+              </IconButton>
             </Box>
           )
         })}
+      </Box>
+
       <Box
         sx={{
           display: 'flex',
-          gap: 1.5,
-          mt: 1,
-          mb: 2,
+          alignItems: 'center',
+          gap: 1,
+          mt: notifications.length ? 1.5 : 0,
           flexWrap: 'wrap',
         }}
       >
+        {!hasDueReminder && (
+          <Button
+            onClick={() => addSmartNotification('due')}
+            disabled={hasReachedLimit}
+            startDecorator={<AddIcon />}
+            size='sm'
+            variant='soft'
+          >
+            {t('notificationTemplate.dueAlert')}
+          </Button>
+        )}
         <Button
           onClick={() => addSmartNotification('reminder')}
-          disabled={notifications.length >= maxNotifications}
+          disabled={hasReachedLimit}
           startDecorator={<AddIcon />}
-          size={'sm'}
-          variant={'outlined'}
-          sx={{
-            borderRadius: 6,
-            fontWeight: 500,
-            borderColor: `${TASK_COLOR.SCHEDULED}60`,
-            color: TASK_COLOR.SCHEDULED,
-            '&:hover': {
-              borderColor: TASK_COLOR.SCHEDULED,
-              background: `${TASK_COLOR.SCHEDULED}10`,
-            },
-          }}
+          size='sm'
+          variant='outlined'
+          color='neutral'
         >
           {t('notificationTemplate.reminder')}
         </Button>
         <Button
-          onClick={() => addSmartNotification('due')}
-          disabled={
-            notifications.length >= maxNotifications ||
-            notifications.some(n => Number(n.value) === 0)
-          }
-          startDecorator={<AddIcon />}
-          size={'sm'}
-          variant={'outlined'}
-          sx={{
-            borderRadius: 6,
-            fontWeight: 500,
-            borderColor: `${NOTIFICATION_TYPE.DUE_DATE}60`,
-            color: NOTIFICATION_TYPE.DUE_DATE,
-            '&:hover': {
-              borderColor: NOTIFICATION_TYPE.DUE_DATE,
-              background: `${NOTIFICATION_TYPE.DUE_DATE}10`,
-            },
-          }}
-        >
-          {t('notificationTemplate.dueAlert')}
-        </Button>
-        <Button
           onClick={() => addSmartNotification('followup')}
-          disabled={notifications.length >= maxNotifications}
+          disabled={hasReachedLimit}
           startDecorator={<AddIcon />}
-          size={'sm'}
-          variant={'outlined'}
-          sx={{
-            borderRadius: 6,
-            fontWeight: 500,
-            borderColor: `${NOTIFICATION_TYPE.POSTDUE}60`,
-            color: NOTIFICATION_TYPE.POSTDUE,
-            '&:hover': {
-              borderColor: NOTIFICATION_TYPE.POSTDUE,
-              background: `${NOTIFICATION_TYPE.POSTDUE}10`,
-            },
-          }}
+          size='sm'
+          variant='outlined'
+          color='neutral'
         >
           {t('notificationTemplate.followUp')}
         </Button>
       </Box>
-      {showSaveDefault && (
-        <Box
-          sx={{
-            mt: 1,
-            display: 'flex',
-            justifyContent: 'start',
-            alignItems: 'center',
-            gap: 1,
-          }}
-        >
+
+      {showSaveDefault && notifications.length > 0 && (
+        <Box sx={{ mt: 1, display: 'flex', justifyContent: 'start' }}>
           <Button
             variant='outlined'
             size='sm'
@@ -776,8 +430,6 @@ const NotificationTemplate = ({
           </Button>
         </Box>
       )}
-
-      {showTimeline && renderTimeline()}
     </Box>
   )
 }

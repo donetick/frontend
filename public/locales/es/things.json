@@ -19,7 +19,11 @@
     "overview": "Resumen de Objetos",
     "visualization": "Visualización de Datos",
     "changeHistory": "Historial de Cambios",
-    "updated": "Actualizado"
+    "updated": "Actualizado",
+    "timeBefore": "{{time}} antes",
+    "loading": "Cargando...",
+    "noMoreHistory": "No hay más historial",
+    "loadMore": "Cargar más"
   },
   "view": {
     "title": "Objetos",

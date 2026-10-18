@@ -25,6 +25,17 @@
   "activeWork": "",
   "breakTime": "",
   "workSessions": "",
+  "timeline": {
+    "started": "התחיל: {{time}}",
+    "ended": "הסתיים: {{time}}",
+    "now": "עכשיו: {{time}}",
+    "active": "פעיל: {{percent}}%",
+    "emptyState": "אין ציר זמן פעילות זמין. התחל לעבוד כדי לראות את דפוס הפעילות שלך.",
+    "workSessionsCount": "מפגשי עבודה ({{count}})",
+    "sessionNumber": "מפגש מס' {{number}}",
+    "ongoing": "→ מתמשך",
+    "durationAutoCalculated": "משך (מחושב אוטומטית)"
+  },
   "totalTime": "",
   "distribution": "",
   "noActiveTime": "",

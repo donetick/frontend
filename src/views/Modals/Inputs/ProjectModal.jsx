@@ -14,14 +14,25 @@ import { useTranslation } from 'react-i18next'
 
 import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
+import { useCircleMembers, useUserProfile } from '../../../queries/UserQueries'
 import PROJECT_COLORS, {
   getTextColorFromBackgroundColor,
 } from '../../../utils/Colors'
+import { PreviewProjectAccess } from '../../../utils/Fetcher'
+import {
+  getProjectVisibility,
+  PROJECT_VISIBILITY,
+  sameMemberSet,
+} from '../../../utils/ProjectAccess'
 import PROJECT_ICONS, { getIconComponent } from '../../../utils/ProjectIcons'
+import ProjectAccessReview, {
+  hasAccessImpact,
+} from '../../Projects/ProjectAccessReview'
 import {
   useCreateProject,
   useUpdateProject,
 } from '../../Projects/ProjectQueries'
+import ProjectVisibilityField from '../../Projects/ProjectVisibilityField'
 import IconPickerModal from './IconPickerModal'
 
 const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
@@ -31,11 +42,22 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
   const [projectDescription, setProjectDescription] = useState('')
   const [projectColor, setProjectColor] = useState(PROJECT_COLORS[0].value)
   const [projectIcon, setProjectIcon] = useState(PROJECT_ICONS[0].value)
+  const [visibility, setVisibility] = useState(PROJECT_VISIBILITY.CIRCLE)
+  const [memberIds, setMemberIds] = useState([])
+  // Server preview of an access change, shown for confirmation before saving.
+  const [accessPreview, setAccessPreview] = useState(null)
+  const [isPreviewing, setIsPreviewing] = useState(false)
   const [error, setError] = useState('')
   const [isIconPickerOpen, setIsIconPickerOpen] = useState(false)
 
   const createProjectMutation = useCreateProject()
   const updateProjectMutation = useUpdateProject()
+  const { data: circleMembersData } = useCircleMembers()
+  const { data: userProfile } = useUserProfile()
+  const circleMembers = circleMembersData?.res || []
+  const ownerId = project ? project.created_by : userProfile?.id
+  // Only the owner may change who can see a project; the server enforces it too.
+  const canChangeAccess = !project || project.created_by === userProfile?.id
 
   // Initialize form when modal opens or project changes
   useEffect(() => {
@@ -46,32 +68,54 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
         setProjectDescription(project.description || '')
         setProjectColor(project.color || PROJECT_COLORS[0].value)
         setProjectIcon(project.icon || PROJECT_ICONS[0].value)
+        setVisibility(getProjectVisibility(project))
+        setMemberIds(project.memberIds || [])
       } else {
         // Creating new project
         setProjectName('')
         setProjectDescription('')
         setProjectColor(PROJECT_COLORS[0].value)
         setProjectIcon(PROJECT_ICONS[0].value)
+        setVisibility(PROJECT_VISIBILITY.CIRCLE)
+        setMemberIds([])
       }
+      setAccessPreview(null)
       setError('')
     }
   }, [isOpen, project])
 
-  const handleSubmit = e => {
-    e.preventDefault()
+  const accessChanged =
+    Boolean(project) &&
+    (visibility !== getProjectVisibility(project) ||
+      (visibility === PROJECT_VISIBILITY.MEMBERS &&
+        !sameMemberSet(memberIds, project.memberIds || [])))
 
-    if (!projectName.trim()) {
-      setError(t('modal.errorNameRequired'))
-      return
-    }
-
-    setError('')
-
-    const projectData = {
+  const buildProjectData = () => {
+    const data = {
       name: projectName.trim(),
       description: projectDescription.trim(),
       color: projectColor,
       icon: projectIcon,
+    }
+    if (canChangeAccess) {
+      data.visibility = visibility
+      // Kept for servers that only know the boolean flag.
+      data.isPrivate = visibility !== PROJECT_VISIBILITY.CIRCLE
+      if (visibility === PROJECT_VISIBILITY.MEMBERS) data.memberIds = memberIds
+    }
+    return data
+  }
+
+  const save = () => {
+    const projectData = buildProjectData()
+    const onError = (fallbackKey, logLabel) => mutationError => {
+      console.error(logLabel, mutationError)
+      setAccessPreview(null)
+      setError(
+        mutationError?.status === 400 && mutationError.message
+          ? mutationError.message
+          : t(fallbackKey),
+      )
     }
 
     if (project) {
@@ -83,10 +127,7 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
             onSave(updatedProject)
             onClose()
           },
-          onError: error => {
-            console.error('Error updating project:', error)
-            setError(t('modal.errorUpdate'))
-          },
+          onError: onError('modal.errorUpdate', 'Error updating project:'),
         },
       )
     } else {
@@ -96,12 +137,62 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
           onSave(newProject)
           onClose()
         },
-        onError: error => {
-          console.error('Error creating project:', error)
-          setError(t('modal.errorCreate'))
-        },
+        onError: onError('modal.errorCreate', 'Error creating project:'),
       })
     }
+  }
+
+  const handleSubmit = async e => {
+    e.preventDefault()
+
+    if (!projectName.trim()) {
+      setError(t('modal.errorNameRequired'))
+      return
+    }
+
+    setError('')
+
+    // Second step: the owner has seen what the access change does.
+    if (accessPreview) {
+      save()
+      return
+    }
+
+    // First step of an access change: ask the server what it would do (removed
+    // assignees, who loses or gains access) and show it before saving.
+    if (accessChanged && canChangeAccess) {
+      setIsPreviewing(true)
+      try {
+        const body = { visibility }
+        if (visibility === PROJECT_VISIBILITY.MEMBERS)
+          body.memberIds = memberIds
+        const response = await PreviewProjectAccess(project.id, body)
+        if (!response.ok) {
+          let message = t('modal.errorUpdate')
+          try {
+            const data = await response.json()
+            if (response.status === 400 && data?.error) message = data.error
+          } catch {
+            // no body
+          }
+          setError(message)
+          return
+        }
+        const data = await response.json()
+        if (hasAccessImpact(data.res)) {
+          setAccessPreview(data.res)
+          return
+        }
+      } catch (previewError) {
+        console.error('Error previewing project access:', previewError)
+        setError(t('visibility.review.previewFailed'))
+        return
+      } finally {
+        setIsPreviewing(false)
+      }
+    }
+
+    save()
   }
 
   const handleClose = () => {
@@ -113,7 +204,9 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
   }
 
   const isSubmitting =
-    createProjectMutation.isPending || updateProjectMutation.isPending
+    createProjectMutation.isPending ||
+    updateProjectMutation.isPending ||
+    isPreviewing
 
   const handleIconSelect = iconValue => {
     setProjectIcon(iconValue)
@@ -127,18 +220,30 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
       size='md'
       unmountDelay={250}
       fullWidth={true}
-      title={project ? 'Edit Project' : 'Create New Project'}
+      title={
+        accessPreview
+          ? t('visibility.review.title')
+          : project
+            ? t('modal.editTitle')
+            : t('modal.createTitle')
+      }
       closeOnBackdrop={!isSubmitting}
       closeOnEscape={!isSubmitting}
       footer={
         <ModalActions
           secondary={{
-            label: t('common:cancel'),
-            onClick: handleClose,
+            label: accessPreview
+              ? t('visibility.review.back')
+              : t('common:cancel'),
+            onClick: accessPreview ? () => setAccessPreview(null) : handleClose,
             disabled: isSubmitting,
           }}
           primary={{
-            label: project ? 'Update' : 'Create',
+            label: accessPreview
+              ? t('visibility.review.confirm')
+              : project
+                ? t('modal.update')
+                : t('modal.create'),
             type: 'submit',
             form: 'project-form',
             loading: isSubmitting,
@@ -148,7 +253,14 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
       }
     >
       <form onSubmit={handleSubmit} id='project-form'>
-        <Stack spacing={3}>
+        {accessPreview && (
+          <ProjectAccessReview
+            preview={accessPreview}
+            members={circleMembers}
+            currentUserId={userProfile?.id}
+          />
+        )}
+        <Stack spacing={3} sx={{ display: accessPreview ? 'none' : undefined }}>
           {/* Project Name */}
           <FormControl required>
             <FormLabel>{t('modal.nameLabel')}</FormLabel>
@@ -247,13 +359,37 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
             </Box>
           </FormControl>
 
-          {/* Error Message */}
-          {error && (
-            <Typography color='danger' level='body-sm'>
-              {error}
+          {/* Who can see the project and its tasks */}
+          {canChangeAccess ? (
+            <ProjectVisibilityField
+              visibility={visibility}
+              onVisibilityChange={value => {
+                setVisibility(value)
+                setError('')
+              }}
+              memberIds={memberIds}
+              onMemberIdsChange={setMemberIds}
+              members={circleMembers}
+              ownerId={ownerId}
+              disabled={isSubmitting}
+            />
+          ) : (
+            <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
+              {t('visibility.ownerOnly')}
+            </Typography>
+          )}
+          {accessChanged && canChangeAccess && (
+            <Typography level='body-xs' color='warning'>
+              {t('visibility.changeHint')}
             </Typography>
           )}
         </Stack>
+        {/* Error Message */}
+        {error && (
+          <Typography color='danger' level='body-sm' sx={{ mt: 2 }}>
+            {error}
+          </Typography>
+        )}
       </form>
       <IconPickerModal
         isOpen={isIconPickerOpen}

@@ -1,74 +1,76 @@
 {
-  "redeem": "",
+  "redeem": "Wykorzystaj punkty",
   "redeemModal": {
-    "redeemButton": "",
-    "pointsAvailable": "",
-    "pointsToRedeem": "",
-    "placeholder": "",
-    "cannotExceed": "",
-    "quickAdd": "",
-    "aboutToRedeem": "",
-    "amount": "",
-    "remaining": ""
+    "redeemButton": "Wykorzystaj",
+    "pointsAvailable": "Dostępne punkty: {{count}}",
+    "pointsToRedeem": "Punkty do wykorzystania",
+    "placeholder": "Wpisz punkty...",
+    "cannotExceed": "Nie może przekraczać dostępnych punktów",
+    "quickAdd": "Szybkie dodawanie:",
+    "aboutToRedeem": "Za chwilę wykorzystasz",
+    "amount": "{{count}} pkt",
+    "remaining": "Pozostało: {{count}} pkt"
   },
   "leaderboard": {
-    "titlePoints": "",
-    "titleTasks": "",
-    "subtitlePoints": "",
-    "subtitleTasks": "",
-    "modePoints": "",
-    "modeTasks": "",
-    "you": "",
-    "tasksAndAvg": "",
-    "available": "",
-    "points_one": "",
-    "points_other": ""
+    "titlePoints": "Ranking punktów",
+    "titleTasks": "Ranking zadań",
+    "subtitlePoints": "Pozycje na podstawie punktów zdobytych w wybranym okresie",
+    "subtitleTasks": "Pozycje na podstawie zadań ukończonych w wybranym okresie",
+    "modePoints": "Punkty",
+    "modeTasks": "Zadania",
+    "you": "Ty",
+    "tasksAndAvg": "Zadania: {{tasks}} • Średnio {{avg}} na zadanie",
+    "available": "Dostępne: {{count}}",
+    "points_one": "{{count}} punkt",
+    "points_other": "{{count}} punktów"
   },
   "tabs": {
-    "short7d": "",
-    "short6m": "",
-    "shortAll": "",
-    "days7": "",
-    "months6": "",
-    "allTime": ""
+    "short7d": "7 dni",
+    "short6m": "6 mies.",
+    "shortAll": "Wszystko",
+    "days7": "7 dni",
+    "months6": "6 miesięcy",
+    "allTime": "Od początku",
+    "short30d": "30D",
+    "days30": "30 dni"
   },
   "filter": {
-    "analysisTitle": "",
-    "title": "",
-    "showFor": "",
-    "timePeriod": ""
+    "analysisTitle": "Filtrowanie i analiza",
+    "title": "Filtruj punkty",
+    "showFor": "Pokaż punkty dla:",
+    "timePeriod": "Okres:"
   },
   "cards": {
     "available": {
-      "title": "",
-      "subtext": ""
+      "title": "Dostępne",
+      "subtext": "Gotowe do wykorzystania"
     },
     "redeemed": {
-      "title": "",
-      "subtext": ""
+      "title": "Wykorzystane",
+      "subtext": "Zużyte wcześniej"
     },
     "total": {
-      "title": "",
-      "subtext": ""
+      "title": "Łącznie",
+      "subtext": "Zdobyte od początku"
     },
     "period": {
-      "title": "",
-      "allTime": "",
-      "last6Months": "",
-      "lastDays_one": "",
-      "lastDays_other": ""
+      "title": "Punkty w okresie",
+      "allTime": "Od początku",
+      "last6Months": "Ostatnie 6 miesięcy",
+      "lastDays_one": "Ostatni {{count}} dzień",
+      "lastDays_other": "Ostatnie {{count}} dni"
     }
   },
   "summary": {
-    "showingFor": "",
-    "unknownUser": "",
-    "overThe": "",
-    "allTime": "",
-    "last6Months": "",
-    "lastDays_one": "",
-    "lastDays_other": ""
+    "showingFor": "Wyświetlanie punktów dla",
+    "unknownUser": "Nieznany użytkownik",
+    "overThe": "w okresie:",
+    "allTime": "Od początku",
+    "last6Months": "Ostatnie 6 miesięcy",
+    "lastDays_one": "Ostatni {{count}} dzień",
+    "lastDays_other": "Ostatnie {{count}} dni"
   },
   "trend": {
-    "title": ""
+    "title": "Trend punktów"
   }
 }

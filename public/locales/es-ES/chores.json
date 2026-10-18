@@ -58,7 +58,9 @@
       "completed": "Tarea completada"
     },
     "unplannedMessage": "La tarea ahora no está planificada y no tiene fecha de vencimiento.",
-    "unplannedTitle": "Tarea sin planificar"
+    "unplannedTitle": "Tarea sin planificar",
+    "failAssignTitle": "Failed to assign",
+    "failAssignMessage": "Unable to assign task"
   },
   "activitiesCard": {
     "byUser": "por {{name}}",
@@ -109,7 +111,24 @@
     "subtasksChip": "Subtareas",
     "taskPlaceholder": "Escribe tu tarea...",
     "title": "Crear nueva tarea",
-    "useTask": "Usar tarea"
+    "useTask": "Usar tarea",
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:",
+    "createAnother": "Crear otra",
+    "createAndAddAnother": "Crear y añadir otra",
+    "createAndClose": "Crear y cerrar",
+    "findingDetails": "Buscando detalles de la tarea en tu foto…",
+    "findingDetailsHint": "Puedes seguir editando mientras buscamos.",
+    "detailsFound": "Encontramos detalles de la tarea",
+    "suggestedDue": "Fecha de vencimiento sugerida: {{date}}",
+    "useSuggestion": "Usar sugerencia",
+    "useAndKeepAttachment": "Usar sugerencia y conservar la foto",
+    "dismissSuggestion": "Descartar sugerencia",
+    "noDetailsFound": "No se encontraron detalles de la tarea",
+    "analysisFailed": "No pudimos analizar esta foto",
+    "attachmentStillAdded": "Tu foto sigue adjunta.",
+    "continueManually": "Puedes seguir creando la tarea manualmente.",
+    "dismissAnalysis": "Descartar análisis de la foto"
   },
   "advancedOptions": {
     "assignStrategy": "Estrategia de asignación",
@@ -197,7 +216,8 @@
     "switchToCard": "Cambiar a vista de tarjetas",
     "switchToCompact": "Cambiar a vista compacta",
     "title": "Tareas archivadas",
-    "unexpectedError": "Ocurrió un error inesperado. Por favor, inténtalo de nuevo."
+    "unexpectedError": "Ocurrió un error inesperado. Por favor, inténtalo de nuevo.",
+    "selectSectionTitle": "Select all tasks in this section"
   },
   "assignedTo": "Asignado a",
   "assignee": {
@@ -402,7 +422,10 @@
     "tagUrl": "URL de la etiqueta",
     "titleCreate": "Crear nueva tarea",
     "titleEdit": "Editar tarea",
-    "writeNfcTag": "Escribir etiqueta NFC"
+    "writeNfcTag": "Escribir etiqueta NFC",
+    "notificationsFreePlanNote": "Tu plan incluye un recordatorio en la fecha de vencimiento. Plus añade recordatorios antes del vencimiento y seguimientos después.",
+    "alwaysDueHint": "Esta tarea no tiene fecha de vencimiento y está siempre disponible para completarse",
+    "notifyForTaskUnavailable": "Las notificaciones no están disponibles para tareas basadas en disparadores o siempre disponibles"
   },
   "choreView": {
     "addNote": "Añadir nota",
@@ -504,7 +527,9 @@
     "undoFailed": "Error al deshacer",
     "undoFailedMessage": "No se pudo deshacer la acción. Por favor, inténtalo de nuevo.",
     "undoSuccessful": "Deshecho con éxito",
-    "viewHistory": "Ver historial"
+    "viewHistory": "Ver historial",
+    "notFoundTitle": "Tarea no disponible",
+    "notFoundDescription": "Es posible que esta tarea haya sido eliminada o ya no esté compartida contigo."
   },
   "completeChore": "Completar tarea",
   "dataError": {
@@ -612,7 +637,8 @@
       "2": "En progreso",
       "3": "Pendiente de aprobación"
     },
-    "statusHeading": "Estado"
+    "statusHeading": "Estado",
+    "anyOf": "Any of"
   },
   "filterChip": {
     "cancelAll": "Cancelar All Filtros",
@@ -858,7 +884,23 @@
     "taskIdentified": "tarea identificada",
     "title": "Escanear foto para crear tarea",
     "upload": "Subir",
-    "uploadPhoto": "Subir foto"
+    "uploadPhoto": "Subir foto",
+    "runningNativeOcr": "Running native OCR…",
+    "identifyingTask": "Identifying task with AI…",
+    "tapToScanHint": "Toca \"Escanear documento\" para abrir el escáner",
+    "readingTextProgress": "Leyendo texto de la imagen… {{progress}}%",
+    "dueDate": "Vence: {{date}}",
+    "hideRawText": "Ocultar texto sin procesar",
+    "showRawText": "Mostrar texto sin procesar",
+    "cameraUnavailableUseUpload": "Cámara no disponible — usa Subir en su lugar",
+    "noTextFound": "No se encontró texto en la imagen. Prueba con una foto más nítida.",
+    "noTaskIdentified": "No se pudo identificar una tarea. Prueba con otra foto.",
+    "processingFailed": "Error al procesar.",
+    "scannerError": "Error del escáner: {{error}}",
+    "scanFailed": "Error al escanear.",
+    "preparingScan": "Iniciando…",
+    "failedTitle": "No se encontró ninguna tarea",
+    "continueWithoutTask": "Continuar sin tarea"
   },
   "priority": {
     "high": "Alta",
@@ -909,7 +951,8 @@
     "every": "Cada",
     "freqMessage": {
       "adaptive": "Esta tarea se programará dinámicamente según las fechas de finalización anteriores.",
-      "custom": "Esta tarea se programará según una frecuencia personalizada."
+      "custom": "Esta tarea se programará según una frecuencia personalizada.",
+      "always": "Esta tarea no tiene fecha de vencimiento y permanece disponible para completarse en cualquier momento. No se archivará al completarse."
     },
     "freqType": {
       "adaptive": "Adaptativa",
@@ -917,7 +960,8 @@
       "daily": "Diariamente",
       "monthly": "Mensualmente",
       "weekly": "Semanalmente",
-      "yearly": "Anualmente"
+      "yearly": "Anualmente",
+      "always": "Siempre"
     },
     "howOften": "¿Con qué frecuencia debe repetirse?",
     "months": {
@@ -1141,7 +1185,11 @@
     "type": {
       "assignee": "Assignee"
     },
-    "viewGroup": "View & Group"
+    "viewGroup": "View & Group",
+    "moreSaveOptions": "Más opciones de guardado",
+    "showCount": "Mostrar {{count}}",
+    "done": "Listo",
+    "savedFilters": "Filtros guardados"
   },
   "voiceToTask": {
     "anyone": "Cualquiera",
@@ -1170,5 +1218,7 @@
     "stopListening": "Stop listening",
     "title": "Di tus tareas",
     "tryAgain": "Reintentar"
-  }
+  },
+  "tasksForDate": "Tareas para {{date}}",
+  "createSuggestion": "Crear \"{{value}}\""
 }

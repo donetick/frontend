@@ -58,6 +58,14 @@
         "title": "API Tokens",
         "description": "Generate and manage access tokens for third-party integrations and API access."
       },
+      "bridge": {
+        "title": "Donetick Bridge",
+        "description": "Connect to Donetick Bridge to deliver push notifications from this self-hosted instance."
+      },
+      "calendar": {
+        "title": "Calendar Sync",
+        "description": "Subscribe to your tasks from Apple Calendar, Google Calendar, Outlook, or another calendar app."
+      },
       "storage": {
         "title": "Storage Settings",
         "description": "Backup and restore your data, manage local storage and sync preferences."
@@ -122,9 +130,16 @@
   },
   "circleSettings": {
     "title": "Circle Settings",
-    "description": "Your account is automatically connected to a Circle when you create or join one. Easily invite friends by sharing the unique Circle code or link below. You'll receive a notification below when someone requests to join your Circle.",
+    "description": "Your account is automatically connected to a Circle when you create or join one. You can easily invite friends by sharing the unique Circle code or link below. You'll receive a notification below when someone requests to join your Circle.",
     "memberOf": "You are part of {{name}}",
     "yourCircleCode": "Your circle code is:",
+    "pendingApprovalMessage": "Your request to join {{name}} is pending approval from a circle admin.",
+    "cancelRequest": "Cancel Request",
+    "cancelRequestTitle": "Cancel Join Request",
+    "cancelRequestMessage": "Are you sure you want to cancel your request to join this circle?",
+    "cancelRequestButton": "Cancel Request",
+    "requestCancelled": "Request cancelled successfully",
+    "cancelRequestFailed": "Failed to cancel request",
     "copyCode": "Copy Code",
     "shareInvite": "Share Invite",
     "codeCopied": "Code copied to clipboard",
@@ -165,6 +180,12 @@
     "acceptRequestTitle": "Accept Member Request",
     "acceptRequestMessage": "Are you sure you want to accept {{name}} (username: {{username}}) to join your circle?",
     "requestAccepted": "Accepted request successfully",
+    "decline": "Decline",
+    "declineRequestTitle": "Decline Member Request",
+    "declineRequestMessage": "Are you sure you want to decline {{name}}'s (username: {{username}}) request to join your circle?",
+    "declineRequestButton": "Decline",
+    "requestDeclined": "Declined request successfully",
+    "declineRequestFailed": "Failed to decline request",
     "or": "or",
     "joinOtherDescription": "Want to join someone else's Circle? Ask them for their unique Circle code or join link. Enter the code below to join their Circle.",
     "enterCircleCode": "Enter Circle code:",
@@ -239,10 +260,10 @@
     "deleteFailed": "Failed to delete Sub account: {{error}}",
     "deleteFailedGeneric": "Failed to delete Sub user",
     "howItWorksTitle": "How Managed Accounts Work",
-    "howItWorks1": "Managed accounts created by the primary user, these specific for user you want to have ability to delete and reset password.",
+    "howItWorks1": "Sub accounts created by the primary user are specifically for users you want to give the ability to delete and reset their password.",
     "howItWorks2": "Sub accounts can log in with their own username and password.",
-    "howItWorks3": "Managed accounts can complete tasks but have limited administrative permissions",
-    "howItWorks4": "Managed accounts automatically added to your circle"
+    "howItWorks3": "Sub accounts can complete tasks but have limited administrative permissions",
+    "howItWorks4": "Sub accounts are automatically added to your circle"
   },
   "notifications": {
     "title": "Notification Settings",
@@ -365,8 +386,9 @@
     "accessToken": "Access Token",
     "description": "Create token to use with the API to update things that trigger task or chores",
     "plusNotice": "API tokens are not available in the Basic plan. Upgrade to Plus to generate API tokens for integrating with external systems and automating your tasks.",
-    "showToken": "Show Token",
-    "hideToken": "Hide Token",
+    "tokenCreatedTitle": "Token Created",
+    "tokenCreatedWarning": "Copy this token now. For your security, you won't be able to see it again.",
+    "copyToken": "Copy Token",
     "removeTitle": "Remove Token",
     "removeMessage": "Are you sure you want to remove {{name}}?",
     "removedTitle": "Removed",
@@ -375,6 +397,124 @@
     "generateNew": "Generate New Token",
     "nameModalTitle": "Give a name for your new token, something to remember it by.",
     "generateToken": "Generate Token"
+  },
+  "calendar": {
+    "title": "Calendar Sync",
+    "description": "Keep your Donetick tasks visible in your preferred calendar app with a private iCalendar subscription.",
+    "plusTitle": "Calendar sync is a Plus feature",
+    "plusNotice": "Upgrade to Plus to subscribe to your tasks from Apple Calendar, Google Calendar, Outlook, and other calendar apps.",
+    "upgrade": "Upgrade to Plus",
+    "activeTitle": "Calendar subscription",
+    "activeStatus": "Active",
+    "urlLabel": "Private calendar subscription URL",
+    "copy": "Copy URL",
+    "copied": "Calendar URL copied to clipboard",
+    "copyFailed": "Could not copy the calendar URL. Please copy it from the field instead.",
+    "createdAt": "Created {{date}}",
+    "lastUsedAt": "Last fetched {{date}}",
+    "neverUsed": "This calendar has not been fetched yet.",
+    "keepPrivateTitle": "Keep this URL private",
+    "keepPrivateDescription": "Anyone with this URL can view your task calendar without signing in. Rotate or revoke it immediately if it is shared accidentally.",
+    "manageTitle": "Manage subscription",
+    "rotate": "Rotate URL",
+    "rotateTitle": "Rotate calendar URL?",
+    "rotateMessage": "Your current URL will stop working immediately. You will need to add the new URL to every calendar app again.",
+    "rotated": "Calendar URL rotated successfully",
+    "revoke": "Revoke URL",
+    "revokeTitle": "Revoke calendar URL?",
+    "revokeMessage": "Your current URL will stop working immediately and subscribed calendar apps will no longer receive updates.",
+    "revoked": "Calendar URL revoked successfully",
+    "inactiveTitle": "No calendar subscription yet",
+    "inactiveDescription": "Generate a private URL, then add it as a subscribed calendar in your calendar app. Updates are pulled automatically by the app.",
+    "generate": "Generate calendar URL",
+    "generated": "Calendar URL generated successfully",
+    "howToTitle": "Add it to your calendar",
+    "howToDescription": "Copy the URL and choose “Add calendar by URL” or “Subscribe to calendar” in your calendar app. Refresh timing is controlled by that app, so changes may not appear immediately.",
+    "errorTitle": "Calendar sync error",
+    "actionFailed": "Could not update your calendar subscription. Please try again.",
+    "loadFailed": "Could not load your calendar subscription. This server may not support calendar sync yet."
+  },
+  "bridge": {
+    "title": "Donetick Bridge",
+    "description": "Connect your self-hosted instance to the official Donetick app and deliver reliable native push notifications without maintaining your own stack for it",
+    "heroEyebrow": "Built for self-hosters",
+    "freeToStart": "Free to start",
+    "heroTitle": "Keep control. Stay connected.",
+    "pricingSummary": "Start on the Free plan. Upgrade to Plus when you need more notifications or devices. or to support Donetick!",
+    "connectedBadge": "Bridge is active",
+    "benefits": {
+      "native": {
+        "title": "Native notifications",
+        "description": "Reach your household in the official iOS and Android apps."
+      },
+      "support": {
+        "title": "Support Donetick",
+        "description": "Your plan helps fund continued development and maintenance."
+      },
+      "simple": {
+        "title": "No Firebase setup",
+        "description": "Skip provider credentials and keep your self-hosted setup simple."
+      }
+    },
+    "privacyTitle": "Private by design",
+    "privacyNotice": "Notification content (title, body, and data) is relayed only while a request is processed and is never stored or logged. Bridge keeps only account, device, and delivery-count information.",
+    "adminOnly": "Only a Donetick administrator can configure Bridge.",
+    "notConnected": "Not connected yet",
+    "checkingStatus": "Checking your Bridge connection…",
+    "connectionTitle": "Your connection",
+    "connectTitle": "Connect Bridge",
+    "credentialsTitle": "Enter your instance credentials",
+    "steps": {
+      "1": "Create your Bridge account",
+      "2": "Add this Donetick instance",
+      "3": "Paste the issued credentials"
+    },
+    "unnamedInstance": "Connected instance",
+    "connectedAs": "Bridge account: {{email}}",
+    "planFree": "Free plan",
+    "planPlus": "Plus plan",
+    "emailUnverified": "Email not verified",
+    "getStarted": "Create a Bridge account",
+    "getStartedHint": "Don't have a Bridge account yet? Create one and add an instance to get its ID and token.",
+    "connectIntro": "Enter the instance ID and instance token shown once when you created or selected this instance in your Bridge account.",
+    "connect": "Connect",
+    "connectedTitle": "Connected to Bridge",
+    "rotateCredential": "Rotate credential",
+    "rotateInstructions": "Generate a new instance token from your Bridge account, then paste it below to rotate. The old token stops working immediately.",
+    "rotatedTitle": "Credential rotated",
+    "disconnect": "Disconnect",
+    "disconnectTitle": "Disconnect Bridge",
+    "disconnectMessage": "This instance will stop sending push notifications through Bridge. Local device tokens are kept, and you can reconnect at any time. This does not delete your Bridge account or usage history.",
+    "disconnectedTitle": "Disconnected",
+    "refresh": "Refresh status",
+    "upgrade": "Upgrade to Plus",
+    "manageBilling": "Manage billing",
+    "upgradeBillingNote": "Upgrade and billing are managed in your Bridge account.",
+    "connectForm": {
+      "baseUrl": "Bridge URL",
+      "instanceId": "Instance ID",
+      "instanceIdPlaceholder": "Instance ID from your Bridge account",
+      "instanceToken": "Instance token",
+      "instanceTokenPlaceholder": "Shown once when the instance was created/rotated",
+      "instanceTokenHint": "This token is sent to this server only and is never shown again after you leave this page.",
+      "required": "Bridge URL, instance ID, and instance token are all required."
+    },
+    "usage": {
+      "notifications": "Notifications this period: {{used}} / {{limit}}",
+      "devices": "Active devices: {{used}} / {{limit}}",
+      "notificationsLabel": "Notifications this period",
+      "devicesLabel": "Active devices"
+    },
+    "errors": {
+      "title": "Bridge error",
+      "generic": "Something went wrong talking to Bridge. Please try again.",
+      "revokedToken": "This instance's credential was rejected. It may have been rotated or revoked from your Bridge account -- reconnect with a current instance token.",
+      "serviceUnavailable": "Bridge is temporarily unavailable. Notifications will resume once it's reachable again -- no action is needed.",
+      "rateLimited": "Too many requests right now. Please wait a moment and try again.",
+      "quotaExceeded": "This Bridge account's monthly notification quota has been reached. Upgrade to Plus or wait for the next period.",
+      "deviceLimitReached": "This Bridge account's active device limit has been reached. Remove an unused device or upgrade to Plus.",
+      "validationError": "Check the values entered and try again."
+    }
   },
   "storage": {
     "title": "Storage Settings",
@@ -618,7 +758,15 @@
     "featureApiTokens": "API tokens for integrations",
     "featureImageUploads": "Image uploads in descriptions",
     "featureAutomation": "Advanced task automation",
-    "planYearly": "Yearly"
+    "planYearly": "Yearly",
+    "reasonAdvancedReminders": "Reminders before a task is due and follow-ups after it are a Plus feature. Your current plan reminds you on the due date.",
+    "reasonReminderChannels": "Sending task reminders to a Telegram group is a Plus feature.",
+    "reasonHistoryWindow": "Your current plan shows the last 30 days. Upgrade to Plus for your full history and long-term trends.",
+    "reasonThingTriggers": "Triggering tasks automatically from a thing changing state is a Plus feature.",
+    "reasonProjectLimit": "Your current plan includes {{projectLimit}} projects. Upgrade to Plus to create as many as you need.",
+    "reasonQuickFilterLimit": "Your current plan includes {{filterLimit}} saved quick filters. Upgrade to Plus for unlimited filters.",
+    "reasonFileUpload": "Attaching files and images is a Plus feature. Upgrade to Plus to add photos, scans and documents to your tasks.",
+    "reasonCalendarSync": "Subscribing to your tasks from Apple Calendar, Google Calendar, Outlook, or another calendar app is a Plus feature."
   },
   "childUsers": {
     "errNameRequired": "Sub account name is required",
@@ -686,7 +834,13 @@
     "createTab": "Create Backup",
     "restoreTab": "Restore Backup",
     "creating": "Creating backup...",
-    "restoring": "Restoring backup..."
+    "restoring": "Restoring backup...",
+    "encryptionKeyRequired": "Encryption Key *",
+    "keySafetyNotice": "Keep this key safe—you'll need it to restore your backup",
+    "nameOptional": "Backup Name (Optional)",
+    "namePlaceholder": "e.g., weekly-backup",
+    "fileRequired": "Backup File *",
+    "selectedFile": "Selected: {{name}}"
   },
   "deletion": {
     "passwordRequired": "Please enter your password to continue",
@@ -714,7 +868,15 @@
   },
   "realtime": {
     "titleSse": "Real-time Updates (SSE)",
-    "subtitleSse": "Get instant notifications via Server-Sent Events"
+    "subtitleSse": "Get instant notifications via Server-Sent Events",
+    "basicPlanDescription": "Real-time updates (SSE) are not available in the Basic plan. Upgrade to Plus to receive instant notifications when chores are updated.",
+    "disabledDescription": "Real-time updates (SSE) are disabled. Enable to see live changes when you or other circle members complete, skip, or modify chores.",
+    "connectedDescription": "Real-time updates (SSE) are working. You'll see live changes when you or other circle members complete, skip, or modify chores.",
+    "connectingDescription": "Connecting to real-time updates (SSE)...",
+    "errorDescription": "Real-time updates (SSE) are enabled but not working: {{error}}",
+    "disconnectedDescription": "Real-time updates (SSE) are enabled but not currently connected.",
+    "enableLabel": "Enable Real-time Updates (SSE)",
+    "statusLabel": "Status:"
   },
   "nativeCancel": {
     "title": "Cancel Subscription",

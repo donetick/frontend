@@ -7,10 +7,15 @@ import { Preferences } from '@capacitor/preferences'
 import { PushNotifications } from '@capacitor/push-notifications'
 import { focusManager } from '@tanstack/react-query'
 
+import {
+  receivePendingShare,
+  storePendingShare,
+} from './service/ShareTargetService'
 import { RegisterDeviceToken, UnregisterDeviceToken } from './utils/Fetcher'
 import { beginOAuthExchange } from './utils/OAuthExchangeState'
 import { hasSeenOnboarding } from './utils/Onboarding'
 import { setPendingInvite } from './utils/PendingInvite'
+import statusBarManager from './utils/StatusBarManager'
 
 // React Router navigate(), injected by <App /> once the router is mounted.
 // Using client-side navigation (instead of window.location.href) avoids a full
@@ -147,6 +152,7 @@ const handleOAuthDeepLink = async url => {
     const urlObj = new URL(url)
     const code = urlObj.searchParams.get('code')
     const state = urlObj.searchParams.get('state')
+    const verifier = localStorage.getItem('authVerifier') ?? ''
 
     if (code && state) {
       // If we're already on the OAuth handler page with the same code, skip
@@ -168,7 +174,7 @@ const handleOAuthDeepLink = async url => {
       // Store the OAuth params for the app to pick up
       await Preferences.set({
         key: 'oauth_callback',
-        value: JSON.stringify({ code, state, timestamp: Date.now() }),
+        value: JSON.stringify({ code, state, verifier, timestamp: Date.now() }),
       })
 
       // Close the browser if it's still open
@@ -360,6 +366,17 @@ const registerCapacitorListeners = navigate => {
 
   localNotificationListenerRegistration()
 
+  // Android launches the plugin's share activity; iOS opens the app through
+  // its URL scheme and emits sendIntentReceived. Check once for cold starts
+  // and again for every warm share.
+  const handleIncomingShare = share => {
+    storePendingShare(share)
+    routerNavigate('/chores?share_task=1')
+  }
+  const checkForShare = () => receivePendingShare(handleIncomingShare)
+  window.addEventListener('sendIntentReceived', checkForShare)
+  void checkForShare()
+
   // Cold-start: app was launched by tapping an NFC tag (or other deep link).
   // getLaunchUrl() is sticky and keeps returning the launch URL across reloads,
   // so consume it exactly once to avoid re-triggering navigation on every boot.
@@ -379,6 +396,12 @@ const registerCapacitorListeners = navigate => {
 
   mobileApp.addListener('appStateChange', ({ isActive }) => {
     focusManager.setFocused(isActive)
+  })
+
+  // On iOS, dismissing SFSafariViewController can leave the WebView laid out
+  // underneath the status bar even though overlaysWebView is disabled.
+  Browser.addListener('browserFinished', () => {
+    void statusBarManager.restoreAfterNativeOverlayDismissal()
   })
 
   mobileApp.addListener('backButton', ({ canGoBack }) => {

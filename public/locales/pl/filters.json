@@ -1,55 +1,55 @@
 {
   "builder": {
-    "errorName": "",
-    "errorConditions": "",
-    "editTitle": "",
-    "newTitle": "",
-    "addConditions": "",
-    "save": "",
-    "name": "",
-    "namePlaceholder": "",
-    "color": ""
+    "errorName": "Wprowadź nazwę filtra",
+    "errorConditions": "Skonfiguruj przynajmniej jeden warunek filtra",
+    "editTitle": "Edytuj filtr",
+    "newTitle": "Nowy filtr",
+    "addConditions": "Dodaj warunki, aby wyświetlić podgląd",
+    "save": "Zapisz filtr",
+    "name": "Nazwa filtra",
+    "namePlaceholder": "np. Zaległe zadania dla Alicji",
+    "color": "Kolor"
   },
-  "nameExists": "",
-  "tasks_one": "",
-  "tasks_other": "",
-  "overdue": "",
-  "noConditions": "",
-  "condition_one": "",
-  "condition_other": "",
-  "usedCount": "",
+  "nameExists": "Filtr o tej nazwie już istnieje",
+  "tasks_one": "{{count}} zadanie",
+  "tasks_other": "{{count}} zadań",
+  "overdue": "{{count}} po terminie",
+  "noConditions": "Brak warunków",
+  "condition_one": "{{count}} warunek",
+  "condition_other": "{{count}} warunków",
+  "usedCount": "Użyto {{count}}x",
   "delete": {
-    "title": "",
-    "message": ""
+    "title": "Usuń filtr",
+    "message": "Czy na pewno chcesz usunąć filtr „{{name}}”? Tej operacji nie można cofnąć."
   },
   "empty": {
-    "title": "",
-    "description": "",
-    "createFilter": "",
-    "noResultsTitle": "",
-    "noResultsWithSearch": "",
-    "noResultsDefault": "",
-    "clearSearch": "",
-    "showAllFilters": ""
+    "title": "Brak zapisanych filtrów",
+    "description": "Zapisz zestaw warunków, np. „zaległe i przypisane do mnie”, i wracaj do nich w każdej chwili.",
+    "createFilter": "Utwórz filtr",
+    "noResultsTitle": "Brak pasujących filtrów",
+    "noResultsWithSearch": "Żaden zapisany filtr nie pasuje do „{{search}}”.",
+    "noResultsDefault": "Żaden zapisany filtr nie spełnia bieżących kryteriów.",
+    "clearSearch": "Wyczyść wyszukiwanie",
+    "showAllFilters": "Pokaż wszystkie filtry"
   },
   "header": {
-    "title": "",
-    "subtitle": ""
+    "title": "Filtry",
+    "subtitle": "Zapisuj ulubione kombinacje filtrów, aby mieć do nich szybki dostęp. Twórz własne widoki, by sprawniej organizować i odnajdywać zadania."
   },
-  "searchPlaceholder": "",
+  "searchPlaceholder": "Szukaj filtrów",
   "sort": {
-    "smart": "",
-    "name": "",
-    "usage": "",
-    "lastUsed": "",
-    "created": ""
+    "smart": "Inteligentne",
+    "name": "Nazwa",
+    "usage": "Liczba użyć",
+    "lastUsed": "Ostatnio użyte",
+    "created": "Data utworzenia"
   },
   "show": {
-    "title": "",
-    "all": "",
-    "pinned": "",
-    "unpinned": ""
+    "title": "Pokaż",
+    "all": "Wszystkie filtry",
+    "pinned": "Przypięte",
+    "unpinned": "Nieprzypięte"
   },
-  "pin": "",
-  "unpin": ""
+  "pin": "Przypnij",
+  "unpin": "Odepnij"
 }

@@ -22,14 +22,18 @@ import {
   Avatar,
   Badge,
   Box,
-  Card,
   Chip,
   Container,
   Divider,
-  Grid,
   IconButton,
   Input,
+  Option,
+  Select,
+  Sheet,
   Stack,
+  Tab,
+  TabList,
+  Tabs,
   Typography,
 } from '@mui/joy'
 import Fuse from 'fuse.js'
@@ -41,6 +45,7 @@ import EmptyState from '../../components/common/EmptyState'
 import FilterBar from '../../components/common/FilterBar'
 import SortAndFilterMenu from '../../components/common/SortAndFilterMenu'
 import { useLocalization } from '../../contexts/LocalizationContext'
+import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
 import { useFilter } from '../../hooks/useFilter'
 import {
   useChores,
@@ -51,6 +56,7 @@ import {
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
 import { ChoresGrouper } from '../../utils/Chores'
 import { COLORS, TASK_COLOR } from '../../utils/Colors.jsx'
+import { isPlusHistoryWindow } from '../../utils/entitlements'
 import LoadingComponent from '../components/Loading'
 import { useLabels } from '../Labels/LabelQueries'
 import EditHistoryModal from '../Modals/EditHistoryModal'
@@ -212,200 +218,256 @@ const ChoreHistoryTimeline = ({
   )
 }
 
-const renderPieChart = (t, data, size, isPrimary, chartType = null) => {
-  // Filter out items with zero or negative values
-  const validData = data.filter(item => item.value > 0)
+const PERIODS = [
+  { value: 7, label: '7' },
+  { value: 30, label: '30' },
+  { value: 90, label: '90', plus: true },
+  { value: 365, label: '∞', plus: true },
+]
 
-  if (validData.length === 0) {
+const surfaceSx = {
+  bgcolor: 'background.surface',
+  border: '1px solid',
+  borderColor: 'divider',
+  borderRadius: 'xl',
+}
+
+const AnalyticsChart = ({ chart, chartType, t }) => {
+  const data = chart.data.filter(item => item.value > 0)
+  const total = data.reduce((sum, item) => sum + item.value, 0)
+  const isDuration = ['labelsDuration', 'tasksTime'].includes(chartType)
+  // Donuts stop being useful once the slices become difficult to compare.
+  // Due-date and high-cardinality breakdowns use ranked bars instead.
+  const useBarBreakdown = chartType === 'due' || data.length > 5
+
+  if (data.length === 0) {
     return (
       <Box
         sx={{
-          width: size,
-          height: size,
-          display: 'flex',
           alignItems: 'center',
+          display: 'flex',
           justifyContent: 'center',
-          border: '1px dashed',
-          borderColor: 'divider',
-          borderRadius: '8px',
+          minHeight: 250,
         }}
       >
-        <Typography level='body-sm' color='neutral'>
+        <Typography level='body-sm' textColor='text.secondary'>
           {t('charts.noData')}
         </Typography>
       </Box>
     )
   }
 
-  // For primary charts, render chart and legend separately to control layout better
-  if (isPrimary) {
-    const chartSize = Math.min(size - 20, 220) // Reserve space and limit max size
+  if (useBarBreakdown) {
+    const maxValue = Math.max(...data.map(item => item.value))
 
     return (
-      <Box
-        sx={{
-          width: size,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: validData.length <= 3 ? 1.5 : 2, // Smaller gap for fewer items
-        }}
-      >
-        {/* Chart Container */}
+      <Box sx={{ p: { xs: 2, sm: 3 } }}>
         <Box
           sx={{
+            alignItems: 'baseline',
             display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
+            gap: 1,
+            mb: 2.5,
           }}
         >
-          <PieChart width={chartSize} height={chartSize}>
-            <Pie
-              data={validData}
-              dataKey='value'
-              nameKey='label'
-              cx='50%'
-              cy='50%'
-              outerRadius={chartSize / 3}
-              innerRadius={chartSize / 8}
-              paddingAngle={validData.length > 1 ? 2 : 0}
-              cornerRadius={3}
-              minAngle={5}
-            >
-              {validData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
-              ))}
-            </Pie>
-            <Tooltip
-              formatter={(value, name, props) => {
-                if (chartType === 'tasksTime' && props.payload.count) {
-                  return [`${value}h (${props.payload.count} times)`, name]
-                }
-                return [`${value}`, name]
-              }}
-            />
-          </PieChart>
-        </Box>
-
-        {/* Scrollable Legend Container */}
-        <Box
-          sx={{
-            width: '100%',
-            maxHeight: validData.length <= 3 ? 'auto' : '120px', // Dynamic height based on data count
-            minHeight: validData.length <= 3 ? 'auto' : '60px', // No minimum height for few items
-            overflowY: validData.length <= 3 ? 'visible' : 'auto', // No scroll for few items
-            overflowX: 'hidden',
-            px: 1,
-            '&::-webkit-scrollbar': {
-              width: '6px',
-            },
-            '&::-webkit-scrollbar-track': {
-              backgroundColor: 'neutral.100',
-              borderRadius: '3px',
-            },
-            '&::-webkit-scrollbar-thumb': {
-              backgroundColor: 'neutral.400',
-              borderRadius: '3px',
-              '&:hover': {
-                backgroundColor: 'neutral.500',
-              },
-            },
-          }}
-        >
-          <Box
+          <Typography
             sx={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 0.5,
-              justifyContent: 'center',
-              alignItems: 'flex-start',
+              fontSize: '2rem',
+              fontWeight: 700,
+              letterSpacing: '-0.04em',
+              lineHeight: 1,
             }}
           >
-            {validData.map((entry, index) => (
-              <Chip
-                key={`legend-${index}`}
-                size='sm'
-                variant='soft'
-                sx={{
-                  // backgroundColor: `${entry.color}20`, // 20% opacity
-                  // borderColor: entry.color,
-                  // border: '1px solid',
-                  color: 'text.primary',
-                  fontSize: '0.7rem',
-                  py: 0.5,
-                  px: 1,
-                  maxWidth: '100%',
-                  '&:hover': {
-                    backgroundColor: `${entry.color}30`, // 30% opacity on hover
-                  },
-                }}
-                startDecorator={
-                  <Box
-                    sx={{
-                      width: 8,
-                      height: 8,
-                      backgroundColor: entry.color,
-                      borderRadius: '50%',
-                      flexShrink: 0,
-                    }}
-                  />
-                }
-              >
-                <Typography
-                  level='body-xs'
-                  sx={{
-                    fontSize: '0.7rem',
-                    fontWeight: 500,
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    maxWidth: '150px',
-                  }}
-                  title={`${entry.label}: ${entry.value}${
-                    chartType === 'tasksTime' && entry.count
-                      ? ` (${entry.count} times)`
-                      : ''
-                  }${
-                    chartType === 'labelsDuration' || chartType === 'tasksTime'
-                      ? 'h'
-                      : ''
-                  }`}
-                >
-                  {entry.label}: {entry.value}
-                  {chartType === 'tasksTime' && entry.count
-                    ? ` (${entry.count}x)`
-                    : ''}
-                  {chartType === 'labelsDuration' || chartType === 'tasksTime'
-                    ? 'h'
-                    : ''}
-                </Typography>
-              </Chip>
-            ))}
-          </Box>
+            {Math.round(total * 10) / 10}
+            {isDuration ? 'h' : ''}
+          </Typography>
+          <Typography level='body-sm' textColor='text.secondary'>
+            {chart.title}
+          </Typography>
         </Box>
+
+        <Stack
+          spacing={1.75}
+          sx={{
+            maxHeight: 380,
+            overflowY: data.length > 8 ? 'auto' : 'visible',
+            pr: data.length > 8 ? 1 : 0,
+            scrollbarColor: 'var(--joy-palette-neutral-300) transparent',
+            scrollbarWidth: 'thin',
+          }}
+        >
+          {data.map(item => (
+            <Box key={item.id ?? item.label} sx={{ minWidth: 0 }}>
+              <Box
+                sx={{
+                  alignItems: 'baseline',
+                  display: 'flex',
+                  gap: 2,
+                  justifyContent: 'space-between',
+                  mb: 0.625,
+                }}
+              >
+                <Typography level='body-sm' noWrap title={item.label}>
+                  {item.label}
+                </Typography>
+                <Typography level='body-sm' sx={{ fontWeight: 650 }}>
+                  {item.value}
+                  {isDuration ? 'h' : ''}
+                </Typography>
+              </Box>
+              <Box
+                sx={{
+                  bgcolor: 'background.level1',
+                  borderRadius: '999px',
+                  height: 8,
+                  overflow: 'hidden',
+                }}
+              >
+                <Box
+                  sx={{
+                    bgcolor: item.color,
+                    borderRadius: 'inherit',
+                    height: '100%',
+                    minWidth: 4,
+                    transition: 'width 300ms ease',
+                    width: `${(item.value / maxValue) * 100}%`,
+                    '@media (prefers-reduced-motion: reduce)': {
+                      transition: 'none',
+                    },
+                  }}
+                />
+              </Box>
+            </Box>
+          ))}
+        </Stack>
       </Box>
     )
   }
 
-  // For small preview charts, keep it simple without legend
   return (
-    <PieChart width={size} height={size}>
-      <Pie
-        data={validData}
-        dataKey='value'
-        nameKey='label'
-        cx='50%'
-        cy='50%'
-        outerRadius={size / 3.5}
-        innerRadius={size / 8}
-        paddingAngle={validData.length > 1 ? 1 : 0}
-        cornerRadius={2}
-      >
-        {validData.map((entry, index) => (
-          <Cell key={`cell-${index}`} fill={entry.color} />
-        ))}
-      </Pie>
-    </PieChart>
+    <Box
+      sx={{
+        alignItems: 'center',
+        display: 'grid',
+        gap: { xs: 2, sm: 4 },
+        gridTemplateColumns: { xs: '1fr', sm: 'minmax(240px, 0.85fr) 1fr' },
+        minHeight: 280,
+        p: { xs: 2, sm: 3 },
+      }}
+    >
+      <Box sx={{ display: 'grid', placeItems: 'center', position: 'relative' }}>
+        <PieChart width={240} height={240}>
+          <Pie
+            data={data}
+            dataKey='value'
+            nameKey='label'
+            cx='50%'
+            cy='50%'
+            outerRadius={104}
+            innerRadius={76}
+            paddingAngle={data.length > 1 ? 3 : 0}
+            cornerRadius={7}
+            minAngle={4}
+            stroke='none'
+          >
+            {data.map(entry => (
+              <Cell key={entry.id ?? entry.label} fill={entry.color} />
+            ))}
+          </Pie>
+          <Tooltip
+            formatter={(value, name) => [
+              `${value}${isDuration ? 'h' : ''}`,
+              name,
+            ]}
+            contentStyle={{
+              background: 'var(--joy-palette-background-surface)',
+              border: '1px solid var(--joy-palette-divider)',
+              borderRadius: 10,
+              boxShadow: 'var(--joy-shadow-md)',
+              fontSize: 12,
+            }}
+          />
+        </PieChart>
+        <Box sx={{ position: 'absolute', textAlign: 'center' }}>
+          <Typography
+            sx={{
+              fontSize: '1.75rem',
+              fontWeight: 700,
+              letterSpacing: '-0.04em',
+              lineHeight: 1,
+            }}
+          >
+            {Math.round(total * 10) / 10}
+            {isDuration ? 'h' : ''}
+          </Typography>
+          <Typography level='body-xs' textColor='text.tertiary'>
+            {chart.title}
+          </Typography>
+        </Box>
+      </Box>
+
+      <Stack spacing={1.5} sx={{ minWidth: 0, width: '100%' }}>
+        {data.map(item => {
+          const percentage = total ? (item.value / total) * 100 : 0
+          return (
+            <Box key={item.id ?? item.label} sx={{ minWidth: 0 }}>
+              <Box
+                sx={{
+                  alignItems: 'baseline',
+                  display: 'flex',
+                  gap: 1,
+                  justifyContent: 'space-between',
+                  mb: 0.5,
+                }}
+              >
+                <Box
+                  sx={{
+                    alignItems: 'center',
+                    display: 'flex',
+                    gap: 1,
+                    minWidth: 0,
+                  }}
+                >
+                  <Box
+                    sx={{
+                      bgcolor: item.color,
+                      borderRadius: '50%',
+                      flex: '0 0 auto',
+                      height: 8,
+                      width: 8,
+                    }}
+                  />
+                  <Typography level='body-sm' noWrap>
+                    {item.label}
+                  </Typography>
+                </Box>
+                <Typography level='body-sm' sx={{ fontWeight: 650 }}>
+                  {item.value}
+                  {isDuration ? 'h' : ''}
+                </Typography>
+              </Box>
+              <Box
+                sx={{
+                  bgcolor: 'background.level1',
+                  borderRadius: '999px',
+                  height: 5,
+                  overflow: 'hidden',
+                }}
+              >
+                <Box
+                  sx={{
+                    bgcolor: item.color,
+                    borderRadius: 'inherit',
+                    height: '100%',
+                    width: `${Math.max(percentage, 2)}%`,
+                  }}
+                />
+              </Box>
+            </Box>
+          )
+        })}
+      </Stack>
+    </Box>
   )
 }
 
@@ -417,7 +479,7 @@ const USER_FILTER = (history, userId) => {
 const UserActivites = () => {
   const { t } = useTranslation('history')
   const { data: userProfile } = useUserProfile()
-
+  const { isPlus, showPaywall } = usePaywall()
   const [tabValue, setTabValue] = React.useState(7)
   const [selectedHistory, setSelectedHistory] = React.useState([])
   const [enrichedHistory, setEnrichedHistory] = React.useState([])
@@ -671,15 +733,22 @@ const UserActivites = () => {
     [tabValue, selectedUser, clientActiveFilters],
   )
 
+  const handlePeriodChange = days => {
+    if (!isPlus && isPlusHistoryWindow(days)) {
+      showPaywall(PAYWALL_REASON.HISTORY_WINDOW)
+      return
+    }
+    setTabValue(days)
+    refetchHistory(days)
+  }
+
   const handleSetFilter = (id, value) => {
     if (id === 'completedBy') {
       const userId = value ?? 'all'
       setSelectedUser(userId)
       setSelectedHistory(enrichedHistory.filter(h => USER_FILTER(h, userId)))
     } else if (id === 'timePeriod') {
-      const days = value ?? 7
-      setTabValue(days)
-      refetchHistory(days)
+      handlePeriodChange(value ?? 7)
     } else {
       setClientFilter(id, value)
     }
@@ -1080,84 +1149,194 @@ const UserActivites = () => {
   // Calculate activities analytics
   return (
     <Container
-      maxWidth='lg'
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-      }}
+      maxWidth='md'
+      sx={{ px: { xs: 2, sm: 3 }, pb: 6, pt: { xs: 1, sm: 2 } }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, p: 2 }}>
-        <Stack sx={{ flex: 1 }}>
+      <Box
+        sx={{
+          alignItems: { xs: 'flex-start', sm: 'center' },
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          gap: 2,
+          justifyContent: 'space-between',
+          mb: 3,
+        }}
+      >
+        <Box>
           <Typography
-            level='h3'
-            sx={{ fontWeight: 'lg', color: 'text.primary' }}
+            level='h2'
+            sx={{
+              fontSize: 'clamp(1.5rem, 6vw, 1.75rem)',
+              letterSpacing: '-0.028em',
+              lineHeight: 1.15,
+            }}
           >
             {t('activities.title')}
           </Typography>
-          <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+          <Typography
+            level='body-sm'
+            textColor='text.secondary'
+            sx={{ mt: 0.5, maxWidth: 520, textWrap: 'pretty' }}
+          >
             {t('activities.subtitle')}
           </Typography>
-        </Stack>
+        </Box>
+
+        <Tabs
+          value={tabValue}
+          onChange={(event, value) => handlePeriodChange(value)}
+          size='sm'
+          sx={{ bgcolor: 'background.level1', borderRadius: 'lg', p: 0.5 }}
+        >
+          <TabList disableUnderline sx={{ gap: 0.25 }}>
+            {PERIODS.map(period => (
+              <Tab
+                key={period.value}
+                value={period.value}
+                disableIndicator
+                sx={{
+                  borderRadius: 'md',
+                  minWidth: 42,
+                  px: 1.25,
+                  '&.Mui-selected': {
+                    bgcolor: 'background.surface',
+                    boxShadow: 'sm',
+                  },
+                }}
+              >
+                {period.label}
+              </Tab>
+            ))}
+          </TabList>
+        </Tabs>
       </Box>
 
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-        <Input
-          slotProps={{ input: { ref: searchInputRef } }}
-          placeholder={t('activities.searchPlaceholder')}
-          value={searchTerm}
-          fullWidth
-          sx={{
-            borderRadius: 24,
-            height: 24,
-            borderColor: 'text.disabled',
-            padding: 1,
-          }}
-          onChange={handleSearchChange}
-          startDecorator={<Search />}
-          endDecorator={
-            searchTerm && (
-              <IconButton
-                variant='plain'
-                size='sm'
-                onClick={handleSearchClose}
-                sx={{ borderRadius: '50%' }}
-              >
-                <Close />
-              </IconButton>
-            )
-          }
-        />
-        <SortAndFilterMenu
-          icon={<Sort />}
-          sortOptions={[
-            { name: t('activities.sort.date'), value: 'date' },
-            { name: t('activities.sort.name'), value: 'name' },
-            { name: t('activities.sort.status'), value: 'status' },
-            { name: t('activities.sort.points'), value: 'points' },
-          ]}
-          selectedSort={sortBy}
-          onSortChange={setSortBy}
-          sortDirection={sortDirection}
-          onSortDirectionChange={setSortDirection}
-          isActive={sortBy !== 'date' || sortDirection !== 'desc'}
-        />
-        <Badge
-          badgeContent={filterActiveCount || null}
-          color='primary'
-          size='sm'
-          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-        >
-          <IconButton
-            onClick={() => setFilterBarOpen(true)}
-            variant='outlined'
-            color={filterActiveCount > 0 ? 'primary' : 'neutral'}
-            size='sm'
-            sx={{ height: 32, width: 32, borderRadius: '50%', flexShrink: 0 }}
-            aria-label={t('common:filterBar.filtersButton')}
+      <Box
+        component='section'
+        sx={{ display: { xs: 'none', sm: 'block' }, mb: 4 }}
+      >
+        <Sheet sx={{ ...surfaceSx, overflow: 'hidden' }}>
+          <Box
+            sx={{
+              alignItems: { xs: 'flex-start', sm: 'center' },
+              display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
+              gap: 1.5,
+              justifyContent: 'space-between',
+              p: { xs: 2, sm: 2.5 },
+            }}
           >
-            <Tune />
-          </IconButton>
-        </Badge>
+            <Box sx={{ minWidth: 0 }}>
+              <Typography level='title-md' sx={{ fontWeight: 650 }}>
+                {chartData[selectedChart].title}
+              </Typography>
+              <Typography level='body-xs' textColor='text.tertiary'>
+                {chartData[selectedChart].description}
+              </Typography>
+            </Box>
+            <Select
+              value={selectedChart}
+              onChange={(event, value) => value && setSelectedChart(value)}
+              size='sm'
+              variant='soft'
+              aria-label={chartData[selectedChart].title}
+              sx={{
+                minWidth: { xs: '100%', sm: 190 },
+                '--Select-radius': 'var(--joy-radius-md)',
+              }}
+            >
+              {Object.entries(chartData).map(([key, value]) => (
+                <Option key={key} value={key}>
+                  {value.title}
+                </Option>
+              ))}
+            </Select>
+          </Box>
+          <Divider />
+          <AnalyticsChart
+            chart={chartData[selectedChart]}
+            chartType={selectedChart}
+            t={t}
+          />
+        </Sheet>
+      </Box>
+
+      <Box component='section'>
+        <Box
+          sx={{
+            alignItems: 'baseline',
+            display: 'flex',
+            justifyContent: 'space-between',
+            mb: 1.25,
+          }}
+        >
+          <Typography level='title-md' sx={{ fontWeight: 650 }}>
+            {t('title.activity')}
+          </Typography>
+          <Typography level='body-xs' textColor='text.tertiary'>
+            {sortedTimeline.length} / {selectedHistory.length}
+          </Typography>
+        </Box>
+
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+          <Input
+            slotProps={{ input: { ref: searchInputRef } }}
+            placeholder={t('activities.searchPlaceholder')}
+            value={searchTerm}
+            fullWidth
+            sx={{
+              borderRadius: 24,
+              height: 24,
+              borderColor: 'text.disabled',
+              padding: 1,
+            }}
+            onChange={handleSearchChange}
+            startDecorator={<Search />}
+            endDecorator={
+              searchTerm && (
+                <IconButton
+                  variant='plain'
+                  size='sm'
+                  onClick={handleSearchClose}
+                  sx={{ borderRadius: '50%' }}
+                >
+                  <Close />
+                </IconButton>
+              )
+            }
+          />
+          <SortAndFilterMenu
+            icon={<Sort />}
+            sortOptions={[
+              { name: t('activities.sort.date'), value: 'date' },
+              { name: t('activities.sort.name'), value: 'name' },
+              { name: t('activities.sort.status'), value: 'status' },
+              { name: t('activities.sort.points'), value: 'points' },
+            ]}
+            selectedSort={sortBy}
+            onSortChange={setSortBy}
+            sortDirection={sortDirection}
+            onSortDirectionChange={setSortDirection}
+            isActive={sortBy !== 'date' || sortDirection !== 'desc'}
+          />
+          <Badge
+            badgeContent={filterActiveCount || null}
+            color='primary'
+            size='sm'
+            anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+          >
+            <IconButton
+              onClick={() => setFilterBarOpen(true)}
+              variant='outlined'
+              color={filterActiveCount > 0 ? 'primary' : 'neutral'}
+              size='sm'
+              sx={{ height: 32, width: 32, borderRadius: '50%', flexShrink: 0 }}
+              aria-label={t('common:filterBar.filtersButton')}
+            >
+              <Tune />
+            </IconButton>
+          </Badge>
+        </Box>
       </Box>
 
       <FilterBar
@@ -1173,7 +1352,7 @@ const UserActivites = () => {
       />
 
       {/* Conditional Content Based on Data Availability */}
-      {!choresData.res?.length > 0 || !choresHistory?.length > 0 ? (
+      {!choresData.res?.length || !choresHistory?.length ? (
         <EmptyState
           variant='no-results'
           fullHeight
@@ -1200,228 +1379,69 @@ const UserActivites = () => {
           primaryAction={{ label: t('empty.backToTasks'), to: '/chores' }}
         />
       ) : (
-        <>
-          {/* Main Content Area - Mobile: Stack vertically, Desktop: Side by side */}
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: { xs: 'column', lg: 'row' },
-              gap: 3,
-              alignItems: 'flex-start',
+        <Box sx={{ minWidth: 0, width: '100%' }}>
+          <ChoreHistoryTimeline
+            history={sortedTimeline}
+            performers={circleUsers}
+            onViewNote={notes => {
+              setNoteViewerConfig({
+                isOpen: true,
+                title: t('detail.note'),
+                content: notes,
+                onClose: () => setNoteViewerConfig({ isOpen: false }),
+              })
             }}
-          >
-            {/* Left Side - Timeline (Mobile: Full width, Desktop: Flexible) */}
-            <Box sx={{ flex: 1, minWidth: 0, width: '100%' }}>
-              <ChoreHistoryTimeline
-                history={sortedTimeline}
-                performers={circleUsers}
-                onViewNote={notes => {
-                  setNoteViewerConfig({
+            onViewDetails={(entry, performers) => {
+              setDetailModalConfig({
+                isOpen: true,
+                entry,
+                performers,
+                onClose: () => setDetailModalConfig({ isOpen: false }),
+                onEdit: record => {
+                  setDetailModalConfig(prev => ({ ...prev, isOpen: false }))
+                  setEditHistoryRecord(record)
+                  setEditModalConfig({
                     isOpen: true,
-                    title: t('detail.note'),
-                    content: notes,
-                    onClose: () => setNoteViewerConfig({ isOpen: false }),
-                  })
-                }}
-                onViewDetails={(entry, performers) => {
-                  setDetailModalConfig({
-                    isOpen: true,
-                    entry,
-                    performers,
-                    onClose: () => setDetailModalConfig({ isOpen: false }),
-                    onEdit: record => {
-                      setDetailModalConfig(prev => ({ ...prev, isOpen: false }))
-                      setEditHistoryRecord(record)
-                      setEditModalConfig({
-                        isOpen: true,
-                        onClose: () => {
-                          setEditModalConfig({ isOpen: false })
-                          setEditHistoryRecord(null)
+                    onClose: () => {
+                      setEditModalConfig({ isOpen: false })
+                      setEditHistoryRecord(null)
+                    },
+                    onSave: updated => {
+                      updateChoreHistory.mutate(
+                        {
+                          choreId: record.choreId,
+                          historyId: record.id,
+                          historyData: {
+                            performedAt: updated.performedAt,
+                            dueDate: updated.dueDate,
+                            notes: updated.notes,
+                          },
                         },
-                        onSave: updated => {
-                          updateChoreHistory.mutate(
-                            {
-                              choreId: record.choreId,
-                              historyId: record.id,
-                              historyData: {
-                                performedAt: updated.performedAt,
-                                dueDate: updated.dueDate,
-                                notes: updated.notes,
-                              },
-                            },
-                            {
-                              onSuccess: () => {
-                                setEditModalConfig({ isOpen: false })
-                                setEditHistoryRecord(null)
-                              },
-                            },
-                          )
+                        {
+                          onSuccess: () => {
+                            setEditModalConfig({ isOpen: false })
+                            setEditHistoryRecord(null)
+                          },
                         },
-                        onDelete: () => {
-                          deleteChoreHistory.mutate(
-                            { choreId: record.choreId, historyId: record.id },
-                            {
-                              onSuccess: () => {
-                                setEditModalConfig({ isOpen: false })
-                                setEditHistoryRecord(null)
-                              },
-                            },
-                          )
+                      )
+                    },
+                    onDelete: () => {
+                      deleteChoreHistory.mutate(
+                        { choreId: record.choreId, historyId: record.id },
+                        {
+                          onSuccess: () => {
+                            setEditModalConfig({ isOpen: false })
+                            setEditHistoryRecord(null)
+                          },
                         },
-                      })
+                      )
                     },
                   })
-                }}
-              />
-            </Box>
-
-            {/* Right Sidebar - Charts (Desktop only, hidden on mobile) */}
-            <Box
-              sx={{
-                display: { xs: 'none', lg: 'block' },
-                width: '350px',
-                position: 'sticky',
-                top: '60px',
-                alignSelf: 'flex-start',
-                maxHeight: 'calc(100vh - 40px)',
-                overflowY: 'auto',
-              }}
-            >
-              {/* Charts Container */}
-              <Card
-                variant='plain'
-                sx={{
-                  p: 2,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  boxShadow: 'sm',
-                  borderRadius: 20,
-                  width: { xs: '100%', lg: '315px' },
-                  mr: { xs: 0, lg: 10 },
-                  mb: 1,
-                }}
-              >
-                <Stack spacing={3}>
-                  {/* Main Chart */}
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'flex-start',
-                      textAlign: 'center',
-                      minHeight: {
-                        lg:
-                          chartData[selectedChart].data.length <= 3
-                            ? '350px'
-                            : '450px',
-                      }, // Dynamic height based on legend needs
-                      maxHeight: {
-                        lg:
-                          chartData[selectedChart].data.length <= 3
-                            ? '400px'
-                            : '500px',
-                      },
-                    }}
-                  >
-                    <Typography level='h4' textAlign='center' sx={{ mb: 1 }}>
-                      {chartData[selectedChart].title}
-                    </Typography>
-                    <Typography
-                      level='body-xs'
-                      textAlign='center'
-                      sx={{ mb: 2 }}
-                    >
-                      {chartData[selectedChart].description}
-                    </Typography>
-                    <Box
-                      sx={{
-                        flex: 1,
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'flex-start',
-                        width: '100%',
-                      }}
-                    >
-                      {renderPieChart(
-                        t,
-                        chartData[selectedChart].data,
-                        300, // Increased size for better chart container
-                        true,
-                        selectedChart,
-                      )}
-                    </Box>
-                  </Box>
-
-                  <Divider />
-
-                  {/* Chart Selection Grid */}
-                  <Box>
-                    <Grid container spacing={1}>
-                      {Object.entries(chartData)
-                        .filter(([key]) => key !== selectedChart)
-                        .map(([key, { data, title }]) => (
-                          <Grid
-                            item
-                            key={key}
-                            xs={4}
-                            sx={{
-                              display: 'flex',
-                              justifyContent: 'center',
-                              alignItems: 'center',
-                            }}
-                          >
-                            <Card
-                              onClick={() => setSelectedChart(key)}
-                              variant='plain'
-                              sx={{
-                                cursor: 'pointer',
-                                p: 1,
-                                transition: 'all 0.2s ease-in-out',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                minHeight: 80,
-                                maxWidth: 90,
-                                '&:hover': {
-                                  transform: 'scale(1.02)',
-                                  boxShadow: 'sm',
-                                },
-                              }}
-                            >
-                              <Typography
-                                textAlign='center'
-                                level='body-xs'
-                                sx={{
-                                  mb: 0.5,
-                                  fontSize: '0.65rem',
-                                  lineHeight: 1.2,
-                                }}
-                              >
-                                {title}
-                              </Typography>
-                              <Box
-                                sx={{
-                                  display: 'flex',
-                                  justifyContent: 'center',
-                                  alignItems: 'center',
-                                }}
-                              >
-                                {renderPieChart(t, data, 70, false)}
-                              </Box>
-                            </Card>
-                          </Grid>
-                        ))}
-                    </Grid>
-                  </Box>
-                </Stack>
-              </Card>
-            </Box>
-          </Box>
-        </>
+                },
+              })
+            }}
+          />
+        </Box>
       )}
       <NoteViewerModal config={noteViewerConfig} />
       <HistoryDetailModal config={detailModalConfig} />

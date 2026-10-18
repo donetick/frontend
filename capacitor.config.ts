@@ -8,8 +8,21 @@ const config: CapacitorConfig = {
     allowMixedContent: true,
   },
   plugins: {
+    // Keep this in native config as well as setting it at runtime. On iOS the
+    // StatusBar plugin reapplies its native config whenever the app's view
+    // appears (including after dismissing Capacitor Browser). Without this it
+    // falls back to overlay=true and the WebView jumps under the status bar.
+    StatusBar: {
+      overlaysWebView: false,
+    },
     PushNotifications: {
       presentationOptions: ['badge', 'sound', 'alert'],
+    },
+    // We drive the badge count ourselves from the due/overdue total (see
+    // useAppBadgeSync), so don't let a resume reset it to 0 out from under us.
+    Badge: {
+      persist: true,
+      autoClear: false,
     },
     LocalNotifications: {
       smallIcon: 'ic_stat_icon_config_sample',

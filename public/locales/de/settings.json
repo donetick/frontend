@@ -151,7 +151,7 @@
     "roles": {
       "member": "Mitglied",
       "memberDescription": "Ein reguläres Mitglied des Kreises",
-      "manager": "",
+      "manager": "Verwalter",
       "managerDescription": "Kann sich als Nutzer ausgeben und in deren Namen handeln",
       "admin": "Administrator",
       "adminDescription": "Voller Zugriff auf den Kreis"
@@ -279,9 +279,9 @@
     "customLabel": "Benutzerdefinierte Benachrichtigung",
     "customHelper": "Benachrichtigungen über eine andere Plattform erhalten",
     "targetNone": "Keine",
-    "targetTelegram": "",
-    "targetPushover": "",
-    "targetWebhooks": "",
+    "targetTelegram": "Telegram",
+    "targetPushover": "Pushover",
+    "targetWebhooks": "Webhooks",
     "telegramBotHelpBefore": "Du musst dem Bot zuerst eine Nachricht senden, damit die Telegram-Benachrichtigung funktioniert",
     "telegramBotHelpAfter": "um einen Chat zu starten",
     "clickHere": "Hier klicken",
@@ -436,45 +436,45 @@
     "detailedDescription": "Passe Anordnung und Sichtbarkeit der Karten in der Seitenleiste an. Dieser Bereich ist nur auf Geräten mit großem Bildschirm wie Tablets und Desktop-Computern verfügbar."
   },
   "homeSections": {
-    "title": "",
-    "description": "",
-    "resetToDefaults": "",
-    "resetHelper": "",
+    "title": "Übersicht Anpassung",
+    "description": "Lege fest, welche Abschnitte in welcher Reihenfolge auf dem Startbildschirm erscheinen. Ziehen und Ablegen um die Abschnitte neu anzuordnen oder wechsle ihre Sichtbarkeit.",
+    "resetToDefaults": "Auf Standard zurücksetzen",
+    "resetHelper": "Dadurch werden alle Abschnitte auf ihre Standard-Sichtbarkeit und Reihenfolge zurückgesetzt.",
     "sections": {
       "greeting": {
-        "name": "",
-        "description": ""
+        "name": "Willkommen",
+        "description": "Die Überschrift an der Oberseite, die deinen Tag zusammenfasst"
       },
       "glance": {
-        "name": "",
-        "description": ""
+        "name": "Auf einen Blick",
+        "description": "Verspätet / heute fällig / benötigt Überprüfung / ungeplante Anzahl"
       },
       "circle": {
-        "name": "",
-        "description": ""
+        "name": "Dein Kreis",
+        "description": "Zeigt was alle in deinem Kreis diese Woche ausführen"
       },
       "review": {
-        "name": "",
-        "description": ""
+        "name": "Benötigt Überprüfung",
+        "description": "Beendete Aufgaben warten auf Freigabe"
       },
       "overdue": {
-        "name": "",
-        "description": ""
+        "name": "Überfällig",
+        "description": "Aufgaben, deren Fälligkeitsdatum abgelaufen sind"
       },
       "nextUp": {
-        "name": "",
-        "description": ""
+        "name": "Demnächst",
+        "description": "Was ist heute und morgen fällig"
       },
       "filters": {
-        "name": "",
-        "description": ""
+        "name": "Filter",
+        "description": "Schnellzugriff auf Ihre angehefteten und nützlichsten Filter"
       },
       "projects": {
-        "name": "",
-        "description": ""
+        "name": "Projekte",
+        "description": "Wo die Arbeit sich aufgehäuft, nach Projekt geordnet"
       }
     },
-    "detailedDescription": ""
+    "detailedDescription": "Layout und Sichtbarkeit von Abschnitten auf dem Startbildschirm anpassen."
   },
   "layout": {
     "title": "Layout & Navigation",
@@ -553,7 +553,7 @@
     "sunday": "Sonntag",
     "monday": "Montag",
     "saturday": "Samstag",
-    "helpTranslate": "",
+    "helpTranslate": "Hilf mit, diese Übersetzung zu verbessern",
     "formats": {
       "mdy": "MM/TT/JJJJ (USA)",
       "dmy": "TT.MM.JJJJ (Europa)",
@@ -590,7 +590,7 @@
       "toggleLabel": "Echtzeit-Updates aktivieren",
       "title": "Echtzeit-Updates",
       "subtitle": "Erhalte sofort Benachrichtigungen, wenn Aufgaben aktualisiert werden",
-      "statusLabel": "",
+      "statusLabel": "Status:",
       "basicPlan": "Echtzeit-Updates sind im Basis-Tarif nicht verfügbar. Wechsle zu Plus, um sofort benachrichtigt zu werden, wenn Aufgaben aktualisiert werden.",
       "disabled": "Echtzeit-Updates sind deaktiviert. Aktiviere sie, um Live-Änderungen zu sehen, wenn du oder andere Kreismitglieder Aufgaben erledigen, überspringen oder ändern.",
       "connected": "Echtzeit-Updates funktionieren. Du siehst Live-Änderungen, wenn du oder andere Kreismitglieder Aufgaben erledigen, überspringen oder ändern.",
@@ -624,7 +624,14 @@
     "featureApiTokens": "API-Tokens für Integrationen",
     "featureImageUploads": "Bild-Uploads in Beschreibungen",
     "featureAutomation": "Erweiterte Aufgabenautomatisierung",
-    "planYearly": "Jährlich"
+    "planYearly": "Jährlich",
+    "reasonAdvancedReminders": "Erinnerungen vor Fälligkeit und Nachfass‑Erinnerungen sind eine Plus‑Funktion. Ihr aktueller Tarif erinnert Sie am Fälligkeitstag.",
+    "reasonReminderChannels": "Das Senden von Aufgaben‑Erinnerungen an eine Telegram‑Gruppe ist eine Plus‑Funktion.",
+    "reasonHistoryWindow": "Ihr aktueller Tarif zeigt die letzten 30 Tage. Upgrade auf Plus für die vollständige Historie und langfristige Trends.",
+    "reasonThingTriggers": "Automatisches Auslösen von Aufgaben, wenn sich der Zustand einer Sache ändert, ist eine Plus‑Funktion.",
+    "reasonProjectLimit": "Ihr aktueller Tarif umfasst {{projectLimit}} Projekte. Upgrade auf Plus, um beliebig viele Projekte zu erstellen.",
+    "reasonQuickFilterLimit": "Ihr aktueller Tarif enthält {{filterLimit}} gespeicherte Schnellfilter. Upgrade auf Plus für unbegrenzte Filter.",
+    "reasonFileUpload": "Anhängen von Dateien und Bildern ist eine Plus‑Funktion. Upgrade auf Plus, um Fotos, Scans und Dokumente zu Aufgaben hinzuzufügen."
   },
   "childUsers": {
     "errNameRequired": "Name des Unterkontos ist erforderlich",
@@ -692,7 +699,13 @@
     "createTab": "Sicherung erstellen",
     "restoreTab": "Sicherung wiederherstellen",
     "creating": "Sicherung wird erstellt...",
-    "restoring": "Sicherung wird wiederhergestellt..."
+    "restoring": "Sicherung wird wiederhergestellt...",
+    "encryptionKeyRequired": "Verschlüsselungsschlüssel *",
+    "keySafetyNotice": "Bewahre diesen Schlüssel sicher auf – du benötigst ihn, um dein Backup wiederherzustellen",
+    "nameOptional": "Backup-Name (optional)",
+    "namePlaceholder": "z. B. wöchentliches-backup",
+    "fileRequired": "Backup-Datei *",
+    "selectedFile": "Ausgewählt: {{name}}"
   },
   "deletion": {
     "passwordRequired": "Bitte gib dein Passwort ein, um fortzufahren",
@@ -702,7 +715,7 @@
     "transferIntro": "Du besitzt Kreise, deren Eigentümerschaft vor dem Löschen übertragen werden muss. Bitte wähle neue Besitzer aus:",
     "selectOwner": "Neuen Besitzer auswählen",
     "confirmPrompt": "Bitte gib dein Passwort ein und tippe DELETE zur Bestätigung",
-    "typeDelete": "",
+    "typeDelete": "LÖSCHEN",
     "warningLead": "Diese Aktion kann nicht rückgängig gemacht werden.",
     "warningIntro": "Beim Löschen deines Kontos werden dauerhaft entfernt:",
     "removesProfile": "Dein Benutzerprofil und deine Authentifizierungsdaten",
@@ -720,7 +733,15 @@
   },
   "realtime": {
     "titleSse": "Echtzeit-Aktualisierungen (SSE)",
-    "subtitleSse": "Sofortige Benachrichtigungen über Server-Sent Events erhalten"
+    "subtitleSse": "Sofortige Benachrichtigungen über Server-Sent Events erhalten",
+    "basicPlanDescription": "Echtzeitaktualisierungen (SSE) sind im Basic-Tarif nicht verfügbar. Wechsle zu Plus, um sofort über Änderungen an Aufgaben benachrichtigt zu werden.",
+    "disabledDescription": "Echtzeitaktualisierungen (SSE) sind deaktiviert. Aktiviere sie, um Änderungen zu sehen, wenn du oder andere Kreismitglieder Aufgaben erledigen, überspringen oder bearbeiten.",
+    "connectedDescription": "Echtzeitaktualisierungen (SSE) funktionieren. Du siehst Änderungen sofort, wenn du oder andere Kreismitglieder Aufgaben erledigen, überspringen oder bearbeiten.",
+    "connectingDescription": "Verbindung zu den Echtzeitaktualisierungen (SSE) wird hergestellt...",
+    "errorDescription": "Echtzeitaktualisierungen (SSE) sind aktiviert, funktionieren aber nicht: {{error}}",
+    "disconnectedDescription": "Echtzeitaktualisierungen (SSE) sind aktiviert, aber derzeit nicht verbunden.",
+    "enableLabel": "Echtzeitaktualisierungen (SSE) aktivieren",
+    "statusLabel": "Status:"
   },
   "nativeCancel": {
     "title": "Abonnement kündigen",

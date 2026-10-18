@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { useDocumentScanner } from '../../../hooks/useDocumentScanner'
 import { localAIService } from '../../../service/LocalAIService'
@@ -97,8 +98,29 @@ async function extractTaskFromOCR(ocrText) {
   }
 }
 
+// Shared by the full scan UI and the native share flow. Keeping OCR and task
+// extraction here prevents incoming photos from having to mount ScanPanel just
+// to use its processing pipeline.
+export async function extractTaskFromImage(
+  imageSource,
+  { method = 'browser', onProgress } = {},
+) {
+  const text =
+    method === 'native'
+      ? await runNativeOCR(imageSource)
+      : await runBrowserOCR(imageSource, onProgress)
+
+  if (!text) return { status: 'no-text', task: null }
+
+  const task = await extractTaskFromOCR(text)
+  if (!task?.taskName) return { status: 'no-task', task: null }
+
+  return { status: 'found', task }
+}
+
 // phases: idle | capture | processing | done | error
-export function useScanToTask() {
+export function useScanToTask({ deferProcessing = false } = {}) {
+  const { t } = useTranslation('chores')
   const { isNativeScanner, scanDocument } = useDocumentScanner()
   const videoRef = useRef(null)
   const canvasRef = useRef(null)
@@ -140,32 +162,29 @@ export function useScanToTask() {
     setErrorMsg('')
 
     try {
-      let text
-      if (method === 'native') {
-        text = await runNativeOCR(imageData)
-      } else {
-        text = await runBrowserOCR(imageData, pct => setOcrProgress(pct))
-      }
+      const result = await extractTaskFromImage(imageData, {
+        method,
+        onProgress: pct => setOcrProgress(pct),
+      })
 
-      if (!text) {
-        setErrorMsg('No text found in image. Try a clearer photo.')
+      if (result.status === 'no-text') {
+        setErrorMsg(t('photoTask.noTextFound'))
+        setPhase('error')
+        return
+      }
+      if (result.status === 'no-task') {
+        setErrorMsg(t('photoTask.noTaskIdentified'))
         setPhase('error')
         return
       }
 
-      const task = await extractTaskFromOCR(text)
-      if (!task || !task.taskName) {
-        setErrorMsg('Could not identify a task. Try a different photo.')
-        setPhase('error')
-        return
-      }
-
-      setTaskResult(task)
+      setTaskResult(result.task)
       setPhase('done')
     } catch (e) {
-      setErrorMsg(e.message || 'Processing failed.')
+      setErrorMsg(e.message || t('photoTask.processingFailed'))
       setPhase('error')
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const capture = useCallback(() => {
@@ -178,8 +197,9 @@ export function useScanToTask() {
     const dataUrl = canvas.toDataURL('image/jpeg', 0.9)
     setCapturedImage(dataUrl)
     stopCamera()
-    processImage(dataUrl, 'browser')
-  }, [stopCamera, processImage])
+    if (deferProcessing) setPhase('captured')
+    else processImage(dataUrl, 'browser')
+  }, [stopCamera, processImage, deferProcessing])
 
   const handleFileSelect = useCallback(
     e => {
@@ -190,26 +210,35 @@ export function useScanToTask() {
         const dataUrl = ev.target.result
         setCapturedImage(dataUrl)
         stopCamera()
-        processImage(dataUrl, 'browser')
+        if (deferProcessing) setPhase('captured')
+        else processImage(dataUrl, 'browser')
       }
       reader.readAsDataURL(file)
     },
-    [stopCamera, processImage],
+    [stopCamera, processImage, deferProcessing],
   )
 
   const handleNativeScan = useCallback(async () => {
     const { cancelled, error, image } = await scanDocument()
     if (cancelled) return
     if (error || !image) {
-      setErrorMsg(error ? `Scanner error: ${error}` : 'Scan failed.')
+      setErrorMsg(
+        error
+          ? t('photoTask.scannerError', { error })
+          : t('photoTask.scanFailed'),
+      )
       setPhase('error')
       return
     }
     setCapturedImage(image)
-    // Native scanner already applied edge detection + crop; use browser OCR
-    // since the native OCR plugin requires a file path, not a base64 data URI
-    processImage(image, 'browser')
-  }, [scanDocument, processImage])
+    if (deferProcessing) {
+      setPhase('captured')
+    } else {
+      // Native scanner already applied edge detection + crop; use browser OCR
+      // since native OCR requires a file path, not a base64 data URI.
+      processImage(image, 'browser')
+    }
+  }, [scanDocument, processImage, deferProcessing])
 
   const retake = useCallback(() => {
     setCapturedImage(null)
@@ -227,13 +256,14 @@ export function useScanToTask() {
       setOcrProgress(0)
 
       if (initialImageUrl) {
-        processImage(initialImageUrl, 'browser')
+        if (deferProcessing) setPhase('captured')
+        else processImage(initialImageUrl, 'browser')
         return
       }
 
       setPhase('capture')
     },
-    [processImage],
+    [processImage, deferProcessing],
   )
 
   const reset = useCallback(() => {

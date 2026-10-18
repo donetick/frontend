@@ -1,4 +1,4 @@
-import { Person } from '@mui/icons-material'
+import { CheckCircle, Person } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 
 import BaseOptionPicker from './BaseOptionPicker'
@@ -6,7 +6,6 @@ import BaseOptionPicker from './BaseOptionPicker'
 const ANYONE = 'anyone'
 
 const AssigneePickerField = ({
-  currentUserId = null,
   emptyDisplay,
   includeAnyone = true,
   isAnyone = false,
@@ -28,15 +27,10 @@ const AssigneePickerField = ({
     })),
   ]
 
-  // An implicit self-assignment is shown as "unset" so the chip stays empty
-  // until the user picks someone explicitly.
-  const isImplicitSelf =
-    !isAnyone &&
-    currentUserId &&
-    values.length === 1 &&
-    values[0] === currentUserId
-
-  const displayValues = isAnyone ? [ANYONE] : isImplicitSelf ? [] : values
+  // Only an empty value is unassigned. In particular, keep the current user
+  // visible: hiding self-assignment made both the menu and trigger appear
+  // unchanged after selecting yourself.
+  const displayValues = isAnyone ? [ANYONE] : values
 
   const handleValuesChange = nextValues => {
     const wasAnyone = displayValues.includes(ANYONE)
@@ -62,7 +56,13 @@ const AssigneePickerField = ({
       getItemValue={item => item.userId}
       getItemLabel={item => item.displayName}
       renderTriggerIcon={() => <Person sx={{ fontSize: '20px' }} />}
-      renderItemStart={() => <Person sx={{ fontSize: '18px' }} />}
+      renderItemStart={({ selected }) =>
+        selected ? (
+          <CheckCircle color='primary' sx={{ fontSize: '18px' }} />
+        ) : (
+          <Person sx={{ fontSize: '18px' }} />
+        )
+      }
       getTriggerText={({ isEmpty, selectedItems }) => {
         if (isEmpty) return t('assignee.label')
         if (selectedItems.length === 1) return selectedItems[0].displayName

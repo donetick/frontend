@@ -874,14 +874,18 @@ const TimerDetails = () => {
                           level='body-xs'
                           sx={{ color: 'text.tertiary' }}
                         >
-                          Started: {fmt.time(timerData.startTime)}
+                          {t('timeline.started', {
+                            time: fmt.time(timerData.startTime),
+                          })}
                         </Typography>
                         {timerData.endTime && (
                           <Typography
                             level='body-xs'
                             sx={{ color: 'text.tertiary' }}
                           >
-                            Ended: {fmt.time(timerData.endTime)}
+                            {t('timeline.ended', {
+                              time: fmt.time(timerData.endTime),
+                            })}
                           </Typography>
                         )}
                         {!timerData.endTime && (
@@ -889,17 +893,23 @@ const TimerDetails = () => {
                             level='body-xs'
                             sx={{ color: 'success.500' }}
                           >
-                            Now: {fmt.time(currentTime)}
+                            {t('timeline.now', { time: fmt.time(currentTime) })}
                           </Typography>
                         )}
                         <Typography
                           level='body-xs'
                           sx={{ color: 'text.tertiary' }}
                         >
-                          Active:{' '}
-                          {calculateCurrentActiveDuration() > 0
-                            ? `${Math.round((calculateCurrentActiveDuration() / calculateTotalDuration()) * 100)}%`
-                            : '0%'}
+                          {t('timeline.active', {
+                            percent:
+                              calculateCurrentActiveDuration() > 0
+                                ? Math.round(
+                                    (calculateCurrentActiveDuration() /
+                                      calculateTotalDuration()) *
+                                      100,
+                                  )
+                                : 0,
+                          })}
                         </Typography>
                       </Box>
                     </Box>
@@ -907,8 +917,7 @@ const TimerDetails = () => {
                 ) : (
                   <Alert color='neutral' variant='soft' sx={{ py: 2 }}>
                     <Typography level='body-sm'>
-                      No activity timeline available. Start working to see your
-                      activity pattern.
+                      {t('timeline.emptyState')}
                     </Typography>
                   </Alert>
                 )}
@@ -969,7 +978,9 @@ const TimerDetails = () => {
                       level='body-md'
                       sx={{ fontWeight: 'bold', mb: 2 }}
                     >
-                      Work Sessions ({timerData.pauseLog.length})
+                      {t('timeline.workSessionsCount', {
+                        count: timerData.pauseLog.length,
+                      })}
                     </Typography>
 
                     <SwipeableList
@@ -1186,7 +1197,10 @@ const TimerDetails = () => {
                                       mb: 0.2,
                                     }}
                                   >
-                                    Session #{pauseIndex + 1} • {sessionDate}
+                                    {t('timeline.sessionNumber', {
+                                      number: pauseIndex + 1,
+                                    })}{' '}
+                                    • {sessionDate}
                                   </Typography>
                                   <Typography
                                     level='body-xs'
@@ -1196,7 +1210,9 @@ const TimerDetails = () => {
                                     }}
                                   >
                                     {startTime}{' '}
-                                    {endTime ? `→ ${endTime}` : '→ ongoing'}
+                                    {endTime
+                                      ? `→ ${endTime}`
+                                      : t('timeline.ongoing')}
                                   </Typography>
                                 </Box>
 
@@ -1284,7 +1300,9 @@ const TimerDetails = () => {
                               level='body-md'
                               sx={{ fontWeight: 'bold' }}
                             >
-                              Session #{pauseIndex + 1}
+                              {t('timeline.sessionNumber', {
+                                number: pauseIndex + 1,
+                              })}
                             </Typography>
                             <Button
                               size='sm'
@@ -1364,7 +1382,7 @@ const TimerDetails = () => {
                                 level='body-sm'
                                 sx={{ fontWeight: 'bold', mb: 1 }}
                               >
-                                Duration (Auto-calculated)
+                                {t('timeline.durationAutoCalculated')}
                               </Typography>
                               <Typography
                                 level='body-sm'

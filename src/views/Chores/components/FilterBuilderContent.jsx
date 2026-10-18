@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next'
 
 import NumberInput from '../../../components/common/NumberInput'
 import Priorities from '../../../utils/Priorities'
+import { ProjectAccessIcon } from '../../Projects/ProjectVisibilityField'
 
 // `labelKey` resolves against `chores:filterBuilder.dueDateOption.*` — these
 // are also read by ChoreToolbarPrototype, which translates them the same way.
@@ -505,7 +506,21 @@ const FilterBuilderContent = ({
             { value: 'default', label: t('filterBuilder.defaultProject') },
             ...projects
               .filter(p => p.id !== 'default')
-              .map(p => ({ value: p.id, label: p.name })),
+              .map(p => ({
+                value: p.id,
+                label: (
+                  <Box
+                    sx={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 0.5,
+                    }}
+                  >
+                    {p.name}
+                    <ProjectAccessIcon project={p} sx={{ fontSize: 12 }} />
+                  </Box>
+                ),
+              })),
           ])}
           <Divider sx={{ my: 2.5 }} />
         </>

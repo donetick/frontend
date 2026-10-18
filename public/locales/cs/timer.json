@@ -25,6 +25,17 @@
   "activeWork": "Aktivní práce",
   "breakTime": "Přestávka",
   "workSessions": "Pracovní relace",
+  "timeline": {
+    "started": "Zahájeno: {{time}}",
+    "ended": "Ukončeno: {{time}}",
+    "now": "Nyní: {{time}}",
+    "active": "Aktivní: {{percent}} %",
+    "emptyState": "Časová osa aktivity není k dispozici. Začněte pracovat, abyste viděli vzorec své aktivity.",
+    "workSessionsCount": "Pracovní relace ({{count}})",
+    "sessionNumber": "Relace č. {{number}}",
+    "ongoing": "→ probíhá",
+    "durationAutoCalculated": "Doba trvání (automaticky vypočtená)"
+  },
   "totalTime": "Celkový čas",
   "distribution": "Poměr práce a přestávek",
   "noActiveTime": "Zatím žádný aktivní čas",

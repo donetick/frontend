@@ -322,7 +322,8 @@ class SyncEngine {
       }
 
       // Always advance the cursor, even when there are no changes
-      const cursorAdvanced = data.cursor != null && data.cursor !== currentCursor
+      const cursorAdvanced =
+        data.cursor != null && data.cursor !== currentCursor
       if (data.cursor != null) {
         currentCursor = data.cursor
       }
@@ -331,7 +332,9 @@ class SyncEngine {
       // A server reporting hasMore without ever moving the cursor would spin
       // this loop forever — treat a stuck cursor as "no more" instead.
       if (hasMore && !cursorAdvanced) {
-        console.error('Delta sync cursor did not advance, stopping to avoid a request loop')
+        console.error(
+          'Delta sync cursor did not advance, stopping to avoid a request loop',
+        )
         hasMore = false
       }
     }

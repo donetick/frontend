@@ -25,17 +25,19 @@ import {
 } from '@mui/joy'
 import { useMediaQuery } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import EmptyState from '../../components/common/EmptyState'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
+import { useNavBarTitle } from '../../contexts/NavBarTitleContext'
 import { useFilter } from '../../hooks/useFilter'
 import { useChores } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
+import { consumePendingShare } from '../../service/ShareTargetService'
 import {
   ChoreFilters,
   ChoresGrouper,
@@ -63,7 +65,6 @@ import {
   selectionsToConditions,
 } from './components/FilterBuilderContent'
 import MultiSelectToolbar from './components/MultiSelectToolbar'
-import MyChoreHeader from './components/MyChoreHeader'
 import { useChoreActions } from './hooks/useChoreActions'
 import { useChoreFilters } from './hooks/useChoreFilters'
 import { useChoreModals } from './hooks/useChoreModals'
@@ -85,6 +86,8 @@ import { INSIGHT_FILTER_DEFS } from './SmartInsightsCard'
 // copy for each lives under `chores:empty.assignee.*` as a whole sentence,
 // since the fragment ("assigned to you") cannot be slotted mid-sentence in
 // every language.
+const EMPTY_PROJECTS = []
+
 const ASSIGNEE_FILTER_KEYS = [
   'assigned_to_me',
   'available_for_me',
@@ -92,6 +95,33 @@ const ASSIGNEE_FILTER_KEYS = [
   'assigned_to_me_tasks',
   'created_by_me',
 ]
+
+const sortChores = (a, b, sortBy, direction) => {
+  const multiplier = direction === 'desc' ? -1 : 1
+
+  if (sortBy === 'smart') return ChoreSorter(a, b) * multiplier
+
+  if (sortBy === 'priority') {
+    const priorityA = a.priority ?? Number.MAX_SAFE_INTEGER
+    const priorityB = b.priority ?? Number.MAX_SAFE_INTEGER
+    return (priorityA - priorityB) * multiplier
+  }
+
+  const dateField =
+    sortBy === 'due_date'
+      ? 'nextDueDate'
+      : sortBy === 'created_date'
+        ? 'createdAt'
+        : 'updatedAt'
+  const dateA = a[dateField] || a[`${dateField.replace('At', '')}_at`]
+  const dateB = b[dateField] || b[`${dateField.replace('At', '')}_at`]
+
+  // Unscheduled/unknown dates remain at the end in either direction.
+  if (!dateA && !dateB) return 0
+  if (!dateA) return 1
+  if (!dateB) return -1
+  return (new Date(dateA).getTime() - new Date(dateB).getTime()) * multiplier
+}
 
 const MyChores = () => {
   const { data: userProfile, isLoading: isUserProfileLoading } =
@@ -104,7 +134,8 @@ const MyChores = () => {
   const Navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const { data: userLabels, isLoading: userLabelsLoading } = useLabels()
-  const { data: projects = [], isLoading: projectsLoading } = useProjects()
+  const { data: projects = EMPTY_PROJECTS, isLoading: projectsLoading } =
+    useProjects()
   const {
     data: choresData,
     error: choresErrorDetails,
@@ -122,9 +153,16 @@ const MyChores = () => {
   const [addTaskModalOpen, setAddTaskModalOpen] = useState(false)
   // 'voice' | 'scan' | null — set by the quick-capture widget deep links
   const [addTaskInitialMode, setAddTaskInitialMode] = useState(null)
+  const [initialShare, setInitialShare] = useState(null)
   const searchInputRef = useRef(null)
   const [selectedChoreSection, setSelectedChoreSection] = useState(
     localStorage.getItem('selectedChoreSection') || 'default',
+  )
+  const [choreSortBy, setChoreSortBy] = useState(
+    () => localStorage.getItem('choreSortBy') || 'smart',
+  )
+  const [choreSortDirection, setChoreSortDirection] = useState(
+    () => localStorage.getItem('choreSortDirection') || 'asc',
   )
   const [openChoreSections, setOpenChoreSections] = useState(() => {
     try {
@@ -205,6 +243,123 @@ const MyChores = () => {
     membersData?.res,
     userLabels,
     projectsWithDefault,
+  )
+
+  const handleProjectSelect = useCallback(
+    project => {
+      setSelectedProjectWithCache(project)
+      clearActiveFilter()
+    },
+    [clearActiveFilter, setSelectedProjectWithCache],
+  )
+
+  const hasCustomProjects = projectsWithDefault.some(
+    project => project.id !== 'default',
+  )
+  const isDefaultProject = !selectedProject || selectedProject.id === 'default'
+  const handleSavedFilterSelect = useCallback(
+    filter => {
+      setSearchTerm('')
+      setSelectedChoreFilterWithCache('anyone')
+      if (filter.conditions?.some(condition => condition.type === 'project')) {
+        setSelectedProjectWithCache(null)
+      }
+      applyCustomFilter(filter.id)
+      setSearchParams(
+        params => {
+          params.delete('filter')
+          params.delete('filter_id')
+          params.set('filterId', String(filter.id))
+          return params
+        },
+        { replace: true },
+      )
+    },
+    [
+      applyCustomFilter,
+      setSearchParams,
+      setSearchTerm,
+      setSelectedChoreFilterWithCache,
+      setSelectedProjectWithCache,
+    ],
+  )
+
+  const handleLabelSelect = useCallback(
+    label => {
+      clearActiveFilter()
+      setSearchTerm('')
+      applyTempFilter(
+        {
+          conditions: [{ type: 'label', operator: 'is', value: [label.id] }],
+          operator: 'AND',
+        },
+        { name: label.name },
+      )
+    },
+    [applyTempFilter, clearActiveFilter, setSearchTerm],
+  )
+
+  const choreViewTitle = tempFilter
+    ? tempFilterMeta?.name || t('common:navigation.filters')
+    : activeFilterId
+      ? activeFilter?.name || t('common:navigation.filters')
+      : !isDefaultProject
+        ? selectedProject.name
+        : hasCustomProjects
+          ? t('toolbar.defaultProject')
+          : t('common:navigation.allTasks')
+  const projectSelector = useMemo(
+    () =>
+      hasCustomProjects && !activeFilterId && !tempFilter
+        ? {
+            items: projectsWithDefault,
+            onSelect: handleProjectSelect,
+            selectedId: isDefaultProject ? 'default' : selectedProject.id,
+            type: 'project',
+          }
+        : null,
+    [
+      activeFilterId,
+      handleProjectSelect,
+      hasCustomProjects,
+      isDefaultProject,
+      projectsWithDefault,
+      selectedProject?.id,
+      tempFilter,
+    ],
+  )
+  const labelSelector = useMemo(() => {
+    const conditions = tempFilter?.conditions || []
+    const condition = conditions.length === 1 ? conditions[0] : null
+    const values = Array.isArray(condition?.value)
+      ? condition.value
+      : condition?.value != null
+        ? [condition.value]
+        : []
+    if (condition?.type !== 'label' || values.length !== 1) return null
+
+    return {
+      items: userLabels || [],
+      onSelect: handleLabelSelect,
+      selectedId: values[0],
+      type: 'label',
+    }
+  }, [handleLabelSelect, tempFilter?.conditions, userLabels])
+  const filterSelector = useMemo(
+    () =>
+      activeFilterId && savedFilters.length > 0
+        ? {
+            items: savedFilters,
+            onSelect: handleSavedFilterSelect,
+            selectedId: activeFilterId,
+            type: 'filter',
+          }
+        : null,
+    [activeFilterId, handleSavedFilterSelect, savedFilters],
+  )
+  useNavBarTitle(
+    choreViewTitle,
+    filterSelector || labelSelector || projectSelector,
   )
 
   const [showAdvancedFilterBuilder, setShowAdvancedFilterBuilder] =
@@ -363,9 +518,15 @@ const MyChores = () => {
       ChoreFilters(impersonatedUser?.userId || userProfile?.id)[
         selectedChoreFilter
       ],
+      choreSortDirection,
     )
 
-    return sections
+    return sections.map(section => ({
+      ...section,
+      content: [...section.content].sort((a, b) =>
+        sortChores(a, b, choreSortBy, choreSortDirection),
+      ),
+    }))
   }, [
     chores,
     quickFilteredChores,
@@ -375,6 +536,8 @@ const MyChores = () => {
     hasQuickFilters,
     selectedChoreSection,
     selectedChoreFilter,
+    choreSortBy,
+    choreSortDirection,
     selectedProject,
     impersonatedUser?.userId,
     userProfile?.id,
@@ -479,6 +642,23 @@ const MyChores = () => {
       params.delete('mode')
       setSearchParams(params, { replace: true })
     }
+  }, [searchParams, setSearchParams])
+
+  // Native share targets persist their payload before navigating here. Consume
+  // it once so refresh/back cannot reopen an already handled share.
+  useEffect(() => {
+    if (searchParams.get('share_task') !== '1') return
+
+    const share = consumePendingShare()
+    if (share) {
+      setInitialShare(share)
+      setAddTaskInitialMode(null)
+      setAddTaskModalOpen(true)
+    }
+
+    const params = new URLSearchParams(searchParams)
+    params.delete('share_task')
+    setSearchParams(params, { replace: true })
   }, [searchParams, setSearchParams])
 
   // Read and apply filters from URL parameters
@@ -843,6 +1023,16 @@ const MyChores = () => {
     localStorage.setItem('selectedChoreSection', value)
   }
 
+  const setChoreSortByWithCache = value => {
+    setChoreSortBy(value)
+    localStorage.setItem('choreSortBy', value)
+  }
+
+  const setChoreSortDirectionWithCache = value => {
+    setChoreSortDirection(value)
+    localStorage.setItem('choreSortDirection', value)
+  }
+
   const setOpenChoreSectionsWithCache = value => {
     setOpenChoreSections(value)
     localStorage.setItem('openChoreSections', JSON.stringify(value))
@@ -991,13 +1181,6 @@ const MyChores = () => {
         maxWidth='md'
         sx={{ px: 1, pt: { xs: 1, md: 3 }, minWidth: 0 }}
       >
-        <MyChoreHeader
-          activeFilterId={activeFilterId}
-          activeFilter={activeFilter}
-          selectedProject={selectedProject}
-          tempFilter={tempFilter}
-          tempFilterMeta={tempFilterMeta}
-        />
         <ChoreToolbar
           members={membersData?.res || []}
           labels={userLabels || []}
@@ -1034,10 +1217,7 @@ const MyChores = () => {
               : undefined
           }
           selectedProject={selectedProject}
-          onProjectSelect={project => {
-            setSelectedProjectWithCache(project)
-            clearActiveFilter()
-          }}
+          onProjectSelect={handleProjectSelect}
           selectedAssigneeFilter={selectedChoreFilter}
           onAssigneeFilterChange={filter => {
             setSelectedChoreFilterWithCache(filter)
@@ -1077,6 +1257,10 @@ const MyChores = () => {
             setSelectedChoreSectionWithCache(value)
             clearQuickFilters()
           }}
+          selectedSort={choreSortBy}
+          onSortChange={setChoreSortByWithCache}
+          sortDirection={choreSortDirection}
+          onSortDirectionChange={setChoreSortDirectionWithCache}
           viewMode={viewMode}
           onToggleViewMode={toggleViewMode}
           isMultiSelectMode={isMultiSelectMode}
@@ -1251,7 +1435,9 @@ const MyChores = () => {
             {selectedCalendarDate && (
               <Box sx={{ mt: 2 }}>
                 <Typography level='title-md' gutterBottom>
-                  Tasks for {selectedCalendarDate.toLocaleDateString()}
+                  {t('tasksForDate', {
+                    date: selectedCalendarDate.toLocaleDateString(),
+                  })}
                 </Typography>
                 <Box
                   sx={{
@@ -1523,12 +1709,15 @@ const MyChores = () => {
         <FeedbackPrompt />
         {addTaskModalOpen && (
           <TaskInput
+            key={initialShare?.id || 'quick-add'}
             onChoreUpdate={updateChores}
             isModalOpen={addTaskModalOpen}
             initialMode={addTaskInitialMode}
+            initialShare={initialShare}
             onClose={forceRefresh => {
               setAddTaskModalOpen(false)
               setAddTaskInitialMode(null)
+              setInitialShare(null)
               if (forceRefresh) {
                 refetchChores()
               }
@@ -1587,14 +1776,18 @@ const MyChores = () => {
               }),
             })
           } else {
-            // Create new filter
+            // Create new filter — the mutation re-checks the plan allowance,
+            // so only announce it once it actually saved.
             saveFilter(filter)
-            showSuccess({
-              title: t('chores:list.advancedFilterCreated'),
-              message: t('chores:list.advancedFilterCreatedMsg', {
-                name: filter.name,
-              }),
-            })
+              .then(() => {
+                showSuccess({
+                  title: t('chores:list.advancedFilterCreated'),
+                  message: t('chores:list.advancedFilterCreatedMsg', {
+                    name: filter.name,
+                  }),
+                })
+              })
+              .catch(() => {})
           }
           setShowAdvancedFilterBuilder(false)
           setEditingFilter(null)

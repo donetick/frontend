@@ -1,8 +1,9 @@
 import { Sync, SyncDisabled } from '@mui/icons-material'
-import { Box, Card, Chip, FormHelperText, Switch, Typography } from '@mui/joy'
+import { Box, Card, FormHelperText, Switch, Typography } from '@mui/joy'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { PAYWALL_REASON, usePaywall } from '../contexts/PaywallContext'
 import { useSSEContext } from '../hooks/useSSEContext'
 import { useUserProfile } from '../queries/UserQueries'
 import { isPlusAccount } from '../utils/Helpers'
@@ -16,6 +17,7 @@ const REALTIME_TYPES = {
 const RealTimeSettings = () => {
   const { t } = useTranslation('settings')
   const { data: userProfile } = useUserProfile()
+  const { showPaywall } = usePaywall()
 
   // SSE context
   const sseContext = useSSEContext()
@@ -30,7 +32,8 @@ const RealTimeSettings = () => {
 
   const handleRealtimeTypeChange = (event, newValue) => {
     if (!isPlusAccount(userProfile)) {
-      return // Don't allow changes for non-Plus users
+      showPaywall(PAYWALL_REASON.REALTIME_SYNC)
+      return
     }
 
     setRealtimeType(newValue)
@@ -65,10 +68,6 @@ const RealTimeSettings = () => {
   const context = getCurrentContext()
 
   const getStatusDescription = () => {
-    if (!isPlusAccount(userProfile)) {
-      return t('advanced.realtime.basicPlan')
-    }
-
     if (realtimeType === REALTIME_TYPES.DISABLED) {
       return t('advanced.realtime.disabled')
     }
@@ -111,7 +110,6 @@ const RealTimeSettings = () => {
           color={
             realtimeType !== REALTIME_TYPES.DISABLED ? 'success' : 'neutral'
           }
-          disabled={!isPlusAccount(userProfile)}
           inputProps={{ 'aria-label': t('advanced.realtime.toggleLabel') }}
         />
         <Box sx={{ flex: 1 }}>
@@ -125,11 +123,6 @@ const RealTimeSettings = () => {
           >
             <Typography level='title-md'>
               {t('advanced.realtime.title')}
-              {!isPlusAccount(userProfile) && (
-                <Chip variant='soft' color='warning' sx={{ ml: 1 }}>
-                  {t('common.plusFeature')}
-                </Chip>
-              )}
             </Typography>
 
             {realtimeType !== REALTIME_TYPES.DISABLED &&
@@ -180,12 +173,6 @@ const RealTimeSettings = () => {
             )}
           </Box>
         )}
-
-      {!isPlusAccount(userProfile) && (
-        <Typography level='body-sm' color='warning' sx={{ mt: 1 }}>
-          {t('advanced.realtime.basicPlanNotice')}
-        </Typography>
-      )}
     </Card>
   )
 }

@@ -24,12 +24,11 @@ import {
   Container,
   IconButton,
   Input,
-  Stack,
   Typography,
 } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
 import Fuse from 'fuse.js'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
@@ -38,10 +37,18 @@ import SortAndFilterMenu from '../../components/common/SortAndFilterMenu'
 import SwipeListItem, {
   SWIPE_COMMIT_THRESHOLD,
 } from '../../components/common/SwipeListItem'
+import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
 import { useChores } from '../../queries/ChoreQueries'
-import { useUserProfile } from '../../queries/UserQueries'
+import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors'
+import { canCreateProject } from '../../utils/entitlements'
 import { DeleteProject } from '../../utils/Fetcher'
+import { resolvePhotoURL } from '../../utils/Helpers'
+import {
+  getProjectAudienceIds,
+  getProjectVisibility,
+  PROJECT_VISIBILITY,
+} from '../../utils/ProjectAccess'
 import { getIconComponent } from '../../utils/ProjectIcons'
 import { getSafeBottom, getSafeBottomStyles } from '../../utils/SafeAreaUtils'
 import { useProjectFilter } from '../Chores/hooks/useProjectFilter'
@@ -49,7 +56,65 @@ import ScrollHideFab from '../components/ScrollHideFab'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import ProjectModal from '../Modals/Inputs/ProjectModal'
 import { useProjects } from './ProjectQueries'
+
+const MAX_VISIBLE_MEMBER_AVATARS = 3
+
+// Overlapping avatar stack with a "+N" overflow badge, for showing who has
+// access to a project at a glance (the pattern used for group members).
+const ProjectMembersStack = ({ members = [] }) => {
+  if (members.length === 0) return null
+  const visible = members.slice(0, MAX_VISIBLE_MEMBER_AVATARS)
+  const overflow = members.length - visible.length
+
+  return (
+    <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0, ml: 1 }}>
+      {visible.map((member, index) => (
+        <Avatar
+          key={member.userId}
+          size='sm'
+          src={resolvePhotoURL(member.image)}
+          sx={{
+            width: 24,
+            height: 24,
+            fontSize: 11,
+            bgcolor: 'background.level2',
+            color: 'text.secondary',
+            border: '2px solid',
+            borderColor: 'background.surface',
+            ml: index === 0 ? 0 : -1,
+            zIndex: visible.length - index,
+          }}
+        >
+          {(member.displayName || member.username || '?')
+            .charAt(0)
+            .toUpperCase()}
+        </Avatar>
+      ))}
+      {overflow > 0 && (
+        <Avatar
+          size='sm'
+          sx={{
+            width: 24,
+            height: 24,
+            fontSize: 10,
+            fontWeight: 'lg',
+            bgcolor: 'neutral.softBg',
+            color: 'text.secondary',
+            border: '2px solid',
+            borderColor: 'background.surface',
+            ml: -1,
+            zIndex: 0,
+          }}
+        >
+          +{overflow}
+        </Avatar>
+      )}
+    </Box>
+  )
+}
+
 const ProjectCardContent = ({
+  circleMembers = [],
   currentUserId,
   onCardClick,
   onToggleActions,
@@ -61,6 +126,19 @@ const ProjectCardContent = ({
   const isOwnedByCurrentUser = project.created_by === currentUserId
   const isDefaultProject = project.id === 'default'
   const taskCount = taskCounts[project.id] || 0
+
+  const audienceIds = getProjectAudienceIds(project)
+  const projectMembers = audienceIds
+    ? circleMembers.filter(member => audienceIds.includes(member.userId))
+    : circleMembers
+
+  const visibility = getProjectVisibility(project)
+  const audienceLabel =
+    isDefaultProject || visibility === PROJECT_VISIBILITY.CIRCLE
+      ? t('visibility.chip.everyone')
+      : visibility === PROJECT_VISIBILITY.PRIVATE
+        ? t('visibility.chip.private')
+        : t('visibility.chip.members', { count: projectMembers.length })
 
   return (
     <Box
@@ -167,55 +245,77 @@ const ProjectCardContent = ({
         </Typography>
 
         {/* Project Info */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+        <Box
+          sx={{ display: 'flex', alignItems: 'center', gap: 0.75, minWidth: 0 }}
+        >
           {project.description && (
-            <Typography
-              level='body-xs'
-              sx={{
-                color: 'text.tertiary',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                maxWidth: '200px',
-              }}
-            >
-              {project.description}
-            </Typography>
+            <>
+              <Typography
+                level='body-xs'
+                sx={{
+                  color: 'text.tertiary',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  maxWidth: '180px',
+                }}
+              >
+                {project.description}
+              </Typography>
+              <Box
+                sx={{
+                  width: 3,
+                  height: 3,
+                  borderRadius: '50%',
+                  bgcolor: 'text.tertiary',
+                  flexShrink: 0,
+                }}
+              />
+            </>
           )}
 
-          <Chip
-            size='sm'
-            variant='soft'
-            startDecorator={<Task />}
+          <Box
             sx={{
-              fontSize: 10,
-              height: 18,
-              px: 0.75,
-              bgcolor: 'primary.softBg',
-              color: 'primary.500',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.375,
+              flexShrink: 0,
+              color: 'text.tertiary',
             }}
           >
-            {t('tasks', { count: taskCount })}
-          </Chip>
-
-          {!isOwnedByCurrentUser && !isDefaultProject && (
-            <Chip
-              size='sm'
-              variant='soft'
-              color='warning'
-              sx={{
-                fontSize: 9,
-                height: 16,
-                px: 0.5,
-                fontWeight: 'md',
-              }}
+            <Task sx={{ fontSize: 13 }} />
+            <Typography
+              level='body-xs'
+              sx={{ color: 'inherit', whiteSpace: 'nowrap' }}
             >
-              {t('shared')}
-            </Chip>
-          )}
+              {t('tasks', { count: taskCount })}
+            </Typography>
+          </Box>
         </Box>
       </Box>
-      <Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-end',
+            gap: 0.25,
+            mr: 0.5,
+          }}
+        >
+          <Typography
+            level='body-xs'
+            sx={{
+              fontSize: 9,
+              color: 'text.tertiary',
+              fontWeight: 'md',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {audienceLabel}
+          </Typography>
+          <ProjectMembersStack members={projectMembers} />
+        </Box>
         {onToggleActions && (
           <IconButton
             color='neutral'
@@ -238,8 +338,14 @@ const ProjectView = () => {
   const { t } = useTranslation('projects')
   const { data: projects, isError, isProjectsLoading } = useProjects()
   const { data: userProfile } = useUserProfile()
+  const { isPlus, showPaywall } = usePaywall()
   const { data: chores = { res: [] } } = useChores(false) // false to exclude archived
   const { data: projectsData = [], isLoading: projectsLoading } = useProjects()
+  const { data: circleMembersData } = useCircleMembers()
+  const activeCircleMembers = useMemo(
+    () => (circleMembersData?.res || []).filter(m => m.isActive !== false),
+    [circleMembersData],
+  )
   const { setSelectedProjectWithCache } = useProjectFilter(
     projectsData,
     !projectsLoading,
@@ -332,10 +438,16 @@ const ProjectView = () => {
     searchInputRef.current?.blur()
   }
 
-  const handleAddProject = () => {
+  // The default project is rendered separately and isn't user-created, so the
+  // allowance counts only the projects in this list.
+  const handleAddProject = useCallback(() => {
+    if (!canCreateProject(projectsData.length, isPlus)) {
+      showPaywall(PAYWALL_REASON.PROJECT_LIMIT)
+      return
+    }
     setCurrentProject(null)
     setModalOpen(true)
-  }
+  }, [projectsData.length, isPlus, showPaywall])
 
   const handleEditProject = project => {
     setCurrentProject(project)
@@ -399,8 +511,7 @@ const ProjectView = () => {
   // the create modal already open.
   useEffect(() => {
     if (searchParams.get('create') !== '1') return
-    setCurrentProject(null)
-    setModalOpen(true)
+    handleAddProject()
     setSearchParams(
       params => {
         params.delete('create')
@@ -408,7 +519,7 @@ const ProjectView = () => {
       },
       { replace: true },
     )
-  }, [searchParams, setSearchParams])
+  }, [searchParams, setSearchParams, handleAddProject])
 
   // Calculate real task counts from chores data
   useEffect(() => {
@@ -464,21 +575,7 @@ const ProjectView = () => {
   }
 
   return (
-    <Container maxWidth='md' sx={{ px: 0 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, p: 2 }}>
-        <Stack sx={{ flex: 1 }}>
-          <Typography
-            level='h3'
-            sx={{ fontWeight: 'lg', color: 'text.primary' }}
-          >
-            {t('common:navigation.projects')}
-          </Typography>
-          <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-            {t('blurb')}
-          </Typography>
-        </Stack>
-      </Box>
-
+    <Container maxWidth='md' sx={{ px: 0, pt: { xs: 0, md: 3 } }}>
       <Box sx={{ px: 2, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
         <Input
           slotProps={{ input: { ref: searchInputRef } }}
@@ -571,6 +668,7 @@ const ProjectView = () => {
               color: '#1976d2',
               created_by: userProfile?.id,
             }}
+            circleMembers={activeCircleMembers}
             currentUserId={userProfile?.id}
             taskCounts={{ default: taskCounts.default || 0 }}
             onCardClick={() =>
@@ -658,6 +756,7 @@ const ProjectView = () => {
             >
               <ProjectCardContent
                 project={project}
+                circleMembers={activeCircleMembers}
                 currentUserId={userProfile?.id}
                 taskCounts={taskCounts}
                 onToggleActions={() => {

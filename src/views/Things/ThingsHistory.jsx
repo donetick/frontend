@@ -435,11 +435,12 @@ const ThingsHistory = () => {
                       fontSize: '0.75rem',
                     }}
                   >
-                    {formatTimeDifference(
-                      history.createdAt,
-                      thingsHistory[index + 1].createdAt,
-                    )}{' '}
-                    before
+                    {t('history.timeBefore', {
+                      time: formatTimeDifference(
+                        history.createdAt,
+                        thingsHistory[index + 1].createdAt,
+                      ),
+                    })}
                   </Typography>
                 </ListDivider>
               )}
@@ -463,10 +464,10 @@ const ThingsHistory = () => {
           disabled={!hasNextPage || isFetchingNextPage}
         >
           {isFetchingNextPage
-            ? 'Loading...'
+            ? t('history.loading')
             : !hasNextPage
-              ? 'No more history'
-              : 'Load more'}
+              ? t('history.noMoreHistory')
+              : t('history.loadMore')}
         </Button>
       </Box>
     </Container>

@@ -24,7 +24,6 @@ import {
   Container,
   IconButton,
   Input,
-  Stack,
   Typography,
 } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
@@ -332,21 +331,7 @@ const LabelView = () => {
   }
 
   return (
-    <Container maxWidth='md' sx={{ px: 0 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, p: 2 }}>
-        {/* <EmojiEvents sx={{ fontSize: '2rem', color: '#FFD700' }} /> */}
-        <Stack sx={{ flex: 1 }}>
-          <Typography
-            level='h3'
-            sx={{ fontWeight: 'lg', color: 'text.primary' }}
-          >
-            {t('common:navigation.labels')}
-          </Typography>
-          <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-            {t('blurb')}
-          </Typography>
-        </Stack>
-      </Box>
+    <Container maxWidth='md' sx={{ px: 0, pt: { xs: 0, md: 3 } }}>
       {userLabels.length > 0 && (
         <Box
           sx={{ px: 2, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}

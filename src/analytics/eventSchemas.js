@@ -12,6 +12,13 @@ const COMMON_PROPS = {
 
 const withCommon = props => ({ ...props, ...COMMON_PROPS })
 
+// Keep synchronized with PAYWALL_REASON and NATIVE_PAYWALL_INVOKER.
+const PAYWALL_INVOKER_SCHEMA =
+  'enum:onboarding,account_settings,settings,advanced_reminders,' +
+  'reminder_channels,history_window,thing_triggers,project_limit,' +
+  'quick_filter_limit,file_upload,calendar_sync,realtime_sync,webhooks,' +
+  'api_tokens,child_accounts,unknown'
+
 export const EVENT_SCHEMAS = {
   onboarding_started: withCommon({}),
   onboarding_completed: withCommon({}),
@@ -19,6 +26,10 @@ export const EVENT_SCHEMAS = {
   onboarding_option_selected: withCommon({
     option: 'string',
     step: 'string',
+  }),
+  paywall_result: withCommon({
+    invoker: PAYWALL_INVOKER_SCHEMA,
+    result: 'enum:CANCELLED,ERROR,NOT_PRESENTED,PURCHASED,RESTORED',
   }),
 
   chore_created: withCommon({
@@ -29,9 +40,9 @@ export const EVENT_SCHEMAS = {
     has_recurrence: 'boolean',
     recurrence_type: 'string',
     priority: 'number',
-    // quick_add/voice/scan = the AddTaskModal popup; full_page/clone = the
-    // dedicated create page (ChoreEdit.jsx with no existing chore id).
-    source: 'enum:quick_add,voice,scan,full_page,clone',
+    // quick_add/voice/scan/share = the AddTaskModal popup; full_page/clone =
+    // the dedicated create page (ChoreEdit.jsx with no existing chore id).
+    source: 'enum:quick_add,voice,scan,share,full_page,clone',
   }),
   chore_updated: withCommon({
     has_due_date: 'boolean',
@@ -93,6 +104,12 @@ export const EVENT_SCHEMAS = {
     has_message: 'boolean',
     result: 'enum:sent,failed,unconfigured,misconfigured,self-hosted',
     sentiment: 'enum:love,okay,issues',
+  }),
+
+  // Which paywall was shown and where the user invoked it.
+  paywall_shown: withCommon({
+    provider: 'enum:stripe,revenuecat',
+    invoker: PAYWALL_INVOKER_SCHEMA,
   }),
 }
 

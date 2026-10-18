@@ -9,7 +9,7 @@
   "dueDate": "Data de vencimento",
   "assignedTo": "Atribuída a",
   "priority": "Prioridade",
-  "status": "",
+  "status": "Status",
   "description": "Descrição",
   "choreView": {
     "assignment": "Atribuição",
@@ -111,10 +111,12 @@
     "unableChangeAssignee": "",
     "availableToCompleteStarting": "",
     "delegateToSomeoneElse": "",
-    "selectAPerformer": ""
+    "selectAPerformer": "",
+    "notFoundTitle": "Tarefa não disponível",
+    "notFoundDescription": "Esta tarefa pode ter sido excluída ou não está mais compartilhada com você."
   },
   "toolbar": {
-    "defaultProject": "",
+    "defaultProject": "Default Project",
     "everyone": "",
     "mine": "",
     "availableToMe": "",
@@ -134,10 +136,14 @@
       "assignee": ""
     },
     "display": "",
-    "displayOptions": ""
+    "displayOptions": "",
+    "moreSaveOptions": "Mais opções de salvamento",
+    "showCount": "Mostrar {{count}}",
+    "done": "Concluído",
+    "savedFilters": "Filtros salvos"
   },
   "sort": {
-    "assignedToMe": "",
+    "assignedToMe": "Assigned to me",
     "smart": "",
     "createdDate": "",
     "updatedDate": "",
@@ -271,7 +277,9 @@
       "skipTitle": "",
       "skippedTitle": "",
       "skipFailedTitle": ""
-    }
+    },
+    "failAssignTitle": "",
+    "failAssignMessage": ""
   },
   "archived": {
     "restoredTitle": "",
@@ -337,7 +345,7 @@
     "noMatchFilters": "",
     "emptyTitle": "",
     "emptyDescription": "",
-    "backToTasks": ""
+    "backToTasks": "Voltar às tarefas"
   },
   "edit": {
     "deleteConfirm": ""
@@ -611,7 +619,23 @@
     "keepAsAttachment": "",
     "altCaptured": "",
     "altProcessing": "",
-    "taskIdentified": ""
+    "taskIdentified": "",
+    "runningNativeOcr": "Running native OCR…",
+    "identifyingTask": "Identifying task with AI…",
+    "tapToScanHint": "Toque em \"Digitalizar documento\" para abrir o scanner",
+    "readingTextProgress": "Lendo texto da imagem… {{progress}}%",
+    "dueDate": "Vencimento: {{date}}",
+    "hideRawText": "Ocultar texto bruto",
+    "showRawText": "Mostrar texto bruto",
+    "cameraUnavailableUseUpload": "Câmera indisponível — use Enviar em vez disso",
+    "noTextFound": "Nenhum texto encontrado na imagem. Tente uma foto mais nítida.",
+    "noTaskIdentified": "Não foi possível identificar uma tarefa. Tente outra foto.",
+    "processingFailed": "Falha no processamento.",
+    "scannerError": "Erro do scanner: {{error}}",
+    "scanFailed": "Falha na digitalização.",
+    "preparingScan": "Iniciando…",
+    "failedTitle": "Nenhuma tarefa encontrada",
+    "continueWithoutTask": "Continuar sem tarefa"
   },
   "descriptionPlaceholder": "",
   "notificationTemplate": {
@@ -728,7 +752,7 @@
     "rescheduleFromCompletion": "",
     "rescheduleFromCompletionHelp": "",
     "notifications": "",
-    "notificationsPlanWarning": "",
+    "notificationsPlanWarning": "Task notifications are not available in the Basic plan. Upgrade to Plus to receive reminders when tasks are due or completed.",
     "notifyForTask": "",
     "notifyForTaskHelp": "",
     "notificationSchedule": "",
@@ -759,7 +783,10 @@
     "updatedBy": "",
     "archive": "",
     "unarchive": "",
-    "create": ""
+    "create": "",
+    "alwaysDueHint": "Esta tarefa não tem data de vencimento e está sempre disponível para ser concluída",
+    "notifyForTaskUnavailable": "As notificações não estão disponíveis para tarefas baseadas em gatilho ou sempre disponíveis",
+    "notificationsFreePlanNote": "O teu plan inclui um lembrete na data de vencimento. Plus adiciona lembretes antes do vencimento e acompanhamentos depois."
   },
   "addTask": {
     "title": "",
@@ -772,7 +799,24 @@
     "createCount": "",
     "useTask": "",
     "processing": "",
-    "create": ""
+    "create": "",
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:",
+    "createAnother": "Criar outra",
+    "createAndAddAnother": "Criar e adicionar outra",
+    "createAndClose": "Criar e fechar",
+    "findingDetails": "Buscando detalhes da tarefa na sua foto…",
+    "findingDetailsHint": "Você pode continuar editando enquanto procuramos.",
+    "detailsFound": "Encontramos detalhes da tarefa",
+    "suggestedDue": "Data de vencimento sugerida: {{date}}",
+    "useSuggestion": "Usar sugestão",
+    "useAndKeepAttachment": "Usar sugestão e manter a foto",
+    "dismissSuggestion": "Descartar sugestão",
+    "noDetailsFound": "Nenhum detalhe de tarefa encontrado",
+    "analysisFailed": "Não conseguimos analisar esta foto",
+    "attachmentStillAdded": "Sua foto ainda está anexada.",
+    "continueManually": "Você pode continuar criando a tarefa manualmente.",
+    "dismissAnalysis": "Descartar análise da foto"
   },
   "repeat": {
     "days": {
@@ -804,11 +848,13 @@
       "monthly": "",
       "yearly": "",
       "adaptive": "",
-      "custom": ""
+      "custom": "",
+      "always": "Sempre"
     },
     "freqMessage": {
       "adaptive": "",
-      "custom": ""
+      "custom": "",
+      "always": "Esta tarefa não tem data de vencimento e permanece disponível para conclusão a qualquer momento. Não será arquivada ao ser concluída."
     },
     "weekPattern": {
       "every_week": "",
@@ -860,7 +906,7 @@
     "repeatOn": "",
     "triggerLabel": "",
     "triggerHelp": "",
-    "triggerPlanWarning": "",
+    "triggerPlanWarning": "Thing-based triggers are not available in the Basic plan. Upgrade to Plus to automatically trigger tasks when device states change.",
     "previewEvery": "",
     "previewOccurrence": "",
     "defaultTime": "",
@@ -1035,5 +1081,7 @@
     "today": "",
     "yesterday": "",
     "noteTitle": ""
-  }
+  },
+  "tasksForDate": "Tarefas para {{date}}",
+  "createSuggestion": "Criar \"{{value}}\""
 }

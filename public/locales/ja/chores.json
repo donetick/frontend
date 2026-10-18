@@ -111,10 +111,12 @@
     "unableChangeAssignee": "",
     "availableToCompleteStarting": "",
     "delegateToSomeoneElse": "",
-    "selectAPerformer": ""
+    "selectAPerformer": "",
+    "notFoundTitle": "タスクが利用できません",
+    "notFoundDescription": "このタスクは削除された可能性があるか、共有が解除されています。"
   },
   "toolbar": {
-    "defaultProject": "",
+    "defaultProject": "Default Project",
     "everyone": "",
     "mine": "",
     "availableToMe": "",
@@ -134,10 +136,14 @@
       "assignee": ""
     },
     "display": "",
-    "displayOptions": ""
+    "displayOptions": "",
+    "moreSaveOptions": "その他の保存オプション",
+    "showCount": "{{count}}件表示",
+    "done": "完了",
+    "savedFilters": "保存済みフィルター"
   },
   "sort": {
-    "assignedToMe": "",
+    "assignedToMe": "Assigned to me",
     "smart": "",
     "createdDate": "",
     "updatedDate": "",
@@ -271,7 +277,9 @@
       "skipTitle": "",
       "skippedTitle": "",
       "skipFailedTitle": ""
-    }
+    },
+    "failAssignTitle": "",
+    "failAssignMessage": ""
   },
   "archived": {
     "restoredTitle": "",
@@ -337,7 +345,7 @@
     "noMatchFilters": "",
     "emptyTitle": "",
     "emptyDescription": "",
-    "backToTasks": ""
+    "backToTasks": "タスクに戻る"
   },
   "edit": {
     "deleteConfirm": ""
@@ -611,7 +619,23 @@
     "keepAsAttachment": "",
     "altCaptured": "",
     "altProcessing": "",
-    "taskIdentified": ""
+    "taskIdentified": "",
+    "runningNativeOcr": "Running native OCR…",
+    "identifyingTask": "Identifying task with AI…",
+    "tapToScanHint": "「ドキュメントをスキャン」をタップしてスキャナーを開く",
+    "readingTextProgress": "画像からテキストを読み取り中… {{progress}}%",
+    "dueDate": "期限: {{date}}",
+    "hideRawText": "元のテキストを非表示",
+    "showRawText": "元のテキストを表示",
+    "cameraUnavailableUseUpload": "カメラが利用できません — 代わりにアップロードを使用してください",
+    "noTextFound": "画像からテキストが見つかりませんでした。もっと鮮明な写真をお試しください。",
+    "noTaskIdentified": "タスクを特定できませんでした。別の写真をお試しください。",
+    "processingFailed": "処理に失敗しました。",
+    "scannerError": "スキャナーエラー: {{error}}",
+    "scanFailed": "スキャンに失敗しました。",
+    "preparingScan": "開始中…",
+    "failedTitle": "タスクが見つかりませんでした",
+    "continueWithoutTask": "タスクなしで続行"
   },
   "descriptionPlaceholder": "",
   "notificationTemplate": {
@@ -728,7 +752,7 @@
     "rescheduleFromCompletion": "",
     "rescheduleFromCompletionHelp": "",
     "notifications": "",
-    "notificationsPlanWarning": "",
+    "notificationsPlanWarning": "Task notifications are not available in the Basic plan. Upgrade to Plus to receive reminders when tasks are due or completed.",
     "notifyForTask": "",
     "notifyForTaskHelp": "",
     "notificationSchedule": "",
@@ -759,7 +783,10 @@
     "updatedBy": "",
     "archive": "",
     "unarchive": "",
-    "create": ""
+    "create": "",
+    "alwaysDueHint": "このタスクには期限がなく、いつでも完了できます",
+    "notifyForTaskUnavailable": "トリガー式または常時利用可能なタスクには通知を設定できません",
+    "notificationsFreePlanNote": "あなたのプランでは期限日にリマインダーが届きます。Plusにすると、期限前のリマインダーと期限後のフォローアップが追加されます。"
   },
   "addTask": {
     "title": "",
@@ -772,7 +799,24 @@
     "createCount": "",
     "useTask": "",
     "processing": "",
-    "create": ""
+    "create": "",
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:",
+    "createAnother": "続けて作成",
+    "createAndAddAnother": "作成して続けて追加",
+    "createAndClose": "作成して閉じる",
+    "findingDetails": "写真からタスクの詳細を検索しています…",
+    "findingDetailsHint": "検索中も編集を続けられます。",
+    "detailsFound": "タスクの詳細が見つかりました",
+    "suggestedDue": "提案された期限: {{date}}",
+    "useSuggestion": "提案を使用",
+    "useAndKeepAttachment": "提案を使用して写真も保持",
+    "dismissSuggestion": "提案を無視",
+    "noDetailsFound": "タスクの詳細が見つかりませんでした",
+    "analysisFailed": "この写真を解析できませんでした",
+    "attachmentStillAdded": "写真は引き続き添付されています。",
+    "continueManually": "タスクの作成を手動で続けられます。",
+    "dismissAnalysis": "写真の解析を無視"
   },
   "repeat": {
     "days": {
@@ -804,11 +848,13 @@
       "monthly": "",
       "yearly": "",
       "adaptive": "",
-      "custom": ""
+      "custom": "",
+      "always": "常時"
     },
     "freqMessage": {
       "adaptive": "",
-      "custom": ""
+      "custom": "",
+      "always": "このタスクには期限がなく、いつでも完了できる状態が続きます。完了してもアーカイブされません。"
     },
     "weekPattern": {
       "every_week": "",
@@ -860,7 +906,7 @@
     "repeatOn": "",
     "triggerLabel": "",
     "triggerHelp": "",
-    "triggerPlanWarning": "",
+    "triggerPlanWarning": "Thing-based triggers are not available in the Basic plan. Upgrade to Plus to automatically trigger tasks when device states change.",
     "previewEvery": "",
     "previewOccurrence": "",
     "defaultTime": "",
@@ -1035,5 +1081,7 @@
     "today": "",
     "yesterday": "",
     "noteTitle": ""
-  }
+  },
+  "tasksForDate": "{{date}} のタスク",
+  "createSuggestion": "「{{value}}」を作成"
 }

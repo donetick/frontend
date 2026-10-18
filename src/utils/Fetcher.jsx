@@ -359,6 +359,13 @@ const AcceptCircleMemberRequest = id => {
   })
 }
 
+const DeclineCircleMemberRequest = id => {
+  return Fetch(`/circles/members/requests/decline?requestId=${id}`, {
+    method: 'DELETE',
+    headers: HEADERS(),
+  })
+}
+
 const LeaveCircle = id => {
   return Fetch(`/circles/leave?circle_id=${id}`, {
     method: 'DELETE',
@@ -472,6 +479,39 @@ const PutNotificationTarget = (platform, deviceToken) => {
     body: JSON.stringify({ platform, deviceToken }),
   })
 }
+// Donetick Bridge (hosted push-notification relay for self-hosted instances).
+// These call Core's own /api/v1/bridge/* endpoints; the browser never talks
+// to Bridge directly and never persists the instance token.
+const GetBridgeStatus = () => {
+  return Fetch(`/bridge/status`, {
+    method: 'GET',
+    headers: HEADERS(),
+  })
+}
+
+const ConnectBridge = ({ baseUrl, instanceId, instanceToken }) => {
+  return Fetch(`/bridge/connect`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify({ baseUrl, instanceId, instanceToken }),
+  })
+}
+
+const RotateBridgeCredential = ({ baseUrl, instanceId, instanceToken }) => {
+  return Fetch(`/bridge/rotate`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify({ baseUrl, instanceId, instanceToken }),
+  })
+}
+
+const DisconnectBridge = () => {
+  return Fetch(`/bridge/disconnect`, {
+    method: 'POST',
+    headers: HEADERS(),
+  })
+}
+
 const CreateLabel = label => {
   return Fetch(`/labels`, {
     method: 'POST',
@@ -612,6 +652,70 @@ const RedeemPoints = (userId, points, circleID) => {
     body: JSON.stringify({ points, userId }),
   })
 }
+
+const GetRewards = async () => {
+  const resp = await Fetch(`/rewards`, {
+    method: 'GET',
+    headers: HEADERS(),
+  })
+  return resp.json()
+}
+
+const CreateReward = reward => {
+  return Fetch(`/rewards`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify(reward),
+  }).then(response => response.json())
+}
+
+const UpdateReward = (id, reward) => {
+  return Fetch(`/rewards/${id}`, {
+    method: 'PUT',
+    headers: HEADERS(),
+    body: JSON.stringify(reward),
+  }).then(response => response.json())
+}
+
+const DeleteReward = id => {
+  return Fetch(`/rewards/${id}`, {
+    method: 'DELETE',
+    headers: HEADERS(),
+  })
+}
+
+const RedeemReward = (id, note) => {
+  return Fetch(`/rewards/${id}/redeem`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify({ note: note || null }),
+  }).then(response => response.json())
+}
+
+const GetRedemptions = async (status = null) => {
+  const query = status ? `?status=${status}` : ''
+  const resp = await Fetch(`/rewards/redemptions${query}`, {
+    method: 'GET',
+    headers: HEADERS(),
+  })
+  return resp.json()
+}
+
+const ApproveRedemption = id => {
+  return Fetch(`/rewards/redemptions/${id}/approve`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify({}),
+  })
+}
+
+const RejectRedemption = (id, note) => {
+  return Fetch(`/rewards/redemptions/${id}/reject`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify({ note: note || null }),
+  })
+}
 const RefreshToken = async () => {
   const basedURL = apiManager.getApiURL()
 
@@ -674,6 +778,34 @@ const PutWebhookURL = url => {
 const GetStorageUsage = () => {
   return Fetch(`/users/storage`, {
     method: 'GET',
+    headers: HEADERS(),
+  })
+}
+
+const GetCalendarURL = () => {
+  return Fetch(`/chores/calendar/url`, {
+    method: 'GET',
+    headers: HEADERS(),
+  })
+}
+
+const CreateCalendarURL = () => {
+  return Fetch(`/chores/calendar/url`, {
+    method: 'POST',
+    headers: HEADERS(),
+  })
+}
+
+const RotateCalendarURL = () => {
+  return Fetch(`/chores/calendar/url/rotate`, {
+    method: 'POST',
+    headers: HEADERS(),
+  })
+}
+
+const RevokeCalendarURL = () => {
+  return Fetch(`/chores/calendar/url`, {
+    method: 'DELETE',
     headers: HEADERS(),
   })
 }
@@ -919,6 +1051,16 @@ const DeleteProject = id => {
   })
 }
 
+// Server-side dry run of a change of who can see a project: which tasks change
+// assignees and who gains or loses access. Nothing is written.
+const PreviewProjectAccess = (id, access) => {
+  return Fetch(`/projects/${id}/access-preview`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify(access),
+  })
+}
+
 // Filter-related API functions
 const GetFilters = () => {
   return Fetch(`/filters`, {
@@ -988,6 +1130,7 @@ const TrackFilterUsage = id => {
 export {
   AcceptCircleMemberRequest,
   ApproveChore,
+  ApproveRedemption,
   ArchiveChore,
   CancelSubscription,
   ChangePassword,
@@ -995,7 +1138,9 @@ export {
   ClearChoreTimer,
   CompleteSubTask,
   ConfirmMFA,
+  ConnectBridge,
   CreateBackup,
+  CreateCalendarURL,
   CreateChildUser,
   CreateChore,
   createChore,
@@ -1003,7 +1148,9 @@ export {
   CreateLabel,
   CreateLongLiveToken,
   CreateProject,
+  CreateReward,
   CreateThing,
+  DeclineCircleMemberRequest,
   DeleteChildUser,
   DeleteChore,
   DeleteChoreAttachment,
@@ -1014,13 +1161,17 @@ export {
   DeleteLabel,
   DeleteLongLiveToken,
   DeleteProject,
+  DeleteReward,
   DeleteThing,
   DeleteTimeSession,
   DeleteUser,
   DisableMFA,
+  DisconnectBridge,
   GetAllCircleMembers,
   GetAllUsers,
   GetArchivedChores,
+  GetBridgeStatus,
+  GetCalendarURL,
   GetChildUsers,
   GetChoreAttachments,
   GetChoreByID,
@@ -1041,7 +1192,9 @@ export {
   GetPinnedFilters,
   GetProjectById,
   GetProjects,
+  GetRedemptions,
   GetResource,
+  GetRewards,
   GetStorageUsage,
   GetSubscriptionSession,
   GetThingHistory,
@@ -1055,16 +1208,22 @@ export {
   MarkChoreComplete,
   NudgeChore,
   PauseChore,
+  PreviewProjectAccess,
   PutNotificationTarget,
   PutWebhookURL,
   RedeemPoints,
+  RedeemReward,
   RefreshToken,
   RegenerateBackupCodes,
   RegisterDeviceToken,
   RejectChore,
+  RejectRedemption,
   ResetChoreTimer,
   ResetPassword,
   RestoreBackup,
+  RevokeCalendarURL,
+  RotateBridgeCredential,
+  RotateCalendarURL,
   SaveChore,
   SaveThing,
   SetupMFA,
@@ -1088,6 +1247,7 @@ export {
   UpdateNotificationTarget,
   UpdatePassword,
   UpdateProject,
+  UpdateReward,
   UpdateThingState,
   UpdateTimeSession,
   UpdateUserDetails,

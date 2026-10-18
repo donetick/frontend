@@ -11,6 +11,7 @@ import {
 } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
 
+import { PAYWALL_REASON, usePaywall } from '../contexts/PaywallContext'
 import { useSSEContext } from '../hooks/useSSEContext'
 import { useUserProfile } from '../queries/UserQueries'
 import { isPlusAccount } from '../utils/Helpers'
@@ -19,6 +20,7 @@ import SSEConnectionStatus from './SSEConnectionStatus'
 const SSESettings = () => {
   const { t } = useTranslation('settings')
   const { data: userProfile } = useUserProfile()
+  const { showPaywall } = usePaywall()
   const {
     error,
     getConnectionStatus,
@@ -31,8 +33,8 @@ const SSESettings = () => {
   const handleToggle = () => {
     console.log('=== TOGGLE CLICKED ===')
     if (!isPlusAccount(userProfile)) {
-      console.log('Not a Plus account, returning early')
-      return // Don't allow toggle for non-Plus users
+      showPaywall(PAYWALL_REASON.REALTIME_SYNC)
+      return
     }
     const currentlyEnabled = isSSEEnabled()
     console.log('SSE Settings - Toggle clicked:', {
@@ -45,27 +47,23 @@ const SSESettings = () => {
   }
 
   const getStatusDescription = () => {
-    if (!isPlusAccount(userProfile)) {
-      return 'Real-time updates (SSE) are not available in the Basic plan. Upgrade to Plus to receive instant notifications when chores are updated.'
-    }
-
     if (!isSSEEnabled()) {
-      return 'Real-time updates (SSE) are disabled. Enable to see live changes when you or other circle members complete, skip, or modify chores.'
+      return t('realtime.disabledDescription')
     }
 
     if (isConnected) {
-      return "Real-time updates (SSE) are working. You'll see live changes when you or other circle members complete, skip, or modify chores."
+      return t('realtime.connectedDescription')
     }
 
     if (isConnecting) {
-      return 'Connecting to real-time updates (SSE)...'
+      return t('realtime.connectingDescription')
     }
 
     if (error) {
-      return `Real-time updates (SSE) are enabled but not working: ${error}`
+      return t('realtime.errorDescription', { error })
     }
 
-    return 'Real-time updates (SSE) are enabled but not currently connected.'
+    return t('realtime.disconnectedDescription')
   }
 
   return (
@@ -77,14 +75,7 @@ const SSESettings = () => {
           <SyncDisabled color='disabled' />
         )}
         <Box sx={{ flex: 1 }}>
-          <Typography level='title-md'>
-            {t('realtime.titleSse')}
-            {!isPlusAccount(userProfile) && (
-              <Chip variant='soft' color='warning' sx={{ ml: 1 }}>
-                {t('common.plusFeature')}
-              </Chip>
-            )}
-          </Typography>
+          <Typography level='title-md'>{t('realtime.titleSse')}</Typography>
           <Typography level='body-sm' color='neutral'>
             {t('realtime.subtitleSse')}
           </Typography>
@@ -96,7 +87,7 @@ const SSESettings = () => {
 
       <FormControl orientation='horizontal' sx={{ mb: 2 }}>
         <Box sx={{ flex: 1 }}>
-          <FormLabel>Enable Real-time Updates (SSE)</FormLabel>
+          <FormLabel>{t('realtime.enableLabel')}</FormLabel>
           <FormHelperText sx={{ mt: 0 }}>
             {getStatusDescription()}
           </FormHelperText>
@@ -104,13 +95,14 @@ const SSESettings = () => {
         <Switch
           checked={isSSEEnabled() && isPlusAccount(userProfile)}
           onChange={handleToggle}
-          disabled={!isPlusAccount(userProfile)}
           color={
             isSSEEnabled() && isPlusAccount(userProfile) ? 'success' : 'neutral'
           }
           variant='solid'
           endDecorator={
-            isSSEEnabled() && isPlusAccount(userProfile) ? 'On' : 'Off'
+            isSSEEnabled() && isPlusAccount(userProfile)
+              ? t('common.on')
+              : t('common.off')
           }
           slotProps={{ endDecorator: { sx: { minWidth: 24 } } }}
         />
@@ -119,7 +111,7 @@ const SSESettings = () => {
       {isSSEEnabled() && isPlusAccount(userProfile) && (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
           <Typography level='body-xs' color='neutral'>
-            Status:
+            {t('realtime.statusLabel')}
           </Typography>
           <Chip
             size='sm'
@@ -136,14 +128,6 @@ const SSESettings = () => {
             </Typography>
           )}
         </Box>
-      )}
-
-      {!isPlusAccount(userProfile) && (
-        <Typography level='body-sm' color='warning' sx={{ mt: 1 }}>
-          Real-time updates (SSE) are not available in the Basic plan. Upgrade
-          to Plus to receive instant notifications when you or other circle
-          members complete, skip, or modify chores.
-        </Typography>
       )}
     </Card>
   )

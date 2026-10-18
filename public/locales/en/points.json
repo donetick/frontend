@@ -1,13 +1,16 @@
 {
-  "redeem": "Redeem Points",
+  "redeem": "Deduct points",
+  "sections": {
+    "overview": "Overview"
+  },
   "redeemModal": {
-    "redeemButton": "Redeem",
+    "redeemButton": "Deduct",
     "pointsAvailable": "{{count}} points available",
-    "pointsToRedeem": "Points to Redeem",
+    "pointsToRedeem": "Points to deduct",
     "placeholder": "Enter points...",
     "cannotExceed": "Cannot exceed available points",
-    "quickAdd": "Quick Add:",
-    "aboutToRedeem": "You are about to redeem",
+    "quickAdd": "Quick add:",
+    "aboutToRedeem": "You are about to deduct",
     "amount": "{{count}} points",
     "remaining": "Remaining: {{count}} points"
   },
@@ -30,7 +33,9 @@
     "shortAll": "All",
     "days7": "7 Days",
     "months6": "6 Months",
-    "allTime": "All Time"
+    "allTime": "All Time",
+    "short30d": "30D",
+    "days30": "30 Days"
   },
   "filter": {
     "analysisTitle": "Filter & Analysis",
@@ -61,6 +66,7 @@
   },
   "summary": {
     "showingFor": "Showing points for",
+    "selectUser": "Select member to view points for",
     "unknownUser": "Unknown User",
     "overThe": "over the",
     "allTime": "All Time",
