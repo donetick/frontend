@@ -28,10 +28,6 @@ import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { networkManager } from '../../hooks/NetworkManager'
-import {
-  PENDING_POLL_MS,
-  SERVER_PROBE_MS,
-} from '../../hooks/useSyncOnReconnect'
 import { commandQueue } from '../../utils/CommandQueue'
 import {
   isOfflineFeatureEnabled,
@@ -74,6 +70,7 @@ function SyncStatusIndicator({ showLabel = false }) {
     syncing: false,
     lastSync: null,
     error: null,
+    nextRetryAt: syncEngine.nextRetryAt,
   })
   const [isOnline, setIsOnline] = useState(networkManager.isOnline)
   const [offlineSince, setOfflineSince] = useState(networkManager.offlineSince)
@@ -81,19 +78,20 @@ function SyncStatusIndicator({ showLabel = false }) {
     networkManager.offlineReason,
   )
 
-  // Mirror the actual intervals used by useSyncOnReconnect so the countdown is accurate
-  const retryInterval = useMemo(
-    () =>
-      !isOnline && offlineReason === 'server'
-        ? SERVER_PROBE_MS / 1000
-        : PENDING_POLL_MS / 1000,
-    [isOnline, offlineReason],
-  )
-
-  const [retryIn, setRetryIn] = useState(retryInterval)
   const [offlineFeatureEnabled, setOfflineFeatureEnabled] = useState(
     isOfflineFeatureEnabled(),
   )
+  // Ticks only while there is a scheduled attempt to count down to.
+  const [now, setNow] = useState(() => Date.now())
+
+  // The scheduler in useSyncOnReconnect publishes when the next attempt will
+  // actually happen, so this is a readout rather than a second clock. The old
+  // local countdown was guesswork — it reset on its own events and drifted out
+  // of phase with the timers, which is why it fired at 11s instead of 15s.
+  const retryIn = useMemo(() => {
+    if (!syncState.nextRetryAt) return null
+    return Math.max(0, Math.ceil((syncState.nextRetryAt - now) / 1000))
+  }, [syncState.nextRetryAt, now])
 
   useEffect(() => {
     const unsubscribe = subscribeToOfflineFeature(setOfflineFeatureEnabled)
@@ -108,50 +106,35 @@ function SyncStatusIndicator({ showLabel = false }) {
   }, [])
 
   useEffect(() => {
-    if (!syncState.syncing) {
-      setRetryIn(retryInterval)
-    }
-  }, [syncState.syncing, syncState.lastSync, retryInterval])
-
-  useEffect(() => {
-    networkManager.registerNetworkListener(online => {
+    const handleNetworkChange = online => {
       setIsOnline(online)
       setOfflineReason(networkManager.offlineReason)
       if (!online) setOfflineSince(networkManager.offlineSince)
-    })
+    }
+    networkManager.registerNetworkListener(handleNetworkChange)
+    return () => networkManager.unregisterNetworkListener(handleNetworkChange)
   }, [])
 
+  // Only tick while a countdown is on screen — the schedule exists at all
+  // times (the cache refresh is always pending), and re-rendering the nav bar
+  // every second to animate a number nobody is looking at is pure waste.
+  const showsCountdown =
+    (isOnline && pendingCommands.length > 0) ||
+    (!isOnline && offlineReason === 'server')
+
   useEffect(() => {
-    // Run countdown both when online (pending commands) and when server-unreachable (probe interval)
-    if (syncState.syncing) return
-    if (isOnline && pendingCommands.length === 0) return
-    if (!isOnline && offlineReason === 'device') return
-    const interval = setInterval(() => {
-      setRetryIn(prev => {
-        if (prev <= 1) {
-          console.debug('[SyncStatusIndicator] Retry timer fired', {
-            isOnline,
-            offlineReason,
-            syncing: syncState.syncing,
-            lastSync: syncState.lastSync,
-            error: syncState.error,
-            pendingCommands: pendingCommands.length,
-          })
-          return retryInterval
-        }
-        return prev - 1
-      })
-    }, 1000)
-    return () => clearInterval(interval)
-  }, [
-    isOnline,
-    offlineReason,
-    syncState.syncing,
-    syncState.lastSync,
-    syncState.error,
-    pendingCommands.length,
-    retryInterval,
-  ])
+    if (!syncState.nextRetryAt || syncState.syncing || !showsCountdown) {
+      return undefined
+    }
+    // `now` may be stale from the last time a countdown was visible, so take a
+    // fresh reading before the first tick lands a second from now.
+    const initialRead = setTimeout(() => setNow(Date.now()), 0)
+    const interval = setInterval(() => setNow(Date.now()), 1000)
+    return () => {
+      clearTimeout(initialRead)
+      clearInterval(interval)
+    }
+  }, [syncState.nextRetryAt, syncState.syncing, showsCountdown])
 
   useEffect(() => {
     const update = async () => {
@@ -532,23 +515,26 @@ function SyncStatusIndicator({ showLabel = false }) {
         )}
 
         {/* Next retry / offline hint */}
-        {isOnline && !syncState.syncing && pendingCount > 0 && (
-          <Box sx={{ px: 1, pb: 0.5 }}>
-            <Typography
-              level='body-xs'
-              sx={{ color: 'var(--joy-palette-text-tertiary)' }}
-            >
-              {t('sync.nextAutoSync', { seconds: retryIn })}
-            </Typography>
-          </Box>
-        )}
+        {isOnline &&
+          !syncState.syncing &&
+          pendingCount > 0 &&
+          retryIn !== null && (
+            <Box sx={{ px: 1, pb: 0.5 }}>
+              <Typography
+                level='body-xs'
+                sx={{ color: 'var(--joy-palette-text-tertiary)' }}
+              >
+                {t('sync.nextAutoSync', { seconds: retryIn })}
+              </Typography>
+            </Box>
+          )}
         {!isOnline && offlineReason === 'server' && (
           <Box sx={{ px: 1, pb: 0.5 }}>
             <Typography
               level='body-xs'
               sx={{ color: 'var(--joy-palette-text-tertiary)' }}
             >
-              {syncState.syncing
+              {syncState.syncing || retryIn === null
                 ? t('sync.checkingServer')
                 : t('sync.retryingIn', { seconds: retryIn })}
             </Typography>
