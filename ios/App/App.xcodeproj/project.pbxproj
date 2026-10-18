@@ -21,6 +21,8 @@
 		D0AC000000000000000000B2 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0AC000000000000000000A2 /* MainViewController.swift */; };
 		D0AC000000000000000000B3 /* DonetickWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0AC000000000000000000A3 /* DonetickWidget.swift */; };
 		D0AC000000000000000000B4 /* DonetickWidgetExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = D0AC000000000000000000A4 /* DonetickWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		D0AC000000000000000000B5 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0AC000000000000000000A7 /* ShareViewController.swift */; };
+		D0AC000000000000000000B6 /* DonetickShare.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = D0AC000000000000000000AA /* DonetickShare.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -45,6 +47,10 @@
 		D0AC000000000000000000A4 /* DonetickWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DonetickWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		D0AC000000000000000000A5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D0AC000000000000000000A6 /* DonetickWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DonetickWidget.entitlements; sourceTree = "<group>"; };
+		D0AC000000000000000000A7 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
+		D0AC000000000000000000A8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D0AC000000000000000000A9 /* DonetickShare.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DonetickShare.entitlements; sourceTree = "<group>"; };
+		D0AC000000000000000000AA /* DonetickShare.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DonetickShare.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -55,6 +61,7 @@
 			dstSubfolderSpec = 13;
 			files = (
 				D0AC000000000000000000B4 /* DonetickWidgetExtension.appex in Embed App Extensions */,
+				D0AC000000000000000000B6 /* DonetickShare.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -69,6 +76,13 @@
 			remoteGlobalIDString = D0AC000000000000000000D1;
 			remoteInfo = DonetickWidgetExtension;
 		};
+		D0AC000000000000000000E4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 504EC2FC1FED79650016851F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D0AC000000000000000000D5;
+			remoteInfo = DonetickShare;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -81,6 +95,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		D0AC000000000000000000D3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D0AC000000000000000000D7 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -103,6 +124,7 @@
 			children = (
 				504EC3061FED79650016851F /* App */,
 				D0AC000000000000000000C1 /* DonetickWidget */,
+				D0AC000000000000000000C3 /* DonetickShare */,
 				504EC3051FED79650016851F /* Products */,
 				7F8756D8B27F46E3366F6CEA /* Pods */,
 				27E2DDA53C4D2A4D1A88CE4A /* Frameworks */,
@@ -120,11 +142,22 @@
 			path = DonetickWidget;
 			sourceTree = "<group>";
 		};
+		D0AC000000000000000000C3 /* DonetickShare */ = {
+			isa = PBXGroup;
+			children = (
+				D0AC000000000000000000A7 /* ShareViewController.swift */,
+				D0AC000000000000000000A8 /* Info.plist */,
+				D0AC000000000000000000A9 /* DonetickShare.entitlements */,
+			);
+			path = DonetickShare;
+			sourceTree = "<group>";
+		};
 		504EC3051FED79650016851F /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				504EC3041FED79650016851F /* App.app */,
 				D0AC000000000000000000A4 /* DonetickWidgetExtension.appex */,
+				D0AC000000000000000000AA /* DonetickShare.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -175,6 +208,7 @@
 			);
 			dependencies = (
 				D0AC000000000000000000E1 /* PBXTargetDependency */,
+				D0AC000000000000000000E3 /* PBXTargetDependency */,
 			);
 			name = App;
 			productName = App;
@@ -198,6 +232,23 @@
 			productReference = D0AC000000000000000000A4 /* DonetickWidgetExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		D0AC000000000000000000D5 /* DonetickShare */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D0AC000000000000000000F4 /* Build configuration list for PBXNativeTarget "DonetickShare" */;
+			buildPhases = (
+				D0AC000000000000000000D6 /* Sources */,
+				D0AC000000000000000000D7 /* Frameworks */,
+				D0AC000000000000000000D8 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = DonetickShare;
+			productName = DonetickShare;
+			productReference = D0AC000000000000000000AA /* DonetickShare.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -214,6 +265,10 @@
 					};
 					D0AC000000000000000000D1 = {
 						CreatedOnToolsVersion = 15.0;
+						ProvisioningStyle = Automatic;
+					};
+					D0AC000000000000000000D5 = {
+						CreatedOnToolsVersion = 16.0;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -235,6 +290,7 @@
 			targets = (
 				504EC3031FED79650016851F /* App */,
 				D0AC000000000000000000D1 /* DonetickWidgetExtension */,
+				D0AC000000000000000000D5 /* DonetickShare */,
 			);
 		};
 /* End PBXProject section */
@@ -256,6 +312,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		D0AC000000000000000000D4 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D0AC000000000000000000D8 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -319,6 +382,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		D0AC000000000000000000D6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D0AC000000000000000000B5 /* ShareViewController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -326,6 +397,11 @@
 			isa = PBXTargetDependency;
 			target = D0AC000000000000000000D1 /* DonetickWidgetExtension */;
 			targetProxy = D0AC000000000000000000E2 /* PBXContainerItemProxy */;
+		};
+		D0AC000000000000000000E3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D0AC000000000000000000D5 /* DonetickShare */;
+			targetProxy = D0AC000000000000000000E4 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -541,6 +617,50 @@
 			};
 			name = Release;
 		};
+		D0AC000000000000000000F5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = DonetickShare/DonetickShare.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 79;
+				DEVELOPMENT_TEAM = 6UJJ78R3BS;
+				INFOPLIST_FILE = DonetickShare/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 1.2.58;
+				PRODUCT_BUNDLE_IDENTIFIER = com.donetick.app.share;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		D0AC000000000000000000F6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = DonetickShare/DonetickShare.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Distribution";
+				CODE_SIGN_STYLE = Manual;
+				PROVISIONING_PROFILE_SPECIFIER = "Donetick Share App Store(fastline)";
+				CURRENT_PROJECT_VERSION = 79;
+				DEVELOPMENT_TEAM = 6UJJ78R3BS;
+				INFOPLIST_FILE = DonetickShare/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 1.2.58;
+				PRODUCT_BUNDLE_IDENTIFIER = com.donetick.app.share;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -567,6 +687,15 @@
 			buildConfigurations = (
 				D0AC000000000000000000F2 /* Debug */,
 				D0AC000000000000000000F3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D0AC000000000000000000F4 /* Build configuration list for PBXNativeTarget "DonetickShare" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D0AC000000000000000000F5 /* Debug */,
+				D0AC000000000000000000F6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

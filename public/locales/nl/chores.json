@@ -804,7 +804,19 @@
     "subtasksLabel": "Subtasks:",
     "createAnother": "Nog een maken",
     "createAndAddAnother": "Maken en nog een toevoegen",
-    "createAndClose": "Maken en sluiten"
+    "createAndClose": "Maken en sluiten",
+    "findingDetails": "Taakdetails zoeken in je foto…",
+    "findingDetailsHint": "Je kunt doorgaan met bewerken terwijl we zoeken.",
+    "detailsFound": "We hebben taakdetails gevonden",
+    "suggestedDue": "Voorgestelde einddatum: {{date}}",
+    "useSuggestion": "Suggestie gebruiken",
+    "useAndKeepAttachment": "Suggestie gebruiken & foto behouden",
+    "dismissSuggestion": "Suggestie negeren",
+    "noDetailsFound": "Geen taakdetails gevonden",
+    "analysisFailed": "We konden deze foto niet analyseren",
+    "attachmentStillAdded": "Je foto is nog steeds toegevoegd.",
+    "continueManually": "Je kunt de taak handmatig blijven aanmaken.",
+    "dismissAnalysis": "Fotoanalyse negeren"
   },
   "repeat": {
     "days": {

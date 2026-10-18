@@ -824,7 +824,19 @@
     "subtasksLabel": "Sottoattività:",
     "createAnother": "Crea un'altra",
     "createAndAddAnother": "Crea e aggiungi un'altra",
-    "createAndClose": "Crea e chiudi"
+    "createAndClose": "Crea e chiudi",
+    "findingDetails": "Ricerca dei dettagli dell'attività dalla tua foto…",
+    "findingDetailsHint": "Puoi continuare a modificare mentre cerchiamo.",
+    "detailsFound": "Abbiamo trovato i dettagli dell'attività",
+    "suggestedDue": "Data di scadenza suggerita: {{date}}",
+    "useSuggestion": "Usa il suggerimento",
+    "useAndKeepAttachment": "Usa il suggerimento e mantieni la foto",
+    "dismissSuggestion": "Ignora il suggerimento",
+    "noDetailsFound": "Nessun dettaglio dell'attività trovato",
+    "analysisFailed": "Non siamo riusciti ad analizzare questa foto",
+    "attachmentStillAdded": "La tua foto è ancora allegata.",
+    "continueManually": "Puoi continuare a creare l'attività manualmente.",
+    "dismissAnalysis": "Ignora l'analisi della foto"
   },
   "repeat": {
     "days": {

@@ -804,7 +804,19 @@
     "subtasksLabel": "Unteraufgaben:",
     "createAnother": "Weitere erstellen",
     "createAndAddAnother": "Erstellen & weitere hinzufügen",
-    "createAndClose": "Erstellen & schließen"
+    "createAndClose": "Erstellen & schließen",
+    "findingDetails": "Suche Aufgabendetails aus deinem Foto…",
+    "findingDetailsHint": "Du kannst währenddessen weiter bearbeiten.",
+    "detailsFound": "Wir haben Aufgabendetails gefunden",
+    "suggestedDue": "Vorgeschlagenes Fälligkeitsdatum: {{date}}",
+    "useSuggestion": "Vorschlag verwenden",
+    "useAndKeepAttachment": "Vorschlag verwenden & Foto behalten",
+    "dismissSuggestion": "Vorschlag verwerfen",
+    "noDetailsFound": "Keine Aufgabendetails gefunden",
+    "analysisFailed": "Dieses Foto konnte nicht analysiert werden",
+    "attachmentStillAdded": "Dein Foto ist weiterhin angehängt.",
+    "continueManually": "Du kannst die Aufgabe weiterhin manuell erstellen.",
+    "dismissAnalysis": "Fotoanalyse verwerfen"
   },
   "repeat": {
     "days": {

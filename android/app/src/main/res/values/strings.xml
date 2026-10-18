@@ -4,6 +4,8 @@
     <string name="title_activity_main">Donetick</string>
     <string name="package_name">com.donetick.app</string>
     <string name="custom_url_scheme">com.donetick.app</string>
+    <string name="share_make_task">Make Task</string>
+    <string name="share_attach_to_task">Attach to Task</string>
 
     <!-- Home-screen widgets -->
     <string name="widget_today_label">Today</string>

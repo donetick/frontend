@@ -804,7 +804,19 @@
     "subtasksLabel": "Subtasks:",
     "createAnother": "Vytvořit další",
     "createAndAddAnother": "Vytvořit a přidat další",
-    "createAndClose": "Vytvořit a zavřít"
+    "createAndClose": "Vytvořit a zavřít",
+    "findingDetails": "Hledání podrobností úkolu z vaší fotky…",
+    "findingDetailsHint": "Můžete pokračovat v úpravách, zatímco hledáme.",
+    "detailsFound": "Našli jsme podrobnosti úkolu",
+    "suggestedDue": "Navrhované datum splnění: {{date}}",
+    "useSuggestion": "Použít návrh",
+    "useAndKeepAttachment": "Použít návrh a zachovat fotku",
+    "dismissSuggestion": "Zahodit návrh",
+    "noDetailsFound": "Nebyly nalezeny žádné podrobnosti úkolu",
+    "analysisFailed": "Tuto fotku se nepodařilo analyzovat",
+    "attachmentStillAdded": "Vaše fotka je stále přiložena.",
+    "continueManually": "Můžete pokračovat ve vytváření úkolu ručně.",
+    "dismissAnalysis": "Zahodit analýzu fotky"
   },
   "repeat": {
     "days": {

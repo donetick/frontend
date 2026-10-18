@@ -36,11 +36,13 @@ const ScanPanel = ({
   canKeepImage = false,
   initialImageUrl,
   onClose,
+  onImageCaptured,
   onStateChange,
   onTaskExtracted,
   open,
 }) => {
   const { t } = useTranslation('chores')
+  const deferProcessing = Boolean(onImageCaptured)
   const {
     activate,
     cameraAvailable,
@@ -60,11 +62,11 @@ const ScanPanel = ({
     stopCamera,
     taskResult,
     videoRef,
-  } = useScanToTask()
+  } = useScanToTask({ deferProcessing })
 
   // The scanned page is usually the task's source of truth (the bill, the
   // notice), so keeping it is the default — the OCR text alone loses it.
-  const [keepImage, setKeepImage] = useState(false)
+  const [keepImage, setKeepImage] = useState(canKeepImage)
 
   // Start/stop based on open state
   useEffect(() => {
@@ -90,9 +92,17 @@ const ScanPanel = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, isNativeScanner])
 
-  // Auto-close and populate when done
+  // The traditional inline flow applies a finished result immediately. When
+  // onImageCaptured is supplied, hand the image back as soon as capture ends;
+  // the parent can restore its form and run extraction in the background.
   useEffect(() => {
-    if (phase === 'done' && taskResult) {
+    if (phase === 'captured' && capturedImage && onImageCaptured) {
+      onImageCaptured({
+        image: capturedImage,
+        keepImage: canKeepImage && keepImage,
+      })
+      onClose()
+    } else if (phase === 'done' && taskResult) {
       onTaskExtracted({
         ...taskResult,
         attachmentImage: canKeepImage && keepImage ? capturedImage : null,
@@ -100,7 +110,7 @@ const ScanPanel = ({
       onClose()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, taskResult])
+  }, [phase, taskResult, capturedImage])
 
   const openFilePicker = useCallback(
     () => fileInputRef.current?.click(),

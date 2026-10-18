@@ -37,6 +37,7 @@ import { useFilter } from '../../hooks/useFilter'
 import { useChores } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
+import { consumePendingShare } from '../../service/ShareTargetService'
 import {
   ChoreFilters,
   ChoresGrouper,
@@ -152,6 +153,7 @@ const MyChores = () => {
   const [addTaskModalOpen, setAddTaskModalOpen] = useState(false)
   // 'voice' | 'scan' | null — set by the quick-capture widget deep links
   const [addTaskInitialMode, setAddTaskInitialMode] = useState(null)
+  const [initialShare, setInitialShare] = useState(null)
   const searchInputRef = useRef(null)
   const [selectedChoreSection, setSelectedChoreSection] = useState(
     localStorage.getItem('selectedChoreSection') || 'default',
@@ -636,6 +638,23 @@ const MyChores = () => {
       params.delete('mode')
       setSearchParams(params, { replace: true })
     }
+  }, [searchParams, setSearchParams])
+
+  // Native share targets persist their payload before navigating here. Consume
+  // it once so refresh/back cannot reopen an already handled share.
+  useEffect(() => {
+    if (searchParams.get('share_task') !== '1') return
+
+    const share = consumePendingShare()
+    if (share) {
+      setInitialShare(share)
+      setAddTaskInitialMode(null)
+      setAddTaskModalOpen(true)
+    }
+
+    const params = new URLSearchParams(searchParams)
+    params.delete('share_task')
+    setSearchParams(params, { replace: true })
   }, [searchParams, setSearchParams])
 
   // Read and apply filters from URL parameters
@@ -1673,12 +1692,15 @@ const MyChores = () => {
         <FeedbackPrompt />
         {addTaskModalOpen && (
           <TaskInput
+            key={initialShare?.id || 'quick-add'}
             onChoreUpdate={updateChores}
             isModalOpen={addTaskModalOpen}
             initialMode={addTaskInitialMode}
+            initialShare={initialShare}
             onClose={forceRefresh => {
               setAddTaskModalOpen(false)
               setAddTaskInitialMode(null)
+              setInitialShare(null)
               if (forceRefresh) {
                 refetchChores()
               }

@@ -804,7 +804,19 @@
     "subtasksLabel": "Subtasks:",
     "createAnother": "Создать ещё",
     "createAndAddAnother": "Создать и добавить ещё",
-    "createAndClose": "Создать и закрыть"
+    "createAndClose": "Создать и закрыть",
+    "findingDetails": "Поиск деталей задачи на вашем фото…",
+    "findingDetailsHint": "Вы можете продолжать редактирование, пока мы ищем.",
+    "detailsFound": "Мы нашли детали задачи",
+    "suggestedDue": "Предложенный срок выполнения: {{date}}",
+    "useSuggestion": "Использовать предложение",
+    "useAndKeepAttachment": "Использовать предложение и сохранить фото",
+    "dismissSuggestion": "Отклонить предложение",
+    "noDetailsFound": "Детали задачи не найдены",
+    "analysisFailed": "Не удалось проанализировать это фото",
+    "attachmentStillAdded": "Ваше фото всё ещё прикреплено.",
+    "continueManually": "Вы можете продолжить создание задачи вручную.",
+    "dismissAnalysis": "Отклонить анализ фото"
   },
   "repeat": {
     "days": {

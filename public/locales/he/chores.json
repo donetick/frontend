@@ -804,7 +804,19 @@
     "subtasksLabel": "Subtasks:",
     "createAnother": "צור עוד אחת",
     "createAndAddAnother": "צור והוסף עוד",
-    "createAndClose": "צור וסגור"
+    "createAndClose": "צור וסגור",
+    "findingDetails": "מחפשים פרטי מטלה בתמונה שלך…",
+    "findingDetailsHint": "אפשר להמשיך לערוך בזמן שאנחנו מחפשים.",
+    "detailsFound": "מצאנו פרטי מטלה",
+    "suggestedDue": "תאריך יעד מוצע: {{date}}",
+    "useSuggestion": "השתמש בהצעה",
+    "useAndKeepAttachment": "השתמש בהצעה ושמור את התמונה",
+    "dismissSuggestion": "התעלם מההצעה",
+    "noDetailsFound": "לא נמצאו פרטי מטלה",
+    "analysisFailed": "לא הצלחנו לנתח את התמונה הזו",
+    "attachmentStillAdded": "התמונה שלך עדיין מצורפת.",
+    "continueManually": "אפשר להמשיך וליצור את המטלה באופן ידני.",
+    "dismissAnalysis": "התעלם מניתוח התמונה"
   },
   "repeat": {
     "days": {
