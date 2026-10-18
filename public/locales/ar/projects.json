@@ -30,9 +30,6 @@
     "Computer": "التكنولوجيا"
   },
   "defaultChip": "الافتراضي",
-  "tasks_one": "مهمة {{count}}",
-  "tasks_other": "مهام {{count}}",
-  "shared": "مشترك",
   "delete": {
     "title": "حذف المشروع",
     "message": "هل أنت متأكد من أنك تريد حذف \"{{name}}\"؟ سيؤدي هذا إلى إزالة المشروع ولكن الاحتفاظ بجميع المهام (سوف ينتقلون إلى المشروع الافتراضي)."
@@ -67,6 +64,81 @@
     "descriptionLabel": "الوصف",
     "iconLabel": "أيقونة المشروع",
     "selectIcon": "اختر أيقونة",
-    "colorLabel": "لون المشروع"
-  }
+    "colorLabel": "لون المشروع",
+    "editTitle": "",
+    "createTitle": "",
+    "update": "",
+    "create": ""
+  },
+  "visibility": {
+    "label": "",
+    "ownerOnly": "",
+    "changeHint": "",
+    "private": {
+      "title": "",
+      "description": ""
+    },
+    "members": {
+      "title": "",
+      "description": "",
+      "pickerTitle": "",
+      "noCandidates": "",
+      "emptyHint": "",
+      "hint_zero": "",
+      "hint_one": "",
+      "hint_two": "",
+      "hint_few": "",
+      "hint_many": "",
+      "hint_other": ""
+    },
+    "circle": {
+      "title": "",
+      "description": ""
+    },
+    "chip": {
+      "private": "",
+      "everyone": "",
+      "members_zero": "",
+      "members_one": "",
+      "members_two": "",
+      "members_few": "",
+      "members_many": "",
+      "members_other": ""
+    },
+    "review": {
+      "title": "",
+      "back": "",
+      "confirm": "",
+      "you": "",
+      "audienceMembers": "",
+      "audienceMembersNone": "",
+      "loseAccess": "",
+      "gainAccess": "",
+      "opensToCircle": "",
+      "removedAssignees": "",
+      "addedAssignees": "",
+      "nowAssigned": "",
+      "nowUnassigned": "",
+      "keepsHistory": "",
+      "previewFailed": "",
+      "loseAccessHint_zero": "",
+      "loseAccessHint_one": "",
+      "loseAccessHint_two": "",
+      "loseAccessHint_few": "",
+      "loseAccessHint_many": "",
+      "loseAccessHint_other": "",
+      "assignmentChanges_zero": "",
+      "assignmentChanges_one": "",
+      "assignmentChanges_two": "",
+      "assignmentChanges_few": "",
+      "assignmentChanges_many": "",
+      "assignmentChanges_other": ""
+    }
+  },
+  "tasks_zero": "",
+  "tasks_one": "مهمة {{count}}",
+  "tasks_two": "",
+  "tasks_few": "",
+  "tasks_many": "",
+  "tasks_other": "مهام {{count}}"
 }

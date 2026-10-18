@@ -1,5 +1,8 @@
 {
   "redeem": "استبدال النقاط",
+  "sections": {
+    "overview": ""
+  },
   "redeemModal": {
     "redeemButton": "استبدال",
     "pointsAvailable": "{{count}} نقطة متاحة",
@@ -21,17 +24,21 @@
     "you": "أنت",
     "tasksAndAvg": "{{tasks}} مهام • متوسط {{avg}} لكل مهمة",
     "available": "{{count}} نقطة متاحة",
+    "points_zero": "",
     "points_one": "{{count}} نقطة",
+    "points_two": "",
+    "points_few": "",
+    "points_many": "",
     "points_other": "{{count}} نقاط"
   },
   "tabs": {
-    "short7d": "7D",
+    "short7d": "",
     "short6m": "6 ميغا",
     "shortAll": "الكل",
     "days7": "آخر 7 أيام",
     "months6": "6 أشهر",
     "allTime": "كل الوقت",
-    "short30d": "30D",
+    "short30d": "",
     "days30": "آخر 30 يومًا"
   },
   "filter": {
@@ -57,17 +64,26 @@
       "title": "نقاط الفترة",
       "allTime": "كل الوقت",
       "last6Months": "آخر 6 أشهر",
+      "lastDays_zero": "",
       "lastDays_one": "آخر {{count}} يوم",
+      "lastDays_two": "",
+      "lastDays_few": "",
+      "lastDays_many": "",
       "lastDays_other": "آخر {{count}} أيام"
     }
   },
   "summary": {
     "showingFor": "عرض النقاط لـ",
+    "selectUser": "",
     "unknownUser": "مستخدم غير معروف",
     "overThe": "خلال",
     "allTime": "كل الوقت",
     "last6Months": "آخر 6 أشهر",
+    "lastDays_zero": "",
     "lastDays_one": "آخر {{count}} يوم",
+    "lastDays_two": "",
+    "lastDays_few": "",
+    "lastDays_many": "",
     "lastDays_other": "آخر {{count}} أيام"
   },
   "trend": {

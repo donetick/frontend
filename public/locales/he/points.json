@@ -1,5 +1,8 @@
 {
   "redeem": "",
+  "sections": {
+    "overview": ""
+  },
   "redeemModal": {
     "redeemButton": "",
     "pointsAvailable": "",
@@ -16,12 +19,13 @@
     "titleTasks": "",
     "subtitlePoints": "",
     "subtitleTasks": "",
-    "modePoints": "נקודות",
-    "modeTasks": "משימות",
+    "modePoints": "",
+    "modeTasks": "",
     "you": "",
     "tasksAndAvg": "",
     "available": "",
     "points_one": "",
+    "points_two": "",
     "points_other": ""
   },
   "tabs": {
@@ -31,8 +35,8 @@
     "days7": "",
     "months6": "",
     "allTime": "",
-    "short30d": "30D",
-    "days30": "30 ימים"
+    "short30d": "",
+    "days30": ""
   },
   "filter": {
     "analysisTitle": "",
@@ -58,16 +62,19 @@
       "allTime": "",
       "last6Months": "",
       "lastDays_one": "",
+      "lastDays_two": "",
       "lastDays_other": ""
     }
   },
   "summary": {
     "showingFor": "",
+    "selectUser": "",
     "unknownUser": "",
     "overThe": "",
     "allTime": "",
     "last6Months": "",
     "lastDays_one": "",
+    "lastDays_two": "",
     "lastDays_other": ""
   },
   "trend": {

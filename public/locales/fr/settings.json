@@ -47,7 +47,7 @@
         "description": "Créez et gérez des sous-comptes pouvant se connecter et terminer les tâches assignées."
       },
       "notifications": {
-        "title": "Notifications",
+        "title": "",
         "description": "Configurez les notifications push, les alertes par e-mail et les destinations de notification des tâches."
       },
       "mfa": {
@@ -57,6 +57,14 @@
       "apitokens": {
         "title": "Jetons d'API",
         "description": "Générez et gérez des jetons d'accès pour les intégrations tierces et l'accès à l'API."
+      },
+      "bridge": {
+        "title": "",
+        "description": ""
+      },
+      "calendar": {
+        "title": "",
+        "description": ""
       },
       "storage": {
         "title": "Paramètres de stockage",
@@ -121,6 +129,13 @@
     "description": "Votre compte est automatiquement rattaché à un cercle lorsque vous en créez un ou que vous en rejoignez un. Invitez facilement vos proches en partageant le code ou le lien du cercle ci-dessous. Vous recevrez une notification ici lorsque quelqu'un demandera à rejoindre votre cercle.",
     "memberOf": "Vous faites partie de {{name}}",
     "yourCircleCode": "Votre code de cercle est :",
+    "pendingApprovalMessage": "",
+    "cancelRequest": "",
+    "cancelRequestTitle": "",
+    "cancelRequestMessage": "",
+    "cancelRequestButton": "",
+    "requestCancelled": "",
+    "cancelRequestFailed": "",
     "copyCode": "Copier le code",
     "shareInvite": "Partager l'invitation",
     "codeCopied": "Code copié dans le presse-papiers",
@@ -161,6 +176,12 @@
     "acceptRequestTitle": "Accepter la demande d'adhésion",
     "acceptRequestMessage": "Voulez-vous vraiment accepter {{name}} (identifiant : {{username}}) dans votre cercle ?",
     "requestAccepted": "Demande acceptée avec succès",
+    "decline": "",
+    "declineRequestTitle": "",
+    "declineRequestMessage": "",
+    "declineRequestButton": "",
+    "requestDeclined": "",
+    "declineRequestFailed": "",
     "or": "ou",
     "joinOtherDescription": "Vous souhaitez rejoindre le cercle de quelqu'un d'autre ? Demandez-lui son code de cercle ou son lien d'invitation. Saisissez le code ci-dessous pour le rejoindre.",
     "enterCircleCode": "Saisissez le code du cercle :",
@@ -176,7 +197,7 @@
     "description": "Modifiez les paramètres de votre compte, votre formule ou votre mot de passe",
     "accountType": "Type de compte : {{type}}",
     "free": "Basic",
-    "plus": "Plus",
+    "plus": "",
     "plusUntil": "Plus (jusqu'au {{date}})",
     "activeDescription": "Vous êtes actuellement abonné à la formule Plus. Votre abonnement sera renouvelé le {{date}}.",
     "cancelledDescription": "Vous avez résilié votre abonnement. Votre compte repassera à la formule Basic le {{date}}.",
@@ -271,9 +292,9 @@
     "customLabel": "Notification personnalisée",
     "customHelper": "Recevoir les notifications sur une autre plateforme",
     "targetNone": "Aucune",
-    "targetTelegram": "Telegram",
-    "targetPushover": "Pushover",
-    "targetWebhooks": "Webhooks",
+    "targetTelegram": "",
+    "targetPushover": "",
+    "targetWebhooks": "",
     "telegramBotHelpBefore": "Vous devez d'abord envoyer un message au bot pour que les notifications Telegram fonctionnent",
     "telegramBotHelpAfter": "pour démarrer une conversation",
     "clickHere": "Cliquez ici",
@@ -361,8 +382,9 @@
     "accessToken": "Jeton d'accès",
     "description": "Créez un jeton à utiliser avec l'API pour mettre à jour les objets qui déclenchent des tâches",
     "plusNotice": "Les jetons d'API ne sont pas disponibles dans la formule Basic. Passez à Plus pour générer des jetons d'API, vous intégrer à des systèmes externes et automatiser vos tâches.",
-    "showToken": "Afficher le jeton",
-    "hideToken": "Masquer le jeton",
+    "tokenCreatedTitle": "",
+    "tokenCreatedWarning": "",
+    "copyToken": "",
     "removeTitle": "Retirer le jeton",
     "removeMessage": "Voulez-vous vraiment retirer {{name}} ?",
     "removedTitle": "Retiré",
@@ -371,6 +393,124 @@
     "generateNew": "Générer un nouveau jeton",
     "nameModalTitle": "Donnez un nom à votre nouveau jeton, quelque chose qui vous permettra de le reconnaître.",
     "generateToken": "Générer le jeton"
+  },
+  "calendar": {
+    "title": "",
+    "description": "",
+    "plusTitle": "",
+    "plusNotice": "",
+    "upgrade": "",
+    "activeTitle": "",
+    "activeStatus": "",
+    "urlLabel": "",
+    "copy": "",
+    "copied": "",
+    "copyFailed": "",
+    "createdAt": "",
+    "lastUsedAt": "",
+    "neverUsed": "",
+    "keepPrivateTitle": "",
+    "keepPrivateDescription": "",
+    "manageTitle": "",
+    "rotate": "",
+    "rotateTitle": "",
+    "rotateMessage": "",
+    "rotated": "",
+    "revoke": "",
+    "revokeTitle": "",
+    "revokeMessage": "",
+    "revoked": "",
+    "inactiveTitle": "",
+    "inactiveDescription": "",
+    "generate": "",
+    "generated": "",
+    "howToTitle": "",
+    "howToDescription": "",
+    "errorTitle": "",
+    "actionFailed": "",
+    "loadFailed": ""
+  },
+  "bridge": {
+    "title": "",
+    "description": "",
+    "heroEyebrow": "",
+    "freeToStart": "",
+    "heroTitle": "",
+    "pricingSummary": "",
+    "connectedBadge": "",
+    "benefits": {
+      "native": {
+        "title": "",
+        "description": ""
+      },
+      "support": {
+        "title": "",
+        "description": ""
+      },
+      "simple": {
+        "title": "",
+        "description": ""
+      }
+    },
+    "privacyTitle": "",
+    "privacyNotice": "",
+    "adminOnly": "",
+    "notConnected": "",
+    "checkingStatus": "",
+    "connectionTitle": "",
+    "connectTitle": "",
+    "credentialsTitle": "",
+    "steps": {
+      "1": "",
+      "2": "",
+      "3": ""
+    },
+    "unnamedInstance": "",
+    "connectedAs": "",
+    "planFree": "",
+    "planPlus": "",
+    "emailUnverified": "",
+    "getStarted": "",
+    "getStartedHint": "",
+    "connectIntro": "",
+    "connect": "",
+    "connectedTitle": "",
+    "rotateCredential": "",
+    "rotateInstructions": "",
+    "rotatedTitle": "",
+    "disconnect": "",
+    "disconnectTitle": "",
+    "disconnectMessage": "",
+    "disconnectedTitle": "",
+    "refresh": "",
+    "upgrade": "",
+    "manageBilling": "",
+    "upgradeBillingNote": "",
+    "connectForm": {
+      "baseUrl": "",
+      "instanceId": "",
+      "instanceIdPlaceholder": "",
+      "instanceToken": "",
+      "instanceTokenPlaceholder": "",
+      "instanceTokenHint": "",
+      "required": ""
+    },
+    "usage": {
+      "notifications": "",
+      "devices": "",
+      "notificationsLabel": "",
+      "devicesLabel": ""
+    },
+    "errors": {
+      "title": "",
+      "generic": "",
+      "revokedToken": "",
+      "serviceUnavailable": "",
+      "rateLimited": "",
+      "quotaExceeded": "",
+      "deviceLimitReached": "",
+      "validationError": ""
+    }
   },
   "storage": {
     "title": "Paramètres de stockage",
@@ -597,7 +737,8 @@
     "reasonThingTriggers": "Le déclenchement automatique de tâches lorsqu'un objet change d'état est une fonctionnalité Plus.",
     "reasonProjectLimit": "Votre formule actuelle inclut {{projectLimit}} projets. Passez à Plus pour en créer autant que nécessaire.",
     "reasonQuickFilterLimit": "Votre formule actuelle inclut {{filterLimit}} filtres rapides enregistrés. Passez à Plus pour des filtres illimités.",
-    "reasonFileUpload": "Joindre des fichiers et des images est une fonctionnalité Plus. Passez à Plus pour ajouter photos, scans et documents à vos tâches."
+    "reasonFileUpload": "Joindre des fichiers et des images est une fonctionnalité Plus. Passez à Plus pour ajouter photos, scans et documents à vos tâches.",
+    "reasonCalendarSync": ""
   },
   "childUsers": {
     "errNameRequired": "Le nom du sous-compte est obligatoire",
@@ -681,7 +822,7 @@
     "transferIntro": "Vous possédez des cercles dont la propriété doit être transférée avant la suppression de votre compte. Sélectionnez de nouveaux propriétaires :",
     "selectOwner": "Sélectionner le nouveau propriétaire",
     "confirmPrompt": "Saisissez votre mot de passe et tapez DELETE pour confirmer",
-    "typeDelete": "DELETE",
+    "typeDelete": "",
     "warningLead": "Cette action est irréversible.",
     "warningIntro": "La suppression de votre compte entraînera la suppression définitive des éléments suivants :",
     "removesProfile": "Votre profil utilisateur et vos données d'authentification",
