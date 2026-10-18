@@ -804,7 +804,19 @@
     "subtasksLabel": "Sous-tâches :",
     "createAnother": "Créer une autre",
     "createAndAddAnother": "Créer et en ajouter une autre",
-    "createAndClose": "Créer et fermer"
+    "createAndClose": "Créer et fermer",
+    "findingDetails": "Recherche des détails de la tâche dans votre photo…",
+    "findingDetailsHint": "Vous pouvez continuer à modifier pendant que nous recherchons.",
+    "detailsFound": "Nous avons trouvé des détails de la tâche",
+    "suggestedDue": "Date d'échéance suggérée : {{date}}",
+    "useSuggestion": "Utiliser la suggestion",
+    "useAndKeepAttachment": "Utiliser la suggestion et conserver la photo",
+    "dismissSuggestion": "Ignorer la suggestion",
+    "noDetailsFound": "Aucun détail de tâche trouvé",
+    "analysisFailed": "Nous n'avons pas pu analyser cette photo",
+    "attachmentStillAdded": "Votre photo est toujours jointe.",
+    "continueManually": "Vous pouvez continuer à créer la tâche manuellement.",
+    "dismissAnalysis": "Ignorer l'analyse de la photo"
   },
   "repeat": {
     "days": {

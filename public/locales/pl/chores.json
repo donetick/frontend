@@ -804,7 +804,19 @@
     "subtasksLabel": "Subtasks:",
     "createAnother": "Utwórz kolejne",
     "createAndAddAnother": "Utwórz i dodaj kolejne",
-    "createAndClose": "Utwórz i zamknij"
+    "createAndClose": "Utwórz i zamknij",
+    "findingDetails": "Wyszukiwanie szczegółów zadania ze zdjęcia…",
+    "findingDetailsHint": "Możesz kontynuować edycję, podczas gdy szukamy.",
+    "detailsFound": "Znaleźliśmy szczegóły zadania",
+    "suggestedDue": "Proponowany termin: {{date}}",
+    "useSuggestion": "Użyj propozycji",
+    "useAndKeepAttachment": "Użyj propozycji i zachowaj zdjęcie",
+    "dismissSuggestion": "Odrzuć propozycję",
+    "noDetailsFound": "Nie znaleziono szczegółów zadania",
+    "analysisFailed": "Nie udało się przeanalizować tego zdjęcia",
+    "attachmentStillAdded": "Twoje zdjęcie jest wciąż dołączone.",
+    "continueManually": "Możesz kontynuować tworzenie zadania ręcznie.",
+    "dismissAnalysis": "Odrzuć analizę zdjęcia"
   },
   "repeat": {
     "days": {

@@ -804,7 +804,19 @@
     "subtasksLabel": "المهام الفرعية:",
     "createAnother": "إنشاء مهمة أخرى",
     "createAndAddAnother": "إنشاء وإضافة أخرى",
-    "createAndClose": "إنشاء وإغلاق"
+    "createAndClose": "إنشاء وإغلاق",
+    "findingDetails": "جارٍ البحث عن تفاصيل المهمة من صورتك…",
+    "findingDetailsHint": "يمكنك الاستمرار في التعديل بينما نبحث.",
+    "detailsFound": "وجدنا تفاصيل المهمة",
+    "suggestedDue": "تاريخ الاستحقاق المقترح: {{date}}",
+    "useSuggestion": "استخدام الاقتراح",
+    "useAndKeepAttachment": "استخدام الاقتراح والاحتفاظ بالصورة",
+    "dismissSuggestion": "تجاهل الاقتراح",
+    "noDetailsFound": "لم يتم العثور على تفاصيل للمهمة",
+    "analysisFailed": "تعذّر تحليل هذه الصورة",
+    "attachmentStillAdded": "لا تزال صورتك مرفقة.",
+    "continueManually": "يمكنك الاستمرار في إنشاء المهمة يدويًا.",
+    "dismissAnalysis": "تجاهل تحليل الصورة"
   },
   "repeat": {
     "days": {

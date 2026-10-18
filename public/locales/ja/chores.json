@@ -804,7 +804,19 @@
     "subtasksLabel": "Subtasks:",
     "createAnother": "続けて作成",
     "createAndAddAnother": "作成して続けて追加",
-    "createAndClose": "作成して閉じる"
+    "createAndClose": "作成して閉じる",
+    "findingDetails": "写真からタスクの詳細を検索しています…",
+    "findingDetailsHint": "検索中も編集を続けられます。",
+    "detailsFound": "タスクの詳細が見つかりました",
+    "suggestedDue": "提案された期限: {{date}}",
+    "useSuggestion": "提案を使用",
+    "useAndKeepAttachment": "提案を使用して写真も保持",
+    "dismissSuggestion": "提案を無視",
+    "noDetailsFound": "タスクの詳細が見つかりませんでした",
+    "analysisFailed": "この写真を解析できませんでした",
+    "attachmentStillAdded": "写真は引き続き添付されています。",
+    "continueManually": "タスクの作成を手動で続けられます。",
+    "dismissAnalysis": "写真の解析を無視"
   },
   "repeat": {
     "days": {
