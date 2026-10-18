@@ -15,6 +15,7 @@ dependencies {
     implementation project(':capacitor-app')
     implementation project(':capacitor-browser')
     implementation project(':capacitor-device')
+    implementation project(':capacitor-filesystem')
     implementation project(':capacitor-haptics')
     implementation project(':capacitor-local-llm')
     implementation project(':capacitor-local-notifications')
@@ -30,6 +31,7 @@ dependencies {
     implementation project(':jcesarmobile-capacitor-ocr')
     implementation project(':revenuecat-purchases-capacitor')
     implementation project(':revenuecat-purchases-capacitor-ui')
+    implementation project(':supernotes-capacitor-send-intent')
     implementation project(':capacitor-plugin-safe-area')
 
 }

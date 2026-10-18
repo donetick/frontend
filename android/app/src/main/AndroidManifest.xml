@@ -49,6 +49,30 @@
             </intent-filter>
         </activity>
 
+        <!-- Android share sheet target. The plugin copies content URIs into
+             app-private storage before exposing them to the WebView. -->
+        <activity
+            android:name="app.supernotes.sendIntent.SendIntentActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+                <data android:mimeType="image/*" />
+                <data android:mimeType="application/*" />
+                <data android:mimeType="video/*" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="image/*" />
+                <data android:mimeType="application/*" />
+                <data android:mimeType="video/*" />
+            </intent-filter>
+        </activity>
+
         <!-- Home-screen widgets -->
         <receiver
             android:name=".widget.TodayWidgetProvider"

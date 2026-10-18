@@ -26,6 +26,10 @@ import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 import { useCreateChore } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { localAIService } from '../../service/LocalAIService'
+import {
+  fileToDataUrl,
+  sharedItemToFile,
+} from '../../service/ShareTargetService'
 import { voiceInputService } from '../../service/VoiceInputService'
 import LABEL_COLORS, { TASK_COLOR } from '../../utils/Colors'
 import { sanitizeRemindersForPlan } from '../../utils/entitlements'
@@ -193,7 +197,13 @@ const POINTS_SUGGESTIONS = {
 // parse so a fast type-then-Enter never creates from stale parsed state.
 const PARSE_DEBOUNCE_MS = 150
 
-const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
+const TaskInput = ({
+  initialMode,
+  initialShare,
+  isModalOpen,
+  onChoreUpdate,
+  onClose,
+}) => {
   const { t } = useTranslation('chores')
   // Claims the keyboard while open so background listeners (e.g. the project
   // selector's own Cmd+E) know to stay out of the way — see
@@ -333,6 +343,8 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
   const [showScan, setShowScan] = useState(false)
   const [scanAutoCapture, setScanAutoCapture] = useState(false)
   const [pendingPhotoUrl, setPendingPhotoUrl] = useState(null)
+  const [scanImageAlreadyAttached, setScanImageAlreadyAttached] =
+    useState(false)
   const [isAttachingScan, setIsAttachingScan] = useState(false)
   const [llmAvailable, setLlmAvailable] = useState(false)
   const [showVoice, setShowVoice] = useState(false)
@@ -916,13 +928,87 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
     }
   }
 
+  // A native share opens directly into this modal. Files are uploaded against
+  // the same draft as picker attachments; the first image also enters the
+  // existing OCR/AI flow automatically.
+  const appliedInitialShareRef = useRef(null)
+  useEffect(() => {
+    if (!isModalOpen) {
+      appliedInitialShareRef.current = null
+      return
+    }
+    if (!initialShare || appliedInitialShareRef.current === initialShare.id) {
+      return
+    }
+    appliedInitialShareRef.current = initialShare.id
+    taskSourceRef.current = 'share'
+
+    const applyShare = async () => {
+      const items = initialShare.items || []
+      const textItem = items.find(item => item.type === 'text/plain')
+      const sharedText = textItem?.url || textItem?.title || ''
+      const sharedSubject =
+        textItem?.title && textItem.title !== sharedText ? textItem.title : null
+      const fileItems = items.filter(
+        item => item.url && item.type !== 'text/plain',
+      )
+
+      const initialTitle =
+        sharedSubject || sharedText || fileItems[0]?.title || ''
+      if (initialTitle) processText(initialTitle)
+      if (sharedSubject && sharedText) {
+        setDescription(sharedText)
+        setHasDescription(true)
+      }
+
+      setIsAttachingScan(fileItems.length > 0)
+      try {
+        let firstImage = null
+        for (const item of fileItems) {
+          try {
+            const file = await sharedItemToFile(item)
+            if (!file) continue
+            if (!firstImage && file.type.startsWith('image/')) {
+              firstImage = file
+            }
+            const uploaded = await uploadFile(file)
+            if (uploaded) {
+              setAttachments(current => [
+                ...current,
+                {
+                  name: uploaded.fileName,
+                  path: uploaded.path,
+                  url: uploaded.url,
+                },
+              ])
+            }
+          } catch (error) {
+            console.error('[ShareTarget] failed to import shared file:', error)
+          }
+        }
+
+        if (firstImage && (await localAIService.isAvailable())) {
+          const imageUrl = await fileToDataUrl(firstImage)
+          setScanImageAlreadyAttached(true)
+          setPendingPhotoUrl(imageUrl)
+          setScanAutoCapture(false)
+          setShowScan(true)
+        }
+      } finally {
+        setIsAttachingScan(false)
+      }
+    }
+
+    void applyShare()
+  }, [initialShare, isModalOpen, processText, uploadFile])
+
   const handleTaskExtracted = ({
     attachmentImage,
     description: extractedDesc,
     dueDate: extractedDue,
     taskName,
   }) => {
-    taskSourceRef.current = 'scan'
+    if (!scanImageAlreadyAttached) taskSourceRef.current = 'scan'
     if (attachmentImage) {
       attachScannedImage(attachmentImage)
     }
@@ -1051,6 +1137,7 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
     setScanState({ phase: 'idle', primaryAction: null })
     setCreatingVoiceTasks(false)
     setIsAttachingScan(false)
+    setScanImageAlreadyAttached(false)
     resetFormFields()
     setProjectId(getInitialProject())
     setContinuousMode(false)
@@ -1735,7 +1822,9 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
           <ScanPanel
             open
             autoCapture={scanAutoCapture}
-            canKeepImage={isPlusAccount(userProfile)}
+            canKeepImage={
+              isPlusAccount(userProfile) && !scanImageAlreadyAttached
+            }
             onTaskExtracted={handleTaskExtracted}
             initialImageUrl={pendingPhotoUrl}
             onStateChange={setScanState}
@@ -1743,6 +1832,7 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
               setShowScan(false)
               setScanAutoCapture(false)
               setPendingPhotoUrl(null)
+              setScanImageAlreadyAttached(false)
               setScanState({ phase: 'idle', primaryAction: null })
             }}
           />

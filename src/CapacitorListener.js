@@ -7,6 +7,10 @@ import { Preferences } from '@capacitor/preferences'
 import { PushNotifications } from '@capacitor/push-notifications'
 import { focusManager } from '@tanstack/react-query'
 
+import {
+  receivePendingShare,
+  storePendingShare,
+} from './service/ShareTargetService'
 import { RegisterDeviceToken, UnregisterDeviceToken } from './utils/Fetcher'
 import { beginOAuthExchange } from './utils/OAuthExchangeState'
 import { hasSeenOnboarding } from './utils/Onboarding'
@@ -331,6 +335,17 @@ const registerCapacitorListeners = navigate => {
   listenersRegistered = true
 
   localNotificationListenerRegistration()
+
+  // Android launches the plugin's share activity; iOS opens the app through
+  // its URL scheme and emits sendIntentReceived. Check once for cold starts
+  // and again for every warm share.
+  const handleIncomingShare = share => {
+    storePendingShare(share)
+    routerNavigate('/chores?share_task=1')
+  }
+  const checkForShare = () => receivePendingShare(handleIncomingShare)
+  window.addEventListener('sendIntentReceived', checkForShare)
+  void checkForShare()
 
   // Cold-start: app was launched by tapping an NFC tag (or other deep link).
   // getLaunchUrl() is sticky and keeps returning the launch URL across reloads,

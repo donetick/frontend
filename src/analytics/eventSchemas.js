@@ -40,9 +40,9 @@ export const EVENT_SCHEMAS = {
     has_recurrence: 'boolean',
     recurrence_type: 'string',
     priority: 'number',
-    // quick_add/voice/scan = the AddTaskModal popup; full_page/clone = the
-    // dedicated create page (ChoreEdit.jsx with no existing chore id).
-    source: 'enum:quick_add,voice,scan,full_page,clone',
+    // quick_add/voice/scan/share = the AddTaskModal popup; full_page/clone =
+    // the dedicated create page (ChoreEdit.jsx with no existing chore id).
+    source: 'enum:quick_add,voice,scan,share,full_page,clone',
   }),
   chore_updated: withCommon({
     has_due_date: 'boolean',
