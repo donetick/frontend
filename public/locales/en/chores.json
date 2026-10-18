@@ -805,7 +805,19 @@
     "create": "Create",
     "createAnother": "Create another",
     "createAndAddAnother": "Create & add another",
-    "createAndClose": "Create & close"
+    "createAndClose": "Create & close",
+    "findingDetails": "Finding task details from your photo…",
+    "findingDetailsHint": "You can continue editing while we look.",
+    "detailsFound": "We found task details",
+    "suggestedDue": "Suggested due date: {{date}}",
+    "useSuggestion": "Use suggestion",
+    "useAndKeepAttachment": "Use suggestion & keep photo",
+    "dismissSuggestion": "Dismiss suggestion",
+    "noDetailsFound": "No task details found",
+    "analysisFailed": "We couldn't analyze this photo",
+    "attachmentStillAdded": "Your photo is still attached.",
+    "continueManually": "You can continue creating the task manually.",
+    "dismissAnalysis": "Dismiss photo analysis"
   },
   "repeat": {
     "days": {
