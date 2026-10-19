@@ -126,6 +126,8 @@
     "cards": "Cards",
     "compact": "Compact",
     "calendar": "Calendar",
+    "list": "List",
+    "board": "Board",
     "filters": "Filters",
     "viewGroup": "View & Group",
     "filterNamePlaceholder": "Filter name…",
@@ -143,6 +145,24 @@
     "showCount": "Show {{count}}",
     "done": "Done",
     "savedFilters": "Saved Filters"
+  },
+  "board": {
+    "add": "Add",
+    "addSection": "Add section",
+    "addTask": "Add task",
+    "deleteSection": "Delete section",
+    "dragSection": "Drag section",
+    "dragTask": "Drag task",
+    "dropTasksHere": "Drop tasks here",
+    "expandSubtasks": "Expand subtasks",
+    "collapseSubtasks": "Collapse subtasks",
+    "newSectionPlaceholder": "New section",
+    "renameSection": "Rename section",
+    "defaults": {
+      "todo": "To do",
+      "inProgress": "In progress",
+      "done": "Done"
+    }
   },
   "sort": {
     "assignedToMe": "Assigned to me",
@@ -786,6 +806,7 @@
     "subtasksLabel": "Subtasks:",
     "title": "Create new task",
     "defaultProject": "Default Project",
+    "selectSection": "Select section",
     "anyone": "Anyone",
     "taskPlaceholder": "Type your task...",
     "descriptionChip": "Description",

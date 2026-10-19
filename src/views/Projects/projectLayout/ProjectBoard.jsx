@@ -1,0 +1,726 @@
+import {
+  closestCorners,
+  DndContext,
+  DragOverlay,
+  KeyboardSensor,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core'
+import {
+  arrayMove,
+  horizontalListSortingStrategy,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+import {
+  Add,
+  ChevronRight,
+  DeleteOutline,
+  DragIndicator,
+  EditOutlined,
+  ExpandMore,
+} from '@mui/icons-material'
+import {
+  Box,
+  Button,
+  Checkbox,
+  CircularProgress,
+  IconButton,
+  Input,
+  Sheet,
+  Typography,
+} from '@mui/joy'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
+
+import useLongPress from '../../../hooks/useLongPress'
+import { CompleteSubTask } from '../../../utils/Fetcher'
+import CompactChoreCard from '../../Chores/CompactChoreCard'
+import {
+  useCreateSection,
+  useDeleteSection,
+  useMoveChore,
+  useMoveSection,
+  useProjectSections,
+  useRenameSection,
+} from '../ProjectQueries'
+
+const columnDndId = id => `section:${id}`
+const taskDndId = id => `task:${id}`
+
+const flattenSubtasks = (tasks, parentId = null, level = 0) =>
+  tasks
+    .filter(task => task.parentId === parentId)
+    .sort((a, b) => (a.orderId || 0) - (b.orderId || 0))
+    .flatMap(task => [
+      { ...task, level },
+      ...flattenSubtasks(tasks, task.id, level + 1),
+    ])
+
+const SortableTask = ({
+  chore,
+  displayMode,
+  isMultiSelectMode,
+  isSelected,
+  membersData,
+  onAction,
+  onChipClick,
+  onLongPress,
+  onSelectionToggle,
+}) => {
+  const { t } = useTranslation('chores')
+  const [subtasksExpanded, setSubtasksExpanded] = useState(false)
+  const [subtasks, setSubtasks] = useState(chore.subTasks || [])
+  const {
+    attributes,
+    isDragging,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({
+    id: taskDndId(chore.id),
+    data: { type: 'task', taskId: String(chore.id) },
+    disabled: isMultiSelectMode,
+  })
+  const navigate = useNavigate()
+  const { cancel: cancelLongPress, handlers: longPressHandlers } = useLongPress(
+    () => onLongPress?.(chore.id),
+    { enabled: Boolean(onLongPress) && !isMultiSelectMode },
+  )
+  const showSubtasks =
+    displayMode === 'list' && subtasks.length > 0 && !isMultiSelectMode
+
+  useEffect(() => setSubtasks(chore.subTasks || []), [chore.subTasks])
+  useEffect(() => {
+    if (isDragging) cancelLongPress()
+  }, [cancelLongPress, isDragging])
+
+  const toggleSubtask = async subtask => {
+    const previous = subtasks
+    const completedAt = subtask.completedAt ? null : new Date().toISOString()
+    setSubtasks(current =>
+      current.map(item =>
+        item.id === subtask.id ? { ...item, completedAt } : item,
+      ),
+    )
+    try {
+      const response = await CompleteSubTask(
+        subtask.id,
+        Number(chore.id),
+        completedAt,
+      )
+      if (!response?.ok) setSubtasks(previous)
+    } catch {
+      setSubtasks(previous)
+    }
+  }
+
+  return (
+    <Sheet
+      {...longPressHandlers}
+      ref={setNodeRef}
+      variant='outlined'
+      onClick={() => {
+        if (isMultiSelectMode) onSelectionToggle()
+        else navigate(`/chores/${chore.id}`)
+      }}
+      sx={{
+        borderRadius: 'md',
+        overflow: 'hidden',
+        flexShrink: 0,
+        opacity: isDragging ? 0.35 : 1,
+        transform: CSS.Transform.toString(transform),
+        transition,
+        touchAction: 'pan-y',
+      }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'stretch' }}>
+        <IconButton
+          {...attributes}
+          {...listeners}
+          aria-label={t('board.dragTask')}
+          disabled={isMultiSelectMode}
+          size='sm'
+          variant='plain'
+          onClick={event => event.stopPropagation()}
+          sx={{
+            width: 28,
+            minWidth: 28,
+            borderRadius: 0,
+            cursor: isMultiSelectMode
+              ? 'default'
+              : isDragging
+                ? 'grabbing'
+                : 'grab',
+            color: 'text.tertiary',
+            touchAction: 'none',
+          }}
+        >
+          <DragIndicator sx={{ fontSize: 18 }} />
+        </IconButton>
+        {showSubtasks && (
+          <IconButton
+            aria-label={t(
+              subtasksExpanded
+                ? 'board.collapseSubtasks'
+                : 'board.expandSubtasks',
+            )}
+            size='sm'
+            variant='plain'
+            onClick={event => {
+              event.stopPropagation()
+              setSubtasksExpanded(value => !value)
+            }}
+            sx={{ width: 28, minWidth: 28, borderRadius: 0 }}
+          >
+            {subtasksExpanded ? <ExpandMore /> : <ChevronRight />}
+          </IconButton>
+        )}
+        <CompactChoreCard
+          chore={chore}
+          performers={membersData?.res || []}
+          isMultiSelectMode={isMultiSelectMode}
+          isSelected={isSelected}
+          onAction={onAction}
+          onChipClick={onChipClick}
+          onSelectionToggle={onSelectionToggle}
+          showDivider={false}
+          sx={{ minWidth: 0, flex: 1 }}
+        />
+      </Box>
+      {showSubtasks && subtasksExpanded && (
+        <Box
+          onClick={event => event.stopPropagation()}
+          sx={{ borderTop: '1px solid', borderColor: 'divider', py: 0.5 }}
+        >
+          {flattenSubtasks(subtasks).map(subtask => (
+            <Box
+              key={subtask.id}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                minHeight: 34,
+                pl: `${16 + Math.min(subtask.level, 4) * 20}px`,
+                pr: 1,
+              }}
+            >
+              <Checkbox
+                checked={Boolean(subtask.completedAt)}
+                size='sm'
+                onChange={() => toggleSubtask(subtask)}
+              />
+              <Typography
+                level='body-sm'
+                sx={{
+                  color: subtask.completedAt ? 'text.tertiary' : 'text.primary',
+                  textDecoration: subtask.completedAt ? 'line-through' : 'none',
+                }}
+              >
+                {subtask.name}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+      )}
+    </Sheet>
+  )
+}
+
+const BoardColumn = ({
+  canDelete,
+  chores,
+  displayMode,
+  isMultiSelectMode,
+  membersData,
+  onAction,
+  onAddTask,
+  onChipClick,
+  onDelete,
+  onLongPressChore,
+  onRename,
+  section,
+  selectedChores,
+  toggleChoreSelection,
+  toggleSectionSelection,
+}) => {
+  const { t } = useTranslation('chores')
+  const [isEditing, setIsEditing] = useState(false)
+  const [name, setName] = useState(section.name)
+  const {
+    attributes,
+    isDragging,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({
+    id: columnDndId(section.id),
+    data: { sectionId: section.id, type: 'section' },
+    disabled: isMultiSelectMode,
+  })
+
+  useEffect(() => setName(section.name), [section.name])
+
+  const saveName = () => {
+    const trimmed = name.trim()
+    if (trimmed && trimmed !== section.name) onRename(trimmed)
+    else setName(section.name)
+    setIsEditing(false)
+  }
+
+  return (
+    <Sheet
+      ref={setNodeRef}
+      variant='soft'
+      sx={{
+        width: displayMode === 'list' ? '100%' : { xs: 292, sm: 320 },
+        minWidth: displayMode === 'list' ? 0 : { xs: 292, sm: 320 },
+        alignSelf: 'flex-start',
+        borderRadius: 'lg',
+        opacity: isDragging ? 0.45 : 1,
+        transform: CSS.Transform.toString(transform),
+        transition,
+      }}
+    >
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 0.5,
+          minHeight: 48,
+          px: 1,
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+        }}
+      >
+        <IconButton
+          {...attributes}
+          {...listeners}
+          aria-label={t('board.dragSection')}
+          disabled={isMultiSelectMode}
+          size='sm'
+          variant='plain'
+          sx={{ cursor: isDragging ? 'grabbing' : 'grab', touchAction: 'none' }}
+        >
+          <DragIndicator />
+        </IconButton>
+        {isMultiSelectMode && (
+          <Checkbox
+            checked={
+              chores.length > 0 &&
+              chores.every(chore => selectedChores.has(chore.id))
+            }
+            indeterminate={
+              chores.some(chore => selectedChores.has(chore.id)) &&
+              !chores.every(chore => selectedChores.has(chore.id))
+            }
+            disabled={chores.length === 0}
+            size='sm'
+            onChange={() => toggleSectionSelection(chores)}
+          />
+        )}
+        {isEditing ? (
+          <Input
+            autoFocus
+            size='sm'
+            value={name}
+            onChange={event => setName(event.target.value)}
+            onBlur={saveName}
+            onKeyDown={event => {
+              if (event.key === 'Enter') saveName()
+              if (event.key === 'Escape') {
+                setName(section.name)
+                setIsEditing(false)
+              }
+            }}
+            sx={{ flex: 1 }}
+          />
+        ) : (
+          <Typography level='title-sm' sx={{ flex: 1 }}>
+            {section.name}
+          </Typography>
+        )}
+        <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+          {chores.length}
+        </Typography>
+        <IconButton
+          aria-label={t('board.renameSection')}
+          size='sm'
+          variant='plain'
+          onClick={() => setIsEditing(true)}
+        >
+          <EditOutlined sx={{ fontSize: 17 }} />
+        </IconButton>
+        <IconButton
+          aria-label={t('board.deleteSection')}
+          color='danger'
+          disabled={!canDelete}
+          size='sm'
+          variant='plain'
+          onClick={onDelete}
+        >
+          <DeleteOutline sx={{ fontSize: 18 }} />
+        </IconButton>
+      </Box>
+
+      {!isMultiSelectMode && (
+        <Button
+          variant='plain'
+          color='neutral'
+          size='sm'
+          startDecorator={<Add sx={{ fontSize: 16 }} />}
+          onClick={onAddTask}
+          sx={{
+            justifyContent: 'flex-start',
+            borderRadius: 0,
+            color: 'text.tertiary',
+            mx: 1,
+            mt: 1,
+          }}
+        >
+          {t('board.addTask')}
+        </Button>
+      )}
+
+      <SortableContext
+        items={chores.map(chore => taskDndId(chore.id))}
+        strategy={verticalListSortingStrategy}
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 1,
+            minHeight: 88,
+            maxHeight: displayMode === 'list' ? 'none' : 'calc(100vh - 260px)',
+            overflowY: 'auto',
+            p: 1,
+          }}
+        >
+          {chores.length === 0 && (
+            <Box
+              sx={{
+                display: 'grid',
+                placeItems: 'center',
+                minHeight: 70,
+                border: '1px dashed',
+                borderColor: 'divider',
+                borderRadius: 'md',
+              }}
+            >
+              <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+                {t('board.dropTasksHere')}
+              </Typography>
+            </Box>
+          )}
+          {chores.map(chore => (
+            <SortableTask
+              key={chore.id}
+              chore={chore}
+              displayMode={displayMode}
+              isMultiSelectMode={isMultiSelectMode}
+              isSelected={selectedChores.has(chore.id)}
+              membersData={membersData}
+              onAction={onAction}
+              onChipClick={onChipClick}
+              onLongPress={onLongPressChore}
+              onSelectionToggle={() => toggleChoreSelection(chore.id)}
+            />
+          ))}
+        </Box>
+      </SortableContext>
+    </Sheet>
+  )
+}
+
+const ProjectBoard = ({
+  chores,
+  displayMode = 'board',
+  handleChoreAction,
+  handleLabelFiltering,
+  isMultiSelectMode = false,
+  membersData,
+  onAddTask,
+  onLongPressChore,
+  projectId,
+  selectedChores = new Set(),
+  toggleChoreSelection,
+  toggleSectionSelection,
+}) => {
+  const { t } = useTranslation('chores')
+  const [activeTask, setActiveTask] = useState(null)
+  const [newSectionName, setNewSectionName] = useState('')
+  const hasEnsuredDefaultsRef = useRef(false)
+
+  const { data: sections = [], isLoading } = useProjectSections(projectId)
+  const createSectionMutation = useCreateSection()
+  const renameSectionMutation = useRenameSection()
+  const deleteSectionMutation = useDeleteSection()
+  const moveSectionMutation = useMoveSection()
+  const moveChoreMutation = useMoveChore()
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 180, tolerance: 6 },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  )
+
+  // A project's board starts without any columns. Create the usual three the
+  // first time anyone opens it empty, so it isn't blank. This can race with
+  // another viewer doing the same at the same moment; worst case is a couple
+  // of duplicate default sections, which anyone can rename or delete.
+  useEffect(() => {
+    if (isLoading || sections.length > 0 || hasEnsuredDefaultsRef.current) {
+      return
+    }
+    hasEnsuredDefaultsRef.current = true
+    ;[
+      t('board.defaults.todo'),
+      t('board.defaults.inProgress'),
+      t('board.defaults.done'),
+    ].forEach(name => {
+      createSectionMutation.mutate({ projectId, name })
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading, sections.length, projectId])
+
+  const choresBySection = useMemo(() => {
+    const grouped = Object.fromEntries(
+      sections.map(section => [section.id, []]),
+    )
+    const firstSectionId = sections[0]?.id
+    chores.forEach(chore => {
+      const sectionId = grouped[chore.sectionId]
+        ? chore.sectionId
+        : firstSectionId
+      if (sectionId) grouped[sectionId].push(chore)
+    })
+    Object.values(grouped).forEach(items =>
+      items.sort((a, b) => (a.boardPosition || 0) - (b.boardPosition || 0)),
+    )
+    return grouped
+  }, [chores, sections])
+
+  const addSection = () => {
+    const name = newSectionName.trim()
+    if (!name) return
+    createSectionMutation.mutate({ projectId, name })
+    setNewSectionName('')
+  }
+
+  const renameSection = (sectionId, name) =>
+    renameSectionMutation.mutate({ projectId, sectionId, name })
+
+  const deleteSection = sectionId => {
+    if (sections.length <= 1) return
+    deleteSectionMutation.mutate({ projectId, sectionId })
+  }
+
+  const handleDragStart = ({ active }) => {
+    if (active.data.current?.type === 'task') {
+      setActiveTask(
+        chores.find(chore => String(chore.id) === active.data.current.taskId) ||
+          null,
+      )
+    }
+  }
+
+  const handleDragEnd = ({ active, over }) => {
+    setActiveTask(null)
+    if (!over || active.id === over.id) return
+
+    const activeData = active.data.current
+    const overData = over.data.current
+
+    if (activeData?.type === 'section' && overData?.type === 'section') {
+      const oldIndex = sections.findIndex(
+        section => section.id === activeData.sectionId,
+      )
+      const newIndex = sections.findIndex(
+        section => section.id === overData.sectionId,
+      )
+      if (oldIndex === -1 || newIndex === -1) return
+      const reordered = arrayMove(sections, oldIndex, newIndex)
+      const movedIndex = reordered.findIndex(
+        section => section.id === activeData.sectionId,
+      )
+      const afterSectionId =
+        movedIndex === 0 ? null : reordered[movedIndex - 1].id
+      moveSectionMutation.mutate({
+        projectId,
+        sectionId: activeData.sectionId,
+        afterSectionId,
+      })
+      return
+    }
+
+    if (activeData?.type !== 'task') return
+    const taskId = activeData.taskId
+    const sourceSectionId = chores.find(
+      chore => String(chore.id) === taskId,
+    )?.sectionId
+    const targetSectionId =
+      overData?.type === 'task'
+        ? chores.find(chore => String(chore.id) === overData.taskId)
+            ?.sectionId
+        : overData?.sectionId
+    const resolvedSourceSectionId = sourceSectionId ?? sections[0]?.id
+    const resolvedTargetSectionId = targetSectionId ?? sections[0]?.id
+    if (!resolvedSourceSectionId || !resolvedTargetSectionId) return
+
+    const sourceIds = (choresBySection[resolvedSourceSectionId] || []).map(
+      chore => String(chore.id),
+    )
+    const targetIds = (choresBySection[resolvedTargetSectionId] || []).map(
+      chore => String(chore.id),
+    )
+    let orderedTargetIds
+    if (resolvedSourceSectionId === resolvedTargetSectionId) {
+      const oldIndex = sourceIds.indexOf(taskId)
+      const newIndex =
+        overData?.type === 'task'
+          ? sourceIds.indexOf(overData.taskId)
+          : sourceIds.length - 1
+      orderedTargetIds = arrayMove(sourceIds, oldIndex, newIndex)
+    } else {
+      orderedTargetIds = targetIds.filter(id => id !== taskId)
+      const overIndex =
+        overData?.type === 'task'
+          ? orderedTargetIds.indexOf(overData.taskId)
+          : orderedTargetIds.length
+      orderedTargetIds.splice(
+        overIndex < 0 ? orderedTargetIds.length : overIndex,
+        0,
+        taskId,
+      )
+    }
+
+    const newIndex = orderedTargetIds.indexOf(taskId)
+    const afterChoreId =
+      newIndex <= 0 ? null : Number(orderedTargetIds[newIndex - 1])
+    moveChoreMutation.mutate({
+      projectId,
+      choreId: Number(taskId),
+      sectionId: resolvedTargetSectionId,
+      afterChoreId,
+    })
+  }
+
+  if (isLoading) {
+    return <CircularProgress sx={{ display: 'block', mx: 'auto', my: 6 }} />
+  }
+
+  return (
+    <Box sx={{ mt: 1 }}>
+      <DndContext
+        collisionDetection={closestCorners}
+        sensors={sensors}
+        onDragStart={handleDragStart}
+        onDragCancel={() => setActiveTask(null)}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext
+          items={sections.map(section => columnDndId(section.id))}
+          strategy={
+            displayMode === 'list'
+              ? verticalListSortingStrategy
+              : horizontalListSortingStrategy
+          }
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: displayMode === 'list' ? 'column' : 'row',
+              alignItems: 'flex-start',
+              gap: 1.5,
+              overflowX: displayMode === 'list' ? 'visible' : 'auto',
+              pb: 2,
+              scrollSnapType:
+                displayMode === 'list'
+                  ? 'none'
+                  : { xs: 'x proximity', md: 'none' },
+              '& > *': { scrollSnapAlign: 'start' },
+            }}
+          >
+            {sections.map(section => (
+              <BoardColumn
+                key={section.id}
+                section={section}
+                chores={choresBySection[section.id] || []}
+                canDelete={sections.length > 1}
+                displayMode={displayMode}
+                isMultiSelectMode={isMultiSelectMode}
+                membersData={membersData}
+                onAction={handleChoreAction}
+                onAddTask={() => onAddTask?.(section.id)}
+                onChipClick={handleLabelFiltering}
+                onLongPressChore={onLongPressChore}
+                selectedChores={selectedChores}
+                toggleChoreSelection={toggleChoreSelection}
+                toggleSectionSelection={toggleSectionSelection}
+                onRename={name => renameSection(section.id, name)}
+                onDelete={() => deleteSection(section.id)}
+              />
+            ))}
+            <Sheet
+              variant='outlined'
+              sx={{
+                display: 'flex',
+                gap: 1,
+                width: displayMode === 'list' ? '100%' : 'auto',
+                minWidth: displayMode === 'list' ? 0 : { xs: 292, sm: 320 },
+                p: 1,
+                borderRadius: 'lg',
+              }}
+            >
+              <Input
+                value={newSectionName}
+                placeholder={t('board.newSectionPlaceholder')}
+                onChange={event => setNewSectionName(event.target.value)}
+                onKeyDown={event => {
+                  if (event.key === 'Enter') addSection()
+                }}
+                sx={{ flex: 1 }}
+              />
+              <Button
+                aria-label={t('board.addSection')}
+                disabled={!newSectionName.trim()}
+                onClick={addSection}
+                startDecorator={<Add />}
+              >
+                {t('board.add')}
+              </Button>
+            </Sheet>
+          </Box>
+        </SortableContext>
+        <DragOverlay>
+          {activeTask ? (
+            <Sheet variant='outlined' sx={{ width: 300, borderRadius: 'md' }}>
+              <CompactChoreCard
+                chore={activeTask}
+                performers={membersData?.res || []}
+                showActions={false}
+                showDivider={false}
+                viewOnly
+              />
+            </Sheet>
+          ) : null}
+        </DragOverlay>
+      </DndContext>
+    </Box>
+  )
+}
+
+export default ProjectBoard

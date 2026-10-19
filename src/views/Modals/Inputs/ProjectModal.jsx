@@ -1,7 +1,9 @@
+import { FormatListBulleted, ViewKanban } from '@mui/icons-material'
 import {
   Avatar,
   Box,
   Button,
+  Chip,
   FormControl,
   FormLabel,
   Input,
@@ -30,6 +32,7 @@ import ProjectAccessReview, {
 } from '../../Projects/ProjectAccessReview'
 import {
   useCreateProject,
+  useProjectView,
   useUpdateProject,
 } from '../../Projects/ProjectQueries'
 import ProjectVisibilityField from '../../Projects/ProjectVisibilityField'
@@ -44,6 +47,8 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
   const [projectIcon, setProjectIcon] = useState(PROJECT_ICONS[0].value)
   const [visibility, setVisibility] = useState(PROJECT_VISIBILITY.CIRCLE)
   const [memberIds, setMemberIds] = useState([])
+  // Private per-user layout preference for this project (board or list).
+  const [view, setView] = useState('board')
   // Server preview of an access change, shown for confirmation before saving.
   const [accessPreview, setAccessPreview] = useState(null)
   const [isPreviewing, setIsPreviewing] = useState(false)
@@ -52,6 +57,7 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
 
   const createProjectMutation = useCreateProject()
   const updateProjectMutation = useUpdateProject()
+  const { data: savedView } = useProjectView(project ? project.id : null)
   const { data: circleMembersData } = useCircleMembers()
   const { data: userProfile } = useUserProfile()
   const circleMembers = circleMembersData?.res || []
@@ -78,11 +84,19 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
         setProjectIcon(PROJECT_ICONS[0].value)
         setVisibility(PROJECT_VISIBILITY.CIRCLE)
         setMemberIds([])
+        setView('board')
       }
       setAccessPreview(null)
       setError('')
     }
   }, [isOpen, project])
+
+  // The saved preference loads asynchronously; apply it once it's in, only
+  // while editing (a new project has no preference yet, so the field starts
+  // on its own default above).
+  useEffect(() => {
+    if (isOpen && project && savedView) setView(savedView)
+  }, [isOpen, project, savedView])
 
   const accessChanged =
     Boolean(project) &&
@@ -96,6 +110,7 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
       description: projectDescription.trim(),
       color: projectColor,
       icon: projectIcon,
+      view,
     }
     if (canChangeAccess) {
       data.visibility = visibility
@@ -119,7 +134,8 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
     }
 
     if (project) {
-      // Update existing project
+      // Update existing project. view rides along in the same request as
+      // the rest of the fields (see buildProjectData) — no separate call.
       updateProjectMutation.mutate(
         { projectId: project.id, projectData },
         {
@@ -357,6 +373,36 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
                 />
               ))}
             </Box>
+          </FormControl>
+
+          {/* Default view (board or list) */}
+          <FormControl>
+            <FormLabel>{t('modal.displayLabel')}</FormLabel>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Chip
+                variant={view === 'board' ? 'solid' : 'soft'}
+                color={view === 'board' ? 'primary' : 'neutral'}
+                startDecorator={<ViewKanban sx={{ fontSize: 16 }} />}
+                onClick={() => setView('board')}
+                disabled={isSubmitting}
+                sx={{ py: 0.64, cursor: 'pointer', userSelect: 'none' }}
+              >
+                {t('modal.displayBoard')}
+              </Chip>
+              <Chip
+                variant={view === 'list' ? 'solid' : 'soft'}
+                color={view === 'list' ? 'primary' : 'neutral'}
+                startDecorator={<FormatListBulleted sx={{ fontSize: 16 }} />}
+                onClick={() => setView('list')}
+                disabled={isSubmitting}
+                sx={{ py: 0.64, cursor: 'pointer', userSelect: 'none' }}
+              >
+                {t('modal.displayList')}
+              </Chip>
+            </Box>
+            <Typography level='body-xs' sx={{ color: 'text.tertiary', mt: 0.5 }}>
+              {t('modal.displayHint')}
+            </Typography>
           </FormControl>
 
           {/* Who can see the project and its tasks */}

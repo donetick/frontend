@@ -5,8 +5,14 @@ import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
 import { canCreateProject } from '../../utils/entitlements'
 import {
   CreateProject,
+  CreateProjectSection,
   DeleteProject,
+  DeleteProjectSection,
   GetProjects,
+  GetProjectSections,
+  MoveProjectChore,
+  MoveProjectSection,
+  RenameProjectSection,
   UpdateProject,
 } from '../../utils/Fetcher'
 import { offlineDB } from '../../utils/OfflineDB'
@@ -198,5 +204,248 @@ export const useProject = projectId => {
     enabled: !!projectId,
     staleTime: 5 * 60 * 1000,
     cacheTime: 10 * 60 * 1000,
+  })
+}
+
+// ─── Board (sections + task placement) ──────────────────────────────────────
+//
+// Sections and which section/position a task sits in are shared state: every
+// user who can see the project sees the same columns in the same order,
+// whether they personally view it as a board or a list (see useProjectView
+// below, which is the private half). Moves are computed server-side from the
+// current order, not from a client-sent full list, so two people dragging
+// different cards at the same time cannot clobber each other.
+
+// Query hook for a project's board columns, ordered by position.
+export const useProjectSections = projectId => {
+  return useQuery({
+    queryKey: ['projectSections', projectId],
+    queryFn: async () => {
+      const response = await GetProjectSections(projectId)
+      if (!response.ok) {
+        throw await errorFrom(response, 'Failed to fetch sections')
+      }
+      const data = await response.json()
+      return data.res || []
+    },
+    enabled: Boolean(projectId) && projectId !== 'default',
+    staleTime: 60 * 1000,
+  })
+}
+
+export const useCreateSection = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ projectId, name }) => {
+      const response = await CreateProjectSection(projectId, name)
+      if (!response.ok) {
+        throw await errorFrom(response, 'Failed to create section')
+      }
+      const data = await response.json()
+      return data.res
+    },
+    onSuccess: (_section, { projectId }) => {
+      queryClient.invalidateQueries({
+        queryKey: ['projectSections', projectId],
+      })
+    },
+  })
+}
+
+export const useRenameSection = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ projectId, sectionId, name }) => {
+      const response = await RenameProjectSection(projectId, sectionId, name)
+      if (!response.ok) {
+        throw await errorFrom(response, 'Failed to rename section')
+      }
+    },
+    onMutate: async ({ projectId, sectionId, name }) => {
+      await queryClient.cancelQueries({
+        queryKey: ['projectSections', projectId],
+      })
+      const previous = queryClient.getQueryData(['projectSections', projectId])
+      queryClient.setQueryData(['projectSections', projectId], old =>
+        (old || []).map(section =>
+          section.id === sectionId ? { ...section, name } : section,
+        ),
+      )
+      return { previous }
+    },
+    onError: (_err, { projectId }, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(['projectSections', projectId], context.previous)
+      }
+    },
+    onSettled: (_data, _err, { projectId }) => {
+      queryClient.invalidateQueries({
+        queryKey: ['projectSections', projectId],
+      })
+    },
+  })
+}
+
+export const useDeleteSection = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ projectId, sectionId }) => {
+      const response = await DeleteProjectSection(projectId, sectionId)
+      if (!response.ok) {
+        throw await errorFrom(response, 'Failed to delete section')
+      }
+    },
+    onSuccess: (_data, { projectId }) => {
+      queryClient.invalidateQueries({
+        queryKey: ['projectSections', projectId],
+      })
+      // A deleted section's chores fall back to another section of the same
+      // project, so the chore list itself needs to resync too.
+      queryClient.invalidateQueries({ queryKey: ['chores'] })
+    },
+  })
+}
+
+// Reorders sections[] so sectionId sits right after afterSectionId (or
+// first, when null), mirroring what the server will settle on, so the
+// column doesn't jump back and forth before the request resolves.
+const reorderedAfter = (sections, sectionId, afterSectionId) => {
+  const next = [...sections]
+  const fromIndex = next.findIndex(section => section.id === sectionId)
+  if (fromIndex === -1) return sections
+  const [moved] = next.splice(fromIndex, 1)
+  const afterIndex =
+    afterSectionId == null
+      ? -1
+      : next.findIndex(section => section.id === afterSectionId)
+  next.splice(afterIndex + 1, 0, moved)
+  return next
+}
+
+export const useMoveSection = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ projectId, sectionId, afterSectionId }) => {
+      const response = await MoveProjectSection(
+        projectId,
+        sectionId,
+        afterSectionId,
+      )
+      if (!response.ok) {
+        throw await errorFrom(response, 'Failed to move section')
+      }
+    },
+    onMutate: async ({ projectId, sectionId, afterSectionId }) => {
+      await queryClient.cancelQueries({
+        queryKey: ['projectSections', projectId],
+      })
+      const previous = queryClient.getQueryData(['projectSections', projectId])
+      queryClient.setQueryData(['projectSections', projectId], old =>
+        reorderedAfter(old || [], sectionId, afterSectionId),
+      )
+      return { previous }
+    },
+    onError: (_err, { projectId }, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(['projectSections', projectId], context.previous)
+      }
+    },
+    onSettled: (_data, _err, { projectId }) => {
+      queryClient.invalidateQueries({
+        queryKey: ['projectSections', projectId],
+      })
+    },
+  })
+}
+
+// Moves one chore into sectionId, right after afterChoreId (or first, when
+// null). Updates the chore's sectionId optimistically in the shared chores
+// cache so the board doesn't wait a round trip to reflect the drop.
+export const useMoveChore = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ projectId, choreId, sectionId, afterChoreId }) => {
+      const response = await MoveProjectChore(
+        projectId,
+        choreId,
+        sectionId,
+        afterChoreId,
+      )
+      if (!response.ok) {
+        throw await errorFrom(response, 'Failed to move task')
+      }
+    },
+    onMutate: async ({ choreId, sectionId }) => {
+      await queryClient.cancelQueries({ queryKey: ['chores'] })
+      const previous = queryClient.getQueryData(['chores', false])
+      queryClient.setQueryData(['chores', false], old => {
+        if (!old?.res) return old
+        return {
+          ...old,
+          res: old.res.map(chore =>
+            chore.id === choreId ? { ...chore, sectionId } : chore,
+          ),
+        }
+      })
+      return { previous }
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(['chores', false], context.previous)
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['chores'] })
+    },
+  })
+}
+
+// ─── View preference (board vs list) ────────────────────────────────────────
+//
+// Private per user, per project: never shared, never affects the sections or
+// task order above. Defaults to "board" server-side when never set. It rides
+// along on the same project object GET/PUT /projects already return/accept
+// (a `view` field) instead of a dedicated endpoint, so reading it is just a
+// lookup into the existing ['projects'] cache and writing it is a PUT
+// /projects/:id call that only sends `view`.
+
+export const useProjectView = projectId => {
+  const { data: projects } = useProjects()
+  const project = projects?.find(p => p.id === projectId)
+  // undefined (not 'board') while projects haven't loaded yet or this one
+  // isn't in the cache, so callers that only apply a saved view once it
+  // actually arrives don't briefly stomp it with the default.
+  return { data: project ? project.view || 'board' : undefined }
+}
+
+export const useSetProjectView = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ projectId, view }) => {
+      const response = await UpdateProject(projectId, { view })
+      if (!response.ok) {
+        throw await errorFrom(response, 'Failed to save view preference')
+      }
+      const data = await response.json()
+      return data.res || data
+    },
+    onMutate: async ({ projectId, view }) => {
+      await queryClient.cancelQueries({ queryKey: ['projects'] })
+      const previous = queryClient.getQueryData(['projects'])
+      queryClient.setQueryData(['projects'], (old = []) =>
+        old.map(project =>
+          project.id === projectId ? { ...project, view } : project,
+        ),
+      )
+      return { previous }
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previous !== undefined) {
+        queryClient.setQueryData(['projects'], context.previous)
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] })
+    },
   })
 }

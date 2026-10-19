@@ -39,7 +39,7 @@ import {
 import { getIconComponent } from '../../utils/ProjectIcons'
 import { generateUUID } from '../../utils/UUID'
 import { useLabels } from '../Labels/LabelQueries'
-import { useProjects } from '../Projects/ProjectQueries'
+import { useProjects, useProjectSections } from '../Projects/ProjectQueries'
 import AdvancedOptionsSection, {
   AdvancedOptionsTrigger,
 } from './AdvancedOptionsSection'
@@ -193,7 +193,14 @@ const POINTS_SUGGESTIONS = {
 // parse so a fast type-then-Enter never creates from stale parsed state.
 const PARSE_DEBOUNCE_MS = 150
 
-const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
+const TaskInput = ({
+  initialMode,
+  initialSectionId,
+  isModalOpen,
+  lockedProjectId,
+  onChoreUpdate,
+  onClose,
+}) => {
   const { t } = useTranslation('chores')
   // Claims the keyboard while open so background listeners (e.g. the project
   // selector's own Cmd+E) know to stay out of the way — see
@@ -311,7 +318,16 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
     return combined ? moment(combined).format('YYYY-MM-DDTHH:mm:ss') : null
   }, [dueDateOnly, dueTime, useCustomTime])
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
-  const [projectId, setProjectId] = useState(getInitialProject)
+  // Opened from a specific board column: the project is fixed to it (no
+  // project switcher) and a section picker takes its place instead.
+  const isSectionContext = lockedProjectId != null
+  const [projectId, setProjectId] = useState(
+    () => lockedProjectId ?? getInitialProject(),
+  )
+  const [sectionId, setSectionId] = useState(initialSectionId ?? null)
+  const { data: sections = [] } = useProjectSections(
+    isSectionContext ? projectId : null,
+  )
   const selectedProject = useMemo(
     () =>
       (projectId !== 'default' &&
@@ -322,6 +338,10 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
   const SelectedProjectIcon = useMemo(
     () => getIconComponent(selectedProject.icon),
     [selectedProject],
+  )
+  const selectedSection = useMemo(
+    () => sections.find(section => section.id === sectionId) || null,
+    [sections, sectionId],
   )
   const [attachments, setAttachments] = useState([])
 
@@ -956,6 +976,7 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
       const chore = buildChorePayload(parsed, {
         userProfile,
         projectId,
+        sectionId,
         notificationTemplates,
       })
       chore.source = 'voice'
@@ -1026,7 +1047,8 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
     // The modal closes without a final parse, so drop the highlight identities
     // here or nothing would animate on the next open
     prevHighlightKeysRef.current = new Set()
-    setProjectId(getInitialProject())
+    setProjectId(lockedProjectId ?? getInitialProject())
+    setSectionId(initialSectionId ?? null)
     setDeadlineOffset(-1)
     setRequireApproval(false)
     setCompletionWindow(-1)
@@ -1097,6 +1119,7 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
       notificationMetadata: {},
       subTasks: subTasks?.length > 0 ? subTasks : null,
       projectId: projectId === 'default' ? null : projectId,
+      sectionId: projectId === 'default' ? null : sectionId,
       draftId: draftId,
       source: taskSourceRef.current,
     }
@@ -1194,66 +1217,127 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
         title={t('addTask.title')}
         footer={
           <ModalActions>
-            {!showScan && !showVoice && projects?.length >= 1 && (
-              <Dropdown>
-                <MenuButton
-                  variant='plain'
-                  color='neutral'
-                  size='sm'
-                  startDecorator={
-                    <SelectedProjectIcon
-                      sx={{ fontSize: 18, color: selectedProject.color }}
-                    />
-                  }
-                  endDecorator={<KeyboardArrowDown sx={{ fontSize: 16 }} />}
-                  sx={{
-                    mr: 'auto',
-                    color: 'text.secondary',
-                    fontWeight: 'normal',
-                  }}
-                >
-                  {selectedProject.id === 'default'
-                    ? t('addTask.defaultProject')
-                    : selectedProject.name}
-                </MenuButton>
-                <Menu
-                  placement='top-start'
-                  sx={{
-                    minWidth: 200,
-                    zIndex: 'calc(var(--joy-zIndex-modal) + 1)',
-                  }}
-                >
-                  {[DEFAULT_PROJECT, ...projects].map(project => {
-                    const ProjectIcon = getIconComponent(project.icon)
-                    return (
-                      <MenuItem
-                        key={project.id}
-                        selected={projectId === project.id}
-                        onClick={() => setProjectId(project.id)}
+            {!showScan &&
+              !showVoice &&
+              (isSectionContext ? (
+                // Opened from a board column: the project is already fixed
+                // (shown as plain text, not a switcher), a section picker
+                // takes the project dropdown's place instead.
+                <>
+                  <Typography
+                    level='body-sm'
+                    startDecorator={
+                      <SelectedProjectIcon
+                        sx={{ fontSize: 18, color: selectedProject.color }}
+                      />
+                    }
+                    sx={{ color: 'text.secondary' }}
+                  >
+                    {selectedProject.name}
+                  </Typography>
+                  {sections.length > 0 && (
+                    <Dropdown>
+                      <MenuButton
+                        variant='plain'
+                        color='neutral'
+                        size='sm'
+                        endDecorator={
+                          <KeyboardArrowDown sx={{ fontSize: 16 }} />
+                        }
+                        sx={{
+                          mr: 'auto',
+                          color: 'text.secondary',
+                          fontWeight: 'normal',
+                        }}
                       >
-                        <ListItemDecorator>
-                          <ProjectIcon
-                            sx={{ fontSize: 18, color: project.color }}
-                          />
-                        </ListItemDecorator>
-                        {project.id === 'default'
-                          ? t('addTask.defaultProject')
-                          : project.name}
-                        {project.isPrivate && (
-                          <Lock
-                            sx={{
-                              fontSize: 14,
-                              ml: 0.5,
-                              verticalAlign: 'text-bottom',
-                            }}
-                          />
-                        )}
-                      </MenuItem>
-                    )
-                  })}
-                </Menu>
-              </Dropdown>
-            )}
+                        {selectedSection
+                          ? selectedSection.name
+                          : t('addTask.selectSection')}
+                      </MenuButton>
+                      <Menu
+                        placement='top-start'
+                        sx={{
+                          minWidth: 200,
+                          zIndex: 'calc(var(--joy-zIndex-modal) + 1)',
+                        }}
+                      >
+                        {sections.map(section => (
+                          <MenuItem
+                            key={section.id}
+                            selected={sectionId === section.id}
+                            onClick={() => setSectionId(section.id)}
+                          >
+                            {section.name}
+                          </MenuItem>
+                        ))}
+                      </Menu>
+                    </Dropdown>
+                  )}
+                </>
+              ) : (
+                projects?.length >= 1 && (
+                  <Dropdown>
+                    <MenuButton
+                      variant='plain'
+                      color='neutral'
+                      size='sm'
+                      startDecorator={
+                        <SelectedProjectIcon
+                          sx={{ fontSize: 18, color: selectedProject.color }}
+                        />
+                      }
+                      endDecorator={
+                        <KeyboardArrowDown sx={{ fontSize: 16 }} />
+                      }
+                      sx={{
+                        mr: 'auto',
+                        color: 'text.secondary',
+                        fontWeight: 'normal',
+                      }}
+                    >
+                      {selectedProject.id === 'default'
+                        ? t('addTask.defaultProject')
+                        : selectedProject.name}
+                    </MenuButton>
+                    <Menu
+                      placement='top-start'
+                      sx={{
+                        minWidth: 200,
+                        zIndex: 'calc(var(--joy-zIndex-modal) + 1)',
+                      }}
+                    >
+                      {[DEFAULT_PROJECT, ...projects].map(project => {
+                        const ProjectIcon = getIconComponent(project.icon)
+                        return (
+                          <MenuItem
+                            key={project.id}
+                            selected={projectId === project.id}
+                            onClick={() => setProjectId(project.id)}
+                          >
+                            <ListItemDecorator>
+                              <ProjectIcon
+                                sx={{ fontSize: 18, color: project.color }}
+                              />
+                            </ListItemDecorator>
+                            {project.id === 'default'
+                              ? t('addTask.defaultProject')
+                              : project.name}
+                            {project.isPrivate && (
+                              <Lock
+                                sx={{
+                                  fontSize: 14,
+                                  ml: 0.5,
+                                  verticalAlign: 'text-bottom',
+                                }}
+                              />
+                            )}
+                          </MenuItem>
+                        )
+                      })}
+                    </Menu>
+                  </Dropdown>
+                )
+              ))}
             <Button
               variant='outlined'
               color='neutral'
