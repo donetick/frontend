@@ -26,40 +26,8 @@ import {
 import { cacheChoreImages } from '../utils/ImageCache'
 import { offlineDB } from '../utils/OfflineDB'
 import { isOfflineFeatureEnabled } from '../utils/OfflineFeatureToggle'
+import { mergePendingCreates } from '../utils/PendingChores'
 import { syncEngine } from '../utils/SyncEngine'
-
-const mergePendingCreates = async chores => {
-  const pending = await commandQueue.getPending()
-  const pendingCreates = pending.filter(
-    cmd => cmd.commandType === CommandType.CREATE_CHORE,
-  )
-  const deletedIds = new Set(
-    pending
-      .filter(cmd => cmd.commandType === CommandType.DELETE_CHORE)
-      .map(cmd => String(cmd.entityId)),
-  )
-
-  if (pendingCreates.length === 0) return chores
-
-  const existingIds = new Set((chores || []).map(chore => String(chore.id)))
-  const createdFromQueue = pendingCreates
-    .filter(
-      cmd =>
-        !existingIds.has(String(cmd.entityId)) &&
-        !deletedIds.has(String(cmd.entityId)),
-    )
-    .map(cmd => {
-      const payload = cmd.payload || {}
-      return {
-        ...payload,
-        id: cmd.entityId,
-        nextDueDate: payload.nextDueDate || payload.dueDate || null,
-        _pendingCreate: true,
-      }
-    })
-
-  return [...(chores || []), ...createdFromQueue]
-}
 
 // Effectively "can this action be queued offline?" — the offline feature must
 // be enabled, otherwise there is no command queue to replay it later and the
@@ -103,7 +71,10 @@ export const useChores = (includeArchive = false, { enabled = true } = {}) => {
       if (isOfflineFeatureEnabled()) {
         try {
           // Sync from server first (coalesced with any run already in flight,
-          // so a just-created chore can't be missed by a stale cursor)
+          // so a just-created chore can't be missed by a stale cursor). This
+          // await no longer delays the first paint — hydrateQueriesFromOfflineCache
+          // seeds this query from the cache at startup, which makes this run a
+          // background refresh.
           if (networkManager.isOnline) {
             await syncEngine.sync()
           }

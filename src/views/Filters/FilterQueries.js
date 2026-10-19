@@ -13,6 +13,7 @@ import {
   ToggleFilterPin,
   UpdateFilter,
 } from '../../utils/Fetcher'
+import { offlineDB } from '../../utils/OfflineDB'
 
 // Query hook for fetching all filters
 export const useFilters = () => {
@@ -23,12 +24,19 @@ export const useFilters = () => {
         const response = await GetFilters()
         if (response.ok) {
           const data = await response.json()
-          return data.res || data
+          const filters = data.res || data
+          // Cached so Home (which blocks its render on this query) can paint
+          // from the last known filters instead of waiting out a dead server.
+          if (Array.isArray(filters)) {
+            offlineDB.saveKV('filters', filters).catch(() => {})
+          }
+          return filters
         }
         throw new Error('Failed to fetch filters')
       } catch (error) {
         console.error('Error fetching filters:', error)
-        return []
+        const cached = await offlineDB.getKV('filters')
+        return Array.isArray(cached) ? cached : []
       }
     },
     staleTime: 5 * 60 * 1000, // 5 minutes

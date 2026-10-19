@@ -426,13 +426,16 @@ const ChoreActionMenu = ({
       onClick: target => openPicker('priority', target),
       submenu: 'priority',
       endDecorator: (
-        <Chip
-          size='sm'
-          variant='soft'
-          color={currentPriority?.color || 'neutral'}
-        >
-          {currentPriority?.name.trim() || t('actionMenu.noPriority')}
-        </Chip>
+        <>
+          <Chip
+            size='sm'
+            variant='soft'
+            color={currentPriority?.color || 'neutral'}
+          >
+            {currentPriority?.name.trim() || t('actionMenu.noPriority')}
+          </Chip>
+          <ChevronRight fontSize='small' />
+        </>
       ),
     },
     {
