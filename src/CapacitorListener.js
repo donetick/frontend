@@ -106,8 +106,38 @@ const handleUrlOpen = (url, isColdStart = false) => {
         ? `/chores?add_task=1&mode=${mode}`
         : '/chores?add_task=1',
     )
+  } else if (
+    parsedUrl.protocol === 'donetick:' &&
+    parsedUrl.host === 'chores' &&
+    (parsedUrl.pathname === '' || parsedUrl.pathname === '/')
+  ) {
+    // Project/filter widget header: open the chore list with that saved view.
+    const filterId = parsedUrl.searchParams.get('filterId')
+    const projectId = parsedUrl.searchParams.get('project')
+    routerNavigate(
+      filterId
+        ? `/chores?filterId=${encodeURIComponent(filterId)}`
+        : projectId
+          ? `/chores?project=${encodeURIComponent(projectId)}`
+          : '/chores',
+    )
   } else if (url.startsWith('donetick://chores/')) {
     handleNFCChoreDeepLink(url, isColdStart)
+  } else if (
+    parsedUrl.protocol === 'donetick:' &&
+    parsedUrl.host === 'search'
+  ) {
+    routerNavigate('/search')
+  } else if (
+    parsedUrl.protocol === 'donetick:' &&
+    parsedUrl.host === 'projects'
+  ) {
+    routerNavigate('/projects')
+  } else if (
+    parsedUrl.protocol === 'donetick:' &&
+    parsedUrl.host === 'overview'
+  ) {
+    routerNavigate('/home')
   } else if (url.startsWith('donetick://auth/')) {
     handleOAuthDeepLink(url)
   }

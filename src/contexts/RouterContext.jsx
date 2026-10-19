@@ -52,6 +52,7 @@ import NotificationSetting from '../views/Settings/NotificationSetting'
 import PrivacyAnalyticsSettings from '../views/Settings/PrivacyAnalyticsSettings'
 import ProfileSettings from '../views/Settings/ProfileSettings'
 import StorageSettings from '../views/Settings/StorageSettings'
+import WidgetSettings from '../views/Settings/WidgetSettings'
 import TermsView from '../views/Terms/TermsView'
 import TestView from '../views/TestView/Test'
 import ThingsHistory from '../views/Things/ThingsHistory'
@@ -136,6 +137,10 @@ const Router = createBrowserRouter([
           {
             path: 'theme',
             element: <ThemeSettings />,
+          },
+          {
+            path: 'widgets',
+            element: <WidgetSettings />,
           },
           {
             path: 'localization',

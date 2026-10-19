@@ -7,7 +7,7 @@
     "remove": "Entfernen",
     "delete": "Löschen",
     "refresh": "Aktualisieren",
-    "loading": "Wird geladen…",
+    "loading": "Wird geladen …",
     "on": "An",
     "off": "Aus",
     "error": "Fehler",
@@ -36,7 +36,7 @@
       },
       "circle": {
         "title": "Kreiseinstellungen",
-        "description": "Verwalte deinen Kreis, lade Mitglieder ein und bearbeite Beitrittsanfragen."
+        "description": "Verwalte deinen Circle, lade Mitglieder ein und bearbeite Beitrittsanfragen."
       },
       "account": {
         "title": "Kontoeinstellungen",
@@ -93,6 +93,14 @@
       "bugReport": {
         "title": "Fehler melden",
         "description": "Etwas funktioniert nicht richtig? Schick uns die Details zusammen mit einer technischen Momentaufnahme."
+      },
+      "widgets": {
+        "title": "Startbildschirm-Widgets",
+        "description": "Lege fest, wie die Donetick-Widgets auf dem Startbildschirm dieses Geräts aussehen."
+      },
+      "sidepanel": {
+        "title": "Seitenleisten-Anpassung",
+        "description": "Passe Layout und Sichtbarkeit der Karten in der Seitenleiste an."
       }
     }
   },
@@ -117,7 +125,7 @@
     "cancel": "Abbrechen"
   },
   "circleSettings": {
-    "title": "Kreiseinstellungen",
+    "title": "Circle-Einstellungen",
     "description": "Dein Konto wird automatisch mit einem Kreis verbunden, wenn du einen erstellst oder beitrittst. Lade Freunde ein, indem du den unten stehenden Kreiscode oder Link teilst. Du erhältst unten eine Benachrichtigung, wenn jemand deinem Kreis beitreten möchte.",
     "memberOf": "Du bist Teil von {{name}}",
     "yourCircleCode": "Dein Kreiscode lautet:",
@@ -129,8 +137,8 @@
     "shareTitle": "Tritt {{name}} auf Donetick bei",
     "shareText": "Ich möchte dich einladen, {{name}} auf Donetick beizutreten.",
     "shareDialogTitle": "Kreiseinladung teilen",
-    "leave": "Kreis verlassen",
-    "leaveConfirmTitle": "Kreis verlassen",
+    "leave": "Circle verlassen",
+    "leaveConfirmTitle": "Circle verlassen",
     "leaveConfirmMessage": "Möchtest du deinen Kreis wirklich verlassen?",
     "leaveConfirmButton": "Verlassen",
     "leftCircle": "Kreis erfolgreich verlassen",
@@ -423,7 +431,9 @@
         "name": "Wochenziele",
         "description": "Zeigt den Wochenfortschritt und die Erledigungsstatistik der Familie"
       }
-    }
+    },
+    "heading": "Seitenleisten-Einstellungen",
+    "detailedDescription": "Passe Anordnung und Sichtbarkeit der Karten in der Seitenleiste an. Dieser Bereich ist nur auf Geräten mit großem Bildschirm wie Tablets und Desktop-Computern verfügbar."
   },
   "homeSections": {
     "title": "Übersicht Anpassung",
@@ -487,7 +497,11 @@
       "title": "Untere Navigation",
       "description": "Wähle bis zu {{max}} Verknüpfungen für die untere Navigationsleiste auf dem Handy und ordne sie per Drag-and-drop. „Mehr“ bleibt immer der letzte Eintrag und öffnet das vollständige Menü.",
       "resetToDefaults": "Auf Standard zurücksetzen",
-      "resetHelper": "Dadurch werden Verknüpfungen und Reihenfolge der unteren Navigation auf den Standard zurückgesetzt."
+      "resetHelper": "Dadurch werden Verknüpfungen und Reihenfolge der unteren Navigation auf den Standard zurückgesetzt.",
+      "hideLabels": {
+        "title": "Beschriftungen ausblenden",
+        "description": "Zeige in der unteren Navigationsleiste nur Symbole an, um sie kleiner zu machen."
+      }
     },
     "sidepanel": {
       "title": "Seitenleiste"
@@ -500,6 +514,26 @@
     "light": "Hell",
     "dark": "Dunkel",
     "system": "System"
+  },
+  "widgets": {
+    "title": "Startbildschirm-Widgets",
+    "opacity": {
+      "title": "Deckkraft des Hintergrunds",
+      "description": "Wie deckend der Hintergrund deiner Widgets ist. Niedrigere Werte lassen dein Hintergrundbild durchscheinen.",
+      "preview": "Müll rausbringen",
+      "perWidgetHint": "Das ist die Vorgabe für alle Widgets. Für ein einzelnes Widget hältst du es auf dem Startbildschirm gedrückt und öffnest seine Optionen (Android) bzw. „Widget bearbeiten“ (iOS).",
+      "webHint": "Startbildschirm-Widgets gehören zu den iOS- und Android-Apps – nur dort wirkt diese Einstellung."
+    },
+    "theme": {
+      "title": "Farben",
+      "description": "Mit welcher Farbpalette deine Widgets gezeichnet werden. „Automatisch“ folgt dem Hell- oder Dunkelmodus deines Handys.",
+      "options": {
+        "auto": "Automatisch",
+        "light": "Immer hell",
+        "dark": "Immer dunkel"
+      },
+      "perWidgetHint": "Das ist die Vorgabe für alle Widgets. Für ein einzelnes Widget hältst du es auf dem Startbildschirm gedrückt und öffnest seine Optionen (Android) bzw. „Widget bearbeiten“ (iOS)."
+    }
   },
   "localization": {
     "title": "Lokalisierung",

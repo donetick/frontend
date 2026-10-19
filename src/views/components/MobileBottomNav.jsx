@@ -22,7 +22,10 @@ import { useTranslation } from 'react-i18next'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 import { useScrollDirection } from '../../hooks/useScrollDirection'
-import { getEnabledBottomNavItems } from '../../utils/BottomNavConfig'
+import {
+  getBottomNavHideLabels,
+  getEnabledBottomNavItems,
+} from '../../utils/BottomNavConfig'
 import { OPEN_NAVIGATION_DRAWER_EVENT } from './navigationEvents'
 
 const ICONS = {
@@ -74,7 +77,7 @@ const MARKETING_HOSTNAMES = ['www.donetick.com', 'donetick.com']
 export const isMobileBottomNavEligible = isMobile =>
   isMobile && !MARKETING_HOSTNAMES.includes(window.location.hostname)
 
-const NavItem = ({ active, icon, label, onClick, to }) => {
+const NavItem = ({ active, hideLabel, icon, label, onClick, to }) => {
   const content = (
     <>
       <Box
@@ -94,17 +97,19 @@ const NavItem = ({ active, icon, label, onClick, to }) => {
       >
         {icon}
       </Box>
-      <Typography
-        level='body-xs'
-        sx={{
-          color: active ? 'primary.plainColor' : 'text.secondary',
-          fontSize: 11,
-          fontWeight: active ? 700 : 550,
-          lineHeight: 1,
-        }}
-      >
-        {label}
-      </Typography>
+      {!hideLabel && (
+        <Typography
+          level='body-xs'
+          sx={{
+            color: active ? 'primary.plainColor' : 'text.secondary',
+            fontSize: 11,
+            fontWeight: active ? 700 : 550,
+            lineHeight: 1,
+          }}
+        >
+          {label}
+        </Typography>
+      )}
     </>
   )
 
@@ -112,6 +117,7 @@ const NavItem = ({ active, icon, label, onClick, to }) => {
     <Box
       {...(to ? { component: Link, to } : { component: 'button', onClick })}
       aria-current={active ? 'page' : undefined}
+      aria-label={hideLabel ? label : undefined}
       type={to ? undefined : 'button'}
       sx={{
         alignItems: 'center',
@@ -121,7 +127,7 @@ const NavItem = ({ active, icon, label, onClick, to }) => {
         display: 'flex',
         flex: 1,
         flexDirection: 'column',
-        gap: 0.5,
+        gap: hideLabel ? 0 : 0.5,
         justifyContent: 'center',
         minHeight: 58,
         minWidth: 0,
@@ -138,6 +144,7 @@ const NavItem = ({ active, icon, label, onClick, to }) => {
 
 NavItem.propTypes = {
   active: PropTypes.bool.isRequired,
+  hideLabel: PropTypes.bool,
   icon: PropTypes.node.isRequired,
   label: PropTypes.string.isRequired,
   onClick: PropTypes.func,
@@ -153,8 +160,12 @@ const MobileBottomNav = () => {
   // Reread whenever the settings page saves, so a reorder/swap shows up
   // without a reload.
   const [items, setItems] = useState(getEnabledBottomNavItems)
+  const [hideLabels, setHideLabels] = useState(getBottomNavHideLabels)
   useEffect(() => {
-    const onConfigChanged = () => setItems(getEnabledBottomNavItems())
+    const onConfigChanged = () => {
+      setItems(getEnabledBottomNavItems())
+      setHideLabels(getBottomNavHideLabels())
+    }
     window.addEventListener('bottomNavConfigChanged', onConfigChanged)
     return () =>
       window.removeEventListener('bottomNavConfigChanged', onConfigChanged)
@@ -168,6 +179,8 @@ const MobileBottomNav = () => {
   const scrolledAway = useScrollDirection({ enabled: isMobile && !hidden })
 
   if (hidden) return null
+
+  const barHeight = hideLabels ? 46 : 56
 
   return (
     <>
@@ -184,7 +197,7 @@ const MobileBottomNav = () => {
           bottom: 0,
           boxShadow: '0 -8px 24px rgba(0, 0, 0, .06)',
           display: 'flex',
-          height: 'calc(56px + var(--safe-area-inset-bottom, 0px))',
+          height: `calc(${barHeight}px + var(--safe-area-inset-bottom, 0px))`,
           insetInline: 0,
           pb: 'var(--safe-area-inset-bottom, 0px)',
           position: 'fixed',
@@ -198,6 +211,7 @@ const MobileBottomNav = () => {
           <NavItem
             key={item.id}
             active={isItemActive(item, location.pathname)}
+            hideLabel={hideLabels}
             icon={ICONS[item.iconName]}
             label={t(item.translationKey, {
               defaultValue: item.translationDefault,
@@ -210,6 +224,7 @@ const MobileBottomNav = () => {
         ))}
         <NavItem
           active={false}
+          hideLabel={hideLabels}
           icon={<MenuRounded />}
           label={t('navigation.more', { defaultValue: 'More' })}
           onClick={() =>
@@ -221,7 +236,7 @@ const MobileBottomNav = () => {
       <Box
         aria-hidden='true'
         sx={{
-          height: 'calc(56px + var(--safe-area-inset-bottom, 0px))',
+          height: `calc(${barHeight}px + var(--safe-area-inset-bottom, 0px))`,
         }}
       />
     </>
