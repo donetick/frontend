@@ -389,7 +389,12 @@ const NotificationSetting = () => {
               <FormControl
                 key={item.property}
                 orientation='horizontal'
-                sx={{ width: 385, justifyContent: 'space-between' }}
+                sx={{
+                  width: '100%',
+                  maxWidth: 385,
+                  gap: 2,
+                  justifyContent: 'space-between',
+                }}
               >
                 <div>
                   <FormLabel>{item.title}</FormLabel>
@@ -417,7 +422,12 @@ const NotificationSetting = () => {
         {isOfficialInstance && (
           <FormControl
             orientation='horizontal'
-            sx={{ width: 400, justifyContent: 'space-between' }}
+            sx={{
+              width: '100%',
+              maxWidth: 400,
+              gap: 2,
+              justifyContent: 'space-between',
+            }}
           >
             <div>
               <FormLabel>{t('notifications.pushLabel')}</FormLabel>
