@@ -232,7 +232,7 @@
     "clone": "Dupliceren",
     "moveToProject": "Naar project verplaatsen",
     "removeDueDate": "Vervaldatum verwijderen",
-    "unarchive": "Uit archief halen",
+    "unarchive": "Dearchiveren",
     "noPriority": "Geen",
     "defaultProject": "Standaardproject"
   },
