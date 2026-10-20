@@ -55,7 +55,7 @@ function EditThingStateModal({ currentThing, isOpen, onClose, onSave }) {
           placeholder={t('valuePlaceholder')}
           value={state || ''}
           onChange={e => setState(e.target.value)}
-          sx={{ minWidth: 300 }}
+          sx={{ width: '100%' }}
         />
         <FormHelperText color='danger'>{errors.state}</FormHelperText>
       </FormControl>

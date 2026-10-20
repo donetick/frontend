@@ -1334,7 +1334,7 @@ const ChoreView = () => {
         </FormControl>
         {completedDate !== null && (
           <Input
-            sx={{ mt: 1, mb: 1.5, width: 300 }}
+            sx={{ mt: 1, mb: 1.5, width: '100%', maxWidth: 300 }}
             type='datetime-local'
             value={completedDate}
             onChange={e => {
