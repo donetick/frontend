@@ -97,6 +97,10 @@ if [ "$PLATFORM" = "ios" ] || [ "$PLATFORM" = "both" ]; then
   fi
 fi
 
+if [ -f fastlane/README.md ]; then
+  npx prettier --write fastlane/README.md >/dev/null 2>&1 || true
+fi
+
 echo "✓ Release build complete"
 [ -f android/app/build/outputs/bundle/release/app-release.aab ] && echo "  Android: android/app/build/outputs/bundle/release/app-release.aab"
 [ -f build/ios/Donetick.ipa ] && echo "  iOS:     build/ios/Donetick.ipa"
