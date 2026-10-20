@@ -16,57 +16,14 @@
 		50B271D11FEDC1A000F3C39B /* public in Resources */ = {isa = PBXBuildFile; fileRef = 50B271D01FEDC1A000F3C39B /* public */; };
 		72FA9293C4A649D1BA0E5917 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 71866EB277374608AD02C137 /* PrivacyInfo.xcprivacy */; };
 		A084ECDBA7D38E1E42DFC39D /* Pods_App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF277DCFFFF123FFC6DF26C7 /* Pods_App.framework */; };
-		D1115B492C653D60004C6043 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D1115B482C653D60004C6043 /* GoogleService-Info.plist */; };
 		D0AC000000000000000000B1 /* WidgetBridgePlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0AC000000000000000000A1 /* WidgetBridgePlugin.swift */; };
 		D0AC000000000000000000B2 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0AC000000000000000000A2 /* MainViewController.swift */; };
 		D0AC000000000000000000B3 /* DonetickWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0AC000000000000000000A3 /* DonetickWidget.swift */; };
 		D0AC000000000000000000B4 /* DonetickWidgetExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = D0AC000000000000000000A4 /* DonetickWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		D0AC000000000000000000B5 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0AC000000000000000000A7 /* ShareViewController.swift */; };
 		D0AC000000000000000000B6 /* DonetickShare.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = D0AC000000000000000000AA /* DonetickShare.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		D1115B492C653D60004C6043 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D1115B482C653D60004C6043 /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXFileReference section */
-		2FAD9762203C412B000D30F8 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = config.xml; sourceTree = "<group>"; };
-		50379B222058CBB4000EE86E /* capacitor.config.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = capacitor.config.json; sourceTree = "<group>"; };
-		504EC3041FED79650016851F /* App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = App.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		504EC3071FED79650016851F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		504EC30C1FED79650016851F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		504EC30E1FED79650016851F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		504EC3111FED79650016851F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		504EC3131FED79650016851F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		50B271D01FEDC1A000F3C39B /* public */ = {isa = PBXFileReference; lastKnownFileType = folder; path = public; sourceTree = "<group>"; };
-		71866EB277374608AD02C137 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		AF277DCFFFF123FFC6DF26C7 /* Pods_App.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_App.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		AF51FD2D460BCFE21FA515B2 /* Pods-App.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-App.release.xcconfig"; path = "Pods/Target Support Files/Pods-App/Pods-App.release.xcconfig"; sourceTree = "<group>"; };
-		D1115B482C653D60004C6043 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
-		D1115B4A2C659D51004C6043 /* App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
-		FC68EB0AF532CFC21C3344DD /* Pods-App.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-App.debug.xcconfig"; path = "Pods/Target Support Files/Pods-App/Pods-App.debug.xcconfig"; sourceTree = "<group>"; };
-		D0AC000000000000000000A1 /* WidgetBridgePlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetBridgePlugin.swift; sourceTree = "<group>"; };
-		D0AC000000000000000000A2 /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
-		D0AC000000000000000000A3 /* DonetickWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DonetickWidget.swift; sourceTree = "<group>"; };
-		D0AC000000000000000000A4 /* DonetickWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DonetickWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		D0AC000000000000000000A5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		D0AC000000000000000000A6 /* DonetickWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DonetickWidget.entitlements; sourceTree = "<group>"; };
-		D0AC000000000000000000A7 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
-		D0AC000000000000000000A8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		D0AC000000000000000000A9 /* DonetickShare.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DonetickShare.entitlements; sourceTree = "<group>"; };
-		D0AC000000000000000000AA /* DonetickShare.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DonetickShare.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-/* End PBXFileReference section */
-
-/* Begin PBXCopyFilesBuildPhase section */
-		D0AC000000000000000000C2 /* Embed App Extensions */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 13;
-			files = (
-				D0AC000000000000000000B4 /* DonetickWidgetExtension.appex in Embed App Extensions */,
-				D0AC000000000000000000B6 /* DonetickShare.appex in Embed App Extensions */,
-			);
-			name = "Embed App Extensions";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXContainerItemProxy section */
 		D0AC000000000000000000E2 /* PBXContainerItemProxy */ = {
@@ -84,6 +41,49 @@
 			remoteInfo = DonetickShare;
 		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		D0AC000000000000000000C2 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				D0AC000000000000000000B4 /* DonetickWidgetExtension.appex in Embed App Extensions */,
+				D0AC000000000000000000B6 /* DonetickShare.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		2FAD9762203C412B000D30F8 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = config.xml; sourceTree = "<group>"; };
+		50379B222058CBB4000EE86E /* capacitor.config.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = capacitor.config.json; sourceTree = "<group>"; };
+		504EC3041FED79650016851F /* App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = App.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		504EC3071FED79650016851F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		504EC30C1FED79650016851F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		504EC30E1FED79650016851F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		504EC3111FED79650016851F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		504EC3131FED79650016851F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		50B271D01FEDC1A000F3C39B /* public */ = {isa = PBXFileReference; lastKnownFileType = folder; path = public; sourceTree = "<group>"; };
+		71866EB277374608AD02C137 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		AF277DCFFFF123FFC6DF26C7 /* Pods_App.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_App.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		AF51FD2D460BCFE21FA515B2 /* Pods-App.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-App.release.xcconfig"; path = "Pods/Target Support Files/Pods-App/Pods-App.release.xcconfig"; sourceTree = "<group>"; };
+		D0AC000000000000000000A1 /* WidgetBridgePlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetBridgePlugin.swift; sourceTree = "<group>"; };
+		D0AC000000000000000000A2 /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
+		D0AC000000000000000000A3 /* DonetickWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DonetickWidget.swift; sourceTree = "<group>"; };
+		D0AC000000000000000000A4 /* DonetickWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DonetickWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		D0AC000000000000000000A5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D0AC000000000000000000A6 /* DonetickWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DonetickWidget.entitlements; sourceTree = "<group>"; };
+		D0AC000000000000000000A7 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
+		D0AC000000000000000000A8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D0AC000000000000000000A9 /* DonetickShare.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DonetickShare.entitlements; sourceTree = "<group>"; };
+		D0AC000000000000000000AA /* DonetickShare.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DonetickShare.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		D1115B482C653D60004C6043 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		D1115B4A2C659D51004C6043 /* App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
+		FC68EB0AF532CFC21C3344DD /* Pods-App.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-App.debug.xcconfig"; path = "Pods/Target Support Files/Pods-App/Pods-App.debug.xcconfig"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		504EC3011FED79650016851F /* Frameworks */ = {
@@ -132,26 +132,6 @@
 			);
 			sourceTree = "<group>";
 		};
-		D0AC000000000000000000C1 /* DonetickWidget */ = {
-			isa = PBXGroup;
-			children = (
-				D0AC000000000000000000A3 /* DonetickWidget.swift */,
-				D0AC000000000000000000A5 /* Info.plist */,
-				D0AC000000000000000000A6 /* DonetickWidget.entitlements */,
-			);
-			path = DonetickWidget;
-			sourceTree = "<group>";
-		};
-		D0AC000000000000000000C3 /* DonetickShare */ = {
-			isa = PBXGroup;
-			children = (
-				D0AC000000000000000000A7 /* ShareViewController.swift */,
-				D0AC000000000000000000A8 /* Info.plist */,
-				D0AC000000000000000000A9 /* DonetickShare.entitlements */,
-			);
-			path = DonetickShare;
-			sourceTree = "<group>";
-		};
 		504EC3051FED79650016851F /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -188,6 +168,26 @@
 				AF51FD2D460BCFE21FA515B2 /* Pods-App.release.xcconfig */,
 			);
 			name = Pods;
+			sourceTree = "<group>";
+		};
+		D0AC000000000000000000C1 /* DonetickWidget */ = {
+			isa = PBXGroup;
+			children = (
+				D0AC000000000000000000A3 /* DonetickWidget.swift */,
+				D0AC000000000000000000A5 /* Info.plist */,
+				D0AC000000000000000000A6 /* DonetickWidget.entitlements */,
+			);
+			path = DonetickWidget;
+			sourceTree = "<group>";
+		};
+		D0AC000000000000000000C3 /* DonetickShare */ = {
+			isa = PBXGroup;
+			children = (
+				D0AC000000000000000000A7 /* ShareViewController.swift */,
+				D0AC000000000000000000A8 /* Info.plist */,
+				D0AC000000000000000000A9 /* DonetickShare.entitlements */,
+			);
+			path = DonetickShare;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -261,7 +261,7 @@
 					504EC3031FED79650016851F = {
 						CreatedOnToolsVersion = 9.2;
 						LastSwiftMigration = 1100;
-						ProvisioningStyle = Automatic;
+						ProvisioningStyle = Manual;
 					};
 					D0AC000000000000000000D1 = {
 						CreatedOnToolsVersion = 15.0;
@@ -537,15 +537,16 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ALLOW_ENTITLEMENTS_MODIFICATION = YES;
 				CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 79;
-				DEVELOPMENT_TEAM = 6UJJ78R3BS;
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 83;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = App/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 1.2.58;
+				MARKETING_VERSION = 1.2.62;
 				PRODUCT_BUNDLE_IDENTIFIER = com.donetick.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -560,15 +561,15 @@
 				CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Distribution";
 				CODE_SIGN_STYLE = Manual;
-				PROVISIONING_PROFILE_SPECIFIER = "Donetick App Store(fastline)";
-				CURRENT_PROJECT_VERSION = 79;
+				CURRENT_PROJECT_VERSION = 83;
 				DEVELOPMENT_TEAM = 6UJJ78R3BS;
 				INFOPLIST_FILE = App/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 1.2.58;
+				MARKETING_VERSION = 1.2.62;
 				PRODUCT_BUNDLE_IDENTIFIER = com.donetick.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "Donetick App Store(fastline)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -580,12 +581,12 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = DonetickWidget/DonetickWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 79;
+				CURRENT_PROJECT_VERSION = 83;
 				DEVELOPMENT_TEAM = 6UJJ78R3BS;
 				INFOPLIST_FILE = DonetickWidget/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
-				MARKETING_VERSION = 1.2.58;
+				MARKETING_VERSION = 1.2.62;
 				PRODUCT_BUNDLE_IDENTIFIER = com.donetick.app.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -602,15 +603,15 @@
 				CODE_SIGN_ENTITLEMENTS = DonetickWidget/DonetickWidget.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Distribution";
 				CODE_SIGN_STYLE = Manual;
-				PROVISIONING_PROFILE_SPECIFIER = "Donetick Widget App Store(fastline)";
-				CURRENT_PROJECT_VERSION = 79;
+				CURRENT_PROJECT_VERSION = 83;
 				DEVELOPMENT_TEAM = 6UJJ78R3BS;
 				INFOPLIST_FILE = DonetickWidget/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
-				MARKETING_VERSION = 1.2.58;
+				MARKETING_VERSION = 1.2.62;
 				PRODUCT_BUNDLE_IDENTIFIER = com.donetick.app.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "Donetick Widget App Store(fastline)";
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -623,12 +624,12 @@
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_ENTITLEMENTS = DonetickShare/DonetickShare.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 79;
+				CURRENT_PROJECT_VERSION = 83;
 				DEVELOPMENT_TEAM = 6UJJ78R3BS;
 				INFOPLIST_FILE = DonetickShare/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
-				MARKETING_VERSION = 1.2.58;
+				MARKETING_VERSION = 1.2.62;
 				PRODUCT_BUNDLE_IDENTIFIER = com.donetick.app.share;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -646,15 +647,15 @@
 				CODE_SIGN_ENTITLEMENTS = DonetickShare/DonetickShare.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Distribution";
 				CODE_SIGN_STYLE = Manual;
-				PROVISIONING_PROFILE_SPECIFIER = "Donetick Share App Store(fastline)";
-				CURRENT_PROJECT_VERSION = 79;
+				CURRENT_PROJECT_VERSION = 83;
 				DEVELOPMENT_TEAM = 6UJJ78R3BS;
 				INFOPLIST_FILE = DonetickShare/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
-				MARKETING_VERSION = 1.2.58;
+				MARKETING_VERSION = 1.2.62;
 				PRODUCT_BUNDLE_IDENTIFIER = com.donetick.app.share;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "Donetick Share App Store(fastline)";
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
