@@ -127,7 +127,7 @@
     "compact": "Compact",
     "calendar": "Kalender",
     "filters": "Filters",
-    "viewGroup": "Weergave en groeperen",
+    "viewGroup": "Weergave en groepering",
     "filterNamePlaceholder": "Filternaam…",
     "clearAll": "Alles wissen",
     "saveFilter": "Filter opslaan",
@@ -160,9 +160,9 @@
   },
   "thing": {
     "triggerHint": "Start een taak wanneer de status van een thing verandert naar een gewenste status",
-    "selectThing": "Kies een thing",
+    "selectThing": "Kies een Thing",
     "enterText": "Voer de tekst in die de taak activeert",
-    "noThingsMessage": "het lijkt erop dat je nog geen things hebt. Maak een thing aan om een taak te activeren wanneer de status verandert.",
+    "noThingsMessage": "Het lijkt erop dat je nog geen Things hebt. Maak een Thing aan om een taak te activeren wanneer de status verandert.",
     "goToThings": "Ga naar Things",
     "noThingsSuffix": "om een thing aan te maken",
     "conditionHint": "Maak een voorwaarde om een taak te activeren wanneer de status van de thing verandert naar de gewenste status",
@@ -232,7 +232,7 @@
     "clone": "Dupliceren",
     "moveToProject": "Naar project verplaatsen",
     "removeDueDate": "Vervaldatum verwijderen",
-    "unarchive": "Dearchiveren",
+    "unarchive": "Uit archief halen",
     "noPriority": "Geen",
     "defaultProject": "Standaardproject"
   },
@@ -350,7 +350,7 @@
     "noMatchSearch": "Niets in het archief komt overeen met \"{{term}}\".",
     "noMatchFilters": "Er zijn gearchiveerde taken, maar geen ervan past bij de actieve filters.",
     "emptyTitle": "Niets gearchiveerd",
-    "emptyDescription": "Archiveren verbergt een taak zonder hem te verwijderen. Alles wat je uit je takenlijst archiveert, verschijnt hier, klaar om te herstellen.",
+    "emptyDescription": "Als je een taak archiveert, verdwijnt die uit je takenlijst zonder te worden verwijderd. Je kunt gearchiveerde taken hier bekijken en herstellen.",
     "backToTasks": "Terug naar taken"
   },
   "edit": {
@@ -675,7 +675,7 @@
     "errNameRequired": "Naam is verplicht",
     "errFrequencyInvalid": "Ongeldige frequentie, {{unit}} moet groter zijn dan 0",
     "errSelectDayOfWeek": "Selecteer minstens één dag van de week",
-    "errSelectDayOccurrence": "Selecteer minstens één dagvoorkomen in de maand",
+    "errSelectDayOccurrence": "Kies minstens één dag in de maand, zoals de 1e maandag",
     "errSelectMonth": "Selecteer minstens één maand",
     "errStartDateRequired": "Startdatum is verplicht",
     "errDueDateRequired": "Vervaldatum is verplicht",
@@ -792,7 +792,7 @@
     "unarchive": "Dearchiveren",
     "create": "Maken",
     "notificationsFreePlanNote": "Je abonnement bevat een herinnering op de vervaldatum. Plus voegt herinneringen vóór de datum en opvolgherrinneringen daarna toe.",
-    "notificationsPlanWarning": "Task notifications are not available in the Basic plan. Upgrade to Plus to receive reminders when tasks are due or completed."
+    "notificationsPlanWarning": "Taakmeldingen zijn niet beschikbaar in het Basic-abonnement. Upgrade naar Plus om herinneringen te krijgen wanneer taken vervallen of worden voltooid."
   },
   "addTask": {
     "descriptionLabel": "Beschrijving:",
@@ -963,7 +963,7 @@
       "months": "Maanden",
       "dayOfMonth": "Dag van de maand"
     },
-    "triggerPlanWarning": "Thing-based triggers are not available in the Basic plan. Upgrade to Plus to automatically trigger tasks when device states change."
+    "triggerPlanWarning": "Triggers op basis van Things zijn niet beschikbaar in het Basic-abonnement. Upgrade naar Plus om taken automatisch te starten wanneer de status van een apparaat verandert."
   },
   "advancedOptions": {
     "points": "Punten",

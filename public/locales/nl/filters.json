@@ -24,7 +24,7 @@
   },
   "empty": {
     "title": "Nog geen opgeslagen filters",
-    "description": "Sla een set voorwaarden één keer op, zoals \"achterstallig en aan mij toegewezen\", en spring er overal direct naar terug.",
+    "description": "Sla een set voorwaarden op, zoals \"achterstallig en aan mij toegewezen\", en open die daarna vanaf elke plek met één tik.",
     "createFilter": "Filter maken",
     "noResultsTitle": "Geen filters gevonden",
     "noResultsWithSearch": "Geen opgeslagen filter komt overeen met \"{{search}}\".",

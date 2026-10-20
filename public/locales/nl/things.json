@@ -27,7 +27,7 @@
   },
   "view": {
     "title": "Things",
-    "description": "Things zijn aangepaste velden die je aan taken kunt koppelen om extra informatie vast te leggen. Ze kunnen van het type tekst, getal of boolean zijn. Je kunt Things aan taken koppelen, zodat een taak vervalt zodra aan een voorwaarde is voldaan",
+    "description": "Things zijn aangepaste velden die je aan taken kunt koppelen om extra informatie vast te leggen. Ze bevatten tekst, een getal of een waar/onwaar-waarde. Je kunt een taak laten vervallen zodra een Thing aan een voorwaarde voldoet",
     "searchPlaceholder": "Things zoeken",
     "sortName": "Naam",
     "sortType": "Type",

@@ -1,16 +1,16 @@
 {
-  "redeem": "Redeem Points",
+  "redeem": "Punten aftrekken",
   "sections": {
     "overview": "Overzicht"
   },
   "redeemModal": {
-    "redeemButton": "Redeem",
+    "redeemButton": "Aftrekken",
     "pointsAvailable": "{{count}} punten beschikbaar",
-    "pointsToRedeem": "Points to Redeem",
+    "pointsToRedeem": "Af te trekken punten",
     "placeholder": "Voer punten in...",
     "cannotExceed": "Mag niet meer zijn dan de beschikbare punten",
-    "quickAdd": "Quick Add:",
-    "aboutToRedeem": "You are about to redeem",
+    "quickAdd": "Snel toevoegen:",
+    "aboutToRedeem": "Dit wordt afgetrokken:",
     "amount": "{{count}} punten",
     "remaining": "Resterend: {{count}} punten"
   },
