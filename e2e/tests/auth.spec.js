@@ -27,6 +27,21 @@ test.describe('Auth – Sign Up', () => {
     await expect(page).toHaveURL(/\/$/)
   })
 
+  test('accepts a display name with non-ASCII letters', async ({ page }) => {
+    const suffix = randomSuffix()
+    await page.goto('/signup')
+    await page.locator('#username').fill(`test.signup.${suffix}`)
+    await page.locator('#email').fill(`signup.${suffix}@donetick.test`)
+    await page.locator('#password').fill('TestPassword123!')
+    await page.locator('#displayName').fill('Sören Müller')
+    await page.getByRole('button', { name: 'Create account' }).click()
+
+    await expect(page).not.toHaveURL(/\/signup/)
+    await expect(
+      page.getByText('Display name can only contain letters and numbers'),
+    ).toHaveCount(0)
+  })
+
   test('shows an error when username is too short', async ({ page }) => {
     await page.goto('/signup')
     await page.locator('#username').fill('ab') // < 4 chars
