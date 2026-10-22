@@ -843,6 +843,10 @@
     "selectedFile": "Selected: {{name}}"
   },
   "deletion": {
+    "passwordResetHelp": "If you signed in with Apple or Google, you’ll need to set a password first. Then enter that password here to verify your identity.",
+    "sendPasswordReset": "Send password reset email",
+    "passwordResetSent": "We’ve sent a password reset link to {{email}}. Follow the link to set your password, then return here to confirm your identity and continue deleting your account.",
+    "passwordResetFailed": "Unable to send the password reset email. Please try again.",
     "passwordRequired": "Please enter your password to continue",
     "passwordAndDelete": "Please enter your password and type DELETE to confirm",
     "failed": "Failed to delete account",

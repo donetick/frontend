@@ -5,6 +5,7 @@ import {
   FormControl,
   FormLabel,
   Input,
+  Link,
   Option,
   Select,
   Typography,
@@ -15,13 +16,17 @@ import { useNavigate } from 'react-router-dom'
 
 import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
-import { CheckUserDeletion, DeleteUser } from '../../../utils/Fetcher'
+import {
+  CheckUserDeletion,
+  DeleteUser,
+  ResetPassword,
+} from '../../../utils/Fetcher'
 
 // Sent verbatim to the delete endpoint, so it stays English in every locale —
 // the label around it is what gets translated.
 const CONFIRMATION_WORD = 'DELETE'
 
-function UserDeletionModal({ isOpen, onClose }) {
+function UserDeletionModal({ isOpen, onClose, userProfile }) {
   const { t } = useTranslation('settings')
   const { ResponsiveModal } = useResponsiveModal()
   const Navigate = useNavigate()
@@ -33,6 +38,7 @@ function UserDeletionModal({ isOpen, onClose }) {
   const [availableMembers, setAvailableMembers] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [resetStatus, setResetStatus] = useState(null)
 
   const resetModal = useCallback(() => {
     setStep(1)
@@ -42,6 +48,7 @@ function UserDeletionModal({ isOpen, onClose }) {
     setCirclesRequiringTransfer([])
     setAvailableMembers([])
     setError('')
+    setResetStatus(null)
   }, [])
 
   const handleClose = useCallback(
@@ -51,6 +58,24 @@ function UserDeletionModal({ isOpen, onClose }) {
     },
     [onClose, resetModal],
   )
+
+  const handlePasswordReset = async () => {
+    if (
+      !userProfile?.email ||
+      resetStatus === 'sending' ||
+      resetStatus === 'sent'
+    ) {
+      return
+    }
+
+    setResetStatus('sending')
+    try {
+      const response = await ResetPassword(userProfile.email)
+      setResetStatus(response.ok ? 'sent' : 'error')
+    } catch {
+      setResetStatus('error')
+    }
+  }
 
   const checkDeletionRequirements = async () => {
     if (password.trim() === '') {
@@ -185,6 +210,43 @@ function UserDeletionModal({ isOpen, onClose }) {
           placeholder={t('deletion.passwordPlaceholder')}
         />
       </FormControl>
+
+      {userProfile?.email && (
+        <Box sx={{ mb: 2 }}>
+          <Typography level='body-sm' textColor='text.secondary'>
+            {t('deletion.passwordResetHelp')}{' '}
+            <Link
+              component='button'
+              type='button'
+              level='body-sm'
+              disabled={resetStatus === 'sending' || resetStatus === 'sent'}
+              onClick={handlePasswordReset}
+            >
+              {t('deletion.sendPasswordReset')}
+            </Link>
+          </Typography>
+          {resetStatus === 'sent' && (
+            <Typography
+              level='body-sm'
+              color='success'
+              role='status'
+              sx={{ mt: 1 }}
+            >
+              {t('deletion.passwordResetSent', { email: userProfile.email })}
+            </Typography>
+          )}
+          {resetStatus === 'error' && (
+            <Typography
+              level='body-sm'
+              color='danger'
+              role='alert'
+              sx={{ mt: 1 }}
+            >
+              {t('deletion.passwordResetFailed')}
+            </Typography>
+          )}
+        </Box>
+      )}
 
       {error && (
         <Typography level='body-sm' color='danger' mb={2}>
