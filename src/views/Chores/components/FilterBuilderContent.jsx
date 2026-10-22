@@ -10,9 +10,9 @@ import {
   TaskAlt,
 } from '@mui/icons-material'
 import { Avatar, Box, Chip, Divider, Typography } from '@mui/joy'
-import { useTranslation } from 'react-i18next'
 
 import NumberInput from '../../../components/common/NumberInput'
+import { useXPTranslation as useTranslation } from '../../../hooks/useXPTranslation'
 import Priorities from '../../../utils/Priorities'
 import { ProjectAccessIcon } from '../../Projects/ProjectVisibilityField'
 

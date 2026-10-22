@@ -18,10 +18,10 @@ import { Box, Sheet, Typography } from '@mui/joy'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import PropTypes from 'prop-types'
 import { useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 import { useScrollDirection } from '../../hooks/useScrollDirection'
+import { useXPTranslation as useTranslation } from '../../hooks/useXPTranslation'
 import {
   getBottomNavHideLabels,
   getEnabledBottomNavItems,

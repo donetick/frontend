@@ -14,12 +14,12 @@ import {
 } from '@mui/icons-material'
 import { Avatar, Box, Button, Chip, Divider, Stack, Typography } from '@mui/joy'
 import moment from 'moment'
-import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
 import ModalActions from '../../components/common/ModalActions'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
+import { useXPTranslation as useTranslation } from '../../hooks/useXPTranslation'
 import { TASK_COLOR } from '../../utils/Colors.jsx'
 import RichTextEditor from '../components/RichTextEditor.jsx'
 

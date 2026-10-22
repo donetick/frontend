@@ -24,7 +24,8 @@
   },
   "redeemConfirm": {
     "title": "Redeem Reward",
-    "message": "Request \"{{name}}\" for {{cost}} points? An admin will need to approve it."
+    "message": "Request \"{{name}}\" for {{cost}} points? An admin will need to approve it.",
+    "message_xp": "Request \"{{name}}\" for {{cost}} XP? An admin will need to approve it."
   },
   "requests": {
     "emptyTitle": "No redemption requests",
@@ -42,7 +43,9 @@
     "editTitle": "Edit Reward",
     "addTitle": "Add Reward",
     "saveChanges": "Save Changes",
-    "addReward": "Add Reward"
+    "addReward": "Add Reward",
+    "errorInvalidCost_xp": "XP cost must be a number greater than 0",
+    "pointsCost_xp": "XP cost"
   },
   "view": {
     "subtitle": "Use the points you earn to choose something special.",
@@ -51,6 +54,13 @@
     "rewardFallbackDescription": "A little something to look forward to.",
     "emptyTitle": "No rewards yet",
     "emptyDescription": "Add a reward — like movie night or a treat — that circle members can redeem their points for.",
-    "createReward": "Create a reward"
-  }
+    "createReward": "Create a reward",
+    "subtitle_xp": "Use the XP you earn to choose something special.",
+    "pointsLabel_xp": "XP",
+    "emptyDescription_xp": "Add a reward — like movie night or a treat — that circle members can redeem their XP for."
+  },
+  "blurb_xp": "Spend your XP on rewards, or manage the reward catalog if you're an admin. Available: {{points}} XP.",
+  "notEnoughPoints_xp": "Not enough XP",
+  "pointsCost_xp_one": "{{count}} XP",
+  "pointsCost_xp_other": "{{count}} XP"
 }

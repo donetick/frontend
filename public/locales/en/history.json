@@ -33,7 +33,8 @@
     "hoursAfterDue_other": "{{count}}h after due date",
     "assignedTo": "Assigned to {{name}}",
     "points_one": "★ {{count}} pt",
-    "points_other": "★ {{count}} pts"
+    "points_other": "★ {{count}} pts",
+    "points_xp_other": "★ {{count}} XP"
   },
   "detail": {
     "title": "Activity Detail",
@@ -48,7 +49,9 @@
     "points_other": "{{count}} pts",
     "note": "Note",
     "reason": "Reason",
-    "notes": "Notes"
+    "notes": "Notes",
+    "pointsEarned_xp": "XP earned",
+    "points_xp_other": "{{count}} XP"
   },
   "charts": {
     "noData": "No data available",
@@ -94,7 +97,8 @@
     "timePeriod": "Time Period",
     "user": "User",
     "completedBy": "Completed By",
-    "completedAt": "Completed At"
+    "completedAt": "Completed At",
+    "hasPoints_xp": "Has XP"
   },
   "period": {
     "days_one": "{{count}} Day",
@@ -110,7 +114,8 @@
     "updatedDate": "Updated date",
     "performer": "Completed by",
     "status": "Status",
-    "points": "Points"
+    "points": "Points",
+    "points_xp": "XP"
   },
   "activities": {
     "title": "Activities",
@@ -126,7 +131,8 @@
       "date": "Date",
       "name": "Task name",
       "status": "Status",
-      "points": "Points"
+      "points": "Points",
+      "points_xp": "XP"
     }
   },
   "title": {

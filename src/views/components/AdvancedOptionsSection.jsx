@@ -17,9 +17,9 @@ import {
   Switch,
   Typography,
 } from '@mui/joy'
-import { useTranslation } from 'react-i18next'
 
 import NumberInput from '../../components/common/NumberInput'
+import { useXPTranslation as useTranslation } from '../../hooks/useXPTranslation'
 
 const STRATEGY_VALUES = [
   'keep_last_assigned',

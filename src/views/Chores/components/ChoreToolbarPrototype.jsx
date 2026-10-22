@@ -48,13 +48,13 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 
 import AppModal from '../../../components/common/AppModal'
 import ActiveFilterChips from '../../../components/common/filter/ActiveFilterChips'
 import KeyboardShortcutHint from '../../../components/common/KeyboardShortcutHint'
 import SortAndFilterMenu from '../../../components/common/SortAndFilterMenu'
 import { PAYWALL_REASON, usePaywall } from '../../../contexts/PaywallContext'
+import { useXPTranslation as useTranslation } from '../../../hooks/useXPTranslation'
 import { FILTER_COLORS } from '../../../utils/Colors'
 import { canCreateQuickFilter } from '../../../utils/entitlements'
 import Priorities from '../../../utils/Priorities'

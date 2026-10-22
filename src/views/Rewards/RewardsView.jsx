@@ -27,9 +27,9 @@ import {
 import { useQueryClient } from '@tanstack/react-query'
 import PropTypes from 'prop-types'
 import { useMemo, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 
 import EmptyState from '../../components/common/EmptyState'
+import { useXPTranslation as useTranslation } from '../../hooks/useXPTranslation'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import {
   ApproveRedemption,

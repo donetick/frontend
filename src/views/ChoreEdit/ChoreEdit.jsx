@@ -55,7 +55,6 @@ import {
 } from '@mui/joy'
 import moment from 'moment'
 import { useEffect, useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import {
   useBlocker,
   useLocation,
@@ -72,6 +71,7 @@ import NotificationTemplate from '../../components/NotificationTemplate.jsx'
 import { usePageShortcutScope } from '../../contexts/KeyboardShortcutScopeContext'
 import { usePaywall } from '../../contexts/PaywallContext'
 import { useDocumentScanner } from '../../hooks/useDocumentScanner'
+import { useXPTranslation as useTranslation } from '../../hooks/useXPTranslation'
 import {
   useArchiveChore,
   useChore,
@@ -189,6 +189,7 @@ const ChoreEdit = () => {
   const [completionActions, setCompletionActions] = useState([])
   const [completionActionsValid, setCompletionActionsValid] = useState(true)
   const [points, setPoints] = useState(-1)
+  const [xpCategoryId, setXPCategoryId] = useState(null)
   const [requireApproval, setRequireApproval] = useState(false)
   const [isPrivate, setIsPrivate] = useState(false)
   const [subTasks, setSubTasks] = useState(null)
@@ -302,6 +303,7 @@ const ChoreEdit = () => {
     attachments,
     completionActions,
     points,
+    xpCategoryId,
     requireApproval,
     isPrivate,
     isNotificable,
@@ -648,6 +650,7 @@ const ChoreEdit = () => {
       thingTrigger: thingTrigger,
       completionActions,
       points: points < 0 ? null : points,
+      xpCategoryId,
       requireApproval: requireApproval,
       isPrivate: isPrivate,
       completionWindow:
@@ -846,6 +849,7 @@ const ChoreEdit = () => {
 
       setNotificationMetadata(data.res.notificationMetadata)
       setCompletionActions(data.res.completionActions || [])
+      setXPCategoryId(data.res.xpCategoryId ?? null)
       setPoints(
         data.res.points != null && data.res.points >= 0 ? data.res.points : -1,
       )
@@ -2407,7 +2411,9 @@ const ChoreEdit = () => {
               error={errors.completionActions}
               summary={
                 [
-                  points >= 0 ? `${points} points` : '',
+                  points >= 0
+                    ? `${points} ${userProfile?.xpMode ? 'XP' : t('choreEdit.pointsPlaceholder')}`
+                    : '',
                   completionActions.length
                     ? `${completionActions.length} Thing action${completionActions.length === 1 ? '' : 's'}`
                     : '',
@@ -2415,7 +2421,7 @@ const ChoreEdit = () => {
                 ]
                   .filter(Boolean)
                   .join(' · ') ||
-                'Award points, require approval, or update Things when completed'
+                t('taskEditor.awardPointsOrChangeThingsWhenThis')
               }
             >
               <CompletionActionsSection
@@ -2424,6 +2430,8 @@ const ChoreEdit = () => {
                 showHeading={false}
                 points={points}
                 onPointsChange={setPoints}
+                xpCategoryId={xpCategoryId}
+                onXPCategoryChange={setXPCategoryId}
                 requireApproval={requireApproval}
                 onRequireApprovalChange={setRequireApproval}
                 onValidate={setCompletionActionsValid}
