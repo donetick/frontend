@@ -1,55 +1,55 @@
 {
   "builder": {
-    "errorName": "Please enter a filter name",
-    "errorConditions": "Please configure at least one filter condition",
-    "editTitle": "Edit Filter",
-    "newTitle": "New Filter",
-    "addConditions": "Add conditions to preview",
-    "save": "Save Filter",
-    "name": "Filter Name",
-    "namePlaceholder": "e.g. Overdue tasks for Alice",
-    "color": "Color"
+    "errorName": "Voer een filternaam in",
+    "errorConditions": "Stel minstens één filtervoorwaarde in",
+    "editTitle": "Filter bewerken",
+    "newTitle": "Nieuw filter",
+    "addConditions": "Voeg voorwaarden toe voor een voorbeeld",
+    "save": "Filter opslaan",
+    "name": "Filternaam",
+    "namePlaceholder": "bijv. Achterstallige taken voor Alice",
+    "color": "Kleur"
   },
-  "nameExists": "A filter with this name already exists",
-  "tasks_one": "{{count}} task",
-  "tasks_other": "{{count}} tasks",
-  "overdue": "{{count}} overdue",
-  "noConditions": "",
-  "condition_one": "",
-  "condition_other": "",
-  "usedCount": "",
+  "nameExists": "Er bestaat al een filter met deze naam",
+  "tasks_one": "{{count}} taak",
+  "tasks_other": "{{count}} taken",
+  "overdue": "{{count}} achterstallig",
+  "noConditions": "Geen voorwaarden",
+  "condition_one": "{{count}} voorwaarde",
+  "condition_other": "{{count}} voorwaarden",
+  "usedCount": "{{count}}x gebruikt",
   "delete": {
-    "title": "",
-    "message": ""
+    "title": "Filter verwijderen",
+    "message": "Weet je zeker dat je \"{{name}}\" wilt verwijderen? Dit kan niet ongedaan worden gemaakt."
   },
   "empty": {
-    "title": "",
-    "description": "",
-    "createFilter": "",
-    "noResultsTitle": "",
-    "noResultsWithSearch": "",
-    "noResultsDefault": "",
-    "clearSearch": "",
-    "showAllFilters": ""
+    "title": "Nog geen opgeslagen filters",
+    "description": "Sla een set voorwaarden op, zoals \"achterstallig en aan mij toegewezen\", en open die daarna vanaf elke plek met één tik.",
+    "createFilter": "Filter maken",
+    "noResultsTitle": "Geen filters gevonden",
+    "noResultsWithSearch": "Geen opgeslagen filter komt overeen met \"{{search}}\".",
+    "noResultsDefault": "Geen opgeslagen filter komt overeen met het huidige filter.",
+    "clearSearch": "Zoekopdracht wissen",
+    "showAllFilters": "Alle filters tonen"
   },
   "header": {
-    "title": "",
-    "subtitle": ""
+    "title": "Filters",
+    "subtitle": "Sla je favoriete filtercombinaties op voor snelle toegang. Maak eigen weergaven om taken sneller te ordenen en te vinden."
   },
-  "searchPlaceholder": "",
+  "searchPlaceholder": "Filters zoeken",
   "sort": {
-    "smart": "",
-    "name": "",
-    "usage": "",
-    "lastUsed": "",
-    "created": ""
+    "smart": "Slim",
+    "name": "Naam",
+    "usage": "Aantal keer gebruikt",
+    "lastUsed": "Laatst gebruikt",
+    "created": "Aanmaakdatum"
   },
   "show": {
-    "title": "",
-    "all": "",
-    "pinned": "",
-    "unpinned": ""
+    "title": "Tonen",
+    "all": "Alle filters",
+    "pinned": "Vastgezet",
+    "unpinned": "Niet vastgezet"
   },
-  "pin": "",
-  "unpin": ""
+  "pin": "Vastzetten",
+  "unpin": "Losmaken"
 }
