@@ -19,6 +19,7 @@ const setup = async lng => {
         points: catalog('points'),
         rewards: catalog('rewards'),
         chores: catalog('chores'),
+        history: catalog('history'),
       },
       es: { points: { redeem: 'Canjear puntos', unchanged: 'Sin cambios' } },
     },
@@ -51,3 +52,17 @@ test('terminology preserves interpolation variable names', async () => {
   assert.match(t(true, 'rewards', 'blurb', { points: 37 }), /37 XP/)
   assert.doesNotMatch(t(true, 'rewards', 'blurb', { points: 37 }), /\{\{/)
 })
+
+for (const [key, prefix] of [
+  ['card.points', '★ '],
+  ['detail.points', ''],
+]) {
+  test(`history ${key} supports singular and plural XP`, async () => {
+    const t = await setup('en')
+    assert.equal(t(false, 'history', key, { count: 1 }), `${prefix}1 pt`)
+    assert.equal(t(false, 'history', key, { count: 2 }), `${prefix}2 pts`)
+    for (const count of [0, 1, 2]) {
+      assert.equal(t(true, 'history', key, { count }), `${prefix}${count} XP`)
+    }
+  })
+}

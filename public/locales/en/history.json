@@ -34,6 +34,7 @@
     "assignedTo": "Assigned to {{name}}",
     "points_one": "★ {{count}} pt",
     "points_other": "★ {{count}} pts",
+    "points_xp_one": "★ {{count}} XP",
     "points_xp_other": "★ {{count}} XP"
   },
   "detail": {
@@ -51,6 +52,7 @@
     "reason": "Reason",
     "notes": "Notes",
     "pointsEarned_xp": "XP earned",
+    "points_xp_one": "{{count}} XP",
     "points_xp_other": "{{count}} XP"
   },
   "charts": {
