@@ -26,6 +26,7 @@ export const PAYWALL_REASON = {
   THING_TRIGGERS: 'thing_triggers',
   PROJECT_LIMIT: 'project_limit',
   QUICK_FILTER_LIMIT: 'quick_filter_limit',
+  CIRCLE_MEMBER_LIMIT: 'circle_member_limit',
   FILE_UPLOAD: 'file_upload',
   CALENDAR_SYNC: 'calendar_sync',
   REALTIME_SYNC: 'realtime_sync',

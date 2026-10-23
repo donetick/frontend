@@ -16,6 +16,13 @@ export const FREE_REMINDER_LIMIT = 1
 export const FREE_PROJECT_LIMIT = 5
 export const FREE_QUICK_FILTER_LIMIT = 2
 
+// Circle seats, mirroring the server's `feature_limits.max_circle_members` /
+// `plus_circle_max_members` defaults. The server is the authority (it rejects
+// the accept with a 400), these exist so the admin sees the wall before
+// confirming a request, and so the copy can name the number.
+export const FREE_CIRCLE_MEMBER_LIMIT = 2
+export const PLUS_CIRCLE_MEMBER_LIMIT = 6
+
 const isUnderLimit = (count, limit) => (Number(count) || 0) < limit
 
 // The default project isn't a created project, so it never counts here.
@@ -24,6 +31,16 @@ export const canCreateProject = (projectCount, isPlus) =>
 
 export const canCreateQuickFilter = (filterCount, isPlus) =>
   Boolean(isPlus) || isUnderLimit(filterCount, FREE_QUICK_FILTER_LIMIT)
+
+// Unlike projects and filters, Plus doesn't make circles unlimited — it raises
+// the cap — so this returns the seats the plan gets rather than a boolean-only
+// gate, and a Plus circle that is full gets an explanation instead of a pitch.
+export const circleMemberLimit = isPlus =>
+  isPlus ? PLUS_CIRCLE_MEMBER_LIMIT : FREE_CIRCLE_MEMBER_LIMIT
+
+// Counts the active members already in the circle, so `>=` is the wall.
+export const canAddCircleMember = (activeMemberCount, isPlus) =>
+  isUnderLimit(activeMemberCount, circleMemberLimit(isPlus))
 
 // Reminder templates are `{ value, unit }` where value is an offset from the
 // due date: 0 = on due, negative = before, positive = after.

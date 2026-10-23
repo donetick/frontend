@@ -24,14 +24,16 @@ import {
   Typography,
 } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
 import { useLocalization } from '../../contexts/LocalizationContext'
+import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
 import { useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { apiClient } from '../../utils/ApiClient'
+import { canAddCircleMember, circleMemberLimit } from '../../utils/entitlements'
 import {
   AcceptCircleMemberRequest,
   DeclineCircleMemberRequest,
@@ -67,6 +69,7 @@ const CircleSettings = () => {
   const { showNotification } = useNotification()
   const navigate = useNavigate()
   const { fmt } = useLocalization()
+  const { isPlus, showPaywall } = usePaywall()
 
   const [userCircles, setUserCircles] = useState([])
   const [circleMemberRequests, setCircleMemberRequests] = useState([])
@@ -154,6 +157,13 @@ const CircleSettings = () => {
         setCircleMemberRequests(data.res || [])
         setLastRefresh(new Date())
       })
+      // Non-admins get a 403 here, which is expected — `data.res` is simply
+      // absent. A transport failure shouldn't be silent though: pending
+      // requests also arrive with the member list, so the section still
+      // renders, but the "last updated" time would otherwise lie.
+      .catch(error =>
+        console.error('Failed to load circle member requests:', error),
+      )
     GetAllCircleMembers().then(data => setCircleMembers(data.res || []))
   }, [])
 
@@ -168,6 +178,42 @@ const CircleSettings = () => {
     circle?.userRole === 'member' && myMembership && !myMembership.isActive
   const inviteCode = circle?.invite_code || ''
   const apiURL = new URL(apiClient.getApiURL(), window.location.origin)
+  // The seat count the server enforces: active members only, so people who
+  // asked to join but haven't been accepted don't occupy a seat yet.
+  const activeMemberCount = circleMembers.filter(
+    member => member.isActive,
+  ).length
+  // Mirrors the server's `feature_limits` defaults. A self-hosted instance
+  // that raised its own limit will be gated here at the default anyway — the
+  // tradeoff for a limit the client can apply everywhere, including dev.
+  const memberLimit = circleMemberLimit(isPlus)
+  const isCircleFull = !canAddCircleMember(activeMemberCount, isPlus)
+  // A join request is an inactive membership, so it reaches us two ways: the
+  // requests endpoint, and the member list itself. Merging them means the
+  // admin always gets Accept/Decline — the member list alone used to render a
+  // "Pending Approval" row with no way to act on it whenever the requests
+  // endpoint came back empty. Requests entries win: they carry the username.
+  const pendingRequests = useMemo(() => {
+    const byID = new Map()
+    for (const member of circleMembers) {
+      if (member.isActive) continue
+      if (member.userId === userProfile?.id) continue
+      byID.set(member.id, member)
+    }
+    for (const request of circleMemberRequests) {
+      byID.set(request.id, { ...byID.get(request.id), ...request })
+    }
+    return [...byID.values()]
+  }, [circleMemberRequests, circleMembers, userProfile?.id])
+
+  // Admins act on pending people in the requests section above, so showing
+  // them again here would be the same person in two rows. Non-admins have no
+  // requests section, so they keep seeing who is waiting.
+  const visibleMembers = useMemo(() => {
+    if (!isAdmin) return circleMembers
+    const pendingIDs = new Set(pendingRequests.map(request => request.id))
+    return circleMembers.filter(member => !pendingIDs.has(member.id))
+  }, [circleMembers, isAdmin, pendingRequests])
   const inviteOrigin =
     apiURL.hostname === 'api.donetick.com'
       ? 'https://app.donetick.com'
@@ -204,7 +250,28 @@ const CircleSettings = () => {
     }
   }
 
+  // Plus raises the cap rather than removing it, so a full Plus circle gets an
+  // explanation; a full free circle gets the upsell.
+  const explainCircleFull = serverMessage => {
+    if (isPlus) {
+      showNotification({
+        type: 'error',
+        message:
+          serverMessage ||
+          t('circleSettings.circleFullPlus', { limit: memberLimit }),
+      })
+      return
+    }
+    showPaywall(PAYWALL_REASON.CIRCLE_MEMBER_LIMIT)
+  }
+
   const acceptRequest = request => {
+    // The server rejects this too (400), but checking here means the admin sees
+    // the limit before confirming instead of after.
+    if (isCircleFull) {
+      explainCircleFull()
+      return
+    }
     showConfirmation(
       t('circleSettings.acceptRequestMessage', {
         name: request.displayName,
@@ -215,7 +282,25 @@ const CircleSettings = () => {
         setAcceptingRequest(request.id)
         try {
           const resp = await AcceptCircleMemberRequest(request.id)
-          if (!resp.ok) return
+          if (!resp.ok) {
+            // The seat limit lives in server config, so its rejection is the
+            // authoritative "full" even when the local count looked fine —
+            // another admin may have just accepted someone, or the instance
+            // may run a different limit than the defaults we mirror.
+            const serverError = await resp
+              .json()
+              .then(body => body?.error || '')
+              .catch(() => '')
+            if (serverError.toLowerCase().includes('full')) {
+              explainCircleFull(serverError)
+            } else {
+              showNotification({
+                type: 'error',
+                message: serverError || t('circleSettings.acceptRequestFailed'),
+              })
+            }
+            return
+          }
           showNotification({
             type: 'success',
             message: t('circleSettings.requestAccepted'),
@@ -258,7 +343,14 @@ const CircleSettings = () => {
           setCircleMemberRequests(requests =>
             requests.filter(item => item.id !== request.id),
           )
+          // The request is also an inactive row in the member list, which is
+          // the other half of what the section renders — drop it there too, or
+          // the declined person stays on screen until the next load.
+          setCircleMembers(members =>
+            members.filter(member => member.id !== request.id),
+          )
           queryClient.invalidateQueries({ queryKey: ['circleMemberRequests'] })
+          queryClient.invalidateQueries({ queryKey: ['circleMembers'] })
         } finally {
           setDecliningRequest(null)
         }
@@ -448,7 +540,7 @@ const CircleSettings = () => {
                 <Typography level='title-md' sx={sectionTitleSx}>
                   {t('circleSettings.circleMemberRequests')}
                   <Chip size='sm' variant='soft' sx={{ ml: 1 }}>
-                    {circleMemberRequests.length}
+                    {pendingRequests.length}
                   </Chip>
                 </Typography>
                 {lastRefresh && (
@@ -475,9 +567,47 @@ const CircleSettings = () => {
               </IconButton>
             </Box>
 
-            {circleMemberRequests.length > 0 && (
+            {/* Pending requests the admin can't act on are worth explaining
+                up front, rather than letting Accept bounce off the limit. */}
+            {isCircleFull && pendingRequests.length > 0 && (
+              <Sheet
+                variant='soft'
+                color='warning'
+                sx={{
+                  alignItems: { xs: 'flex-start', sm: 'center' },
+                  borderRadius: 'xl',
+                  display: 'flex',
+                  flexDirection: { xs: 'column', sm: 'row' },
+                  gap: 1,
+                  justifyContent: 'space-between',
+                  mb: 1.25,
+                  p: 1.5,
+                }}
+              >
+                <Typography level='body-sm'>
+                  {t('circleSettings.circleFullNotice', {
+                    members: activeMemberCount,
+                    limit: memberLimit,
+                  })}
+                </Typography>
+                {!isPlus && (
+                  <Button
+                    size='sm'
+                    variant='solid'
+                    color='primary'
+                    onClick={() =>
+                      showPaywall(PAYWALL_REASON.CIRCLE_MEMBER_LIMIT)
+                    }
+                  >
+                    {t('overview.upgrade.button')}
+                  </Button>
+                )}
+              </Sheet>
+            )}
+
+            {pendingRequests.length > 0 && (
               <Sheet sx={{ ...surfaceSx, overflow: 'hidden' }}>
-                {circleMemberRequests.map((request, index) => (
+                {pendingRequests.map((request, index) => (
                   <Box key={request.id}>
                     {index > 0 && <Divider />}
                     <Box
@@ -532,12 +662,22 @@ const CircleSettings = () => {
         <Box component='section' sx={{ mt: 3.5 }}>
           <Typography level='title-md' sx={{ ...sectionTitleSx, mb: 1.25 }}>
             {t('circleSettings.circleMembers')}
-            <Chip size='sm' variant='soft' sx={{ ml: 1 }}>
-              {circleMembers.length}
+            {/* Show the allowance, not just the count: the limit shouldn't be
+                news only once someone asks to join. */}
+            <Chip
+              size='sm'
+              variant='soft'
+              color={isCircleFull ? 'warning' : 'neutral'}
+              sx={{ ml: 1 }}
+            >
+              {t('circleSettings.memberSeats', {
+                members: activeMemberCount,
+                limit: memberLimit,
+              })}
             </Chip>
           </Typography>
           <Sheet sx={{ ...surfaceSx, overflow: 'hidden' }}>
-            {circleMembers.map((member, index) => {
+            {visibleMembers.map((member, index) => {
               const isCurrentUser = member.userId === userProfile.id
               return (
                 <Box key={member.id || member.userId}>

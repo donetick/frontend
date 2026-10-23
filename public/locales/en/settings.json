@@ -180,6 +180,10 @@
     "acceptRequestTitle": "Accept Member Request",
     "acceptRequestMessage": "Are you sure you want to accept {{name}} (username: {{username}}) to join your circle?",
     "requestAccepted": "Accepted request successfully",
+    "acceptRequestFailed": "Failed to accept request",
+    "memberSeats": "{{members}} of {{limit}}",
+    "circleFullNotice": "Your circle is full at {{members}} of {{limit}} members. Upgrade to Plus for more members.",
+    "circleFullPlus": "Your circle is full. Plus circles can have up to {{limit}} members, so remove a member to make room.",
     "decline": "Decline",
     "declineRequestTitle": "Decline Member Request",
     "declineRequestMessage": "Are you sure you want to decline {{name}}'s (username: {{username}}) request to join your circle?",
@@ -765,6 +769,7 @@
     "reasonThingTriggers": "Triggering tasks automatically from a thing changing state is a Plus feature.",
     "reasonProjectLimit": "Your current plan includes {{projectLimit}} projects. Upgrade to Plus to create as many as you need.",
     "reasonQuickFilterLimit": "Your current plan includes {{filterLimit}} saved quick filters. Upgrade to Plus for unlimited filters.",
+    "reasonCircleMemberLimit": "Your current plan includes {{memberLimit}} members per circle. Upgrade to Plus for up to {{plusMemberLimit}} members, so the whole household can share tasks.",
     "reasonFileUpload": "Attaching files and images is a Plus feature. Upgrade to Plus to add photos, scans and documents to your tasks.",
     "reasonCalendarSync": "Subscribing to your tasks from Apple Calendar, Google Calendar, Outlook, or another calendar app is a Plus feature."
   },
