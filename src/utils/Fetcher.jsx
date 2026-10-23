@@ -396,6 +396,21 @@ const UpdateNotificationTarget = notificationTarget => {
   })
 }
 
+const GetNotificationPreferences = () => {
+  return Fetch(`/users/notifications/preferences`, {
+    method: 'GET',
+    headers: HEADERS(),
+  })
+}
+
+const UpdateNotificationPreferences = preference => {
+  return Fetch(`/users/notifications/preferences`, {
+    method: 'PUT',
+    headers: HEADERS(),
+    body: JSON.stringify(preference),
+  })
+}
+
 const GetSubscriptionSession = () => {
   return Fetch(`/payments/create-subscription`, {
     method: 'GET',
@@ -1189,6 +1204,7 @@ export {
   GetLabels,
   GetLongLiveTokens,
   GetMFAStatus,
+  GetNotificationPreferences,
   GetPinnedFilters,
   GetProjectById,
   GetProjects,
@@ -1244,6 +1260,7 @@ export {
   UpdateFilter,
   UpdateLabel,
   UpdateMemberRole,
+  UpdateNotificationPreferences,
   UpdateNotificationTarget,
   UpdatePassword,
   UpdateProject,

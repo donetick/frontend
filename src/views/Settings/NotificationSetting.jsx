@@ -23,14 +23,49 @@ import { useTranslation } from 'react-i18next'
 
 import { registerPushNotifications } from '../../CapacitorListener'
 import { useLocalization } from '../../contexts/LocalizationContext'
-import { useDeviceTokens, useUserProfile } from '../../queries/UserQueries'
+import {
+  useDeviceTokens,
+  useNotificationPreferences,
+  useUserProfile,
+} from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { isOfficialDonetickInstanceSync } from '../../utils/FeatureToggle'
 import {
   UnregisterDeviceToken,
+  UpdateNotificationPreferences,
   UpdateNotificationTarget,
 } from '../../utils/Fetcher'
 import SettingsLayout from './SettingsLayout'
+
+const NOTIFICATION_PROFILE_LABEL_KEYS = {
+  balanced: 'profileBalanced',
+  planner: 'profilePlanner',
+  just_in_time: 'profileJustInTime',
+  persistent: 'profilePersistent',
+  quiet: 'profileQuiet',
+  custom: 'profileCustom',
+}
+
+const NOTIFICATION_EVENT_LABEL_KEYS = {
+  pre_due: { title: 'eventPreDueTitle', label: 'eventPreDueLabel' },
+  due: { title: 'eventDueTitle', label: 'eventDueLabel' },
+  overdue_followup: {
+    title: 'eventOverdueFollowupTitle',
+    label: 'eventOverdueFollowupLabel',
+  },
+  escalation: {
+    title: 'eventEscalationTitle',
+    label: 'eventEscalationLabel',
+  },
+  daily_digest: {
+    title: 'eventDailyDigestTitle',
+    label: 'eventDailyDigestLabel',
+  },
+  weekly_digest: {
+    title: 'eventWeeklyDigestTitle',
+    label: 'eventWeeklyDigestLabel',
+  },
+}
 
 const NotificationSetting = () => {
   const { t } = useTranslation('settings')
@@ -38,6 +73,10 @@ const NotificationSetting = () => {
   const { showWarning } = useNotification()
   const { data: userProfile, refetch: refetchUserProfile } = useUserProfile()
   const { data: deviceTokens, refetch: refetchDevices } = useDeviceTokens()
+  const {
+    data: notificationPreference,
+    refetch: refetchNotificationPreference,
+  } = useNotificationPreferences()
 
   const getNotificationPreferences = async () => {
     const ret = await Preferences.get({ key: 'notificationPreferences' })
@@ -277,6 +316,66 @@ const NotificationSetting = () => {
       })
     }
   }
+
+  const persistNotificationPreference = async ({
+    digestHour,
+    overrides,
+    profile,
+  }) => {
+    try {
+      const resp = await UpdateNotificationPreferences({
+        profile,
+        overrides,
+        digestHour,
+      })
+      if (resp.status !== 200) {
+        showWarning({
+          title: t('common.error'),
+          message: t('notifications.preferenceUpdateFailed'),
+        })
+        return
+      }
+      refetchNotificationPreference()
+    } catch (error) {
+      console.error('Error updating notification preference:', error)
+      showWarning({
+        title: t('common.error'),
+        message: t('notifications.preferenceUpdateFailed'),
+      })
+    }
+  }
+
+  const handleProfileChange = (event, selected) => {
+    if (!selected) return
+    persistNotificationPreference({
+      profile: selected,
+      overrides: notificationPreference?.overrides ?? {},
+      digestHour: notificationPreference?.digestHour ?? 8,
+    })
+  }
+
+  const handleEventToggle = eventType => {
+    const effective = notificationPreference?.effective ?? {}
+    const overrides = {
+      ...(notificationPreference?.overrides ?? {}),
+      [eventType]: !effective[eventType],
+    }
+    persistNotificationPreference({
+      profile: notificationPreference?.profile ?? 'balanced',
+      overrides,
+      digestHour: notificationPreference?.digestHour ?? 8,
+    })
+  }
+
+  const handleDigestHourChange = (event, selected) => {
+    if (selected === null || selected === undefined) return
+    persistNotificationPreference({
+      profile: notificationPreference?.profile ?? 'balanced',
+      overrides: notificationPreference?.overrides ?? {},
+      digestHour: Number(selected),
+    })
+  }
+
   return (
     <SettingsLayout title={t('notifications.title')}>
       <div className='grid gap-4 py-4' id='notifications'>
@@ -763,6 +862,94 @@ const NotificationSetting = () => {
             </Button>
           </Box>
         )}
+
+        <Typography level='h3' sx={{ mt: 2 }}>
+          {t('notifications.preferenceSection')}
+        </Typography>
+        <Divider />
+        <Typography level='body-md'>
+          {t('notifications.preferenceSectionDescription')}
+        </Typography>
+
+        <FormControl sx={{ maxWidth: 260 }}>
+          <FormLabel>{t('notifications.profileLabel')}</FormLabel>
+          <Select
+            value={notificationPreference?.profile ?? 'balanced'}
+            onChange={handleProfileChange}
+          >
+            {Object.entries(NOTIFICATION_PROFILE_LABEL_KEYS).map(
+              ([profile, labelKey]) => (
+                <Option key={profile} value={profile}>
+                  {t(`notifications.${labelKey}`)}
+                </Option>
+              ),
+            )}
+          </Select>
+          <FormHelperText>{t('notifications.profileHelper')}</FormHelperText>
+        </FormControl>
+
+        <Card>
+          {Object.entries(NOTIFICATION_EVENT_LABEL_KEYS).map(
+            ([eventType, labelKeys]) => (
+              <FormControl
+                key={eventType}
+                orientation='horizontal'
+                sx={{
+                  width: '100%',
+                  maxWidth: 385,
+                  gap: 2,
+                  justifyContent: 'space-between',
+                }}
+              >
+                <div>
+                  <FormLabel>{t(`notifications.${labelKeys.title}`)}</FormLabel>
+                  <FormHelperText sx={{ mt: 0 }}>
+                    {t(`notifications.${labelKeys.label}`)}
+                  </FormHelperText>
+                </div>
+
+                <Switch
+                  checked={Boolean(
+                    notificationPreference?.effective?.[eventType],
+                  )}
+                  onClick={() => handleEventToggle(eventType)}
+                  color={
+                    notificationPreference?.effective?.[eventType]
+                      ? 'success'
+                      : ''
+                  }
+                  variant='solid'
+                  endDecorator={
+                    notificationPreference?.effective?.[eventType]
+                      ? t('common.on')
+                      : t('common.off')
+                  }
+                  slotProps={{ endDecorator: { sx: { minWidth: 24 } } }}
+                />
+              </FormControl>
+            ),
+          )}
+        </Card>
+
+        <FormControl orientation='horizontal' sx={{ maxWidth: 300, gap: 2 }}>
+          <div>
+            <FormLabel>{t('notifications.digestHourLabel')}</FormLabel>
+            <FormHelperText sx={{ mt: 0 }}>
+              {t('notifications.digestHourHelper')}
+            </FormHelperText>
+          </div>
+          <Select
+            value={notificationPreference?.digestHour ?? 8}
+            onChange={handleDigestHourChange}
+            sx={{ minWidth: 100 }}
+          >
+            {Array.from({ length: 24 }, (_, hour) => hour).map(hour => (
+              <Option key={hour} value={hour}>
+                {String(hour).padStart(2, '0')}:00
+              </Option>
+            ))}
+          </Select>
+        </FormControl>
       </div>
     </SettingsLayout>
   )
