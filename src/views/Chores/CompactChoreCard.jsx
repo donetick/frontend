@@ -11,12 +11,12 @@ import {
   Webhook,
 } from '@mui/icons-material'
 import { Box, Checkbox, Chip, IconButton, Typography } from '@mui/joy'
-import { useTranslation } from 'react-i18next'
 
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { usePendingCommands } from '../../hooks/usePendingCommands'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
+import { useXPTranslation as useTranslation } from '../../queries/XPQueries'
 import {
   getDueDateChipColor,
   getDueDateChipText,
@@ -72,7 +72,7 @@ const CompactChoreCard = ({
   sx,
   viewOnly,
 }) => {
-  const { t } = useTranslation('chores')
+  const { t, xpMode } = useTranslation('chores')
 
   const { data: userProfile } = useUserProfile()
   const { timeFormat } = useLocalization()
@@ -134,7 +134,7 @@ const CompactChoreCard = ({
 
     // Points
     if (chore.points > 0) {
-      parts.push(`${chore.points}pts`)
+      parts.push(`${chore.points}${xpMode ? ' XP' : 'pts'}`)
     }
 
     return parts.join(' • ')

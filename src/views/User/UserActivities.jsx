@@ -38,7 +38,6 @@ import {
 } from '@mui/joy'
 import Fuse from 'fuse.js'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { Cell, Pie, PieChart, Tooltip } from 'recharts'
 
 import EmptyState from '../../components/common/EmptyState'
@@ -54,6 +53,7 @@ import {
   useUpdateChoreHistory,
 } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
+import { useXPTranslation as useTranslation } from '../../queries/XPQueries'
 import { ChoresGrouper } from '../../utils/Chores'
 import { COLORS, TASK_COLOR } from '../../utils/Colors.jsx'
 import { isPlusHistoryWindow } from '../../utils/entitlements'

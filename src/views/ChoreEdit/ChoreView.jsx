@@ -36,7 +36,7 @@ import {
 import { useQueryClient } from '@tanstack/react-query'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useXPTranslation as useTranslation } from '../../queries/XPQueries'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import EmptyState from '../../components/common/EmptyState'
