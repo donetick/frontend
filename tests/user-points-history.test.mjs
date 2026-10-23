@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { Buffer } from 'node:buffer'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
+import { URL } from 'node:url'
 import vm from 'node:vm'
 
 import { parseSync } from '@swc/core'
@@ -16,10 +17,7 @@ const ast = parseSync(anchoredSource.toString(), {
 })
 const text = node =>
   anchoredSource
-    .subarray(
-      node.span.start - ast.span.start,
-      node.span.end - ast.span.start,
-    )
+    .subarray(node.span.start - ast.span.start, node.span.end - ast.span.start)
     .toString()
 
 const forEachCallbacks = []
