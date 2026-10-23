@@ -968,6 +968,16 @@ const UnregisterDeviceToken = (deviceId, token) => {
   })
 }
 
+// Launch-time heartbeat that keeps this device's registration from being
+// reaped as inactive, without re-sending an unchanged token. A 404 means the
+// server has no active row for this device and the caller must re-register.
+const UpdateDeviceActivity = deviceId => {
+  return Fetch(`/devices/tokens/${encodeURIComponent(deviceId)}/activity`, {
+    method: 'PUT',
+    headers: HEADERS(),
+  })
+}
+
 const GetDeviceTokens = (active = true) => {
   return Fetch(`/devices/tokens?active=${active}`, {
     method: 'GET',
@@ -1240,6 +1250,7 @@ export {
   UpdateChoreAssignee,
   UpdateChoreHistory,
   UpdateChorePriority,
+  UpdateDeviceActivity,
   UpdateDueDate,
   UpdateFilter,
   UpdateLabel,

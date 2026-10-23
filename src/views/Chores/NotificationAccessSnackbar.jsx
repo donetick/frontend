@@ -12,29 +12,46 @@ const NotificationAccessSnackbar = () => {
   const [open, setOpen] = useState(false)
 
   // Define the function outside of useEffect
-  const getNotificationPreferences = async () => {
-    const ret = await Preferences.get({ key: 'notificationPreferences' })
-    return JSON.parse(ret.value) || {}
+  const readPreferences = async key => {
+    const ret = await Preferences.get({ key })
+    try {
+      return JSON.parse(ret.value) || {}
+    } catch {
+      return {}
+    }
   }
 
   useEffect(() => {
     // Only run the effect on native platforms
-    if (Capacitor.isNativePlatform()) {
-      getNotificationPreferences().then(async data => {
-        // if optOut is true then don't show the snackbar
-        if (data?.optOut === true || data?.granted === true) {
-          // Onboarding (and the system settings screen) can grant permission
-          // while no session exists, so the push token still needs registering.
-          if (data?.granted === true) {
-            await registerPushNotifications().catch(error =>
-              console.error('Error registering push notifications:', error),
-            )
-          }
-          return
-        }
-        setOpen(true)
-      })
+    if (!Capacitor.isNativePlatform()) return
+
+    const run = async () => {
+      const [localPrefs, pushPrefs] = await Promise.all([
+        readPreferences('notificationPreferences'),
+        readPreferences('pushNotificationPreferences'),
+      ])
+
+      // This is the only launch-time path that re-attaches the native push
+      // listeners, and it must key off the *push* preference: FCM tokens
+      // rotate (reinstall, cleared data, backup restore, FCM's own refresh)
+      // and a rotation is only observed while a `registration` listener is
+      // attached. Gating this on `notificationPreferences` — the separate
+      // local-notification grant — meant push users who never answered the
+      // snackbar below silently stopped receiving pushes after their first
+      // rotation, and signed-out users whose local grant was still true got
+      // re-registered against their wishes.
+      if (pushPrefs?.granted === true) {
+        await registerPushNotifications().catch(error =>
+          console.error('Error registering push notifications:', error),
+        )
+      }
+
+      // if optOut is true then don't show the snackbar
+      if (localPrefs?.optOut === true || localPrefs?.granted === true) return
+      setOpen(true)
     }
+
+    run()
   }, [])
 
   // Return early if not on a native platform
@@ -72,8 +89,16 @@ const NotificationAccessSnackbar = () => {
                 const resp = await LocalNotifications.requestPermissions()
                 if (resp.display === 'granted') {
                   notificationPreferences['granted'] = true
-                  // Register for push notifications after local permission is granted
-                  await registerPushNotifications()
+                  // Register for push notifications after local permission is
+                  // granted, and record it under the push key too — the
+                  // launch-time re-registration above reads that key, so
+                  // leaving it unset here meant opting in through this
+                  // snackbar never survived a token rotation.
+                  await registerPushNotifications({ force: true })
+                  await Preferences.set({
+                    key: 'pushNotificationPreferences',
+                    value: JSON.stringify({ granted: true }),
+                  })
                 }
               } catch (error) {
                 console.error('Error setting up notifications:', error)

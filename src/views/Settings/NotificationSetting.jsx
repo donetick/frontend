@@ -21,10 +21,14 @@ import {
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { registerPushNotifications } from '../../CapacitorListener'
+import {
+  registerPushNotifications,
+  unregisterPushNotifications,
+} from '../../CapacitorListener'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useDeviceTokens, useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
+import { getStableDeviceId } from '../../utils/DeviceInfo'
 import { isOfficialDonetickInstanceSync } from '../../utils/FeatureToggle'
 import {
   UnregisterDeviceToken,
@@ -109,12 +113,14 @@ const NotificationSetting = () => {
       const getCurrentDeviceInfo = async () => {
         try {
           const deviceInfo = await Device.getInfo()
-          const deviceId = await Device.getId()
+          // Must be the same helper the registration path uses, or "this
+          // device" never matches a row in the registered list.
+          const deviceId = await getStableDeviceId()
           const platform =
             Capacitor.getPlatform() === 'android' ? 'android' : 'ios'
 
           setCurrentDevice({
-            id: deviceId.identifier,
+            id: deviceId,
             platform,
             model: deviceInfo.model,
             appVersion: deviceInfo.appVersion,
@@ -257,9 +263,11 @@ const NotificationSetting = () => {
         return
       }
 
-      // Ensure push notification listeners are set up before registration
-
-      await registerPushNotifications()
+      // Ensure push notification listeners are set up before registration.
+      // force: the user is explicitly re-adding a device whose row was
+      // removed server-side, so the POST must happen even though the local
+      // registration record still matches the current token.
+      await registerPushNotifications({ force: true })
 
       // Store registration preferences immediately since permission was granted
       await setPushNotificationPreferences({ granted: true })
@@ -308,6 +316,10 @@ const NotificationSetting = () => {
                 })
               } else {
                 setDeviceNotification(false)
+                // Persist the opt-out: without this the toggle snapped back
+                // to "on" on the next mount, since the stored preference was
+                // never updated.
+                setNotificationPreferences({ granted: false })
               }
             }}
             color={deviceNotification ? 'success' : 'neutral'}
@@ -449,8 +461,10 @@ const NotificationSetting = () => {
                     if (resp.receive === 'granted') {
                       setPushNotification(true)
                       setPushNotificationPreferences({ granted: true })
-                      // Register push notifications after permission is granted
-                      await registerPushNotifications()
+                      // Register push notifications after permission is
+                      // granted. force: explicit opt-in must reach the server
+                      // even if a stale local record matches.
+                      await registerPushNotifications({ force: true })
                     }
                     if (resp.receive !== 'granted') {
                       showWarning({
@@ -466,6 +480,13 @@ const NotificationSetting = () => {
                   }
                 } else {
                   setPushNotification(false)
+                  // Turning the toggle off used to only change local React
+                  // state: the preference was never persisted and the server
+                  // kept this device as a push target, so pushes continued
+                  // and the toggle flipped back on remount. Drop the device
+                  // registration for real.
+                  await unregisterPushNotifications()
+                  refetchDevices()
                 }
               }}
               color={pushNotification ? 'success' : 'neutral'}
@@ -594,6 +615,19 @@ const NotificationSetting = () => {
                               null,
                             )
                             if (resp.ok) {
+                              // Removing *this* device must also clear its
+                              // cached registration record, otherwise the
+                              // dedupe check sees a matching token and skips
+                              // re-registering it later.
+                              if (device.deviceId === currentDevice?.id) {
+                                await Preferences.remove({
+                                  key: 'deviceRegistration',
+                                })
+                                await setPushNotificationPreferences({
+                                  granted: false,
+                                })
+                                setPushNotification(false)
+                              }
                               refetchDevices()
                             } else {
                               showWarning({
