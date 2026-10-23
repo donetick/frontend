@@ -40,6 +40,14 @@ const NotificationAccessSnackbar = () => {
       // snackbar below silently stopped receiving pushes after their first
       // rotation, and signed-out users whose local grant was still true got
       // re-registered against their wishes.
+      // Migrate pre-push-preference installs without overriding an explicit opt-out.
+      if (pushPrefs.granted === undefined && localPrefs.granted === true) {
+        pushPrefs.granted = true
+        await Preferences.set({
+          key: 'pushNotificationPreferences',
+          value: JSON.stringify(pushPrefs),
+        })
+      }
       if (pushPrefs?.granted === true) {
         await registerPushNotifications().catch(error =>
           console.error('Error registering push notifications:', error),

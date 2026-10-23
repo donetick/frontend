@@ -11,7 +11,7 @@ import {
   receivePendingShare,
   storePendingShare,
 } from './service/ShareTargetService'
-import { getStableDeviceId } from './utils/DeviceInfo'
+import { getAppVersion, getStableDeviceId } from './utils/DeviceInfo'
 import {
   RegisterDeviceToken,
   UnregisterDeviceToken,
@@ -222,6 +222,21 @@ const localNotificationListenerRegistration = () => {
 // still looks current — the row may have been removed server-side from
 // another device's Settings screen.
 let forceNextRegistration = false
+let pushEnabled = false
+let registrationEpoch = 0
+let registrationQueue = Promise.resolve()
+let pendingPushToken = null
+let retryTimer = null
+
+const schedulePushRetry = () => {
+  if (retryTimer || !pushEnabled) return
+  retryTimer = setTimeout(() => {
+    retryTimer = null
+    if (pushEnabled && hasValidAccessToken()) {
+      void pushNotificationListenerRegistration()
+    }
+  }, 30000)
+}
 
 // The `registration` event fires on every PushNotifications.register() call,
 // not just when the FCM token actually rotates, so compare against the last
@@ -252,13 +267,18 @@ const isRegistrationCurrent = async (token, deviceId, platform, appVersion) => {
 const touchDeviceActivity = async deviceId => {
   try {
     const result = await UpdateDeviceActivity(deviceId)
-    if (!result) return true
+    if (!result) {
+      schedulePushRetry()
+      return true
+    }
     if (result.status === 404) return false
     if (!result.ok) {
+      schedulePushRetry()
       console.warn('Device activity update failed:', result.status)
     }
     return true
   } catch (error) {
+    schedulePushRetry()
     console.warn('Device activity update failed:', error)
     return true
   }
@@ -269,9 +289,10 @@ const registerTokenIfNeeded = async (
   deviceInfo,
   deviceId,
   platform,
-  { force = false } = {},
+  { epoch = registrationEpoch, force = false } = {},
 ) => {
   try {
+    if (!pushEnabled || epoch !== registrationEpoch) return
     if (!deviceId) {
       console.warn('Skipping device registration: no device id available')
       return
@@ -283,6 +304,7 @@ const registerTokenIfNeeded = async (
     // `pushNotificationPreferences.granted` persists, so the next launch with
     // a live session re-registers.
     if (!hasValidAccessToken()) {
+      schedulePushRetry()
       console.log('Skipping device registration: no valid session')
       return
     }
@@ -308,6 +330,8 @@ const registerTokenIfNeeded = async (
       console.log('Cached device registration is stale, re-registering')
     }
 
+    if (!pushEnabled || epoch !== registrationEpoch) return
+
     const result = await RegisterDeviceToken(
       token.value,
       deviceId,
@@ -316,7 +340,10 @@ const registerTokenIfNeeded = async (
       deviceInfo.model,
     )
 
-    if (!result) return
+    if (!result) {
+      schedulePushRetry()
+      return
+    }
 
     if (result.ok) {
       await Preferences.set({
@@ -332,6 +359,7 @@ const registerTokenIfNeeded = async (
       console.log('Device token registered successfully')
       window.dispatchEvent(new CustomEvent('deviceTokenRegistered'))
     } else {
+      if (result.status !== 409) schedulePushRetry()
       console.error('Device registration failed:', result.status)
       // Drop the cached record so the next attempt is not deduped away by
       // isRegistrationCurrent() while the server has no row for this device.
@@ -346,6 +374,7 @@ const registerTokenIfNeeded = async (
       )
     }
   } catch (error) {
+    schedulePushRetry()
     console.error('Error registering device token:', error)
     window.dispatchEvent(
       new CustomEvent('deviceTokenRegistrationFailed', {
@@ -358,39 +387,45 @@ const registerTokenIfNeeded = async (
 // Drop this device from the account's push targets. Must run while the access
 // token is still valid (i.e. before the logout cleanup clears it), otherwise
 // the server keeps pushing this user's chores to a signed-out device.
-const unregisterPushNotifications = async () => {
-  if (!Capacitor.isNativePlatform()) return
+const unregisterPushNotifications = async ({ disable = true } = {}) => {
+  if (!Capacitor.isNativePlatform()) return true
 
-  try {
-    const stored = await Preferences.get({ key: 'deviceRegistration' })
-    const registration = stored.value ? JSON.parse(stored.value) : null
-
-    // Fall back to the platform device id when the local record is missing
-    // (e.g. app reinstall or preferences cleared) so we still try the delete.
-    const deviceId = registration?.deviceId ?? (await getStableDeviceId())
-    const token = registration?.token ?? null
-
-    if (deviceId || token) {
-      await UnregisterDeviceToken(deviceId, token)
-    }
-
-    await Preferences.remove({ key: 'deviceRegistration' })
+  pushEnabled = false
+  registrationEpoch += 1
+  pendingPushToken = null
+  forceNextRegistration = false
+  clearTimeout(retryTimer)
+  retryTimer = null
+  if (disable) {
     await Preferences.set({
       key: 'pushNotificationPreferences',
       value: JSON.stringify({ granted: false }),
     })
+  }
 
-    // Stop APNs/FCM delivery to this install until the next sign-in registers
-    // again. removeAllListeners() detaches what addPushListeners() attached,
-    // so clear the guard or a logout/login in the same app session would
-    // leave the app with no push listeners at all.
-    await PushNotifications.removeAllListeners()
-    pushListenersRegistered = false
-    forceNextRegistration = false
-    await PushNotifications.unregister()
+  // Finish any POST before DELETE, so a late registration cannot recreate the row.
+  // Push requests bypass auth recovery to avoid a logout waiting on itself.
+  await registrationQueue
+  let removed = false
+  try {
+    const stored = await Preferences.get({ key: 'deviceRegistration' })
+    const registration = stored.value ? JSON.parse(stored.value) : null
+    const deviceId = registration?.deviceId ?? (await getStableDeviceId())
+    const result = await UnregisterDeviceToken(deviceId, registration?.token)
+    removed = Boolean(result?.ok || result?.status === 404)
+    if (removed) await Preferences.remove({ key: 'deviceRegistration' })
+    else console.error('Backend push unregistration failed:', result?.status)
   } catch (error) {
     console.error('Error unregistering device token', error)
+  } finally {
+    // Native cleanup must run even when the backend is unreachable.
+    try {
+      await PushNotifications.unregister()
+    } catch (error) {
+      console.error('Native push unregistration failed:', error)
+    }
   }
+  return removed
 }
 
 // Capacitor appends listeners rather than replacing them, and this function is
@@ -404,29 +439,47 @@ const addPushListeners = () => {
   if (pushListenersRegistered) return
   pushListenersRegistered = true
 
-  PushNotifications.addListener('registration', async token => {
-    if (Capacitor.isNativePlatform()) {
-      try {
+  PushNotifications.addListener('registration', token => {
+    if (!pushEnabled) return
+    pendingPushToken = token
+    const epoch = registrationEpoch
+    const force = forceNextRegistration
+    forceNextRegistration = false
+    registrationQueue = registrationQueue
+      .then(async () => {
+        if (!pushEnabled || epoch !== registrationEpoch) return
         const deviceInfo = await Device.getInfo()
+        deviceInfo.appVersion = await getAppVersion()
         const deviceId = await getStableDeviceId()
-
-        const platform =
-          Capacitor.getPlatform() === 'android' ? 'android' : 'ios'
-
-        const force = forceNextRegistration
-        forceNextRegistration = false
-
-        await registerTokenIfNeeded(token, deviceInfo, deviceId, platform, {
-          force,
-        })
-      } catch (error) {
+        await registerTokenIfNeeded(
+          token,
+          deviceInfo,
+          deviceId,
+          Capacitor.getPlatform(),
+          {
+            force,
+            epoch,
+          },
+        )
+      })
+      .catch(error => {
         console.error('Error registering device token', error)
-      }
+        schedulePushRetry()
+      })
+  })
+
+  window.addEventListener('authTokensSaved', () => {
+    if (pushEnabled && pendingPushToken && hasValidAccessToken()) {
+      void pushNotificationListenerRegistration()
     }
+  })
+  window.addEventListener('online', () => {
+    if (pushEnabled) void pushNotificationListenerRegistration()
   })
 
   PushNotifications.addListener('registrationError', error => {
     forceNextRegistration = false
+    schedulePushRetry()
     console.error('Error on registration: ' + JSON.stringify(error))
   })
 
@@ -453,6 +506,23 @@ const addPushListeners = () => {
 // `force` marks this as an explicit user action, so the token is re-sent to
 // the server even if the locally cached registration still matches.
 const pushNotificationListenerRegistration = async ({ force = false } = {}) => {
+  if (!Capacitor.isNativePlatform()) return
+  const epoch = registrationEpoch
+  // Persist explicit opt-in before native callbacks can arrive.
+  if (force) {
+    await Preferences.set({
+      key: 'pushNotificationPreferences',
+      value: JSON.stringify({ granted: true }),
+    })
+  }
+  const stored = await Preferences.get({ key: 'pushNotificationPreferences' })
+  if (
+    epoch !== registrationEpoch ||
+    !stored.value ||
+    !JSON.parse(stored.value).granted
+  )
+    return
+  pushEnabled = true
   // Check and request permissions for Android 13+
   if (Capacitor.isNativePlatform()) {
     let permStatus = await PushNotifications.checkPermissions()
@@ -462,6 +532,9 @@ const pushNotificationListenerRegistration = async ({ force = false } = {}) => {
     }
 
     if (permStatus.receive !== 'granted') {
+      pushEnabled = false
+      clearTimeout(retryTimer)
+      retryTimer = null
       console.warn('Push notification permission not granted')
       return
     }
@@ -469,6 +542,7 @@ const pushNotificationListenerRegistration = async ({ force = false } = {}) => {
 
   // Attach before register() so the `registration` event it triggers cannot
   // land before anything is listening for it.
+  if (epoch !== registrationEpoch || !pushEnabled) return
   addPushListeners()
 
   if (force) forceNextRegistration = true

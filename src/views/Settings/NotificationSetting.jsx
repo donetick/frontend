@@ -28,7 +28,7 @@ import {
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useDeviceTokens, useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
-import { getStableDeviceId } from '../../utils/DeviceInfo'
+import { getAppVersion, getStableDeviceId } from '../../utils/DeviceInfo'
 import { isOfficialDonetickInstanceSync } from '../../utils/FeatureToggle'
 import {
   UnregisterDeviceToken,
@@ -123,7 +123,7 @@ const NotificationSetting = () => {
             id: deviceId,
             platform,
             model: deviceInfo.model,
-            appVersion: deviceInfo.appVersion,
+            appVersion: await getAppVersion(),
           })
         } catch (error) {
           console.error('Error getting device info:', error)
@@ -485,7 +485,13 @@ const NotificationSetting = () => {
                   // kept this device as a push target, so pushes continued
                   // and the toggle flipped back on remount. Drop the device
                   // registration for real.
-                  await unregisterPushNotifications()
+                  const removed = await unregisterPushNotifications()
+                  if (!removed) {
+                    showWarning({
+                      title: t('common.error'),
+                      message: t('notifications.unregisterFailed'),
+                    })
+                  }
                   refetchDevices()
                 }
               }}
@@ -610,24 +616,18 @@ const NotificationSetting = () => {
                         size='sm'
                         onClick={async () => {
                           try {
-                            const resp = await UnregisterDeviceToken(
-                              device.deviceId,
-                              null,
-                            )
-                            if (resp.ok) {
-                              // Removing *this* device must also clear its
-                              // cached registration record, otherwise the
-                              // dedupe check sees a matching token and skips
-                              // re-registering it later.
-                              if (device.deviceId === currentDevice?.id) {
-                                await Preferences.remove({
-                                  key: 'deviceRegistration',
-                                })
-                                await setPushNotificationPreferences({
-                                  granted: false,
-                                })
-                                setPushNotification(false)
-                              }
+                            const isThisDevice =
+                              device.deviceId === currentDevice?.id
+                            const removed = isThisDevice
+                              ? await unregisterPushNotifications()
+                              : (
+                                  await UnregisterDeviceToken(
+                                    device.deviceId,
+                                    null,
+                                  )
+                                ).ok
+                            if (isThisDevice) setPushNotification(false)
+                            if (removed) {
                               refetchDevices()
                             } else {
                               showWarning({

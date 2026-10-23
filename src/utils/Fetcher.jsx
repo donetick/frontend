@@ -945,6 +945,7 @@ const RegisterDeviceToken = (
 ) => {
   return Fetch(`/devices/tokens`, {
     method: 'POST',
+    skipAuthRecovery: true,
     headers: HEADERS(),
     body: JSON.stringify({
       token,
@@ -974,6 +975,7 @@ const UnregisterDeviceToken = (deviceId, token) => {
 const UpdateDeviceActivity = deviceId => {
   return Fetch(`/devices/tokens/${encodeURIComponent(deviceId)}/activity`, {
     method: 'PUT',
+    skipAuthRecovery: true,
     headers: HEADERS(),
   })
 }

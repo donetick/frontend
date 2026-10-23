@@ -93,6 +93,7 @@ export const saveTokens = async ({
         // Don't throw - access token is still saved to localStorage
       }
     }
+    if (accessToken) window.dispatchEvent(new CustomEvent('authTokensSaved'))
   } catch (error) {
     console.error('Error saving tokens:', error)
     throw error

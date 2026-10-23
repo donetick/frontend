@@ -18,7 +18,21 @@ const DEVICE_ID_FALLBACK_KEY = 'deviceIdFallback'
  * failed". Mint a UUID once and keep it in Preferences so those devices still
  * get a stable identity that survives relaunches.
  */
-export const getStableDeviceId = async () => {
+let deviceIdPromise = null
+export const getStableDeviceId = () => {
+  if (!deviceIdPromise) {
+    deviceIdPromise = resolveDeviceId().catch(error => {
+      deviceIdPromise = null
+      throw error
+    })
+  }
+  return deviceIdPromise
+}
+
+const resolveDeviceId = async () => {
+  // Once a fallback is chosen, keep using it even if the OS ID becomes available.
+  const stored = await Preferences.get({ key: DEVICE_ID_FALLBACK_KEY })
+  if (stored.value) return stored.value
   let identifier = null
   try {
     identifier = (await Device.getId())?.identifier ?? null
@@ -29,9 +43,6 @@ export const getStableDeviceId = async () => {
   if (typeof identifier === 'string' && identifier.trim() !== '') {
     return identifier.trim()
   }
-
-  const stored = await Preferences.get({ key: DEVICE_ID_FALLBACK_KEY })
-  if (stored.value) return stored.value
 
   const generated = generateUUID()
   await Preferences.set({ key: DEVICE_ID_FALLBACK_KEY, value: generated })
