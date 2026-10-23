@@ -30,6 +30,25 @@ const isNativePlatform = () => {
 let clearingTokens = false
 
 /**
+ * Whether there is an access token that has not expired yet.
+ *
+ * Synchronous (localStorage only) so callers that run outside React — e.g.
+ * native event handlers that fire at unpredictable times — can cheaply skip
+ * an authenticated request rather than let its 401 start a refresh/logout
+ * cascade. A `true` result does not guarantee the server will accept the
+ * token; it only means the session is not known to be gone.
+ */
+export const hasValidAccessToken = () => {
+  const token = localStorage.getItem(TOKEN_KEYS.ACCESS_TOKEN)
+  if (!token) return false
+
+  const expiry = localStorage.getItem(TOKEN_KEYS.ACCESS_TOKEN_EXPIRY)
+  if (!expiry) return true // no expiry recorded — assume usable
+
+  return new Date() < new Date(expiry)
+}
+
+/**
  * Save tokens based on platform
  * Web: Only access tokens to localStorage
  * Native: Access tokens to localStorage + refresh tokens to Capacitor Preferences
@@ -74,6 +93,7 @@ export const saveTokens = async ({
         // Don't throw - access token is still saved to localStorage
       }
     }
+    if (accessToken) window.dispatchEvent(new CustomEvent('authTokensSaved'))
   } catch (error) {
     console.error('Error saving tokens:', error)
     throw error

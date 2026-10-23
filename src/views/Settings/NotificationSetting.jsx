@@ -21,10 +21,14 @@ import {
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { registerPushNotifications } from '../../CapacitorListener'
+import {
+  registerPushNotifications,
+  unregisterPushNotifications,
+} from '../../CapacitorListener'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useDeviceTokens, useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
+import { getAppVersion, getStableDeviceId } from '../../utils/DeviceInfo'
 import { isOfficialDonetickInstanceSync } from '../../utils/FeatureToggle'
 import {
   UnregisterDeviceToken,
@@ -44,13 +48,10 @@ const NotificationSetting = () => {
     return JSON.parse(ret.value)
   }
   const setNotificationPreferences = async value => {
-    if (value.granted === false) {
-      await Preferences.set({
-        key: 'notificationPreferences',
-        value: JSON.stringify({ granted: false }),
-      })
-      return
-    }
+    // Always merge: this key also holds the per-type switches
+    // (dueNotification, preDueNotification, naggingNotification) and the
+    // snackbar's `optOut`, so replacing the record wholesale on
+    // `granted: false` silently reset the user's other choices.
     const currentSettings = await getNotificationPreferences()
     await Preferences.set({
       key: 'notificationPreferences',
@@ -109,15 +110,17 @@ const NotificationSetting = () => {
       const getCurrentDeviceInfo = async () => {
         try {
           const deviceInfo = await Device.getInfo()
-          const deviceId = await Device.getId()
+          // Must be the same helper the registration path uses, or "this
+          // device" never matches a row in the registered list.
+          const deviceId = await getStableDeviceId()
           const platform =
             Capacitor.getPlatform() === 'android' ? 'android' : 'ios'
 
           setCurrentDevice({
-            id: deviceId.identifier,
+            id: deviceId,
             platform,
             model: deviceInfo.model,
-            appVersion: deviceInfo.appVersion,
+            appVersion: await getAppVersion(),
           })
         } catch (error) {
           console.error('Error getting device info:', error)
@@ -257,9 +260,11 @@ const NotificationSetting = () => {
         return
       }
 
-      // Ensure push notification listeners are set up before registration
-
-      await registerPushNotifications()
+      // Ensure push notification listeners are set up before registration.
+      // force: the user is explicitly re-adding a device whose row was
+      // removed server-side, so the POST must happen even though the local
+      // registration record still matches the current token.
+      await registerPushNotifications({ force: true })
 
       // Store registration preferences immediately since permission was granted
       await setPushNotificationPreferences({ granted: true })
@@ -308,6 +313,11 @@ const NotificationSetting = () => {
                 })
               } else {
                 setDeviceNotification(false)
+                // Persist the opt-out: without this the toggle snapped back
+                // to "on" on the next mount, since the stored preference was
+                // never updated. `optOut` too, so turning it off here does
+                // not make the onboarding snackbar start nagging again.
+                setNotificationPreferences({ granted: false, optOut: true })
               }
             }}
             color={deviceNotification ? 'success' : 'neutral'}
@@ -449,8 +459,10 @@ const NotificationSetting = () => {
                     if (resp.receive === 'granted') {
                       setPushNotification(true)
                       setPushNotificationPreferences({ granted: true })
-                      // Register push notifications after permission is granted
-                      await registerPushNotifications()
+                      // Register push notifications after permission is
+                      // granted. force: explicit opt-in must reach the server
+                      // even if a stale local record matches.
+                      await registerPushNotifications({ force: true })
                     }
                     if (resp.receive !== 'granted') {
                       showWarning({
@@ -466,6 +478,19 @@ const NotificationSetting = () => {
                   }
                 } else {
                   setPushNotification(false)
+                  // Turning the toggle off used to only change local React
+                  // state: the preference was never persisted and the server
+                  // kept this device as a push target, so pushes continued
+                  // and the toggle flipped back on remount. Drop the device
+                  // registration for real.
+                  const removed = await unregisterPushNotifications()
+                  if (!removed) {
+                    showWarning({
+                      title: t('common.error'),
+                      message: t('notifications.unregisterFailed'),
+                    })
+                  }
+                  refetchDevices()
                 }
               }}
               color={pushNotification ? 'success' : 'neutral'}
@@ -589,11 +614,18 @@ const NotificationSetting = () => {
                         size='sm'
                         onClick={async () => {
                           try {
-                            const resp = await UnregisterDeviceToken(
-                              device.deviceId,
-                              null,
-                            )
-                            if (resp.ok) {
+                            const isThisDevice =
+                              device.deviceId === currentDevice?.id
+                            const removed = isThisDevice
+                              ? await unregisterPushNotifications()
+                              : (
+                                  await UnregisterDeviceToken(
+                                    device.deviceId,
+                                    null,
+                                  )
+                                ).ok
+                            if (isThisDevice) setPushNotification(false)
+                            if (removed) {
                               refetchDevices()
                             } else {
                               showWarning({
