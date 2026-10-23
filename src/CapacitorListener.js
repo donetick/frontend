@@ -535,6 +535,12 @@ const pushNotificationListenerRegistration = async ({ force = false } = {}) => {
       pushEnabled = false
       clearTimeout(retryTimer)
       retryTimer = null
+      // The opt-in above was written before the prompt was answered. Leaving
+      // it behind made the Settings toggle — which initializes from this key
+      // — read "on" while nothing was ever registered.
+      if (force) {
+        await Preferences.remove({ key: 'pushNotificationPreferences' })
+      }
       console.warn('Push notification permission not granted')
       return
     }

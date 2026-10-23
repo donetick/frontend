@@ -48,13 +48,10 @@ const NotificationSetting = () => {
     return JSON.parse(ret.value)
   }
   const setNotificationPreferences = async value => {
-    if (value.granted === false) {
-      await Preferences.set({
-        key: 'notificationPreferences',
-        value: JSON.stringify({ granted: false }),
-      })
-      return
-    }
+    // Always merge: this key also holds the per-type switches
+    // (dueNotification, preDueNotification, naggingNotification) and the
+    // snackbar's `optOut`, so replacing the record wholesale on
+    // `granted: false` silently reset the user's other choices.
     const currentSettings = await getNotificationPreferences()
     await Preferences.set({
       key: 'notificationPreferences',
@@ -318,8 +315,9 @@ const NotificationSetting = () => {
                 setDeviceNotification(false)
                 // Persist the opt-out: without this the toggle snapped back
                 // to "on" on the next mount, since the stored preference was
-                // never updated.
-                setNotificationPreferences({ granted: false })
+                // never updated. `optOut` too, so turning it off here does
+                // not make the onboarding snackbar start nagging again.
+                setNotificationPreferences({ granted: false, optOut: true })
               }
             }}
             color={deviceNotification ? 'success' : 'neutral'}

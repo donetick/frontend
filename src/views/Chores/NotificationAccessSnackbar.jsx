@@ -98,15 +98,13 @@ const NotificationAccessSnackbar = () => {
                 if (resp.display === 'granted') {
                   notificationPreferences['granted'] = true
                   // Register for push notifications after local permission is
-                  // granted, and record it under the push key too — the
-                  // launch-time re-registration above reads that key, so
-                  // leaving it unset here meant opting in through this
-                  // snackbar never survived a token rotation.
+                  // granted. `force` owns the push preference key — it writes
+                  // the opt-in and clears it again if the push prompt itself
+                  // is denied, so this must not write that key directly:
+                  // `resp.display` only covers *local* notifications, and
+                  // recording push as granted off the back of it made the
+                  // Settings toggle read "on" with nothing registered.
                   await registerPushNotifications({ force: true })
-                  await Preferences.set({
-                    key: 'pushNotificationPreferences',
-                    value: JSON.stringify({ granted: true }),
-                  })
                 }
               } catch (error) {
                 console.error('Error setting up notifications:', error)

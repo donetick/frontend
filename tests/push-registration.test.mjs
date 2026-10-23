@@ -8,10 +8,13 @@ const source = readFileSync(
   new URL('../src/CapacitorListener.js', import.meta.url),
   'utf8',
 )
-const logic = source.slice(
-  source.indexOf('let forceNextRegistration'),
-  source.indexOf('let launchUrlHandled'),
+const logicStart = source.indexOf('let forceNextRegistration')
+const logicEnd = source.indexOf('let launchUrlHandled')
+assert.ok(
+  logicStart !== -1 && logicEnd > logicStart,
+  'push registration slice markers not found in CapacitorListener.js; update the sentinels above',
 )
+const logic = source.slice(logicStart, logicEnd)
 
 function harness() {
   const prefs = new Map([['pushNotificationPreferences', '{"granted":true}']])
@@ -19,6 +22,7 @@ function harness() {
   const events = new Map()
   const calls = []
   let valid = true
+  let permission = 'granted'
   let post = async () => ({ ok: true })
   let remove = async () => ({ ok: true })
   const context = vm.createContext({
@@ -49,7 +53,7 @@ function harness() {
         assert(!listeners.has(name))
         listeners.set(name, callback)
       },
-      checkPermissions: async () => ({ receive: 'granted' }),
+      checkPermissions: async () => ({ receive: permission }),
       register: async () => listeners.get('registration')({ value: 'fcm' }),
       unregister: async () => calls.push('native-delete'),
     },
@@ -74,6 +78,9 @@ function harness() {
     events,
     setValid: value => {
       valid = value
+    },
+    setPermission: value => {
+      permission = value
     },
     setPost: fn => {
       post = fn
@@ -109,7 +116,8 @@ test('disable waits for an in-flight POST before deleting', async () => {
       }),
   )
   await h.register()
-  while (!release) await Promise.resolve()
+  for (let i = 0; i < 50 && !release; i++) await Promise.resolve()
+  assert.ok(release, 'registration POST was never issued')
   const disabling = h.unregister()
   release({ ok: true })
   assert.equal(await disabling, true)
@@ -135,6 +143,15 @@ test('backend failure still cleans up native delivery and keeps registration for
     JSON.parse(h.prefs.get('pushNotificationPreferences')).granted,
     false,
   )
+})
+
+test('denied push permission clears the opt-in a forced registration persisted', async () => {
+  const h = harness()
+  h.setPermission('denied')
+  await h.register({ force: true })
+  await h.drain()
+  assert.equal(h.calls.length, 0)
+  assert.equal(h.prefs.has('pushNotificationPreferences'), false)
 })
 
 test('token skipped during expired access is registered after session refresh', async () => {
