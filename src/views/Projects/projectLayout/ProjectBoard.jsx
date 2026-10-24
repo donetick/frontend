@@ -40,7 +40,7 @@ import {
   Sheet,
   Typography,
 } from '@mui/joy'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { memo, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
@@ -59,6 +59,11 @@ import {
   useProjectSections,
   useRenameSection,
 } from '../ProjectQueries'
+
+// Sortable wrappers update frequently during a drag; keep the expensive card
+// content out of those renders when its task and interaction props are unchanged.
+const MemoizedCompactChoreCard = memo(CompactChoreCard)
+const EMPTY_MEMBERS = []
 
 const columnDndId = id => `section:${id}`
 const taskDndId = id => `task:${id}`
@@ -110,7 +115,7 @@ const flattenSubtasks = (tasks, parentId = null, level = 0) =>
       ...flattenSubtasks(tasks, task.id, level + 1),
     ])
 
-const TaskCard = ({
+const TaskCard = memo(function TaskCard({
   chore,
   dragAttributes,
   dragListeners,
@@ -131,7 +136,7 @@ const TaskCard = ({
   sections,
   subtasksExpanded = false,
   onSubtasksExpandedChange,
-}) => {
+}) {
   const { t } = useTranslation('chores')
   const [subtasks, setSubtasks] = useState(chore.subTasks || [])
   const navigate = useNavigate()
@@ -181,14 +186,13 @@ const TaskCard = ({
         if (isMultiSelectMode) onSelectionToggle()
         else navigate(`/chores/${chore.id}`)
       }}
+      style={{ transform: CSS.Translate.toString(transform), transition }}
       sx={{
         borderRadius: 'md',
         overflow: 'hidden',
         flexShrink: 0,
         opacity: isDragging && !isOverlay ? 0 : 1,
         pointerEvents: isOverlay ? 'none' : undefined,
-        transform: CSS.Translate.toString(transform),
-        transition,
         touchAction: 'auto',
         cursor: 'pointer',
       }}
@@ -214,9 +218,9 @@ const TaskCard = ({
           </IconButton>
         )}
         <Box sx={{ minWidth: 0, flex: 1 }}>
-          <CompactChoreCard
+          <MemoizedCompactChoreCard
             chore={chore}
-            performers={membersData?.res || []}
+            performers={membersData?.res || EMPTY_MEMBERS}
             isMultiSelectMode={isMultiSelectMode}
             isSelected={isSelected}
             onAction={onAction}
@@ -274,7 +278,7 @@ const TaskCard = ({
       )}
     </Sheet>
   )
-}
+})
 
 const SortableTask = props => {
   const [subtasksExpanded, setSubtasksExpanded] = useState(false)
@@ -362,6 +366,7 @@ const BoardColumn = ({
     <Sheet
       ref={setNodeRef}
       variant='soft'
+      style={{ transform: CSS.Translate.toString(transform), transition }}
       sx={{
         // On wide screens the columns share the available width instead of
         // sitting at a fixed size, so a handful of sections fit without any
@@ -376,8 +381,6 @@ const BoardColumn = ({
         pt: displayMode === 'list' && isExpanded ? '40px' : 0,
         borderRadius: 'lg',
         opacity: isDragging ? 0.45 : 1,
-        transform: CSS.Translate.toString(transform),
-        transition,
       }}
     >
       <Box
