@@ -363,8 +363,13 @@ const BoardColumn = ({
       ref={setNodeRef}
       variant='soft'
       sx={{
-        width: displayMode === 'list' ? '100%' : { xs: 292, sm: 320 },
-        minWidth: displayMode === 'list' ? 0 : { xs: 292, sm: 320 },
+        // On wide screens the columns share the available width instead of
+        // sitting at a fixed size, so a handful of sections fit without any
+        // horizontal scrolling. Narrow screens keep the fixed snap width.
+        width:
+          displayMode === 'list' ? '100%' : { xs: 292, sm: 320, md: 'auto' },
+        minWidth: displayMode === 'list' ? 0 : { xs: 292, sm: 320, md: 280 },
+        flex: displayMode === 'list' ? 'none' : { xs: '0 0 auto', md: '1 1 0' },
         alignSelf: 'flex-start',
         touchAction: 'auto',
         position: 'relative',
@@ -945,7 +950,10 @@ const ProjectBoard = ({
                 display: 'flex',
                 gap: 1,
                 width: displayMode === 'list' ? '100%' : 'auto',
-                minWidth: displayMode === 'list' ? 0 : { xs: 292, sm: 320 },
+                minWidth:
+                  displayMode === 'list' ? 0 : { xs: 292, sm: 320, md: 260 },
+                flexShrink: 0,
+                alignSelf: 'flex-start',
                 p: 1,
                 borderRadius: 'lg',
               }}

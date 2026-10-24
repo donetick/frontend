@@ -1230,7 +1230,9 @@ const MyChores = () => {
       }}
     >
       <Container
-        maxWidth='md'
+        maxWidth={
+          viewMode === 'board' && isCustomProjectSelected ? false : 'md'
+        }
         sx={{ px: 1, pt: { xs: 1, md: 3 }, minWidth: 0 }}
       >
         <ChoreToolbar
