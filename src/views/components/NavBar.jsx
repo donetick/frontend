@@ -34,12 +34,10 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 
-import { version } from '../../../package.json'
 import DoneTickLogo from '../../assets/logo.svg'
 import UserProfileAvatar from '../../components/UserProfileAvatar'
 import { useNavBarTitleContext } from '../../contexts/NavBarTitleContext'
 import { useScrollDirection } from '../../hooks/useScrollDirection'
-import { useResource } from '../../queries/ResourceQueries'
 import { useGlobalSearch } from '../../search/GlobalSearchContext'
 import { apiClient } from '../../utils/ApiClient'
 import ErrorReportModal from '../Modals/ErrorReportModal'
@@ -77,7 +75,6 @@ const SHELL_FREE_PAGES = [
 
 const NavBar = () => {
   const { t } = useTranslation('common')
-  const { data: resource } = useResource()
   const { navBarConfig } = useNavBarTitleContext()
   const { openSearch } = useGlobalSearch()
   const navigate = useNavigate()
@@ -385,18 +382,6 @@ const NavBar = () => {
           </ListItemButton>
         </Tooltip>
       </List>
-      {!compact && (
-        <Typography
-          level='body-xs'
-          onClick={() => window.location.reload()}
-          sx={{ color: 'text.tertiary', cursor: 'pointer', px: 1, py: 0.75 }}
-        >
-          {t('versionInfo', {
-            version,
-            apiVersion: resource?.api_version || t('apiVersionUnavailable'),
-          })}
-        </Typography>
-      )}
     </Box>
   )
 
@@ -549,6 +534,11 @@ const NavBar = () => {
                 minHeight: 0,
                 overflowY: 'auto',
                 overflowX: 'hidden',
+                ...(!desktopExpanded && {
+                  scrollbarWidth: 'none',
+                  msOverflowStyle: 'none',
+                  '&::-webkit-scrollbar': { display: 'none' },
+                }),
               }}
             >
               {navigation(false, !desktopExpanded)}

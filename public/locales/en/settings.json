@@ -15,9 +15,26 @@
     "plusFeature": "Plus Feature",
     "earlyAccess": "Early Access"
   },
+  "navigation": {
+    "breadcrumbs": "Settings navigation"
+  },
+  "integrations": {
+    "adminOnly": "Only circle admins can manage webhook connections.",
+    "loadFailed": "Unable to load your circle. Please try again.",
+    "hint": "Connect Donetick to the services you use. Notification timing and reminder preferences are still managed in Notifications."
+  },
   "overview": {
     "title": "Settings",
-    "subtitle": "Customize your experience and manage your account preferences",
+    "subtitle": "Your account, your circle, and the way Donetick works for you.",
+    "support": "Help and feedback",
+    "groups": {
+      "account": "Your account",
+      "circle": "Your circle",
+      "preferences": "Preferences",
+      "connections": "Connections",
+      "data": "Data & privacy",
+      "advanced": "Advanced"
+    },
     "upgrade": {
       "title": "Upgrade to Plus",
       "description": "Unlock powerful features to enhance your productivity",
@@ -30,28 +47,40 @@
       }
     },
     "sections": {
+      "integrations": {
+        "title": "Integrations",
+        "description": "Connect calendars, notification services, and other apps."
+      },
+      "webhooks": {
+        "title": "Circle webhooks",
+        "description": "Send circle task and thing updates to an external service."
+      },
+      "notification-integrations": {
+        "title": "Notification integrations",
+        "description": "Connect Telegram, Pushover, or webhooks for task notifications."
+      },
       "profile": {
-        "title": "Profile Settings",
+        "title": "Profile",
         "description": "Update your profile information, photo, display name, and timezone preferences."
       },
       "circle": {
-        "title": "Circle Settings",
-        "description": "Manage your circle, invite members, and handle join requests."
+        "title": "Circle",
+        "description": "Members, invitations, join requests, and managed accounts."
       },
       "account": {
-        "title": "Account Settings",
-        "description": "Manage your subscription, change password, and account deletion options."
+        "title": "Account & subscription",
+        "description": "Manage your plan, password, and account deletion."
       },
       "subaccounts": {
         "title": "Managed Accounts",
-        "description": "Create and manage sub accounts to log in and complete assigned tasks."
+        "description": "Create and manage accounts for household members who need your help signing in."
       },
       "notifications": {
         "title": "Notifications",
-        "description": "Configure push notifications, email alerts, and notification targets for tasks."
+        "description": "Choose reminder timing, in-app and push alerts, and registered devices."
       },
       "mfa": {
-        "title": "Multi-Factor Authentication",
+        "title": "Security",
         "description": "Add an extra layer of security with MFA using authenticator apps."
       },
       "apitokens": {
@@ -67,7 +96,7 @@
         "description": "Subscribe to your tasks from Apple Calendar, Google Calendar, Outlook, or another calendar app."
       },
       "storage": {
-        "title": "Storage Settings",
+        "title": "Storage & backups",
         "description": "Backup and restore your data, manage local storage and sync preferences."
       },
       "layout": {
@@ -75,23 +104,23 @@
         "description": "Pick the screen the app opens on, and which shortcuts and panels surround it."
       },
       "theme": {
-        "title": "Theme Preferences",
+        "title": "Appearance",
         "description": "Choose your preferred theme and configure dark/light mode settings."
       },
       "localization": {
-        "title": "Localization",
+        "title": "Language & region",
         "description": "Customize language, date format, time format, and regional preferences."
       },
       "advanced": {
-        "title": "Advanced Settings",
-        "description": "Configure webhooks, real-time updates, and other advanced features for enhanced productivity."
+        "title": "Advanced options",
+        "description": "Offline behavior, real-time updates, and developer tools."
       },
       "privacy": {
         "title": "Privacy & Analytics",
         "description": "Control anonymous usage analytics and crash reporting."
       },
       "developer": {
-        "title": "Developer Settings",
+        "title": "Developer tools",
         "description": "View technical information about authentication tokens, SSE connections, and debug data."
       },
       "feedback": {
@@ -300,9 +329,9 @@
     "deviceCreatedAt": "Created At: {{date}}",
     "noDevices": "No devices registered for push notifications",
     "customSection": "Custom Notification",
-    "customSectionDescription": "Notification through other platform like Telegram or Pushover",
+    "customSectionDescription": "Receive task notifications through Telegram, Pushover, or your circle's webhook connection.",
     "customLabel": "Custom Notification",
-    "customHelper": "Receive notification on other platform",
+    "customHelper": "Choose an external service for your task notifications.",
     "targetNone": "None",
     "targetTelegram": "Telegram",
     "targetPushover": "Pushover",
@@ -732,7 +761,7 @@
   },
   "advanced": {
     "title": "Advanced Settings",
-    "description": "Configure advanced features like webhooks and real-time updates for enhanced productivity.",
+    "description": "Manage offline support and real-time updates. External connections are managed in Integrations.",
     "offlineTitle": "Offline Support",
     "offlineDescription": "Keep using Donetick when you're offline on this device/browser. Your changes are saved locally and synced when you're back online.",
     "offlineToggle": "Enable Offline Support",
