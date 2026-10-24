@@ -7,7 +7,7 @@
     "period": {
       "allTime": "Histórico",
       "last6Months": "Últimos 6 meses",
-      "lastDays_one": "Último día",
+      "lastDays_one": "Último {{count}} día",
       "lastDays_other": "Últimos {{count}} días",
       "title": "Puntos del periodo"
     },
@@ -54,7 +54,7 @@
   "summary": {
     "allTime": "Todo el tiempo",
     "last6Months": "Últimos 6 meses",
-    "lastDays_one": "Último día",
+    "lastDays_one": "Último {{count}} día",
     "lastDays_other": "Últimos {{count}} días",
     "overThe": "durante",
     "showingFor": "Mostrando puntos de",

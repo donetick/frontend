@@ -290,7 +290,7 @@
     "descending": "Descendente",
     "filter": "Filtro"
   },
-  "versionInfo": "Información de la versión",
+  "versionInfo": "v{{version}} (API: {{apiVersion}})",
   "apiVersionUnavailable": "no disponible",
   "sync": {
     "aria": "Abrir estado de red y sincronización",
