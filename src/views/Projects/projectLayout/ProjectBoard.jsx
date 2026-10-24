@@ -1,5 +1,6 @@
+import './ProjectBoard.css'
+
 import {
-  closestCorners,
   DndContext,
   DragOverlay,
   KeyboardSensor,
@@ -40,7 +41,17 @@ import {
   Sheet,
   Typography,
 } from '@mui/joy'
-import { memo, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  createContext,
+  memo,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
+import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
@@ -49,6 +60,7 @@ import { useCreateChore } from '../../../queries/ChoreQueries'
 import { useUserProfile } from '../../../queries/UserQueries'
 import { CompleteSubTask } from '../../../utils/Fetcher'
 import CompactChoreCard from '../../Chores/CompactChoreCard'
+import ChoreActionMenu from '../../components/ChoreActionMenu'
 import TaskComposerRow from '../../components/VoiceToTask/TaskComposerRow'
 import { buildChorePayload } from '../../components/VoiceToTask/parseVoiceTask'
 import {
@@ -59,11 +71,13 @@ import {
   useProjectSections,
   useRenameSection,
 } from '../ProjectQueries'
+import { boardCollisionDetection } from './boardCollisionDetection'
 
 // Sortable wrappers update frequently during a drag; keep the expensive card
 // content out of those renders when its task and interaction props are unchanged.
 const MemoizedCompactChoreCard = memo(CompactChoreCard)
 const EMPTY_MEMBERS = []
+const ignoreActionMenu = () => {}
 
 const columnDndId = id => `section:${id}`
 const taskDndId = id => `task:${id}`
@@ -73,38 +87,115 @@ const interactiveControlSelector =
 
 // Only this control starts a drag. The rest of the card remains scrollable
 // and can use press-and-hold for selection without competing with DnD.
-const DragHandle = ({
+const DragHandle = memo(function DragHandle({
   attributes,
   listeners,
   label,
   setActivatorNodeRef,
   isDragging,
   isOverlay,
-}) => (
-  <IconButton
-    {...attributes}
-    {...listeners}
-    ref={setActivatorNodeRef}
-    aria-label={label}
-    tabIndex={isOverlay ? -1 : attributes?.tabIndex}
-    variant='plain'
-    color='neutral'
-    size='sm'
-    onPointerDown={event => event.stopPropagation()}
-    onClick={event => event.stopPropagation()}
-    sx={{
-      flexShrink: 0,
-      alignSelf: 'center',
-      touchAction: 'none',
-      userSelect: 'none',
-      cursor: isDragging ? 'grabbing' : 'grab',
-      color: 'text.tertiary',
-      '@media (pointer: coarse)': { minWidth: 44, minHeight: 44 },
-    }}
-  >
-    <DragIndicator sx={{ fontSize: 20 }} />
-  </IconButton>
-)
+}) {
+  return (
+    <IconButton
+      {...attributes}
+      {...listeners}
+      ref={setActivatorNodeRef}
+      aria-label={label}
+      tabIndex={isOverlay ? -1 : attributes?.tabIndex}
+      variant='plain'
+      color='neutral'
+      size='sm'
+      onPointerDown={event => event.stopPropagation()}
+      onClick={event => event.stopPropagation()}
+      sx={{
+        flexShrink: 0,
+        alignSelf: 'center',
+        touchAction: 'none',
+        userSelect: 'none',
+        cursor: isDragging ? 'grabbing' : 'grab',
+        color: 'text.tertiary',
+        '@media (pointer: coarse)': { minWidth: 44, minHeight: 44 },
+      }}
+    >
+      <DragIndicator sx={{ fontSize: 20 }} />
+    </IconButton>
+  )
+})
+
+const ColumnDragContext = createContext(null)
+
+const ColumnDragHandle = ({ label }) => {
+  const dragProps = useContext(ColumnDragContext)
+  return <DragHandle {...dragProps} label={label} />
+}
+
+// Keep Joy/Emotion entirely outside the per-frame render path. This surface
+// only updates when layout or contents change, not when a transform changes.
+const ColumnSurface = memo(function ColumnSurface({
+  children,
+  displayMode,
+  isExpanded,
+}) {
+  return (
+    <Sheet
+      variant='soft'
+      sx={{
+        position: 'relative',
+        pt: displayMode === 'list' && isExpanded ? '40px' : 0,
+        borderRadius: 'lg',
+      }}
+    >
+      {children}
+    </Sheet>
+  )
+})
+
+// Only this plain DOM shell subscribes to sortable movement. Its children keep
+// their identity while the pointer moves, avoiding per-frame style serialization.
+const SortableColumnShell = ({
+  children,
+  displayMode,
+  isExpanded,
+  isMultiSelectMode,
+  sectionId,
+}) => {
+  const {
+    attributes,
+    isDragging,
+    listeners,
+    setActivatorNodeRef,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({
+    id: columnDndId(sectionId),
+    data: { sectionId, type: 'section' },
+    disabled: isMultiSelectMode,
+  })
+  const dragProps = useMemo(
+    () => ({ attributes, listeners, setActivatorNodeRef, isDragging }),
+    [attributes, listeners, setActivatorNodeRef, isDragging],
+  )
+
+  return (
+    <ColumnDragContext.Provider value={dragProps}>
+      <div
+        ref={setNodeRef}
+        className={`project-board-column project-board-column--${displayMode === 'list' ? 'list' : 'board'}`}
+        style={{
+          transform: CSS.Translate.toString(transform),
+          transition,
+          opacity: isDragging ? 0.45 : 1,
+          willChange: isDragging ? 'transform' : undefined,
+        }}
+      >
+        <ColumnSurface displayMode={displayMode} isExpanded={isExpanded}>
+          {children}
+        </ColumnSurface>
+      </div>
+    </ColumnDragContext.Provider>
+  )
+}
 
 const flattenSubtasks = (tasks, parentId = null, level = 0) =>
   tasks
@@ -121,10 +212,7 @@ const TaskCard = memo(function TaskCard({
   dragListeners,
   isDragging = false,
   isOverlay = false,
-  setNodeRef,
   setActivatorNodeRef,
-  transform,
-  transition,
   displayMode,
   isMultiSelectMode,
   isSelected,
@@ -132,6 +220,7 @@ const TaskCard = memo(function TaskCard({
   onAction,
   onChipClick,
   onLongPress,
+  onOpenActionMenu,
   onSelectionToggle,
   sections,
   subtasksExpanded = false,
@@ -180,13 +269,11 @@ const TaskCard = memo(function TaskCard({
         longPressHandlers.onPointerDown(event)
       }}
       aria-hidden={isOverlay || undefined}
-      ref={setNodeRef}
       variant='outlined'
       onClick={() => {
         if (isMultiSelectMode) onSelectionToggle()
         else navigate(`/chores/${chore.id}`)
       }}
-      style={{ transform: CSS.Translate.toString(transform), transition }}
       sx={{
         borderRadius: 'md',
         overflow: 'hidden',
@@ -226,6 +313,7 @@ const TaskCard = memo(function TaskCard({
             onAction={onAction}
             onChipClick={onChipClick}
             onSelectionToggle={onSelectionToggle}
+            onOpenActionMenu={isOverlay ? ignoreActionMenu : onOpenActionMenu}
             sections={sections}
             showDivider={false}
           />
@@ -292,23 +380,34 @@ const SortableTask = props => {
     transition,
   } = useSortable({
     id: taskDndId(props.chore.id),
-    data: { type: 'task', taskId: String(props.chore.id), subtasksExpanded },
+    data: {
+      type: 'task',
+      taskId: String(props.chore.id),
+      sectionId: props.sectionId,
+      subtasksExpanded,
+    },
     disabled: props.isMultiSelectMode,
   })
 
   return (
-    <TaskCard
-      {...props}
-      subtasksExpanded={subtasksExpanded}
-      onSubtasksExpandedChange={setSubtasksExpanded}
-      dragAttributes={attributes}
-      dragListeners={listeners}
-      isDragging={isDragging}
-      setNodeRef={setNodeRef}
-      setActivatorNodeRef={setActivatorNodeRef}
-      transform={transform}
-      transition={transition}
-    />
+    <div
+      ref={setNodeRef}
+      style={{
+        transform: CSS.Translate.toString(transform),
+        transition,
+        flexShrink: 0,
+      }}
+    >
+      <TaskCard
+        {...props}
+        subtasksExpanded={subtasksExpanded}
+        onSubtasksExpandedChange={setSubtasksExpanded}
+        dragAttributes={attributes}
+        dragListeners={listeners}
+        isDragging={isDragging}
+        setActivatorNodeRef={setActivatorNodeRef}
+      />
+    </div>
   )
 }
 
@@ -323,6 +422,7 @@ const BoardColumn = ({
   onChipClick,
   onDelete,
   onLongPressChore,
+  onOpenActionMenu,
   onQuickAdd,
   onRename,
   section,
@@ -339,20 +439,6 @@ const BoardColumn = ({
   const [isEditing, setIsEditing] = useState(false)
   const [name, setName] = useState(section.name)
   const [isQuickAdding, setIsQuickAdding] = useState(false)
-  const {
-    attributes,
-    isDragging,
-    listeners,
-    setActivatorNodeRef,
-    setNodeRef,
-    transform,
-    transition,
-  } = useSortable({
-    id: columnDndId(section.id),
-    data: { sectionId: section.id, type: 'section' },
-    disabled: isMultiSelectMode,
-  })
-
   useEffect(() => setName(section.name), [section.name])
 
   const saveName = () => {
@@ -363,25 +449,11 @@ const BoardColumn = ({
   }
 
   return (
-    <Sheet
-      ref={setNodeRef}
-      variant='soft'
-      style={{ transform: CSS.Translate.toString(transform), transition }}
-      sx={{
-        // On wide screens the columns share the available width instead of
-        // sitting at a fixed size, so a handful of sections fit without any
-        // horizontal scrolling. Narrow screens keep the fixed snap width.
-        width:
-          displayMode === 'list' ? '100%' : { xs: 292, sm: 320, md: 'auto' },
-        minWidth: displayMode === 'list' ? 0 : { xs: 292, sm: 320, md: 280 },
-        flex: displayMode === 'list' ? 'none' : { xs: '0 0 auto', md: '1 1 0' },
-        alignSelf: 'flex-start',
-        touchAction: 'auto',
-        position: 'relative',
-        pt: displayMode === 'list' && isExpanded ? '40px' : 0,
-        borderRadius: 'lg',
-        opacity: isDragging ? 0.45 : 1,
-      }}
+    <SortableColumnShell
+      sectionId={section.id}
+      displayMode={displayMode}
+      isExpanded={isExpanded}
+      isMultiSelectMode={isMultiSelectMode}
     >
       <Box
         sx={
@@ -426,12 +498,8 @@ const BoardColumn = ({
           }}
         >
           {!isMultiSelectMode && (
-            <DragHandle
-              attributes={attributes}
-              listeners={listeners}
+            <ColumnDragHandle
               label={`${t('board.dragSection')}: ${section.name}`}
-              setActivatorNodeRef={setActivatorNodeRef}
-              isDragging={isDragging}
             />
           )}
           {displayMode === 'list' && (
@@ -555,6 +623,7 @@ const BoardColumn = ({
               <SortableTask
                 key={chore.id}
                 chore={chore}
+                sectionId={section.id}
                 displayMode={displayMode}
                 isMultiSelectMode={isMultiSelectMode}
                 isSelected={selectedChores.has(chore.id)}
@@ -562,6 +631,7 @@ const BoardColumn = ({
                 onAction={onAction}
                 onChipClick={onChipClick}
                 onLongPress={onLongPressChore}
+                onOpenActionMenu={onOpenActionMenu}
                 onSelectionToggle={() => toggleChoreSelection(chore.id)}
                 sections={sections}
               />
@@ -601,7 +671,7 @@ const BoardColumn = ({
             </Button>
           ))}
       </Box>
-    </Sheet>
+    </SortableColumnShell>
   )
 }
 
@@ -623,6 +693,11 @@ const ProjectBoard = ({
 }) => {
   const { t } = useTranslation('chores')
   const [dragPreview, setDragPreview] = useState(null)
+  const [actionMenu, setActionMenu] = useState(null)
+  const openActionMenu = useCallback((anchorEl, chore) => {
+    setActionMenu({ anchorEl, chore })
+  }, [])
+  const closeActionMenu = useCallback(() => setActionMenu(null), [])
   const [pendingTaskOrder, setPendingTaskOrder] = useState(null)
   const [pendingSectionOrder, setPendingSectionOrder] = useState(null)
   const [newSectionName, setNewSectionName] = useState('')
@@ -754,6 +829,7 @@ const ProjectBoard = ({
   }
 
   const handleDragStart = ({ active }) => {
+    closeActionMenu()
     if (active.data.current?.type === 'task') {
       const task = chores.find(
         chore => String(chore.id) === active.data.current.taskId,
@@ -817,10 +893,7 @@ const ProjectBoard = ({
     const sourceSectionId = chores.find(
       chore => String(chore.id) === taskId,
     )?.sectionId
-    const targetSectionId =
-      overData?.type === 'task'
-        ? chores.find(chore => String(chore.id) === overData.taskId)?.sectionId
-        : overData?.sectionId
+    const targetSectionId = overData?.sectionId
     const resolvedSourceSectionId = sourceSectionId ?? sections[0]?.id
     const resolvedTargetSectionId = targetSectionId ?? sections[0]?.id
     if (!resolvedSourceSectionId || !resolvedTargetSectionId) return
@@ -885,16 +958,7 @@ const ProjectBoard = ({
   return (
     <Box sx={{ mt: 1 }}>
       <DndContext
-        collisionDetection={args =>
-          closestCorners({
-            ...args,
-            droppableContainers: args.droppableContainers.filter(container =>
-              args.active.data.current?.type === 'section'
-                ? container.data.current?.type === 'section'
-                : true,
-            ),
-          })
-        }
+        collisionDetection={boardCollisionDetection}
         sensors={sensors}
         onDragStart={handleDragStart}
         onDragCancel={() => setDragPreview(null)}
@@ -936,6 +1000,7 @@ const ProjectBoard = ({
                 onAddTask={() => onAddTask?.(section.id)}
                 onChipClick={handleLabelFiltering}
                 onLongPressChore={onLongPressChore}
+                onOpenActionMenu={openActionMenu}
                 onQuickAdd={effective => quickAddTask(section.id, effective)}
                 sections={sections}
                 selectedChores={selectedChores}
@@ -981,22 +1046,49 @@ const ProjectBoard = ({
             </Sheet>
           </Box>
         </SortableContext>
-        <DragOverlay adjustScale={false}>
-          {dragPreview ? (
-            <Box sx={{ ...dragPreview.size, '& > *': { height: '100%' } }}>
-              <TaskCard
-                chore={dragPreview.task}
-                subtasksExpanded={dragPreview.subtasksExpanded}
-                displayMode={displayMode}
-                isOverlay
-                isDragging
-                membersData={membersData}
-                sections={sections}
-              />
-            </Box>
-          ) : null}
-        </DragOverlay>
+        {createPortal(
+          <DragOverlay adjustScale={false} style={{ willChange: 'transform' }}>
+            {dragPreview ? (
+              <Box sx={{ ...dragPreview.size, '& > *': { height: '100%' } }}>
+                <TaskCard
+                  chore={dragPreview.task}
+                  subtasksExpanded={dragPreview.subtasksExpanded}
+                  displayMode={displayMode}
+                  isOverlay
+                  isDragging
+                  membersData={membersData}
+                  sections={sections}
+                />
+              </Box>
+            ) : null}
+          </DragOverlay>,
+          document.body,
+        )}
       </DndContext>
+      {actionMenu && (
+        <ChoreActionMenu
+          chore={actionMenu.chore}
+          anchorEl={actionMenu.anchorEl}
+          sections={sections}
+          onClose={closeActionMenu}
+          onAction={handleAction}
+          onCompleteWithNote={() =>
+            handleAction('completeWithNote', actionMenu.chore)
+          }
+          onCompleteWithPastDate={() =>
+            handleAction('completeWithPastDate', actionMenu.chore)
+          }
+          onChangeAssignee={() =>
+            handleAction('changeAssignee', actionMenu.chore)
+          }
+          onChangeDueDate={() =>
+            handleAction('changeDueDate', actionMenu.chore)
+          }
+          onWriteNFC={() => handleAction('writeNFC', actionMenu.chore)}
+          onNudge={() => handleAction('nudge', actionMenu.chore)}
+          onDelete={() => handleAction('delete', actionMenu.chore)}
+        />
+      )}
     </Box>
   )
 }
