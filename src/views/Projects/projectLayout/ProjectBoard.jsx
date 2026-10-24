@@ -40,8 +40,12 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
 import useLongPress from '../../../hooks/useLongPress'
+import { useCreateChore } from '../../../queries/ChoreQueries'
+import { useUserProfile } from '../../../queries/UserQueries'
 import { CompleteSubTask } from '../../../utils/Fetcher'
 import CompactChoreCard from '../../Chores/CompactChoreCard'
+import TaskComposerRow from '../../components/VoiceToTask/TaskComposerRow'
+import { buildChorePayload } from '../../components/VoiceToTask/parseVoiceTask'
 import {
   useCreateSection,
   useDeleteSection,
@@ -245,15 +249,19 @@ const BoardColumn = ({
   onChipClick,
   onDelete,
   onLongPressChore,
+  onQuickAdd,
   onRename,
   section,
   selectedChores,
   toggleChoreSelection,
   toggleSectionSelection,
+  userLabels,
+  userProfile,
 }) => {
   const { t } = useTranslation('chores')
   const [isEditing, setIsEditing] = useState(false)
   const [name, setName] = useState(section.name)
+  const [isQuickAdding, setIsQuickAdding] = useState(false)
   const {
     attributes,
     isDragging,
@@ -371,24 +379,38 @@ const BoardColumn = ({
         </IconButton>
       </Box>
 
-      {!isMultiSelectMode && (
-        <Button
-          variant='plain'
-          color='neutral'
-          size='sm'
-          startDecorator={<Add sx={{ fontSize: 16 }} />}
-          onClick={onAddTask}
-          sx={{
-            justifyContent: 'flex-start',
-            borderRadius: 0,
-            color: 'text.tertiary',
-            mx: 1,
-            mt: 1,
-          }}
-        >
-          {t('board.addTask')}
-        </Button>
-      )}
+      {!isMultiSelectMode &&
+        (isQuickAdding ? (
+          <TaskComposerRow
+            currentUserId={userProfile?.id}
+            members={membersData?.res || []}
+            userLabels={userLabels}
+            placeholder={t('board.addTaskPlaceholder')}
+            onSubmit={onQuickAdd}
+            onCancel={() => setIsQuickAdding(false)}
+            onMoreOptions={() => {
+              onAddTask?.()
+              setIsQuickAdding(false)
+            }}
+          />
+        ) : (
+          <Button
+            variant='plain'
+            color='neutral'
+            size='sm'
+            startDecorator={<Add sx={{ fontSize: 16 }} />}
+            onClick={() => setIsQuickAdding(true)}
+            sx={{
+              justifyContent: 'flex-start',
+              borderRadius: 0,
+              color: 'text.tertiary',
+              mx: 1,
+              mt: 1,
+            }}
+          >
+            {t('board.addTask')}
+          </Button>
+        ))}
 
       <SortableContext
         items={chores.map(chore => taskDndId(chore.id))}
@@ -450,10 +472,12 @@ const ProjectBoard = ({
   membersData,
   onAddTask,
   onLongPressChore,
+  onTaskCreated,
   projectId,
   selectedChores = new Set(),
   toggleChoreSelection,
   toggleSectionSelection,
+  userLabels = [],
 }) => {
   const { t } = useTranslation('chores')
   const [activeTask, setActiveTask] = useState(null)
@@ -461,11 +485,28 @@ const ProjectBoard = ({
   const hasEnsuredDefaultsRef = useRef(false)
 
   const { data: sections = [], isLoading } = useProjectSections(projectId)
+  const { data: userProfile } = useUserProfile()
   const createSectionMutation = useCreateSection()
   const renameSectionMutation = useRenameSection()
   const deleteSectionMutation = useDeleteSection()
   const moveSectionMutation = useMoveSection()
   const moveChoreMutation = useMoveChore()
+  const createChoreMutation = useCreateChore()
+
+  // Mirrors AddTaskModal's voice-to-task multi-create path: `effective` is the
+  // same parsed-plus-overrides shape TaskPreviewCard works with, so this
+  // builds the same default-filled payload and lets the caller (MyChores)
+  // splice the result into local state the same way a modal-created task would.
+  const quickAddTask = async (sectionId, effective) => {
+    const chore = buildChorePayload(effective, { projectId, sectionId, userProfile })
+    chore.source = 'quick_add'
+    const result = await createChoreMutation.mutateAsync(chore)
+    onTaskCreated?.(
+      result?._pendingCreate
+        ? result
+        : { ...chore, ...result, id: result?.id },
+    )
+  }
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -667,11 +708,14 @@ const ProjectBoard = ({
                 onAddTask={() => onAddTask?.(section.id)}
                 onChipClick={handleLabelFiltering}
                 onLongPressChore={onLongPressChore}
+                onQuickAdd={effective => quickAddTask(section.id, effective)}
                 selectedChores={selectedChores}
                 toggleChoreSelection={toggleChoreSelection}
                 toggleSectionSelection={toggleSectionSelection}
                 onRename={name => renameSection(section.id, name)}
                 onDelete={() => deleteSection(section.id)}
+                userLabels={userLabels}
+                userProfile={userProfile}
               />
             ))}
             <Sheet

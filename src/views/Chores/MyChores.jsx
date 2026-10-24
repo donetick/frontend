@@ -1468,6 +1468,8 @@ const MyChores = () => {
             toggleChoreSelection={toggleChoreSelection}
             toggleSectionSelection={toggleSectionSelection}
             onLongPressChore={enterMultiSelectWithChore}
+            onTaskCreated={updateChores}
+            userLabels={userLabels || []}
             onAddTask={sectionId => {
               setAddTaskSectionContext({
                 projectId: selectedProject.id,
