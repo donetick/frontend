@@ -358,9 +358,34 @@ export const useMoveSection = () => {
   })
 }
 
+// Reassigns boardPosition for every chore in sectionId so choreId lands right
+// after afterChoreId (or first, when null), mirroring what the server will
+// settle on, so the column doesn't snap back before the request resolves.
+const reorderedChoresAfter = (chores, choreId, sectionId, afterChoreId) => {
+  const siblings = chores
+    .filter(chore => chore.sectionId === sectionId && chore.id !== choreId)
+    .sort((a, b) => (a.boardPosition || 0) - (b.boardPosition || 0))
+  const afterIndex =
+    afterChoreId == null
+      ? -1
+      : siblings.findIndex(chore => chore.id === afterChoreId)
+  const moved = chores.find(chore => chore.id === choreId)
+  if (!moved) return chores
+  siblings.splice(afterIndex + 1, 0, moved)
+  const positions = new Map(
+    siblings.map((chore, index) => [chore.id, index]),
+  )
+  return chores.map(chore =>
+    positions.has(chore.id)
+      ? { ...chore, sectionId, boardPosition: positions.get(chore.id) }
+      : chore,
+  )
+}
+
 // Moves one chore into sectionId, right after afterChoreId (or first, when
-// null). Updates the chore's sectionId optimistically in the shared chores
-// cache so the board doesn't wait a round trip to reflect the drop.
+// null). Updates the chore's sectionId and boardPosition optimistically in
+// the shared chores cache so the board doesn't wait a round trip to reflect
+// the drop.
 export const useMoveChore = () => {
   const queryClient = useQueryClient()
   return useMutation({
@@ -375,16 +400,14 @@ export const useMoveChore = () => {
         throw await errorFrom(response, 'Failed to move task')
       }
     },
-    onMutate: async ({ choreId, sectionId }) => {
+    onMutate: async ({ choreId, sectionId, afterChoreId }) => {
       await queryClient.cancelQueries({ queryKey: ['chores'] })
       const previous = queryClient.getQueryData(['chores', false])
       queryClient.setQueryData(['chores', false], old => {
         if (!old?.res) return old
         return {
           ...old,
-          res: old.res.map(chore =>
-            chore.id === choreId ? { ...chore, sectionId } : chore,
-          ),
+          res: reorderedChoresAfter(old.res, choreId, sectionId, afterChoreId),
         }
       })
       return { previous }

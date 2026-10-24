@@ -88,8 +88,15 @@ const flattenSubtasks = (tasks, parentId = null, level = 0) =>
       ...flattenSubtasks(tasks, task.id, level + 1),
     ])
 
-const SortableTask = ({
+const TaskCard = ({
   chore,
+  dragAttributes,
+  dragListeners,
+  isDragging = false,
+  isOverlay = false,
+  setNodeRef,
+  transform,
+  transition,
   displayMode,
   isMultiSelectMode,
   isSelected,
@@ -99,22 +106,11 @@ const SortableTask = ({
   onLongPress,
   onSelectionToggle,
   sections,
+  subtasksExpanded = false,
+  onSubtasksExpandedChange,
 }) => {
   const { t } = useTranslation('chores')
-  const [subtasksExpanded, setSubtasksExpanded] = useState(false)
   const [subtasks, setSubtasks] = useState(chore.subTasks || [])
-  const {
-    attributes,
-    isDragging,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-  } = useSortable({
-    id: taskDndId(chore.id),
-    data: { type: 'task', taskId: String(chore.id) },
-    disabled: isMultiSelectMode,
-  })
   const navigate = useNavigate()
   const { cancel: cancelLongPress, handlers: longPressHandlers } = useLongPress(
     () => onLongPress?.(chore.id),
@@ -151,8 +147,8 @@ const SortableTask = ({
   return (
     <Sheet
       {...longPressHandlers}
-      {...attributes}
-      {...surfaceListeners(listeners)}
+      {...dragAttributes}
+      {...surfaceListeners(dragListeners)}
       aria-label={t('board.dragTask')}
       ref={setNodeRef}
       variant='outlined'
@@ -164,8 +160,9 @@ const SortableTask = ({
         borderRadius: 'md',
         overflow: 'hidden',
         flexShrink: 0,
-        opacity: isDragging ? 0.35 : 1,
-        transform: CSS.Transform.toString(transform),
+        opacity: isDragging && !isOverlay ? 0 : 1,
+        pointerEvents: isOverlay ? 'none' : undefined,
+        transform: CSS.Translate.toString(transform),
         transition,
         touchAction: 'pan-y',
         cursor: isMultiSelectMode
@@ -188,7 +185,7 @@ const SortableTask = ({
             variant='plain'
             onClick={event => {
               event.stopPropagation()
-              setSubtasksExpanded(value => !value)
+              onSubtasksExpandedChange?.(!subtasksExpanded)
             }}
             sx={{ width: 28, minWidth: 28, borderRadius: 0 }}
           >
@@ -197,7 +194,6 @@ const SortableTask = ({
         )}
         <CompactChoreCard
           chore={chore}
-          isDragging={isDragging}
           performers={membersData?.res || []}
           isMultiSelectMode={isMultiSelectMode}
           isSelected={isSelected}
@@ -245,6 +241,36 @@ const SortableTask = ({
         </Box>
       )}
     </Sheet>
+  )
+}
+
+const SortableTask = props => {
+  const [subtasksExpanded, setSubtasksExpanded] = useState(false)
+  const {
+    attributes,
+    isDragging,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({
+    id: taskDndId(props.chore.id),
+    data: { type: 'task', taskId: String(props.chore.id), subtasksExpanded },
+    disabled: props.isMultiSelectMode,
+  })
+
+  return (
+    <TaskCard
+      {...props}
+      subtasksExpanded={subtasksExpanded}
+      onSubtasksExpandedChange={setSubtasksExpanded}
+      dragAttributes={attributes}
+      dragListeners={listeners}
+      isDragging={isDragging}
+      setNodeRef={setNodeRef}
+      transform={transform}
+      transition={transition}
+    />
   )
 }
 
@@ -318,7 +344,7 @@ const BoardColumn = ({
         pt: displayMode === 'list' && isExpanded ? '40px' : 0,
         borderRadius: 'lg',
         opacity: isDragging ? 0.45 : 1,
-        transform: CSS.Transform.toString(transform),
+        transform: CSS.Translate.toString(transform),
         transition,
       }}
     >
@@ -555,6 +581,10 @@ const ProjectBoard = ({
 }) => {
   const { t } = useTranslation('chores')
   const [activeTask, setActiveTask] = useState(null)
+  const [activeSubtasksExpanded, setActiveSubtasksExpanded] = useState(false)
+  const [activeTaskSize, setActiveTaskSize] = useState(null)
+  const [pendingTaskOrder, setPendingTaskOrder] = useState(null)
+  const [pendingSectionOrder, setPendingSectionOrder] = useState(null)
   const [newSectionName, setNewSectionName] = useState('')
   const hasEnsuredDefaultsRef = useRef(false)
 
@@ -613,6 +643,11 @@ const ProjectBoard = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, sections.length, projectId])
 
+  const displayedSections =
+    pendingSectionOrder?.projectId === projectId
+      ? pendingSectionOrder.sections
+      : sections
+
   const choresBySection = useMemo(() => {
     const grouped = Object.fromEntries(
       sections.map(section => [section.id, []]),
@@ -627,8 +662,28 @@ const ProjectBoard = ({
     Object.values(grouped).forEach(items =>
       items.sort((a, b) => (a.boardPosition || 0) - (b.boardPosition || 0)),
     )
+    if (pendingTaskOrder?.projectId === projectId) {
+      const { taskId, sectionId, orderedIds } = pendingTaskOrder
+      const moved = chores.find(chore => String(chore.id) === taskId)
+      if (moved && grouped[sectionId]) {
+        Object.keys(grouped).forEach(id => {
+          grouped[id] = grouped[id].filter(chore => String(chore.id) !== taskId)
+        })
+        const target = new Map(
+          grouped[sectionId].map(chore => [String(chore.id), chore]),
+        )
+        target.set(taskId, moved)
+        grouped[sectionId] = orderedIds
+          .flatMap(id => {
+            const chore = target.get(id)
+            target.delete(id)
+            return chore ? [chore] : []
+          })
+          .concat([...target.values()])
+      }
+    }
     return grouped
-  }, [chores, sections])
+  }, [chores, sections, pendingTaskOrder, projectId])
 
   const handleAction = (action, chore, extraData) => {
     if (action === 'moveToSection') {
@@ -664,35 +719,51 @@ const ProjectBoard = ({
         chores.find(chore => String(chore.id) === active.data.current.taskId) ||
           null,
       )
+      setActiveSubtasksExpanded(active.data.current.subtasksExpanded)
+      const rect = active.rect.current?.initial
+      setActiveTaskSize(
+        rect ? { width: rect.width, height: rect.height } : null,
+      )
     }
   }
 
   const handleDragEnd = ({ active, over }) => {
     setActiveTask(null)
+    setActiveTaskSize(null)
     if (!over || active.id === over.id) return
 
     const activeData = active.data.current
     const overData = over.data.current
 
     if (activeData?.type === 'section' && overData?.type === 'section') {
-      const oldIndex = sections.findIndex(
+      const oldIndex = displayedSections.findIndex(
         section => section.id === activeData.sectionId,
       )
-      const newIndex = sections.findIndex(
+      const newIndex = displayedSections.findIndex(
         section => section.id === overData.sectionId,
       )
       if (oldIndex === -1 || newIndex === -1) return
-      const reordered = arrayMove(sections, oldIndex, newIndex)
+      const reordered = arrayMove(displayedSections, oldIndex, newIndex)
       const movedIndex = reordered.findIndex(
         section => section.id === activeData.sectionId,
       )
       const afterSectionId =
         movedIndex === 0 ? null : reordered[movedIndex - 1].id
-      moveSectionMutation.mutate({
-        projectId,
-        sectionId: activeData.sectionId,
-        afterSectionId,
-      })
+      const pendingOrder = { projectId, sections: reordered }
+      setPendingSectionOrder(pendingOrder)
+      moveSectionMutation.mutate(
+        {
+          projectId,
+          sectionId: activeData.sectionId,
+          afterSectionId,
+        },
+        {
+          onSettled: () =>
+            setPendingSectionOrder(current =>
+              current === pendingOrder ? null : current,
+            ),
+        },
+      )
       return
     }
 
@@ -739,12 +810,27 @@ const ProjectBoard = ({
     const newIndex = orderedTargetIds.indexOf(taskId)
     const afterChoreId =
       newIndex <= 0 ? null : Number(orderedTargetIds[newIndex - 1])
-    moveChoreMutation.mutate({
+    const pendingOrder = {
       projectId,
-      choreId: Number(taskId),
+      taskId,
       sectionId: resolvedTargetSectionId,
-      afterChoreId,
-    })
+      orderedIds: orderedTargetIds,
+    }
+    setPendingTaskOrder(pendingOrder)
+    moveChoreMutation.mutate(
+      {
+        projectId,
+        choreId: Number(taskId),
+        sectionId: resolvedTargetSectionId,
+        afterChoreId,
+      },
+      {
+        onSettled: () =>
+          setPendingTaskOrder(current =>
+            current === pendingOrder ? null : current,
+          ),
+      },
+    )
   }
 
   if (isLoading) {
@@ -766,11 +852,14 @@ const ProjectBoard = ({
         }
         sensors={sensors}
         onDragStart={handleDragStart}
-        onDragCancel={() => setActiveTask(null)}
+        onDragCancel={() => {
+          setActiveTask(null)
+          setActiveTaskSize(null)
+        }}
         onDragEnd={handleDragEnd}
       >
         <SortableContext
-          items={sections.map(section => columnDndId(section.id))}
+          items={displayedSections.map(section => columnDndId(section.id))}
           strategy={
             displayMode === 'list'
               ? verticalListSortingStrategy
@@ -792,7 +881,7 @@ const ProjectBoard = ({
               '& > *': { scrollSnapAlign: 'start' },
             }}
           >
-            {sections.map(section => (
+            {displayedSections.map(section => (
               <BoardColumn
                 key={section.id}
                 section={section}
@@ -847,18 +936,19 @@ const ProjectBoard = ({
             </Sheet>
           </Box>
         </SortableContext>
-        <DragOverlay>
+        <DragOverlay adjustScale={false}>
           {activeTask ? (
-            <Sheet variant='outlined' sx={{ width: 300, borderRadius: 'md' }}>
-              <CompactChoreCard
+            <Box sx={{ ...activeTaskSize, '& > *': { height: '100%' } }}>
+              <TaskCard
                 chore={activeTask}
+                subtasksExpanded={activeSubtasksExpanded}
+                displayMode={displayMode}
+                isOverlay
                 isDragging
-                performers={membersData?.res || []}
-                showActions={false}
-                showDivider={false}
-                viewOnly
+                membersData={membersData}
+                sections={sections}
               />
-            </Sheet>
+            </Box>
           ) : null}
         </DragOverlay>
       </DndContext>

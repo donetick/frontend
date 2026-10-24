@@ -1,4 +1,4 @@
-import { Add, Close } from '@mui/icons-material'
+import { Add, Close, MoreVert } from '@mui/icons-material'
 import { Box, CircularProgress, IconButton, Input } from '@mui/joy'
 import moment from 'moment'
 import { useMemo, useRef, useState } from 'react'
@@ -162,86 +162,90 @@ const TaskComposerRow = ({
         </IconButton>
       </Box>
 
-      <Box
-        sx={{
-          display: 'flex',
-          gap: 1,
-          overflowX: 'auto',
-          pt: 0.5,
-          '&::-webkit-scrollbar': { display: 'none' },
-        }}
-      >
-        <DueDatePickerField
-          emptyDisplay='icon'
-          dueDateOnly={dueDateOnly}
-          dueTime={dueTime}
-          useCustomTime={hasCustomTime}
-          onDueDateChange={e => queueDuePatch({ date: e.target.value || null })}
-          onDueTimeChange={e => queueDuePatch({ time: e.target.value || null })}
-          onUseCustomTimeChange={checked => queueDuePatch({ custom: checked })}
-          onClear={() => setOverrides(o => ({ ...o, dueDate: null }))}
-        />
-        <RepeatPickerField
-          emptyDisplay='icon'
-          value={effective.frequency}
-          onChange={f => setOverrides(o => ({ ...o, frequency: f }))}
-          onClear={() => setOverrides(o => ({ ...o, frequency: null }))}
-        />
-        <PriorityPickerField
-          emptyDisplay='icon'
-          value={effective.priority}
-          onChange={p => setOverrides(o => ({ ...o, priority: p }))}
-          onClear={() => setOverrides(o => ({ ...o, priority: 0 }))}
-          priorityColors={PRIORITY_COLORS}
-          priorityLabels={PRIORITY_LABELS}
-        />
-        <AssigneePickerField
-          emptyDisplay='icon'
-          values={effective.assignees.map(a => a.userId)}
-          isAnyone={effective.isAnyone}
-          onChange={userIds => {
-            if (userIds.includes('anyone')) {
-              setOverrides(o => ({ ...o, assignees: [], isAnyone: true }))
-            } else {
-              setOverrides(o => ({
-                ...o,
-                assignees: userIds.map(userId => ({ userId })),
-                isAnyone: false,
-              }))
-            }
-          }}
-          onClear={() =>
-            setOverrides(o => ({ ...o, assignees: [], isAnyone: false }))
-          }
-          members={members}
-        />
-        <LabelsPickerField
-          emptyDisplay='icon'
-          values={effective.labelIds}
-          onChange={ids => setOverrides(o => ({ ...o, labelIds: ids }))}
-          onClear={() => setOverrides(o => ({ ...o, labelIds: [] }))}
-          labels={userLabels}
-        />
-      </Box>
-
-      {onMoreOptions && (
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
         <Box
-          component='span'
           sx={{
-            alignSelf: 'flex-start',
-            color: 'text.tertiary',
-            cursor: 'pointer',
-            fontSize: 'xs',
-            '&:hover': { textDecoration: 'underline' },
-          }}
-          onClick={() => {
-            reset()
-            onMoreOptions()
+            display: 'flex',
+            gap: 1,
+            overflowX: 'auto',
+            flex: 1,
+            minWidth: 0,
+            pt: '20px',
+            pb: '2px',
+            px: '18px',
+            mx: '-18px',
+            '&::-webkit-scrollbar': { display: 'none' },
           }}
         >
-          {t('chores:board.moreOptions')}
+          <DueDatePickerField
+            emptyDisplay='icon'
+            dueDateOnly={dueDateOnly}
+            dueTime={dueTime}
+            useCustomTime={hasCustomTime}
+            onDueDateChange={e =>
+              queueDuePatch({ date: e.target.value || null })
+            }
+            onDueTimeChange={e => queueDuePatch({ time: e.target.value || null })}
+            onUseCustomTimeChange={checked => queueDuePatch({ custom: checked })}
+            onClear={() => setOverrides(o => ({ ...o, dueDate: null }))}
+          />
+          <RepeatPickerField
+            emptyDisplay='icon'
+            value={effective.frequency}
+            onChange={f => setOverrides(o => ({ ...o, frequency: f }))}
+            onClear={() => setOverrides(o => ({ ...o, frequency: null }))}
+          />
+          <PriorityPickerField
+            emptyDisplay='icon'
+            value={effective.priority}
+            onChange={p => setOverrides(o => ({ ...o, priority: p }))}
+            onClear={() => setOverrides(o => ({ ...o, priority: 0 }))}
+            priorityColors={PRIORITY_COLORS}
+            priorityLabels={PRIORITY_LABELS}
+          />
+          <AssigneePickerField
+            emptyDisplay='icon'
+            values={effective.assignees.map(a => a.userId)}
+            isAnyone={effective.isAnyone}
+            onChange={userIds => {
+              if (userIds.includes('anyone')) {
+                setOverrides(o => ({ ...o, assignees: [], isAnyone: true }))
+              } else {
+                setOverrides(o => ({
+                  ...o,
+                  assignees: userIds.map(userId => ({ userId })),
+                  isAnyone: false,
+                }))
+              }
+            }}
+            onClear={() =>
+              setOverrides(o => ({ ...o, assignees: [], isAnyone: false }))
+            }
+            members={members}
+          />
+          <LabelsPickerField
+            emptyDisplay='icon'
+            values={effective.labelIds}
+            onChange={ids => setOverrides(o => ({ ...o, labelIds: ids }))}
+            onClear={() => setOverrides(o => ({ ...o, labelIds: [] }))}
+            labels={userLabels}
+          />
         </Box>
-      )}
+        {onMoreOptions && (
+          <IconButton
+            aria-label={t('chores:board.moreOptions')}
+            size='sm'
+            variant='plain'
+            color='neutral'
+            onClick={() => {
+              reset()
+              onMoreOptions()
+            }}
+          >
+            <MoreVert sx={{ fontSize: 18 }} />
+          </IconButton>
+        )}
+      </Box>
     </Box>
   )
 }
