@@ -57,10 +57,12 @@ import AdvancedFilterBuilder from '../Modals/Inputs/AdvancedFilterBuilder'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import ProjectBoard from '../Projects/projectLayout/ProjectBoard.jsx'
 import {
+  projectViewToViewMode,
   useProjects,
   useProjectSections,
   useProjectView,
   useSetProjectView,
+  viewModeToProjectView,
 } from '../Projects/ProjectQueries.js'
 import ChoreListView from './ChoreListView.jsx'
 import ChoreModals from './components/ChoreModals'
@@ -1039,22 +1041,25 @@ const MyChores = () => {
       if (newMode !== 'calendar') {
         setSelectedCalendarDate(null)
       }
-      // An explicit board/list pick for the currently selected project is
-      // this user's own preference for it; save it so it's there next time,
-      // on any device. Marking it "synced" here too stops the loader effect
-      // above from immediately overwriting this pick with a stale value.
-      if (
-        isCustomProjectSelected &&
-        (newMode === 'board' || newMode === 'project-list')
-      ) {
+      // An explicit layout pick for the currently selected project is this
+      // user's own preference for it; save it so it's there next time, on any
+      // device. Marking it "synced" here too stops the loader effect above
+      // from immediately overwriting this pick with a stale value.
+      const projectView = viewModeToProjectView(newMode)
+      if (isCustomProjectSelected && projectView) {
         lastSyncedProjectIdRef.current = selectedProject.id
         setProjectViewMutation.mutate({
           projectId: selectedProject.id,
-          view: newMode === 'project-list' ? 'list' : 'board',
+          view: projectView,
         })
       }
     },
-    [viewMode, isCustomProjectSelected, selectedProject, setProjectViewMutation],
+    [
+      viewMode,
+      isCustomProjectSelected,
+      selectedProject,
+      setProjectViewMutation,
+    ],
   )
 
   const selectedDateChores = useMemo(() => {
@@ -1106,22 +1111,25 @@ const MyChores = () => {
     }
   }, [isCustomProjectSelected, isProjectWorkflowView, toggleViewMode])
 
-  // Selecting a project loads its own saved board/list choice, once per
-  // project — after that, the user's explicit picks (persisted by
-  // toggleViewMode below) win over this sync, even if they differ from what
-  // was saved. This has to apply even when not already in a workflow view:
-  // on a fresh browser `viewMode` starts at its 'default' fallback (nothing
-  // in localStorage yet), so gating on isProjectWorkflowView would mean the
-  // saved view never gets a chance to switch things into board/list at all.
+  // Selecting a project loads its own saved layout choice, once per project —
+  // after that, the user's explicit picks (persisted by toggleViewMode below)
+  // win over this sync, even if they differ from what was saved. This has to
+  // apply even when not already in a workflow view: on a fresh browser
+  // `viewMode` starts at its 'default' fallback (nothing in localStorage yet),
+  // so gating on isProjectWorkflowView would mean the saved view never gets a
+  // chance to switch layouts at all.
   useEffect(() => {
     if (!isCustomProjectSelected) return
     if (savedProjectView == null) return
     if (lastSyncedProjectIdRef.current === selectedProject.id) return
     lastSyncedProjectIdRef.current = selectedProject.id
-    const mapped = savedProjectView === 'list' ? 'project-list' : 'board'
-    if (mapped !== viewMode) {
+    const mapped = projectViewToViewMode(savedProjectView)
+    if (mapped && mapped !== viewMode) {
       setViewMode(mapped)
       localStorage.setItem('choreCardViewMode', mapped)
+      if (mapped !== 'calendar') {
+        setSelectedCalendarDate(null)
+      }
     }
   }, [isCustomProjectSelected, savedProjectView, selectedProject, viewMode])
 
@@ -1713,9 +1721,13 @@ const MyChores = () => {
             })}
           </AccordionGroup>
         )}
+        {/* The selection bar lives in this same bottom slot, so the add button
+            steps aside for it rather than stacking on top of it: while you are
+            picking tasks, creating one is not the action you want. */}
         <ScrollHideFab
           sx={{
             bottom: getSafeBottom(10, 10),
+            display: isMultiSelectMode ? 'none' : undefined,
             '@media (max-width: 768px)': {
               bottom: getSafeBottom(66, 10),
             },

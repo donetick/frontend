@@ -423,7 +423,7 @@ export const useMoveChore = () => {
   })
 }
 
-// ─── View preference (board vs list) ────────────────────────────────────────
+// ─── View preference (which layout a project is looked at in) ───────────────
 //
 // Private per user, per project: never shared, never affects the sections or
 // task order above. Defaults to "board" server-side when never set. It rides
@@ -431,6 +431,37 @@ export const useMoveChore = () => {
 // (a `view` field) instead of a dedicated endpoint, so reading it is just a
 // lookup into the existing ['projects'] cache and writing it is a PUT
 // /projects/:id call that only sends `view`.
+//
+// Every layout a project can be viewed in is stored, not just board/list:
+// cards, compact and calendar are remembered the same way, so coming back to
+// a project puts you back in the layout you left it in.
+
+// The UI's own name for the section list is 'project-list'; the wire name is
+// 'list', which is what is already stored for existing users. Every other
+// layout uses the same name on both sides.
+const VIEW_MODE_TO_PROJECT_VIEW = {
+  default: 'default',
+  compact: 'compact',
+  calendar: 'calendar',
+  'project-list': 'list',
+  board: 'board',
+}
+
+const PROJECT_VIEW_TO_VIEW_MODE = {
+  default: 'default',
+  compact: 'compact',
+  calendar: 'calendar',
+  list: 'project-list',
+  board: 'board',
+}
+
+// null for anything this build doesn't know how to store/render, so callers
+// can skip it rather than persist or apply a value they can't honour.
+export const viewModeToProjectView = viewMode =>
+  VIEW_MODE_TO_PROJECT_VIEW[viewMode] || null
+
+export const projectViewToViewMode = view =>
+  PROJECT_VIEW_TO_VIEW_MODE[view] || null
 
 export const useProjectView = projectId => {
   const { data: projects } = useProjects()
