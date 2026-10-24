@@ -25,6 +25,15 @@ body {
   overflow-x: hidden;
 }
 
+/* Clip horizontal overflow without creating an unscrolled ancestor that
+ * traps sticky section headers instead of letting them follow page scroll. */
+@supports (overflow: clip) {
+  html,
+  body {
+    overflow-x: clip;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

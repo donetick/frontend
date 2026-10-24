@@ -3,7 +3,7 @@ import {
   DndContext,
   DragOverlay,
   KeyboardSensor,
-  PointerSensor,
+  MouseSensor,
   TouchSensor,
   useSensor,
   useSensors,
@@ -21,7 +21,6 @@ import {
   Add,
   ChevronRight,
   DeleteOutline,
-  DragIndicator,
   EditOutlined,
   ExpandMore,
 } from '@mui/icons-material'
@@ -57,6 +56,23 @@ import {
 
 const columnDndId = id => `section:${id}`
 const taskDndId = id => `task:${id}`
+
+// Keep nested controls usable when the surrounding surface starts a drag.
+const surfaceListeners = listeners =>
+  Object.fromEntries(
+    Object.entries(listeners || {}).map(([name, listener]) => [
+      name,
+      event => {
+        const control = event.target.closest(
+          'button, input, textarea, select, a, [role="button"], [role="checkbox"], [contenteditable="true"]',
+        )
+        if (control && control !== event.currentTarget) return
+        if (name === 'onKeyDown' && event.target !== event.currentTarget) return
+        event.stopPropagation()
+        listener(event)
+      },
+    ]),
+  )
 
 const flattenSubtasks = (tasks, parentId = null, level = 0) =>
   tasks
@@ -129,6 +145,9 @@ const SortableTask = ({
   return (
     <Sheet
       {...longPressHandlers}
+      {...attributes}
+      {...surfaceListeners(listeners)}
+      aria-label={t('board.dragTask')}
       ref={setNodeRef}
       variant='outlined'
       onClick={() => {
@@ -143,32 +162,14 @@ const SortableTask = ({
         transform: CSS.Transform.toString(transform),
         transition,
         touchAction: 'pan-y',
+        cursor: isMultiSelectMode
+          ? 'default'
+          : isDragging
+            ? 'grabbing'
+            : 'grab',
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'stretch' }}>
-        <IconButton
-          {...attributes}
-          {...listeners}
-          aria-label={t('board.dragTask')}
-          disabled={isMultiSelectMode}
-          size='sm'
-          variant='plain'
-          onClick={event => event.stopPropagation()}
-          sx={{
-            width: 28,
-            minWidth: 28,
-            borderRadius: 0,
-            cursor: isMultiSelectMode
-              ? 'default'
-              : isDragging
-                ? 'grabbing'
-                : 'grab',
-            color: 'text.tertiary',
-            touchAction: 'none',
-          }}
-        >
-          <DragIndicator sx={{ fontSize: 18 }} />
-        </IconButton>
         {showSubtasks && (
           <IconButton
             aria-label={t(
@@ -176,6 +177,7 @@ const SortableTask = ({
                 ? 'board.collapseSubtasks'
                 : 'board.expandSubtasks',
             )}
+            aria-expanded={subtasksExpanded}
             size='sm'
             variant='plain'
             onClick={event => {
@@ -189,6 +191,7 @@ const SortableTask = ({
         )}
         <CompactChoreCard
           chore={chore}
+          isDragging={isDragging}
           performers={membersData?.res || []}
           isMultiSelectMode={isMultiSelectMode}
           isSelected={isSelected}
@@ -259,6 +262,8 @@ const BoardColumn = ({
   userProfile,
 }) => {
   const { t } = useTranslation('chores')
+  const [isCollapsed, setIsCollapsed] = useState(false)
+  const isExpanded = displayMode !== 'list' || !isCollapsed
   const [isEditing, setIsEditing] = useState(false)
   const [name, setName] = useState(section.name)
   const [isQuickAdding, setIsQuickAdding] = useState(false)
@@ -286,12 +291,23 @@ const BoardColumn = ({
 
   return (
     <Sheet
+      {...attributes}
+      {...surfaceListeners(listeners)}
+      aria-label={t('board.dragSection')}
       ref={setNodeRef}
       variant='soft'
       sx={{
         width: displayMode === 'list' ? '100%' : { xs: 292, sm: 320 },
         minWidth: displayMode === 'list' ? 0 : { xs: 292, sm: 320 },
         alignSelf: 'flex-start',
+        cursor: isMultiSelectMode
+          ? 'default'
+          : isDragging
+            ? 'grabbing'
+            : 'grab',
+        touchAction: 'pan-y',
+        position: 'relative',
+        pt: displayMode === 'list' && isExpanded ? '40px' : 0,
         borderRadius: 'lg',
         opacity: isDragging ? 0.45 : 1,
         transform: CSS.Transform.toString(transform),
@@ -299,166 +315,194 @@ const BoardColumn = ({
       }}
     >
       <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 0.5,
-          minHeight: 48,
-          px: 1,
-          borderBottom: '1px solid',
-          borderColor: 'divider',
-        }}
-      >
-        <IconButton
-          {...attributes}
-          {...listeners}
-          aria-label={t('board.dragSection')}
-          disabled={isMultiSelectMode}
-          size='sm'
-          variant='plain'
-          sx={{ cursor: isDragging ? 'grabbing' : 'grab', touchAction: 'none' }}
-        >
-          <DragIndicator />
-        </IconButton>
-        {isMultiSelectMode && (
-          <Checkbox
-            checked={
-              chores.length > 0 &&
-              chores.every(chore => selectedChores.has(chore.id))
-            }
-            indeterminate={
-              chores.some(chore => selectedChores.has(chore.id)) &&
-              !chores.every(chore => selectedChores.has(chore.id))
-            }
-            disabled={chores.length === 0}
-            size='sm'
-            onChange={() => toggleSectionSelection(chores)}
-          />
-        )}
-        {isEditing ? (
-          <Input
-            autoFocus
-            size='sm'
-            value={name}
-            onChange={event => setName(event.target.value)}
-            onBlur={saveName}
-            onKeyDown={event => {
-              if (event.key === 'Enter') saveName()
-              if (event.key === 'Escape') {
-                setName(section.name)
-                setIsEditing(false)
+        sx={
+          displayMode === 'list' && isExpanded
+            ? {
+                position: 'absolute',
+                inset: '0 0 min(72px, calc(100% - 40px))',
+                pointerEvents: 'none',
+                zIndex: 2,
               }
-            }}
-            sx={{ flex: 1 }}
-          />
-        ) : (
-          <Typography level='title-sm' sx={{ flex: 1 }}>
-            {section.name}
-          </Typography>
-        )}
-        <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-          {chores.length}
-        </Typography>
-        <IconButton
-          aria-label={t('board.renameSection')}
-          size='sm'
-          variant='plain'
-          onClick={() => setIsEditing(true)}
-        >
-          <EditOutlined sx={{ fontSize: 17 }} />
-        </IconButton>
-        <IconButton
-          aria-label={t('board.deleteSection')}
-          color='danger'
-          disabled={!canDelete}
-          size='sm'
-          variant='plain'
-          onClick={onDelete}
-        >
-          <DeleteOutline sx={{ fontSize: 18 }} />
-        </IconButton>
-      </Box>
-
-      {!isMultiSelectMode &&
-        (isQuickAdding ? (
-          <TaskComposerRow
-            currentUserId={userProfile?.id}
-            members={membersData?.res || []}
-            userLabels={userLabels}
-            placeholder={t('board.addTaskPlaceholder')}
-            onSubmit={onQuickAdd}
-            onCancel={() => setIsQuickAdding(false)}
-            onMoreOptions={() => {
-              onAddTask?.()
-              setIsQuickAdding(false)
-            }}
-          />
-        ) : (
-          <Button
-            variant='plain'
-            color='neutral'
-            size='sm'
-            startDecorator={<Add sx={{ fontSize: 16 }} />}
-            onClick={() => setIsQuickAdding(true)}
-            sx={{
-              justifyContent: 'flex-start',
-              borderRadius: 0,
-              color: 'text.tertiary',
-              mx: 1,
-              mt: 1,
-            }}
-          >
-            {t('board.addTask')}
-          </Button>
-        ))}
-
-      <SortableContext
-        items={chores.map(chore => taskDndId(chore.id))}
-        strategy={verticalListSortingStrategy}
+            : undefined
+        }
       >
         <Box
           sx={{
             display: 'flex',
-            flexDirection: 'column',
-            gap: 1,
-            minHeight: 88,
-            maxHeight: displayMode === 'list' ? 'none' : 'calc(100vh - 260px)',
-            overflowY: 'auto',
-            p: 1,
+            alignItems: 'center',
+            gap: 0.5,
+            minHeight: 40,
+            height: 40,
+            pointerEvents: 'auto',
+            px: 1,
+            position: 'sticky',
+            top: displayMode === 'list' ? 'var(--app-header-offset, 0px)' : 0,
+            transition: 'top 220ms ease',
+            '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
+            zIndex: 2,
+            bgcolor: 'background.level1',
+            borderTopLeftRadius: 'lg',
+            borderTopRightRadius: 'lg',
+            borderBottom: isExpanded ? '1px solid' : 'none',
+            borderColor: 'divider',
           }}
         >
-          {chores.length === 0 && (
-            <Box
+          {displayMode === 'list' && (
+            <IconButton
+              aria-label={t(
+                isCollapsed ? 'board.expandSection' : 'board.collapseSection',
+              )}
+              aria-expanded={isExpanded}
+              aria-controls={`project-section-${section.id}`}
+              size='sm'
+              variant='plain'
+              onClick={() => setIsCollapsed(value => !value)}
+            >
+              {isCollapsed ? <ChevronRight /> : <ExpandMore />}
+            </IconButton>
+          )}
+          {isMultiSelectMode && (
+            <Checkbox
+              checked={
+                chores.length > 0 &&
+                chores.every(chore => selectedChores.has(chore.id))
+              }
+              indeterminate={
+                chores.some(chore => selectedChores.has(chore.id)) &&
+                !chores.every(chore => selectedChores.has(chore.id))
+              }
+              disabled={chores.length === 0}
+              size='sm'
+              onChange={() => toggleSectionSelection(chores)}
+            />
+          )}
+          {isEditing ? (
+            <Input
+              autoFocus
+              size='sm'
+              value={name}
+              onChange={event => setName(event.target.value)}
+              onBlur={saveName}
+              onKeyDown={event => {
+                if (event.key === 'Enter') saveName()
+                if (event.key === 'Escape') {
+                  setName(section.name)
+                  setIsEditing(false)
+                }
+              }}
+              sx={{ flex: 1 }}
+            />
+          ) : (
+            <Typography level='title-sm' noWrap sx={{ flex: 1, minWidth: 0 }}>
+              {section.name}
+            </Typography>
+          )}
+          <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+            {chores.length}
+          </Typography>
+          <IconButton
+            aria-label={t('board.renameSection')}
+            size='sm'
+            variant='plain'
+            onClick={() => setIsEditing(true)}
+          >
+            <EditOutlined sx={{ fontSize: 17 }} />
+          </IconButton>
+          <IconButton
+            aria-label={t('board.deleteSection')}
+            color='danger'
+            disabled={!canDelete}
+            size='sm'
+            variant='plain'
+            onClick={onDelete}
+          >
+            <DeleteOutline sx={{ fontSize: 18 }} />
+          </IconButton>
+        </Box>
+      </Box>
+
+      <Box id={`project-section-${section.id}`} hidden={!isExpanded}>
+        <SortableContext
+          items={chores.map(chore => taskDndId(chore.id))}
+          strategy={verticalListSortingStrategy}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 1,
+              minHeight: 88,
+              maxHeight:
+                displayMode === 'list' ? 'none' : 'calc(100vh - 260px)',
+              overflowY: displayMode === 'list' ? 'visible' : 'auto',
+              p: 1,
+            }}
+          >
+            {chores.length === 0 && (
+              <Box
+                sx={{
+                  display: 'grid',
+                  placeItems: 'center',
+                  minHeight: 70,
+                  border: '1px dashed',
+                  borderColor: 'divider',
+                  borderRadius: 'md',
+                }}
+              >
+                <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+                  {t('board.dropTasksHere')}
+                </Typography>
+              </Box>
+            )}
+            {chores.map(chore => (
+              <SortableTask
+                key={chore.id}
+                chore={chore}
+                displayMode={displayMode}
+                isMultiSelectMode={isMultiSelectMode}
+                isSelected={selectedChores.has(chore.id)}
+                membersData={membersData}
+                onAction={onAction}
+                onChipClick={onChipClick}
+                onLongPress={onLongPressChore}
+                onSelectionToggle={() => toggleChoreSelection(chore.id)}
+              />
+            ))}
+          </Box>
+        </SortableContext>
+        {!isMultiSelectMode &&
+          (isQuickAdding ? (
+            <TaskComposerRow
+              currentUserId={userProfile?.id}
+              members={membersData?.res || []}
+              userLabels={userLabels}
+              placeholder={t('board.addTaskPlaceholder')}
+              onSubmit={onQuickAdd}
+              onCancel={() => setIsQuickAdding(false)}
+              onMoreOptions={() => {
+                onAddTask?.()
+                setIsQuickAdding(false)
+              }}
+            />
+          ) : (
+            <Button
+              variant='plain'
+              color='neutral'
+              size='sm'
+              startDecorator={<Add sx={{ fontSize: 16 }} />}
+              onClick={() => setIsQuickAdding(true)}
               sx={{
-                display: 'grid',
-                placeItems: 'center',
-                minHeight: 70,
-                border: '1px dashed',
-                borderColor: 'divider',
-                borderRadius: 'md',
+                justifyContent: 'flex-start',
+                borderRadius: 0,
+                color: 'text.tertiary',
+                mx: 1,
+                mb: 1,
               }}
             >
-              <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                {t('board.dropTasksHere')}
-              </Typography>
-            </Box>
-          )}
-          {chores.map(chore => (
-            <SortableTask
-              key={chore.id}
-              chore={chore}
-              displayMode={displayMode}
-              isMultiSelectMode={isMultiSelectMode}
-              isSelected={selectedChores.has(chore.id)}
-              membersData={membersData}
-              onAction={onAction}
-              onChipClick={onChipClick}
-              onLongPress={onLongPressChore}
-              onSelectionToggle={() => toggleChoreSelection(chore.id)}
-            />
+              {t('board.addTask')}
+            </Button>
           ))}
-        </Box>
-      </SortableContext>
+      </Box>
     </Sheet>
   )
 }
@@ -498,18 +542,20 @@ const ProjectBoard = ({
   // builds the same default-filled payload and lets the caller (MyChores)
   // splice the result into local state the same way a modal-created task would.
   const quickAddTask = async (sectionId, effective) => {
-    const chore = buildChorePayload(effective, { projectId, sectionId, userProfile })
+    const chore = buildChorePayload(effective, {
+      projectId,
+      sectionId,
+      userProfile,
+    })
     chore.source = 'quick_add'
     const result = await createChoreMutation.mutateAsync(chore)
     onTaskCreated?.(
-      result?._pendingCreate
-        ? result
-        : { ...chore, ...result, id: result?.id },
+      result?._pendingCreate ? result : { ...chore, ...result, id: result?.id },
     )
   }
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
     useSensor(TouchSensor, {
       activationConstraint: { delay: 180, tolerance: 6 },
     }),
@@ -614,8 +660,7 @@ const ProjectBoard = ({
     )?.sectionId
     const targetSectionId =
       overData?.type === 'task'
-        ? chores.find(chore => String(chore.id) === overData.taskId)
-            ?.sectionId
+        ? chores.find(chore => String(chore.id) === overData.taskId)?.sectionId
         : overData?.sectionId
     const resolvedSourceSectionId = sourceSectionId ?? sections[0]?.id
     const resolvedTargetSectionId = targetSectionId ?? sections[0]?.id
@@ -666,7 +711,16 @@ const ProjectBoard = ({
   return (
     <Box sx={{ mt: 1 }}>
       <DndContext
-        collisionDetection={closestCorners}
+        collisionDetection={args =>
+          closestCorners({
+            ...args,
+            droppableContainers: args.droppableContainers.filter(container =>
+              args.active.data.current?.type === 'section'
+                ? container.data.current?.type === 'section'
+                : true,
+            ),
+          })
+        }
         sensors={sensors}
         onDragStart={handleDragStart}
         onDragCancel={() => setActiveTask(null)}
@@ -754,6 +808,7 @@ const ProjectBoard = ({
             <Sheet variant='outlined' sx={{ width: 300, borderRadius: 'md' }}>
               <CompactChoreCard
                 chore={activeTask}
+                isDragging
                 performers={membersData?.res || []}
                 showActions={false}
                 showDivider={false}

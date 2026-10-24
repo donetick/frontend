@@ -1,6 +1,7 @@
 import {
   AllInclusive,
   Check,
+  DragIndicator,
   HourglassEmpty,
   OpenInNew,
   Pause,
@@ -52,6 +53,7 @@ const ACTION_MENU_SX = {
 
 const CompactChoreCard = ({
   chore,
+  isDragging = false,
   isMultiSelectMode = false,
   isSelected = false,
   onAction,
@@ -146,7 +148,7 @@ const CompactChoreCard = ({
   } = splitTextAtFirstHttpUrl(chore.name)
   const descriptionUrl = getFirstHttpUrl(chore.description)
   const showDescriptionUrl = descriptionUrl && descriptionUrl !== titleUrl
-  const showLeadingSlot = showActions || isMultiSelectMode
+  const showLeadingSlot = showActions || isMultiSelectMode || isDragging
   const showTrailingSlot = showActions && !isMultiSelectMode
   const visibleLabels = chore.labelsV2?.slice(0, 2) ?? []
   const extraLabelCount = Math.max(
@@ -224,8 +226,14 @@ const CompactChoreCard = ({
           transition: 'width 0.3s ease-in-out, margin 0.3s ease-in-out',
         }}
       >
+        {isDragging && (
+          <DragIndicator
+            aria-label={t('board.dragTask')}
+            sx={{ color: 'text.secondary', fontSize: 24 }}
+          />
+        )}
         {/* Complete Button */}
-        {showActions && (
+        {showActions && !isDragging && (
           <Box
             sx={{
               position: 'absolute',

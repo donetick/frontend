@@ -156,6 +156,8 @@
     "dragSection": "Drag section",
     "dragTask": "Drag task",
     "dropTasksHere": "Drop tasks here",
+    "expandSection": "Expand section",
+    "collapseSection": "Collapse section",
     "expandSubtasks": "Expand subtasks",
     "collapseSubtasks": "Collapse subtasks",
     "moreOptions": "More options",
