@@ -57,6 +57,7 @@ test('specialist pages are nested rather than cluttering the overview', () => {
   }
   assert.equal(parentOf('developer'), 'advanced')
   assert.equal(parentOf('widgets'), 'layout')
+  assert.equal(parentOf('home-sections'), 'layout')
 })
 
 test('managed users do not see parent-only destinations', () => {
@@ -68,6 +69,7 @@ test('managed users do not see parent-only destinations', () => {
     'integrations',
     'calendar',
     'notification-integrations',
+    'home-sections',
   ]) {
     assert.ok(ids(managed).includes(id), id)
   }

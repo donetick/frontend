@@ -119,10 +119,11 @@ test('layout saves reordered IDs and ordering without dropping enabled state', (
   ])
 })
 
-test('layout and side panel reopen in saved order', () => {
+test('layout, side panel, and Home sections reopen in saved order', () => {
   for (const [name, getter] of [
     ['LayoutSettings', 'getBottomNavConfig'],
     ['SidepanelSettings', 'getSidepanelConfig'],
+    ['HomeSectionsSettings', 'getHomeSectionsConfig'],
   ]) {
     const file = source(name)
     const initializer = find(
@@ -143,6 +144,50 @@ test('layout and side panel reopen in saved order', () => {
     )
     assert.equal(stored[0].id, 'home')
   }
+})
+
+test('Home section toggles, reordering, and reset preserve preferences and save immediately', () => {
+  const file = source('HomeSectionsSettings')
+  let saved
+  const config = [
+    { id: 'greeting', enabled: true, order: 0 },
+    { id: 'glance', enabled: false, order: 1 },
+  ]
+  const context = {
+    config,
+    saveConfig: value => {
+      saved = value
+    },
+  }
+  const toggle = file.evaluate(
+    prop(file, 'SettingsReorderList', 'onToggle'),
+    context,
+  )
+  toggle('greeting', false)
+  assert.deepEqual(
+    JSON.parse(JSON.stringify(saved)),
+    config.map(item => ({ ...item, enabled: false })),
+  )
+  const reorder = file.evaluate(
+    prop(file, 'SettingsReorderList', 'onReorder'),
+    context,
+  )
+  reorder(['glance', 'greeting'])
+  assert.deepEqual(JSON.parse(JSON.stringify(saved)), [
+    { id: 'glance', enabled: false, order: 0 },
+    { id: 'greeting', enabled: true, order: 1 },
+  ])
+  const reset = file.evaluate(prop(file, 'Button', 'onClick'), {
+    ...context,
+    DEFAULT_HOME_SECTIONS_CONFIG: config,
+  })
+  reset()
+  assert.equal(saved, config)
+  const save = file.evaluate(variable(file, 'saveConfig'), {
+    setConfig: value => assert.equal(value, config),
+    saveHomeSectionsConfig: value => assert.equal(value, config),
+  })
+  save(config)
 })
 
 test('start-screen and display-mode choices persist immediately', () => {

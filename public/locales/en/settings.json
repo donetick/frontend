@@ -131,6 +131,10 @@
         "title": "Report an Issue",
         "description": "Tell us what's not working and we'll attach the technical details for you."
       },
+      "home-sections": {
+        "title": "Overview customization",
+        "description": "Show, hide, and reorder sections on your Home screen."
+      },
       "widgets": {
         "title": "Home Screen Widgets",
         "description": "Control how Donetick's home-screen widgets look on this device."
@@ -632,8 +636,9 @@
     }
   },
   "homeSections": {
-    "title": "Overview Customization",
-    "description": "Customize which sections appear on the Home screen and their order. Drag and drop to reorder, or toggle visibility for each section.",
+    "title": "Overview customization",
+    "description": "Make your Home screen work for you. Choose which sections to show and put the ones you use most first.",
+    "sectionsTitle": "Home screen sections",
     "resetToDefaults": "Reset to Defaults",
     "resetHelper": "This will restore all sections to their default visibility and order.",
     "sections": {
