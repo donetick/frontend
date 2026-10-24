@@ -6,6 +6,7 @@ import {
   KeyboardSensor,
   MouseSensor,
   TouchSensor,
+  useDndMonitor,
   useSensor,
   useSensors,
 } from '@dnd-kit/core'
@@ -72,6 +73,7 @@ import {
   useRenameSection,
 } from '../ProjectQueries'
 import { boardCollisionDetection } from './boardCollisionDetection'
+import { applyTaskOrder, getTaskDropOrder } from './boardTaskOrdering'
 
 // Sortable wrappers update frequently during a drag; keep the expensive card
 // content out of those renders when its task and interaction props are unchanged.
@@ -439,6 +441,18 @@ const BoardColumn = ({
   const [isEditing, setIsEditing] = useState(false)
   const [name, setName] = useState(section.name)
   const [isQuickAdding, setIsQuickAdding] = useState(false)
+  useDndMonitor({
+    onDragOver: ({ active, over }) => {
+      if (
+        displayMode === 'list' &&
+        isCollapsed &&
+        active.data.current?.type === 'task' &&
+        over?.data.current?.sectionId === section.id
+      ) {
+        setIsCollapsed(false)
+      }
+    },
+  })
   useEffect(() => setName(section.name), [section.name])
 
   const saveName = () => {
@@ -699,6 +713,7 @@ const ProjectBoard = ({
   }, [])
   const closeActionMenu = useCallback(() => setActionMenu(null), [])
   const [pendingTaskOrder, setPendingTaskOrder] = useState(null)
+  const [dragTaskOrder, setDragTaskOrder] = useState(null)
   const [pendingSectionOrder, setPendingSectionOrder] = useState(null)
   const [newSectionName, setNewSectionName] = useState('')
   const hasEnsuredDefaultsRef = useRef(false)
@@ -764,9 +779,7 @@ const ProjectBoard = ({
       : sections
 
   const choresBySection = useMemo(() => {
-    const grouped = Object.fromEntries(
-      sections.map(section => [section.id, []]),
-    )
+    let grouped = Object.fromEntries(sections.map(section => [section.id, []]))
     const firstSectionId = sections[0]?.id
     chores.forEach(chore => {
       const sectionId = grouped[chore.sectionId]
@@ -778,27 +791,18 @@ const ProjectBoard = ({
       items.sort((a, b) => (a.boardPosition || 0) - (b.boardPosition || 0)),
     )
     if (pendingTaskOrder?.projectId === projectId) {
-      const { taskId, sectionId, orderedIds } = pendingTaskOrder
-      const moved = chores.find(chore => String(chore.id) === taskId)
-      if (moved && grouped[sectionId]) {
-        Object.keys(grouped).forEach(id => {
-          grouped[id] = grouped[id].filter(chore => String(chore.id) !== taskId)
-        })
-        const target = new Map(
-          grouped[sectionId].map(chore => [String(chore.id), chore]),
-        )
-        target.set(taskId, moved)
-        grouped[sectionId] = orderedIds
-          .flatMap(id => {
-            const chore = target.get(id)
-            target.delete(id)
-            return chore ? [chore] : []
-          })
-          .concat([...target.values()])
-      }
+      grouped = applyTaskOrder(grouped, pendingTaskOrder)
     }
     return grouped
   }, [chores, sections, pendingTaskOrder, projectId])
+
+  const displayedChoresBySection = useMemo(
+    () =>
+      dragTaskOrder?.projectId === projectId
+        ? applyTaskOrder(choresBySection, dragTaskOrder)
+        : choresBySection,
+    [choresBySection, dragTaskOrder, projectId],
+  )
 
   const handleAction = (action, chore, extraData) => {
     if (action === 'moveToSection') {
@@ -830,6 +834,7 @@ const ProjectBoard = ({
 
   const handleDragStart = ({ active }) => {
     closeActionMenu()
+    setDragTaskOrder(null)
     if (active.data.current?.type === 'task') {
       const task = chores.find(
         chore => String(chore.id) === active.data.current.taskId,
@@ -849,9 +854,38 @@ const ProjectBoard = ({
     }
   }
 
+  const handleDragCancel = () => {
+    setDragPreview(null)
+    setDragTaskOrder(null)
+  }
+
+  // Change the rendered order only when crossing section boundaries, not on
+  // every pointer move. Inside a section dnd-kit handles the insertion animation.
+  const handleDragOver = ({ active, over }) => {
+    if (active.data.current?.type !== 'task' || !over) return
+    const { taskId } = active.data.current
+    const targetSectionId = over.data.current?.sectionId
+    const target = displayedChoresBySection[targetSectionId]
+    if (!target || target.some(task => String(task.id) === taskId)) return
+
+    const translated = active.rect.current.translated
+    const insertAfter = Boolean(
+      translated && translated.top > over.rect.top + over.rect.height / 2,
+    )
+    const order = getTaskDropOrder(
+      displayedChoresBySection,
+      taskId,
+      targetSectionId,
+      over.data.current?.taskId,
+      insertAfter,
+    )
+    if (order) setDragTaskOrder({ ...order, projectId })
+  }
+
   const handleDragEnd = ({ active, over }) => {
     setDragPreview(null)
-    if (!over || active.id === over.id) return
+    setDragTaskOrder(null)
+    if (!over || (active.id === over.id && !dragTaskOrder)) return
 
     const activeData = active.data.current
     const overData = over.data.current
@@ -890,56 +924,23 @@ const ProjectBoard = ({
 
     if (activeData?.type !== 'task') return
     const taskId = activeData.taskId
-    const sourceSectionId = chores.find(
-      chore => String(chore.id) === taskId,
-    )?.sectionId
-    const targetSectionId = overData?.sectionId
-    const resolvedSourceSectionId = sourceSectionId ?? sections[0]?.id
-    const resolvedTargetSectionId = targetSectionId ?? sections[0]?.id
-    if (!resolvedSourceSectionId || !resolvedTargetSectionId) return
-
-    const sourceIds = (choresBySection[resolvedSourceSectionId] || []).map(
-      chore => String(chore.id),
-    )
-    const targetIds = (choresBySection[resolvedTargetSectionId] || []).map(
-      chore => String(chore.id),
-    )
-    let orderedTargetIds
-    if (resolvedSourceSectionId === resolvedTargetSectionId) {
-      const oldIndex = sourceIds.indexOf(taskId)
-      const newIndex =
-        overData?.type === 'task'
-          ? sourceIds.indexOf(overData.taskId)
-          : sourceIds.length - 1
-      orderedTargetIds = arrayMove(sourceIds, oldIndex, newIndex)
-    } else {
-      orderedTargetIds = targetIds.filter(id => id !== taskId)
-      const overIndex =
-        overData?.type === 'task'
-          ? orderedTargetIds.indexOf(overData.taskId)
-          : orderedTargetIds.length
-      orderedTargetIds.splice(
-        overIndex < 0 ? orderedTargetIds.length : overIndex,
-        0,
-        taskId,
-      )
-    }
-
-    const newIndex = orderedTargetIds.indexOf(taskId)
-    const afterChoreId =
-      newIndex <= 0 ? null : Number(orderedTargetIds[newIndex - 1])
-    const pendingOrder = {
-      projectId,
+    const order = getTaskDropOrder(
+      displayedChoresBySection,
       taskId,
-      sectionId: resolvedTargetSectionId,
-      orderedIds: orderedTargetIds,
-    }
+      overData?.sectionId,
+      overData?.taskId,
+    )
+    if (!order) return
+    const newIndex = order.orderedIds.indexOf(taskId)
+    const afterChoreId =
+      newIndex <= 0 ? null : Number(order.orderedIds[newIndex - 1])
+    const pendingOrder = { ...order, projectId }
     setPendingTaskOrder(pendingOrder)
     moveChoreMutation.mutate(
       {
         projectId,
         choreId: Number(taskId),
-        sectionId: resolvedTargetSectionId,
+        sectionId: order.sectionId,
         afterChoreId,
       },
       {
@@ -961,7 +962,8 @@ const ProjectBoard = ({
         collisionDetection={boardCollisionDetection}
         sensors={sensors}
         onDragStart={handleDragStart}
-        onDragCancel={() => setDragPreview(null)}
+        onDragCancel={handleDragCancel}
+        onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
         <SortableContext
@@ -991,7 +993,7 @@ const ProjectBoard = ({
               <BoardColumn
                 key={section.id}
                 section={section}
-                chores={choresBySection[section.id] || []}
+                chores={displayedChoresBySection[section.id] || []}
                 canDelete={sections.length > 1}
                 displayMode={displayMode}
                 isMultiSelectMode={isMultiSelectMode}
