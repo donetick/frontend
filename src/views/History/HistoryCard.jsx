@@ -10,9 +10,9 @@ import {
 } from '@mui/icons-material'
 import { Avatar, Box, Card, Chip, IconButton, Typography } from '@mui/joy'
 import moment from 'moment'
-import { useTranslation } from 'react-i18next'
 
 import { useLocalization } from '../../contexts/LocalizationContext'
+import { useXPTranslation as useTranslation } from '../../hooks/useXPTranslation'
 import { TASK_COLOR } from '../../utils/Colors.jsx'
 import PendingBadge from '../components/PendingBadge'
 

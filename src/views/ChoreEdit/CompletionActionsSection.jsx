@@ -17,10 +17,11 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 
 import NumberInput from '../../components/common/NumberInput'
+import { useXPTranslation as useTranslation } from '../../hooks/useXPTranslation'
 import { GetThings } from '../../utils/Fetcher'
+import XPCategorySelect from '../XP/XPCategorySelect'
 
 export default function CompletionActionsSection({
   actions,
@@ -28,9 +29,11 @@ export default function CompletionActionsSection({
   onPointsChange,
   onRequireApprovalChange,
   onValidate,
+  onXPCategoryChange,
   points,
   requireApproval = false,
   showHeading = true,
+  xpCategoryId,
 }) {
   const { t } = useTranslation('chores')
   const [things, setThings] = useState([])
@@ -128,6 +131,10 @@ export default function CompletionActionsSection({
                 : 'Enter a whole number from 0 to 1000.'}
             </FormHelperText>
           </FormControl>
+          <XPCategorySelect
+            value={xpCategoryId}
+            onChange={onXPCategoryChange}
+          />
         </Card>
       )}
       {requireApproval && (

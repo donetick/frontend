@@ -25,7 +25,6 @@ import {
 } from '@mui/joy'
 import moment from 'moment'
 import { useMemo, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
 import {
   Bar,
@@ -38,6 +37,7 @@ import {
 } from 'recharts'
 
 import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext.jsx'
+import { useXPTranslation as useTranslation } from '../../hooks/useXPTranslation'
 import { useChoresHistory } from '../../queries/ChoreQueries.jsx'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
 import { isPlusHistoryWindow } from '../../utils/entitlements.js'
@@ -47,6 +47,7 @@ import LoadingComponent from '../components/Loading.jsx'
 import RedeemPointsModal from '../Modals/RedeemPointsModal'
 import { useRedemptions } from '../Rewards/RewardQueries.jsx'
 import RewardsView from '../Rewards/RewardsView.jsx'
+import XPSection from '../XP/XPSection'
 
 const PERIODS = [
   { shortKey: 'tabs.short7d', value: 7 },
@@ -370,6 +371,11 @@ const UserPoints = () => {
       sx={{ px: { xs: 2, sm: 3 }, pb: 6, pt: { xs: 1, sm: 2 } }}
     >
       {pageTabs}
+      <XPSection
+        canManage={canManageRewards}
+        members={circleUsers}
+        selectedUser={activeSelectedUser}
+      />
 
       <Box
         sx={{

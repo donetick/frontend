@@ -1,10 +1,10 @@
 import { Box, FormControl, Input, Switch, Textarea, Typography } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 
 import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal.js'
+import { useXPTranslation as useTranslation } from '../../../hooks/useXPTranslation'
 import { useNotification } from '../../../service/NotificationProvider.jsx'
 import { CreateReward, UpdateReward } from '../../../utils/Fetcher'
 

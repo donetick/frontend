@@ -11,11 +11,11 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 
 import ModalActions from '../../components/common/ModalActions.jsx'
 import NumberInput from '../../components/common/NumberInput.jsx'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal.js'
+import { useXPTranslation as useTranslation } from '../../hooks/useXPTranslation'
 import { resolvePhotoURL } from '../../utils/Helpers.jsx'
 
 function RedeemPointsModal({ config }) {

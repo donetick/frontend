@@ -47,7 +47,6 @@ import {
 import Fuse from 'fuse.js'
 import moment from 'moment'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 
 import EmptyState from '../../components/common/EmptyState'
@@ -61,6 +60,7 @@ import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
 import useConfirmationModal from '../../hooks/useConfirmationModal'
 import { useFilter } from '../../hooks/useFilter'
 import { usePendingCommands } from '../../hooks/usePendingCommands'
+import { useXPTranslation as useTranslation } from '../../hooks/useXPTranslation'
 import {
   useChoreHistory,
   useDeleteChoreHistory,

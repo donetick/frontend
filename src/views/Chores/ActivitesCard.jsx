@@ -27,8 +27,8 @@ import {
 } from '@mui/joy'
 import moment from 'moment'
 import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
 
+import { useXPTranslation as useTranslation } from '../../hooks/useXPTranslation'
 import { useChores, useChoresHistory } from '../../queries/ChoreQueries'
 import { useCircleMembers } from '../../queries/UserQueries'
 import { resolvePhotoURL } from '../../utils/Helpers'
