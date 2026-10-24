@@ -20,7 +20,7 @@ const SettingsSection = ({ action, children, description, title }) => {
     >
       <Box sx={{ display: 'flex', alignItems: 'start', gap: 2, mb: 2.5 }}>
         <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Typography id={headingId} level='title-md'>
+          <Typography id={headingId} component='h3' level='title-md'>
             {title}
           </Typography>
           {description && (

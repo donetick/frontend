@@ -1413,7 +1413,7 @@ const TimerDetails = () => {
       {/* Floating Timer Control Button */}
       {!loading && timerData && (
         <IconButton
-          color={isTimerRunning() ? 'warning' : 'success'}
+          color={isTimerRunning() ? 'warning' : 'primary'}
           variant='solid'
           onClick={isTimerRunning() ? handlePauseTimer : handleStartTimer}
           loading={timerActionLoading}
@@ -1431,7 +1431,7 @@ const TimerDetails = () => {
             transform: timerActionLoading ? 'scale(0.95)' : 'scale(1)',
             animation: isTimerRunning()
               ? 'pulse-warning 2s infinite'
-              : 'pulse-success 2s infinite',
+              : 'pulse-primary 2s infinite',
             '&:hover': {
               transform: 'scale(1.1)',
               boxShadow: 'xl',
@@ -1439,18 +1439,22 @@ const TimerDetails = () => {
             '&:active': {
               transform: 'scale(0.95)',
             },
-            '@keyframes pulse-success': {
+            '--Timer-actionGlow':
+              'color-mix(in srgb, var(--joy-palette-primary-solidBg) 30%, transparent)',
+            '--Timer-actionRing':
+              'color-mix(in srgb, var(--joy-palette-primary-solidBg) 70%, transparent)',
+            '@keyframes pulse-primary': {
               '0%': {
                 boxShadow:
-                  '0 4px 12px rgba(76, 175, 80, 0.3), 0 0 0 0 rgba(76, 175, 80, 0.7)',
+                  '0 4px 12px var(--Timer-actionGlow), 0 0 0 0 var(--Timer-actionRing)',
               },
               '70%': {
                 boxShadow:
-                  '0 4px 12px rgba(76, 175, 80, 0.3), 0 0 0 10px rgba(76, 175, 80, 0)',
+                  '0 4px 12px var(--Timer-actionGlow), 0 0 0 10px transparent',
               },
               '100%': {
                 boxShadow:
-                  '0 4px 12px rgba(76, 175, 80, 0.3), 0 0 0 0 rgba(76, 175, 80, 0)',
+                  '0 4px 12px var(--Timer-actionGlow), 0 0 0 0 transparent',
               },
             },
             '@keyframes pulse-warning': {

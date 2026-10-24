@@ -62,6 +62,16 @@ test('Hot Pink dark accents retain readable text across interaction states', () 
   }
 })
 
+test('success and warning cues remain readable on themed feedback surfaces', () => {
+  for (const [id, preset] of skins) {
+    for (const palette of [colors.emerald, colors.amber]) {
+      assert.ok(contrast('#ffffff', palette[700]) >= 4.5)
+      assert.ok(contrast(palette[800], preset.light.surface) >= 4.5, id)
+      assert.ok(contrast(palette[300], preset.dark.surface) >= 4.5, id)
+    }
+  }
+})
+
 test('Graphite remains monochrome', () => {
   assert.deepEqual(tintNeutralPalette(colors.zinc, colors.zinc), colors.zinc)
 })

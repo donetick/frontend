@@ -467,7 +467,7 @@ const ChoreCard = ({
                       <Box sx={{ display: 'flex', gap: 0.5 }}>
                         <IconButton
                           variant='soft'
-                          color='success'
+                          color='primary'
                           onClick={e => {
                             e.stopPropagation()
                             onAction('approve', chore)
@@ -541,7 +541,7 @@ const ChoreCard = ({
                   ) : (
                     <IconButton
                       variant={chore.status === 0 ? 'solid' : 'soft'}
-                      color={chore.status === 0 ? 'success' : 'warning'}
+                      color={chore.status === 0 ? 'primary' : 'warning'}
                       onClick={e => {
                         e.stopPropagation()
                         switch (chore.status) {

@@ -14,6 +14,10 @@ import {
   THEME_PRESETS,
   THEME_SKIN_STORAGE_KEY,
 } from '@/constants/themePresets'
+import {
+  feedbackDecoratorStyles,
+  feedbackSurfaceStyles,
+} from '@/utils/feedbackTheme'
 import { tintNeutralPalette } from '@/utils/themePalette'
 
 import { useLocalization } from './LocalizationContext'
@@ -286,6 +290,24 @@ const getSkinTheme = (skin, direction) => {
               getPalette(preset.neutral),
               getPalette(preset.accent),
             ),
+            success: {
+              ...getPalette('emerald'),
+              solidBg: COLORS.emerald[700],
+              solidHoverBg: COLORS.emerald[800],
+              solidActiveBg: COLORS.emerald[900],
+              plainColor: COLORS.emerald[mode === 'light' ? 800 : 300],
+              outlinedColor: COLORS.emerald[mode === 'light' ? 800 : 300],
+              softColor: COLORS.emerald[mode === 'light' ? 800 : 300],
+            },
+            warning: {
+              ...getPalette('amber'),
+              solidBg: COLORS.amber[700],
+              solidHoverBg: COLORS.amber[800],
+              solidActiveBg: COLORS.amber[900],
+              plainColor: COLORS.amber[mode === 'light' ? 800 : 300],
+              outlinedColor: COLORS.amber[mode === 'light' ? 800 : 300],
+              softColor: COLORS.amber[mode === 'light' ? 800 : 300],
+            },
             background: preset[mode],
           },
         },
@@ -293,7 +315,25 @@ const getSkinTheme = (skin, direction) => {
     )
     skinThemes.set(
       key,
-      extendTheme({ ...themeConfig, direction, colorSchemes }),
+      extendTheme({
+        ...themeConfig,
+        direction,
+        colorSchemes,
+        components: {
+          ...themeConfig.components,
+          ...Object.fromEntries(
+            ['JoyAlert', 'JoySnackbar'].map(component => [
+              component,
+              {
+                styleOverrides: {
+                  root: feedbackSurfaceStyles,
+                  startDecorator: feedbackDecoratorStyles,
+                },
+              },
+            ]),
+          ),
+        },
+      }),
     )
   }
   return skinThemes.get(key)

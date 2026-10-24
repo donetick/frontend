@@ -3,6 +3,8 @@ import { Box, Button, Snackbar, Typography } from '@mui/joy'
 import React, { createContext, useContext, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { useThemeSkin } from '../contexts/ThemeSkinContext'
+
 const NotificationContext = createContext()
 
 export const useNotification = () => useContext(NotificationContext)
@@ -62,6 +64,9 @@ const NOTIFICATION_TYPES = {
 
 export const NotificationProvider = ({ children }) => {
   const { t } = useTranslation('common')
+  const { skin } = useThemeSkin()
+  const isCustomTheme = skin !== 'default'
+  const notificationTextSx = isCustomTheme ? { color: 'inherit' } : undefined
   const [notifications, setNotifications] = useState([])
 
   const addNotification = notification => {
@@ -189,7 +194,11 @@ export const NotificationProvider = ({ children }) => {
 
     // Handle standard notifications
     // Determine the icon to use
-    const notificationIcon = notification.icon || config.icon
+    const notificationIcon =
+      notification.icon ||
+      (isCustomTheme && config.icon
+        ? React.cloneElement(config.icon, { color: 'inherit' })
+        : config.icon)
 
     // Determine title and message
     const title = notification.title || t(config.defaultTitle)
@@ -199,6 +208,7 @@ export const NotificationProvider = ({ children }) => {
       <Snackbar
         key={notification.id}
         open={true}
+        color={isCustomTheme ? config.color : 'neutral'}
         autoHideDuration={config.autoHideDuration}
         onClose={() => removeNotification(notification.id)}
         startDecorator={notificationIcon}
@@ -235,15 +245,27 @@ export const NotificationProvider = ({ children }) => {
         {/* Enhanced structure like ErrorProvider - always show title and message for consistency */}
         {title && message ? (
           <Box>
-            <Typography color={config.color} level='title-sm'>
+            <Typography
+              color={config.color}
+              level='title-sm'
+              sx={notificationTextSx}
+            >
               {title}
             </Typography>
-            <Typography color={config.color} level='body-sm'>
+            <Typography
+              color={config.color}
+              level='body-sm'
+              sx={notificationTextSx}
+            >
               {message}
             </Typography>
           </Box>
         ) : (
-          <Typography color={config.color} level='body-md'>
+          <Typography
+            color={config.color}
+            level='body-md'
+            sx={notificationTextSx}
+          >
             {message || title || t('notification.title')}
           </Typography>
         )}

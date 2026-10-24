@@ -345,7 +345,7 @@ const MultiSelectToolbar = ({
           <Button
             size='sm'
             variant='solid'
-            color='success'
+            color='primary'
             onClick={onComplete}
             startDecorator={<Done />}
             disabled={selectedCount === 0}
