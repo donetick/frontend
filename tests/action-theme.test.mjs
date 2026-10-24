@@ -59,6 +59,20 @@ test('primary swipe actions use paired solid background and text tokens', () => 
   assert.match(swipe, /bgcolor='danger.600'/)
 })
 
+test('timer progress, timeline and live sessions follow the accent', () => {
+  const timer = source('views/Timer/TimerDetails.jsx')
+  assert.doesNotMatch(timer, /success[.']|pulse-success/)
+  for (const token of [
+    'primary.solidBg',
+    'primary.solidHoverBg',
+    'primary.solidActiveBg',
+    'primary.outlinedBorder',
+    'primary.plainColor',
+  ]) {
+    assert.ok(timer.includes(token), `missing themed timer token: ${token}`)
+  }
+})
+
 test('resume timer button and its pulse follow the accent', () => {
   const timer = source('views/Timer/TimerDetails.jsx')
   assert.match(timer, /color=\{isTimerRunning\(\) \? 'warning' : 'primary'\}/)
