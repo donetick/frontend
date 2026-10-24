@@ -1,11 +1,10 @@
 import {
   CheckCircleOutline,
   ClearAll,
-  CloudDone,
-  CloudQueue,
-  CloudSync,
   Refresh,
-  WifiOff,
+  Sync,
+  SyncDisabled,
+  SyncProblem,
 } from '@mui/icons-material'
 import {
   Badge,
@@ -213,18 +212,29 @@ function SyncStatusIndicator({ showLabel = false }) {
   const failedCount = failedCommands.length
   const totalBadge = pendingCount + failedCount
 
+  // One sync glyph across every state, so the icon never changes shape — only
+  // its colour and whether it spins. "All synced" is deliberately the quietest
+  // of them: it is the state nobody needs to look at, so it shouldn't shout.
   const getStatusIcon = () => {
     const iconSize = showLabel ? 21 : 20
+    const sx = { fontSize: iconSize }
 
     if (syncState.syncing)
-      return <CloudSync sx={{ fontSize: iconSize, color: 'primary.500' }} />
-    if (!isOnline)
-      return <WifiOff sx={{ fontSize: iconSize, color: 'danger.500' }} />
+      return (
+        <Sync
+          sx={{
+            ...sx,
+            color: 'primary.500',
+            animation: 'spin 1.4s linear infinite',
+            '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
+          }}
+        />
+      )
+    if (!isOnline) return <SyncDisabled sx={{ ...sx, color: 'danger.500' }} />
     if (failedCount > 0)
-      return <CloudQueue sx={{ fontSize: iconSize, color: 'danger.400' }} />
-    if (pendingCount > 0)
-      return <CloudQueue sx={{ fontSize: iconSize, color: 'warning.500' }} />
-    return <CloudDone sx={{ fontSize: iconSize, color: 'success.500' }} />
+      return <SyncProblem sx={{ ...sx, color: 'danger.400' }} />
+    if (pendingCount > 0) return <Sync sx={{ ...sx, color: 'warning.500' }} />
+    return <Sync sx={{ ...sx, color: 'text.tertiary' }} />
   }
 
   const getStatusLabel = () => {
@@ -265,17 +275,7 @@ function SyncStatusIndicator({ showLabel = false }) {
             position: 'relative',
           }}
         >
-          {syncState.syncing && (
-            <CircularProgress
-              size='sm'
-              sx={{
-                position: 'absolute',
-                '--CircularProgress-size': showLabel ? '24px' : '28px',
-                '--CircularProgress-trackThickness': '2px',
-                '--CircularProgress-progressThickness': '2px',
-              }}
-            />
-          )}
+          {/* No ring here: the sync glyph spins on its own while syncing. */}
           {totalBadge > 0 ? (
             <Badge
               badgeContent={totalBadge}
