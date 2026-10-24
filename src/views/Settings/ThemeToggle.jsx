@@ -14,6 +14,8 @@ import { useTranslation } from 'react-i18next'
 
 import useStickyState from '@/hooks/useStickyState'
 
+import ThemeSkinPicker from './ThemeSkinPicker'
+
 const ELEMENTID = 'select-theme-mode'
 
 const ThemeToggle = () => {
@@ -27,38 +29,37 @@ const ThemeToggle = () => {
     setMode(newThemeMode)
   }
 
-  const FormThemeModeToggleLabel = () => (
-    <FormLabel
-      level='title-md'
-      id={`${ELEMENTID}-label`}
-      htmlFor='select-theme-mode'
-    >
-      {t('theme.themeMode')}
-    </FormLabel>
-  )
-
   return (
-    <FormControl>
-      <FormThemeModeToggleLabel />
-      <div className='flex items-center gap-4'>
-        <ToggleButtonGroup
-          id={ELEMENTID}
-          variant='outlined'
-          value={themeMode}
-          onChange={handleThemeModeChange}
+    <div className='grid gap-4'>
+      <ThemeSkinPicker />
+      <FormControl>
+        <FormLabel
+          level='title-md'
+          id={`${ELEMENTID}-label`}
+          htmlFor={ELEMENTID}
         >
-          <Button startDecorator={<LightModeOutlined />} value='light'>
-            {t('theme.light')}
-          </Button>
-          <Button startDecorator={<DarkModeOutlined />} value='dark'>
-            {t('theme.dark')}
-          </Button>
-          <Button startDecorator={<LaptopOutlined />} value='system'>
-            {t('theme.system')}
-          </Button>
-        </ToggleButtonGroup>
-      </div>
-    </FormControl>
+          {t('theme.themeMode')}
+        </FormLabel>
+        <div className='flex items-center gap-4'>
+          <ToggleButtonGroup
+            id={ELEMENTID}
+            variant='outlined'
+            value={themeMode}
+            onChange={handleThemeModeChange}
+          >
+            <Button startDecorator={<LightModeOutlined />} value='light'>
+              {t('theme.light')}
+            </Button>
+            <Button startDecorator={<DarkModeOutlined />} value='dark'>
+              {t('theme.dark')}
+            </Button>
+            <Button startDecorator={<LaptopOutlined />} value='system'>
+              {t('theme.system')}
+            </Button>
+          </ToggleButtonGroup>
+        </div>
+      </FormControl>
+    </div>
   )
 }
 

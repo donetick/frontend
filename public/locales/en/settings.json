@@ -705,7 +705,21 @@
   },
   "theme": {
     "title": "Theme Preferences",
-    "description": "Choose how the site looks to you. Select a single theme, or sync with your system and automatically switch between day and night themes.",
+    "description": "Personalize Donetick with a color theme and choose light, dark, or system mode.",
+    "skin": "Color theme",
+    "skinDescription": "Every theme supports light and dark mode. Your selection is saved on this device.",
+    "skins": {
+      "default": "Default",
+      "forest": "Forest",
+      "lavender": "Lavender",
+      "sand": "Sand",
+      "ocean": "Ocean",
+      "rose": "Rose",
+      "sunset": "Sunset",
+      "bubblegum": "Hot Pink",
+      "mint": "Mint",
+      "graphite": "Graphite"
+    },
     "themeMode": "Theme mode",
     "light": "Light",
     "dark": "Dark",

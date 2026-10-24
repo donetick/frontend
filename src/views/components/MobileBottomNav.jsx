@@ -192,6 +192,7 @@ const MobileBottomNav = () => {
         variant='plain'
         sx={{
           alignItems: 'flex-start',
+          bgcolor: 'background.body',
           borderTop: '1px solid',
           borderColor: 'divider',
           bottom: 0,

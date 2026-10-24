@@ -413,7 +413,7 @@ const NavBar = () => {
             component='aside'
             variant='plain'
             sx={{
-              bgcolor: 'background.surface',
+              bgcolor: 'background.body',
               borderInlineEnd: '1px solid',
               borderColor: 'divider',
               boxShadow: desktopExpanded ? 'lg' : 'none',
@@ -521,7 +521,7 @@ const NavBar = () => {
                     }}
                   >
                     Done
-                    <Box component='span' sx={{ color: '#06b6d4' }}>
+                    <Box component='span' sx={{ color: 'primary.plainColor' }}>
                       tick
                     </Box>
                   </Typography>
@@ -555,12 +555,11 @@ const NavBar = () => {
             variant='plain'
             sx={{
               alignItems: 'center',
-              backdropFilter: 'blur(16px)',
-              bgcolor:
-                'rgba(var(--joy-palette-background-surfaceChannel) / 0.88)',
-              borderBottom: 'none',
+              // Use the opaque page canvas: unsupported channel variables made
+              // this transparent, letting scrolling content bleed through.
+              bgcolor: 'background.body',
+              borderBottom: '1px solid',
               borderColor: 'divider',
-              '@media (min-width: 769px)': { borderBottom: '1px solid' },
               display: 'flex',
               gap: 1,
               minHeight: 56,
@@ -616,6 +615,7 @@ const NavBar = () => {
               '--Drawer-horizontalSize': 'min(72vw, 248px)',
               '@media (min-width: 1024px)': { display: 'none' },
               '& .MuiDrawer-content': {
+                bgcolor: 'background.body',
                 display: 'flex',
                 flexDirection: 'column',
                 fontFamily: 'var(--joy-fontFamily-body)',

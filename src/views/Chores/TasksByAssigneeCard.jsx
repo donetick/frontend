@@ -273,7 +273,8 @@ const TasksByAssigneeCard = ({ chores = [] }) => {
                     width: 28,
                     height: 28,
                     mb: 1,
-                    border: '2px solid white',
+                    border: '2px solid',
+                    borderColor: 'background.surface',
                     boxShadow: 'sm',
                     fontSize: '12px',
                   }}
@@ -292,8 +293,9 @@ const TasksByAssigneeCard = ({ chores = [] }) => {
                     maxWidth: 28,
                     borderRadius: 4,
                     overflow: 'hidden',
-                    border: '1px solid #E5E7EB',
-                    backgroundColor: '#F9FAFB',
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    backgroundColor: 'background.level1',
                   }}
                 >
                   {/* Pending Review - bottom */}
