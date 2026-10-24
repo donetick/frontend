@@ -960,6 +960,7 @@ const RegisterDeviceToken = (
 ) => {
   return Fetch(`/devices/tokens`, {
     method: 'POST',
+    skipAuthRecovery: true,
     headers: HEADERS(),
     body: JSON.stringify({
       token,
@@ -980,6 +981,17 @@ const UnregisterDeviceToken = (deviceId, token) => {
       deviceId,
       token,
     }),
+  })
+}
+
+// Launch-time heartbeat that keeps this device's registration from being
+// reaped as inactive, without re-sending an unchanged token. A 404 means the
+// server has no active row for this device and the caller must re-register.
+const UpdateDeviceActivity = deviceId => {
+  return Fetch(`/devices/tokens/${encodeURIComponent(deviceId)}/activity`, {
+    method: 'PUT',
+    skipAuthRecovery: true,
+    headers: HEADERS(),
   })
 }
 
@@ -1256,6 +1268,7 @@ export {
   UpdateChoreAssignee,
   UpdateChoreHistory,
   UpdateChorePriority,
+  UpdateDeviceActivity,
   UpdateDueDate,
   UpdateFilter,
   UpdateLabel,

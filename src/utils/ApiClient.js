@@ -188,7 +188,7 @@ class ApiClient {
     try {
       const { unregisterPushNotifications } =
         await import('../CapacitorListener')
-      await unregisterPushNotifications()
+      await unregisterPushNotifications({ disable: false })
     } catch (e) {
       console.error('Error unregistering push device on logout', e)
     }

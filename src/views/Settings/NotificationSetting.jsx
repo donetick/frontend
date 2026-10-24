@@ -33,7 +33,10 @@ import PropTypes from 'prop-types'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { registerPushNotifications } from '../../CapacitorListener'
+import {
+  registerPushNotifications,
+  unregisterPushNotifications,
+} from '../../CapacitorListener'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import {
   useDeviceTokens,
@@ -41,6 +44,7 @@ import {
   useUserProfile,
 } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
+import { getAppVersion, getStableDeviceId } from '../../utils/DeviceInfo'
 import { isOfficialDonetickInstanceSync } from '../../utils/FeatureToggle'
 import {
   UnregisterDeviceToken,
@@ -175,12 +179,15 @@ const NotificationSetting = () => {
       .then(value => setPush(Boolean(value.granted)))
       .catch(console.error)
     if (native) {
-      Promise.all([Device.getInfo(), Device.getId()])
-        .then(([info, id]) => {
+      // Must be the same helper the registration path uses, or "this
+      // device" never matches a row in the registered list.
+      Promise.all([Device.getInfo(), getStableDeviceId(), getAppVersion()])
+        .then(([info, id, appVersion]) => {
           setCurrentDevice({
-            id: id.identifier,
+            id,
             model: info.model,
             platform: Capacitor.getPlatform(),
+            appVersion,
           })
         })
         .catch(console.error)
@@ -263,7 +270,9 @@ const NotificationSetting = () => {
       })
       return
     }
-    await registerPushNotifications()
+    // force: explicit opt-in must reach the server even if a stale local
+    // registration record still matches the current token.
+    await registerPushNotifications({ force: true })
     await Preferences.set({
       key: 'pushNotificationPreferences',
       value: JSON.stringify({ granted: true }),
@@ -281,8 +290,12 @@ const NotificationSetting = () => {
         if (
           deviceTokens?.some(device => device.deviceId === currentDevice?.id)
         ) {
-          const response = await UnregisterDeviceToken(currentDevice.id, null)
-          if (!response.ok) throw new Error('Unable to unregister device')
+          // unregisterPushNotifications also halts the native registration
+          // state machine, not just the server row — a direct
+          // UnregisterDeviceToken call here left the retry/registration
+          // listeners live and the device re-registered itself shortly after.
+          const removed = await unregisterPushNotifications()
+          if (!removed) throw new Error('Unable to unregister device')
           await refetchDevices()
         }
         await Preferences.set({
@@ -369,15 +382,15 @@ const NotificationSetting = () => {
   const removeDevice = async device => {
     setRemovingDevice(device.deviceId)
     try {
-      const response = await UnregisterDeviceToken(device.deviceId, null)
-      if (!response.ok) throw new Error('Unable to unregister device')
-      if (device.deviceId === currentDevice?.id) {
-        await Preferences.set({
-          key: 'pushNotificationPreferences',
-          value: JSON.stringify({ granted: false }),
-        })
-        setPush(false)
-      }
+      const isCurrentDevice = device.deviceId === currentDevice?.id
+      // unregisterPushNotifications also halts the native registration state
+      // machine and persists the opt-out, which a direct UnregisterDeviceToken
+      // call on the current device would not do.
+      const removed = isCurrentDevice
+        ? await unregisterPushNotifications()
+        : (await UnregisterDeviceToken(device.deviceId, null)).ok
+      if (!removed) throw new Error('Unable to unregister device')
+      if (isCurrentDevice) setPush(false)
       await refetchDevices()
     } catch {
       showError({ message: t('notifications.unregisterFailed') })
