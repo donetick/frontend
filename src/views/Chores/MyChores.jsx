@@ -1101,12 +1101,15 @@ const MyChores = () => {
     }
   }, [isCustomProjectSelected, isProjectWorkflowView, toggleViewMode])
 
-  // Switching into a different project while already browsing a board/list
-  // workflow view loads that project's own saved choice, once per project —
-  // after that, the user's explicit picks (persisted by toggleViewMode
-  // below) win over this sync, even if they differ from what was saved.
+  // Selecting a project loads its own saved board/list choice, once per
+  // project — after that, the user's explicit picks (persisted by
+  // toggleViewMode below) win over this sync, even if they differ from what
+  // was saved. This has to apply even when not already in a workflow view:
+  // on a fresh browser `viewMode` starts at its 'default' fallback (nothing
+  // in localStorage yet), so gating on isProjectWorkflowView would mean the
+  // saved view never gets a chance to switch things into board/list at all.
   useEffect(() => {
-    if (!isCustomProjectSelected || !isProjectWorkflowView) return
+    if (!isCustomProjectSelected) return
     if (savedProjectView == null) return
     if (lastSyncedProjectIdRef.current === selectedProject.id) return
     lastSyncedProjectIdRef.current = selectedProject.id
@@ -1115,13 +1118,7 @@ const MyChores = () => {
       setViewMode(mapped)
       localStorage.setItem('choreCardViewMode', mapped)
     }
-  }, [
-    isCustomProjectSelected,
-    isProjectWorkflowView,
-    savedProjectView,
-    selectedProject,
-    viewMode,
-  ])
+  }, [isCustomProjectSelected, savedProjectView, selectedProject, viewMode])
 
   // What the list actually renders. Sections are the source of truth outside
   // of search, since they are the only place the assignee filter is applied.
