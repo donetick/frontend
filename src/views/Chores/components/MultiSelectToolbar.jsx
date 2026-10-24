@@ -16,6 +16,7 @@ import {
   Remove,
   SelectAll,
   SkipNext,
+  ViewColumn,
 } from '@mui/icons-material'
 import {
   Avatar,
@@ -134,6 +135,7 @@ const MultiSelectToolbar = ({
   onComplete,
   onDelete,
   onMoveToProject,
+  onMoveToSection,
   onSelectAll,
   onSetAssignee,
   onSetDueDate,
@@ -143,6 +145,7 @@ const MultiSelectToolbar = ({
   // each control shows as current, and which labels can be added vs removed.
   onToggleLabel,
   projects = [],
+  sections = [],
   selectAllDisabled,
   selectedCount,
   selectionSummary,
@@ -153,11 +156,14 @@ const MultiSelectToolbar = ({
   const [dueDatePickerOpen, setDueDatePickerOpen] = useState(false)
   const [dueMenuAnchor, setDueMenuAnchor] = useState(null)
   const [projectMenuAnchor, setProjectMenuAnchor] = useState(null)
+  const [sectionMenuAnchor, setSectionMenuAnchor] = useState(null)
   const dueMenuRef = useRef(null)
   const projectMenuRef = useRef(null)
+  const sectionMenuRef = useRef(null)
 
   const closeDueMenu = () => setDueMenuAnchor(null)
   const closeProjectMenu = () => setProjectMenuAnchor(null)
+  const closeSectionMenu = () => setSectionMenuAnchor(null)
 
   const summary = selectionSummary || {}
   const labelState = summary.labels || { common: [], partial: [] }
@@ -555,6 +561,54 @@ const MultiSelectToolbar = ({
                           }}
                         />
                       </Typography>
+                    </ListItemContent>
+                  </MenuItem>
+                ))}
+              </Menu>
+            </>
+          )}
+
+          {onMoveToSection && sections.length > 0 && (
+            <>
+              <Button
+                size='sm'
+                variant='soft'
+                color='neutral'
+                ref={sectionMenuRef}
+                onClick={() =>
+                  setSectionMenuAnchor(prev =>
+                    prev ? null : sectionMenuRef.current,
+                  )
+                }
+                startDecorator={<ViewColumn />}
+                disabled={selectedCount === 0}
+                sx={{
+                  '--Button-paddingInline': { xs: '0.75rem', sm: '1rem' },
+                }}
+                title={t('multiToolbar.moveSectionTitle')}
+              >
+                {t('multiToolbar.moveSection')}
+              </Button>
+              <Menu
+                size='md'
+                anchorEl={sectionMenuAnchor}
+                open={Boolean(sectionMenuAnchor)}
+                onClose={closeSectionMenu}
+                placement='bottom-end'
+              >
+                {sections.map(section => (
+                  <MenuItem
+                    key={section.id}
+                    onClick={() => {
+                      closeSectionMenu()
+                      onMoveToSection(section)
+                    }}
+                  >
+                    <ListItemDecorator>
+                      <ViewColumn sx={{ fontSize: 18 }} />
+                    </ListItemDecorator>
+                    <ListItemContent>
+                      <Typography level='body-sm'>{section.name}</Typography>
                     </ListItemContent>
                   </MenuItem>
                 ))}

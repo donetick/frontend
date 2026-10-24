@@ -412,6 +412,8 @@
     "noDueDate": "No due date",
     "moveTitle": "Move selected tasks to a project",
     "move": "Move",
+    "moveSectionTitle": "Move selected tasks to a section",
+    "moveSection": "Section",
     "defaultProject": "Default Project",
     "moreTitle": "Set priority, assignee, or labels",
     "more": "More",

@@ -58,6 +58,7 @@ import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import ProjectBoard from '../Projects/projectLayout/ProjectBoard.jsx'
 import {
   useProjects,
+  useProjectSections,
   useProjectView,
   useSetProjectView,
 } from '../Projects/ProjectQueries.js'
@@ -201,6 +202,9 @@ const MyChores = () => {
     isCustomProjectSelected ? selectedProject.id : null,
   )
   const setProjectViewMutation = useSetProjectView()
+  const { data: multiSelectSections = [] } = useProjectSections(
+    isCustomProjectSelected ? selectedProject.id : null,
+  )
   const lastSyncedProjectIdRef = useRef(null)
 
   const {
@@ -814,6 +818,7 @@ const MyChores = () => {
     handleBulkDueDate,
     handleBulkLabels,
     handleBulkMoveToProject,
+    handleBulkMoveToSection,
     handleBulkPriority,
     handleBulkSkip,
     handleChangeDueDate,
@@ -1332,6 +1337,9 @@ const MyChores = () => {
           onArchive={handleBulkArchive}
           onDelete={handleBulkDelete}
           onMoveToProject={handleBulkMoveToProject}
+          onMoveToSection={
+            isProjectWorkflowView ? handleBulkMoveToSection : undefined
+          }
           onSetDueDate={handleBulkDueDate}
           onSetAssignee={handleBulkAssignee}
           onSetPriority={handleBulkPriority}
@@ -1340,6 +1348,7 @@ const MyChores = () => {
           members={membersData?.res || []}
           labels={userLabels || []}
           projects={projects}
+          sections={isProjectWorkflowView ? multiSelectSections : []}
           showKeyboardShortcuts={showKeyboardShortcuts}
           selectAllDisabled={
             isProjectWorkflowView
