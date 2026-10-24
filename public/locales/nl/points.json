@@ -1,76 +1,80 @@
 {
-  "redeem": "Redeem Points",
+  "redeem": "Punten aftrekken",
+  "sections": {
+    "overview": "Overzicht"
+  },
   "redeemModal": {
-    "redeemButton": "Redeem",
-    "pointsAvailable": "{{count}} points available",
-    "pointsToRedeem": "Points to Redeem",
-    "placeholder": "Enter points...",
-    "cannotExceed": "Cannot exceed available points",
-    "quickAdd": "Quick Add:",
-    "aboutToRedeem": "You are about to redeem",
-    "amount": "{{count}} points",
-    "remaining": "Remaining: {{count}} points"
+    "redeemButton": "Aftrekken",
+    "pointsAvailable": "{{count}} punten beschikbaar",
+    "pointsToRedeem": "Af te trekken punten",
+    "placeholder": "Voer punten in...",
+    "cannotExceed": "Mag niet meer zijn dan de beschikbare punten",
+    "quickAdd": "Snel toevoegen:",
+    "aboutToRedeem": "Dit wordt afgetrokken:",
+    "amount": "{{count}} punten",
+    "remaining": "Resterend: {{count}} punten"
   },
   "leaderboard": {
-    "titlePoints": "Points Leaderboard",
-    "titleTasks": "Tasks Leaderboard",
-    "subtitlePoints": "Rankings based on points earned during the selected time period",
-    "subtitleTasks": "Rankings based on tasks completed during the selected time period",
-    "modePoints": "Points",
-    "modeTasks": "Tasks",
-    "you": "You",
-    "tasksAndAvg": "{{tasks}} tasks • {{avg}} avg per task",
-    "available": "{{count}} available",
-    "points_one": "{{count}} point",
-    "points_other": "{{count}} points"
+    "titlePoints": "Ranglijst punten",
+    "titleTasks": "Ranglijst taken",
+    "subtitlePoints": "Rangschikking op basis van punten verdiend in de gekozen periode",
+    "subtitleTasks": "Rangschikking op basis van taken voltooid in de gekozen periode",
+    "modePoints": "Punten",
+    "modeTasks": "Taken",
+    "you": "Jij",
+    "tasksAndAvg": "{{tasks}} taken • gem. {{avg}} per taak",
+    "available": "{{count}} beschikbaar",
+    "points_one": "{{count}} punt",
+    "points_other": "{{count}} punten"
   },
   "tabs": {
     "short7d": "7D",
     "short6m": "6M",
-    "shortAll": "All",
-    "days7": "7 Days",
-    "months6": "6 Months",
-    "allTime": "All Time",
+    "shortAll": "Alles",
+    "days7": "7 dagen",
+    "months6": "6 maanden",
+    "allTime": "Altijd",
     "short30d": "30D",
     "days30": "30 dagen"
   },
   "filter": {
-    "analysisTitle": "Filter & Analysis",
-    "title": "Filter Points",
-    "showFor": "Show points for:",
-    "timePeriod": "Time period:"
+    "analysisTitle": "Filter & analyse",
+    "title": "Punten filteren",
+    "showFor": "Punten tonen voor:",
+    "timePeriod": "Periode:"
   },
   "cards": {
     "available": {
-      "title": "Available",
-      "subtext": "Ready to redeem"
+      "title": "Beschikbaar",
+      "subtext": "Klaar om in te wisselen"
     },
     "redeemed": {
-      "title": "Redeemed",
-      "subtext": "Previously used"
+      "title": "Ingewisseld",
+      "subtext": "Eerder gebruikt"
     },
     "total": {
-      "title": "Total",
-      "subtext": "All time earned"
+      "title": "Totaal",
+      "subtext": "Totaal verdiend"
     },
     "period": {
-      "title": "Period Points",
-      "allTime": "All time",
-      "last6Months": "Last 6 months",
-      "lastDays_one": "Last {{count}} day",
-      "lastDays_other": "Last {{count}} days"
+      "title": "Punten in periode",
+      "allTime": "Altijd",
+      "last6Months": "Laatste 6 maanden",
+      "lastDays_one": "Laatste {{count}} dag",
+      "lastDays_other": "Laatste {{count}} dagen"
     }
   },
   "summary": {
-    "showingFor": "Showing points for",
-    "unknownUser": "Unknown User",
-    "overThe": "over the",
-    "allTime": "All Time",
-    "last6Months": "Last 6 Months",
-    "lastDays_one": "Last {{count}} Day",
-    "lastDays_other": "Last {{count}} Days"
+    "showingFor": "Punten van",
+    "selectUser": "Kies een lid om de punten te bekijken",
+    "unknownUser": "Onbekende gebruiker",
+    "overThe": "over de",
+    "allTime": "hele periode",
+    "last6Months": "laatste 6 maanden",
+    "lastDays_one": "laatste {{count}} dag",
+    "lastDays_other": "laatste {{count}} dagen"
   },
   "trend": {
-    "title": "Points Trend"
+    "title": "Puntentrend"
   }
 }

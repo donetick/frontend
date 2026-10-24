@@ -1,0 +1,56 @@
+{
+  "blurb": "Besteed je punten aan beloningen, of beheer de beloningscatalogus als je beheerder bent. Beschikbaar: {{points}} punten.",
+  "redeem": "Inwisselen",
+  "notEnoughPoints": "Niet genoeg punten",
+  "approve": "Goedkeuren",
+  "reject": "Afwijzen",
+  "actions": {
+    "menu": "Acties voor {{name}}"
+  },
+  "pointsCost_one": "{{count}} punt",
+  "pointsCost_other": "{{count}} punten",
+  "tabs": {
+    "store": "Winkel",
+    "requests": "Aanvragen"
+  },
+  "status": {
+    "pending": "In afwachting",
+    "approved": "Goedgekeurd",
+    "rejected": "Afgewezen"
+  },
+  "delete": {
+    "title": "Beloning verwijderen",
+    "message": "Weet je zeker dat je deze beloning wilt verwijderen? Hij kan dan niet meer worden ingewisseld."
+  },
+  "redeemConfirm": {
+    "title": "Beloning inwisselen",
+    "message": "\"{{name}}\" aanvragen voor {{cost}} punten? Een beheerder moet dit goedkeuren."
+  },
+  "requests": {
+    "emptyTitle": "Geen inwisselaanvragen",
+    "emptyDescription": "Inwisselaanvragen verschijnen hier zodra iemand een beloning inwisselt."
+  },
+  "modal": {
+    "errorEmptyName": "Naam mag niet leeg zijn",
+    "errorInvalidCost": "Kosten in punten moeten een getal groter dan 0 zijn",
+    "saveFailedTitle": "Beloning opslaan mislukt",
+    "saveFailedMessage": "Kan beloning niet opslaan. Probeer het opnieuw.",
+    "name": "Naam",
+    "description": "Beschrijving",
+    "pointsCost": "Kosten in punten",
+    "active": "Actief",
+    "editTitle": "Beloning bewerken",
+    "addTitle": "Beloning toevoegen",
+    "saveChanges": "Wijzigingen opslaan",
+    "addReward": "Beloning toevoegen"
+  },
+  "view": {
+    "subtitle": "Gebruik je verdiende punten om iets speciaals uit te kiezen.",
+    "availableBalance": "Beschikbaar saldo",
+    "pointsLabel": "punten",
+    "rewardFallbackDescription": "Iets leuks om naar uit te kijken.",
+    "emptyTitle": "Nog geen beloningen",
+    "emptyDescription": "Voeg een beloning toe, zoals een filmavond of iets lekkers, waarvoor kringleden hun punten kunnen inwisselen.",
+    "createReward": "Beloning maken"
+  }
+}

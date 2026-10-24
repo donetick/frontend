@@ -98,8 +98,8 @@ const SignupView = () => {
       isValid = false
     }
 
-    // display name should only contain letters and spaces and numbers:
-    if (!/^[a-zA-Z0-9 ]+$/.test(displayName)) {
+    // display name should only contain letters and spaces and numbers (any script):
+    if (!/^[\p{L}\p{M}\p{N} ]+$/u.test(displayName)) {
       setDisplayNameError(t('displayNameChars'))
       isValid = false
     }
