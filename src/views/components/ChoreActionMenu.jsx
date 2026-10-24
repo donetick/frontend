@@ -569,7 +569,10 @@ const ChoreActionMenu = ({
         <ListItem key={item.key}>
           <ListItemButton
             color={item.color}
-            onClick={event => item.onClick(event.currentTarget)}
+            onClick={event => {
+              event.stopPropagation()
+              item.onClick(event.currentTarget)
+            }}
           >
             <ListItemDecorator>{item.icon}</ListItemDecorator>
             <ListItemContent>{item.label}</ListItemContent>
@@ -585,7 +588,12 @@ const ChoreActionMenu = ({
         <Divider key={option.key} />
       ) : (
         <ListItem key={option.key}>
-          <ListItemButton onClick={option.onClick}>
+          <ListItemButton
+            onClick={event => {
+              event.stopPropagation()
+              option.onClick()
+            }}
+          >
             <ListItemDecorator>{option.icon}</ListItemDecorator>
             <ListItemContent>{option.label}</ListItemContent>
           </ListItemButton>
@@ -638,7 +646,10 @@ const ChoreActionMenu = ({
         <ListItemButton
           selected={(currentPriority?.value || 0) === priority.value}
           color={priority.color || 'neutral'}
-          onClick={() => handleChangePriority(priority)}
+          onClick={event => {
+            event.stopPropagation()
+            handleChangePriority(priority)
+          }}
         >
           <ListItemDecorator>{priority.icon || <Flag />}</ListItemDecorator>
           <ListItemContent>{priority.name.trim()}</ListItemContent>
@@ -687,12 +698,13 @@ const ChoreActionMenu = ({
       {includeListItem ? (
         <ListItem>
           <ListItemButton
-            onClick={() =>
+            onClick={event => {
+              event.stopPropagation()
               handleMoveToProject({
                 id: null,
                 name: t('actionMenu.defaultProject'),
               })
-            }
+            }}
           >
             <ListItemDecorator>
               {renderProjectAvatar(LABEL_COLORS[0].value, 'FolderOpen')}
@@ -719,7 +731,12 @@ const ChoreActionMenu = ({
       {projects.map(project =>
         includeListItem ? (
           <ListItem key={project.id}>
-            <ListItemButton onClick={() => handleMoveToProject(project)}>
+            <ListItemButton
+              onClick={event => {
+                event.stopPropagation()
+                handleMoveToProject(project)
+              }}
+            >
               <ListItemDecorator>
                 {renderProjectAvatar(project.color, project.icon)}
               </ListItemDecorator>
@@ -765,7 +782,10 @@ const ChoreActionMenu = ({
       <ListItem key={section.id}>
         <ListItemButton
           selected={chore.sectionId === section.id}
-          onClick={() => handleMoveToSection(section)}
+          onClick={event => {
+            event.stopPropagation()
+            handleMoveToSection(section)
+          }}
         >
           <ListItemDecorator>
             <ViewColumn />
@@ -857,7 +877,8 @@ const ChoreActionMenu = ({
               color='neutral'
               size='sm'
               startDecorator={<ArrowBack fontSize='small' />}
-              onClick={() => {
+              onClick={event => {
+                event.stopPropagation()
                 setShowProjectPicker(false)
                 setShowSectionPicker(false)
                 setShowPriorityPicker(false)
