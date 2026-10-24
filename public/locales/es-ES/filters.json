@@ -1,33 +1,33 @@
 {
   "builder": {
-    "addConditions": "Añade condiciones para la vista previa",
+    "addConditions": "Añade condiciones para ver la vista previa",
     "color": "Color",
-    "editTitle": "Editar Filtro",
-    "errorConditions": "Por favor, configura al menos una condición de filtro",
-    "errorName": "Por favor, introduce un nombre para el filtro",
-    "name": "Nombre del Filtro",
+    "editTitle": "Editar filtro",
+    "errorConditions": "Por favor, configura al menos una condición",
+    "errorName": "Por favor, ponle un nombre al filtro",
+    "name": "Nombre del filtro",
     "namePlaceholder": "ej. Tareas vencidas de Alicia",
-    "newTitle": "Nuevo Filtro",
-    "save": "Guardar Filtro"
+    "newTitle": "Nuevo filtro",
+    "save": "Guardar filtro"
   },
   "condition_one": "{{count}} condición",
   "condition_other": "{{count}} condiciones",
   "delete": {
-    "message": "¿Estás seguro de que quieres eliminar \"{{name}}\"? Esto no se puede deshacer.",
-    "title": "Eliminar Filtro"
+    "message": "¿Seguro que quieres eliminar «{{name}}»? Esta acción no se puede deshacer.",
+    "title": "Eliminar filtro"
   },
   "empty": {
-    "clearSearch": "Limpiar búsqueda",
+    "clearSearch": "Borrar búsqueda",
     "createFilter": "Crear un filtro",
-    "description": "Guarda un conjunto de condiciones una vez, como \"vencidas y asignadas a mí\", y vuelve directamente a ellas desde cualquier lugar.",
+    "description": "Guarda una combinación de condiciones (como «vencidas y asignadas a mí») para volver a ella cuando quieras con un solo toque.",
     "noResultsDefault": "Ningún filtro guardado coincide con el filtro actual.",
     "noResultsTitle": "Ningún filtro coincide",
-    "noResultsWithSearch": "Ningún filtro guardado coincide con \"{{search}}\".",
+    "noResultsWithSearch": "Ningún filtro guardado coincide con «{{search}}».",
     "showAllFilters": "Mostrar todos los filtros",
-    "title": "Aún no hay filtros guardados"
+    "title": "Aún no tienes filtros guardados"
   },
   "header": {
-    "subtitle": "Guarda tus combinaciones de filtros favoritas para un acceso rápido. Crea vistas personalizadas para organizar y encontrar tareas más rápido.",
+    "subtitle": "Guarda tus combinaciones de filtros favoritas para tenerlas siempre a mano. Crea vistas a tu medida para organizar y encontrar tus tareas al instante.",
     "title": "Filtros"
   },
   "nameExists": "Ya existe un filtro con este nombre",
@@ -46,7 +46,7 @@
     "lastUsed": "Último uso",
     "name": "Nombre",
     "smart": "Inteligente",
-    "usage": "Frecuencia de uso"
+    "usage": "Más usados"
   },
   "tasks_one": "{{count}} tarea",
   "tasks_other": "{{count}} tareas",
