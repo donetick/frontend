@@ -55,7 +55,6 @@ import {
 } from '@mui/joy'
 import moment from 'moment'
 import { useEffect, useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import {
   useBlocker,
   useLocation,
@@ -81,6 +80,7 @@ import {
   useUpdateChore,
 } from '../../queries/ChoreQueries.jsx'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
+import { useXPTranslation as useTranslation } from '../../queries/XPQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
 import { sanitizeRemindersForPlan } from '../../utils/entitlements'
@@ -147,7 +147,7 @@ const NO_DUE_DATE_REQUIRED_TYPE = ['no_repeat', 'once']
 const NO_DUE_DATE_ALLOWED_TYPE = ['trigger', 'always']
 const NOTIFICATION_FORBIDDEN_TYPE = ['trigger', 'always']
 const ChoreEdit = () => {
-  const { t } = useTranslation('chores')
+  const { t, xpMode } = useTranslation('chores')
   // Page-level shortcuts (save/cancel) must defer to whatever modal
   // currently owns the keyboard — see KeyboardShortcutScopeContext.
   const isPageShortcutActive = usePageShortcutScope()
@@ -189,6 +189,7 @@ const ChoreEdit = () => {
   const [completionActions, setCompletionActions] = useState([])
   const [completionActionsValid, setCompletionActionsValid] = useState(true)
   const [points, setPoints] = useState(-1)
+  const [xpCategoryID, setXPCategoryID] = useState(null)
   const [requireApproval, setRequireApproval] = useState(false)
   const [isPrivate, setIsPrivate] = useState(false)
   const [subTasks, setSubTasks] = useState(null)
@@ -302,6 +303,7 @@ const ChoreEdit = () => {
     attachments,
     completionActions,
     points,
+    xpCategoryID,
     requireApproval,
     isPrivate,
     isNotificable,
@@ -648,6 +650,7 @@ const ChoreEdit = () => {
       thingTrigger: thingTrigger,
       completionActions,
       points: points < 0 ? null : points,
+      xpCategoryId: xpCategoryID,
       requireApproval: requireApproval,
       isPrivate: isPrivate,
       completionWindow:
@@ -849,6 +852,7 @@ const ChoreEdit = () => {
       setPoints(
         data.res.points != null && data.res.points >= 0 ? data.res.points : -1,
       )
+      setXPCategoryID(data.res.xpCategoryId ?? null)
       setRequireApproval(data.res.requireApproval || false)
       setIsPrivate(data.res.isPrivate || false)
       setCompletionWindow(
@@ -2407,7 +2411,9 @@ const ChoreEdit = () => {
               error={errors.completionActions}
               summary={
                 [
-                  points >= 0 ? `${points} points` : '',
+                  points >= 0
+                    ? `${points} ${xpMode ? 'XP' : t('points:xp.points')}`
+                    : '',
                   completionActions.length
                     ? `${completionActions.length} Thing action${completionActions.length === 1 ? '' : 's'}`
                     : '',
@@ -2415,7 +2421,7 @@ const ChoreEdit = () => {
                 ]
                   .filter(Boolean)
                   .join(' · ') ||
-                'Award points, require approval, or update Things when completed'
+                t('taskEditor.awardPointsOrChangeThingsWhenThis')
               }
             >
               <CompletionActionsSection
@@ -2424,6 +2430,8 @@ const ChoreEdit = () => {
                 showHeading={false}
                 points={points}
                 onPointsChange={setPoints}
+                categoryID={xpCategoryID}
+                onCategoryChange={setXPCategoryID}
                 requireApproval={requireApproval}
                 onRequireApprovalChange={setRequireApproval}
                 onValidate={setCompletionActionsValid}

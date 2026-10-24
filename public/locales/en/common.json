@@ -66,7 +66,8 @@
     "collapseMenu": "Collapse menu",
     "expandMenu": "Expand menu",
     "primaryNavigation": "Primary navigation",
-    "profile": "Profile"
+    "profile": "Profile",
+    "points_xp": "XP"
   },
   "search": {
     "title": "Search",
@@ -106,7 +107,8 @@
       "viewPoints": "View points",
       "openSettings": "Open settings",
       "filterTasks": "Show tasks matching “{{query}}”",
-      "filterTasksSubtitle": "Filter the task list"
+      "filterTasksSubtitle": "Filter the task list",
+      "viewPoints_xp": "View XP"
     },
     "footer": {
       "navigate": "Navigate",
@@ -376,7 +378,9 @@
       "vehicleDue": "Due Aug 3",
       "acTitle": "💨 Change the AC filter",
       "acDue": "Due Fri",
-      "acRepeat": "Every 3 months"
+      "acRepeat": "Every 3 months",
+      "voiceCaption_xp": "Dates, labels and XP from your words",
+      "typeCaption_xp": "#labels @people *XP as you type"
     },
     "schedule": {
       "fromDueDate": "Reschedule from due date",
@@ -492,7 +496,8 @@
       "crashReportsLabel": "Share crash reports",
       "crashReportsDescription": "When Donetick crashes, send us the error and what led to it (device, app version, the screen you were on) no task content. It's how we catch bugs that never show up in our own testing and ship fixes faster.",
       "analyticsLabel": "Share anonymous usage analytics",
-      "analyticsDescription": "Send anonymous usage events which features get used, which get ignored so we know what to build next instead of guessing. No task content, no personal data, nothing tied back to you."
+      "analyticsDescription": "Send anonymous usage events which features get used, which get ignored so we know what to build next instead of guessing. No task content, no personal data, nothing tied back to you.",
+      "subtitle_xp": "Your server, your data. Both of these are off from this XP unless you turn them on."
     }
   },
   "errorReport": {
