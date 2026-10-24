@@ -98,6 +98,7 @@ const SortableTask = ({
   onChipClick,
   onLongPress,
   onSelectionToggle,
+  sections,
 }) => {
   const { t } = useTranslation('chores')
   const [subtasksExpanded, setSubtasksExpanded] = useState(false)
@@ -203,6 +204,7 @@ const SortableTask = ({
           onAction={onAction}
           onChipClick={onChipClick}
           onSelectionToggle={onSelectionToggle}
+          sections={sections}
           showDivider={false}
           sx={{ minWidth: 0, flex: 1 }}
         />
@@ -260,6 +262,7 @@ const BoardColumn = ({
   onQuickAdd,
   onRename,
   section,
+  sections,
   selectedChores,
   toggleChoreSelection,
   toggleSectionSelection,
@@ -492,6 +495,7 @@ const BoardColumn = ({
                 onChipClick={onChipClick}
                 onLongPress={onLongPressChore}
                 onSelectionToggle={() => toggleChoreSelection(chore.id)}
+                sections={sections}
               />
             ))}
           </Box>
@@ -625,6 +629,19 @@ const ProjectBoard = ({
     )
     return grouped
   }, [chores, sections])
+
+  const handleAction = (action, chore, extraData) => {
+    if (action === 'moveToSection') {
+      moveChoreMutation.mutate({
+        projectId,
+        choreId: Number(chore.id),
+        sectionId: extraData.section.id,
+        afterChoreId: null,
+      })
+      return
+    }
+    handleChoreAction(action, chore, extraData)
+  }
 
   const addSection = () => {
     const name = newSectionName.trim()
@@ -784,11 +801,12 @@ const ProjectBoard = ({
                 displayMode={displayMode}
                 isMultiSelectMode={isMultiSelectMode}
                 membersData={membersData}
-                onAction={handleChoreAction}
+                onAction={handleAction}
                 onAddTask={() => onAddTask?.(section.id)}
                 onChipClick={handleLabelFiltering}
                 onLongPressChore={onLongPressChore}
                 onQuickAdd={effective => quickAddTask(section.id, effective)}
+                sections={sections}
                 selectedChores={selectedChores}
                 toggleChoreSelection={toggleChoreSelection}
                 toggleSectionSelection={toggleSectionSelection}

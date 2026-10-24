@@ -65,6 +65,7 @@ const CompactChoreCard = ({
   onlyClickable = false,
   // Multi-select props
   performers,
+  sections,
   showActions = true,
   // Undefined leaves the old `&:last-child` CSS rule in charge (the card is a
   // direct sibling of its neighbours). Pass explicitly once a wrapper — like a
@@ -638,6 +639,7 @@ const CompactChoreCard = ({
             <ChoreActionMenu
               variant='plain'
               chore={chore}
+              sections={sections}
               onAction={onAction}
               onCompleteWithNote={() => onAction('completeWithNote', chore)}
               onCompleteWithPastDate={() =>

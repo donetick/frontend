@@ -21,6 +21,7 @@ import {
   Unarchive,
   Update,
   ViewCarousel,
+  ViewColumn,
   WbSunny,
   Weekend,
 } from '@mui/icons-material'
@@ -120,6 +121,7 @@ const ChoreActionMenu = ({
   onNudge,
   onOpen,
   onWriteNFC,
+  sections = [],
   sx = {},
   trigger,
   variant = 'soft',
@@ -130,6 +132,7 @@ const ChoreActionMenu = ({
   const anchorEl = isControlled ? controlledAnchorEl : uncontrolledAnchorEl
   const [isOfficialInstance, setIsOfficialInstance] = useState(false)
   const [showProjectPicker, setShowProjectPicker] = useState(false)
+  const [showSectionPicker, setShowSectionPicker] = useState(false)
   const [showPriorityPicker, setShowPriorityPicker] = useState(false)
   const [showSchedulePicker, setShowSchedulePicker] = useState(false)
   const [submenuAnchorEl, setSubmenuAnchorEl] = useState(null)
@@ -192,6 +195,7 @@ const ChoreActionMenu = ({
 
   const handleMenuClose = () => {
     setShowProjectPicker(false)
+    setShowSectionPicker(false)
     setShowPriorityPicker(false)
     setShowSchedulePicker(false)
     setSubmenuAnchorEl(null)
@@ -204,6 +208,7 @@ const ChoreActionMenu = ({
 
   const openPicker = (picker, target) => {
     setShowProjectPicker(picker === 'project')
+    setShowSectionPicker(picker === 'section')
     setShowPriorityPicker(picker === 'priority')
     setShowSchedulePicker(picker === 'schedule')
     setSubmenuAnchorEl(isSmallScreen ? null : target)
@@ -211,6 +216,7 @@ const ChoreActionMenu = ({
 
   const closeDesktopSubmenu = () => {
     setShowProjectPicker(false)
+    setShowSectionPicker(false)
     setShowPriorityPicker(false)
     setShowSchedulePicker(false)
     setSubmenuAnchorEl(null)
@@ -223,6 +229,11 @@ const ChoreActionMenu = ({
 
   const handleMoveToProject = project => {
     onAction?.('moveToProject', chore, { project })
+    handleMenuClose()
+  }
+
+  const handleMoveToSection = section => {
+    onAction?.('moveToSection', chore, { section })
     handleMenuClose()
   }
 
@@ -450,6 +461,14 @@ const ChoreActionMenu = ({
       label: t('actionMenu.moveToProject'),
       onClick: target => openPicker('project', target),
       submenu: 'project',
+      endDecorator: <ChevronRight fontSize='small' />,
+    },
+    sections.length > 0 && {
+      key: 'moveToSection',
+      icon: <ViewColumn />,
+      label: t('actionMenu.moveToSection'),
+      onClick: target => openPicker('section', target),
+      submenu: 'section',
       endDecorator: <ChevronRight fontSize='small' />,
     },
     { key: 'divider-utilities', type: 'divider' },
@@ -741,9 +760,41 @@ const ChoreActionMenu = ({
 
   const renderMenuProjectPicker = () => renderProjectOptions(MenuItem)
 
+  const renderModalSectionPicker = () =>
+    sections.map(section => (
+      <ListItem key={section.id}>
+        <ListItemButton
+          selected={chore.sectionId === section.id}
+          onClick={() => handleMoveToSection(section)}
+        >
+          <ListItemDecorator>
+            <ViewColumn />
+          </ListItemDecorator>
+          <ListItemContent>{section.name}</ListItemContent>
+        </ListItemButton>
+      </ListItem>
+    ))
+
+  const renderMenuSectionPicker = () =>
+    sections.map(section => (
+      <MenuItem
+        key={section.id}
+        selected={chore.sectionId === section.id}
+        onClick={e => {
+          e.stopPropagation()
+          handleMoveToSection(section)
+        }}
+      >
+        <ViewColumn />
+        {section.name}
+      </MenuItem>
+    ))
+
   let modalTitle
   if (showProjectPicker) {
     modalTitle = t('actionMenu.moveToProject')
+  } else if (showSectionPicker) {
+    modalTitle = t('actionMenu.moveToSection')
   } else if (showPriorityPicker) {
     modalTitle = t('priority')
   } else if (showSchedulePicker) {
@@ -797,7 +848,10 @@ const ChoreActionMenu = ({
           showHandle
           contentSx={{ px: 0, pb: 1 }}
         >
-          {(showProjectPicker || showPriorityPicker || showSchedulePicker) && (
+          {(showProjectPicker ||
+            showSectionPicker ||
+            showPriorityPicker ||
+            showSchedulePicker) && (
             <Button
               variant='plain'
               color='neutral'
@@ -805,6 +859,7 @@ const ChoreActionMenu = ({
               startDecorator={<ArrowBack fontSize='small' />}
               onClick={() => {
                 setShowProjectPicker(false)
+                setShowSectionPicker(false)
                 setShowPriorityPicker(false)
                 setShowSchedulePicker(false)
               }}
@@ -824,11 +879,13 @@ const ChoreActionMenu = ({
           >
             {showProjectPicker
               ? renderModalProjectPicker()
-              : showPriorityPicker
-                ? renderModalPriorityPicker()
-                : showSchedulePicker
-                  ? renderModalSchedulePicker()
-                  : renderModalActionItems()}
+              : showSectionPicker
+                ? renderModalSectionPicker()
+                : showPriorityPicker
+                  ? renderModalPriorityPicker()
+                  : showSchedulePicker
+                    ? renderModalSchedulePicker()
+                    : renderModalActionItems()}
           </List>
         </AppModal>
       ) : (
@@ -880,7 +937,9 @@ const ChoreActionMenu = ({
                 ? renderMenuPriorityPicker(false)
                 : showProjectPicker
                   ? renderMenuProjectPicker()
-                  : null}
+                  : showSectionPicker
+                    ? renderMenuSectionPicker()
+                    : null}
           </Menu>
         </>
       )}

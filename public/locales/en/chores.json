@@ -256,6 +256,7 @@
     "history": "History",
     "clone": "Clone",
     "moveToProject": "Move to project",
+    "moveToSection": "Move to section",
     "removeDueDate": "Remove due date",
     "unarchive": "Unarchive",
     "noPriority": "None",
