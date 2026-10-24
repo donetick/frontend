@@ -23,14 +23,19 @@ import {
   DeleteOutline,
   EditOutlined,
   ExpandMore,
+  MoreVert,
 } from '@mui/icons-material'
 import {
   Box,
   Button,
   Checkbox,
   CircularProgress,
+  Dropdown,
   IconButton,
   Input,
+  Menu,
+  MenuButton,
+  MenuItem,
   Sheet,
   Typography,
 } from '@mui/joy'
@@ -327,6 +332,17 @@ const BoardColumn = ({
         }
       >
         <Box
+          onClick={event => {
+            const control = event.target.closest(
+              'button, input, textarea, select, a, [role="button"], [role="checkbox"], [role="menuitem"], [contenteditable="true"]',
+            )
+            if (
+              displayMode !== 'list' ||
+              (control && event.currentTarget.contains(control))
+            )
+              return
+            setIsCollapsed(value => !value)
+          }}
           sx={{
             display: 'flex',
             alignItems: 'center',
@@ -400,24 +416,34 @@ const BoardColumn = ({
           <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
             {chores.length}
           </Typography>
-          <IconButton
-            aria-label={t('board.renameSection')}
-            size='sm'
-            variant='plain'
-            onClick={() => setIsEditing(true)}
-          >
-            <EditOutlined sx={{ fontSize: 17 }} />
-          </IconButton>
-          <IconButton
-            aria-label={t('board.deleteSection')}
-            color='danger'
-            disabled={!canDelete}
-            size='sm'
-            variant='plain'
-            onClick={onDelete}
-          >
-            <DeleteOutline sx={{ fontSize: 18 }} />
-          </IconButton>
+          <Dropdown>
+            <MenuButton
+              slots={{ root: IconButton }}
+              slotProps={{
+                root: {
+                  'aria-label': t('board.moreOptions'),
+                  size: 'sm',
+                  variant: 'plain',
+                },
+              }}
+            >
+              <MoreVert sx={{ fontSize: 18 }} />
+            </MenuButton>
+            <Menu
+              placement='bottom-end'
+              size='sm'
+              onClick={event => event.stopPropagation()}
+            >
+              <MenuItem onClick={() => setIsEditing(true)}>
+                <EditOutlined sx={{ fontSize: 17 }} />
+                {t('board.renameSection')}
+              </MenuItem>
+              <MenuItem color='danger' disabled={!canDelete} onClick={onDelete}>
+                <DeleteOutline sx={{ fontSize: 18 }} />
+                {t('board.deleteSection')}
+              </MenuItem>
+            </Menu>
+          </Dropdown>
         </Box>
       </Box>
 
