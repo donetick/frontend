@@ -674,7 +674,17 @@
   },
   "layout": {
     "title": "Layout & Navigation",
-    "detailedDescription": "Choose the screen the app opens on and which shortcuts and panels sit around it.",
+    "detailedDescription": "Make room for the way you work. Choose your start screen and keep your favorite tools close.",
+    "savedOnDevice": "Changes are saved automatically on this device or browser.",
+    "preview": "Preview",
+    "reorderItem": "Reorder {{name}}",
+    "reorderHint": "Drag the handles to reorder. With a keyboard, focus a handle, press Space, then use the arrow keys.",
+    "taskEditor": {
+      "title": "Task editor",
+      "description": "Choose how you move through task settings.",
+      "singlePage": "Keep everything on one page",
+      "helper": "Show all task settings in one scrolling page instead of separate steps."
+    },
     "defaultView": {
       "title": "Default View",
       "description": "Choose which screen the app opens on.",
@@ -690,7 +700,9 @@
       }
     },
     "bottomNav": {
-      "title": "Bottom Navigation",
+      "title": "Bottom navigation",
+      "selectedCount": "{{count}} of {{max}} shortcuts selected",
+      "limitHint": "All shortcut slots are in use. Turn one off to choose another.",
       "description": "Choose up to {{max}} shortcuts for the mobile bottom navigation bar and drag to reorder them. \"More\" always stays as the last item and opens the full menu.",
       "resetToDefaults": "Reset to Defaults",
       "resetHelper": "This will restore the bottom navigation to its default shortcuts and order.",
@@ -700,7 +712,7 @@
       }
     },
     "sidepanel": {
-      "title": "Sidepanel"
+      "title": "Desktop side panel"
     }
   },
   "theme": {
@@ -720,7 +732,9 @@
       "mint": "Mint",
       "graphite": "Graphite"
     },
-    "themeMode": "Theme mode",
+    "themeMode": "Display mode",
+    "modeDescription": "Choose a look that feels comfortable throughout your day.",
+    "systemHint": "System automatically follows your device’s light or dark appearance.",
     "light": "Light",
     "dark": "Dark",
     "system": "System"

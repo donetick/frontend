@@ -1,66 +1,122 @@
 import {
-  DarkModeOutlined,
-  LaptopOutlined,
-  LightModeOutlined,
-} from '@mui/icons-material'
-import {
-  Button,
-  FormControl,
-  FormLabel,
-  ToggleButtonGroup,
+  Box,
+  Radio,
+  RadioGroup,
+  Sheet,
+  Typography,
   useColorScheme,
 } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
 
+import { THEME_PRESETS } from '@/constants/themePresets'
+import { useThemeSkin } from '@/contexts/ThemeSkinContext'
 import useStickyState from '@/hooks/useStickyState'
 
+import AppearancePreview from './AppearancePreview'
+import SettingsSection from './SettingsSection'
 import ThemeSkinPicker from './ThemeSkinPicker'
-
-const ELEMENTID = 'select-theme-mode'
 
 const ThemeToggle = () => {
   const { t } = useTranslation('settings')
   const { mode, setMode } = useColorScheme()
-  const [themeMode, setThemeMode] = useStickyState(mode, 'themeMode')
-
-  const handleThemeModeChange = (_, newThemeMode) => {
-    if (!newThemeMode) return
-    setThemeMode(newThemeMode)
-    setMode(newThemeMode)
-  }
+  const { skin } = useThemeSkin()
+  const [, setThemeMode] = useStickyState(mode, 'themeMode')
+  const preset = THEME_PRESETS[skin] || THEME_PRESETS.default
 
   return (
-    <div className='grid gap-4'>
-      <ThemeSkinPicker />
-      <FormControl>
-        <FormLabel
-          level='title-md'
-          id={`${ELEMENTID}-label`}
-          htmlFor={ELEMENTID}
+    <Box sx={{ display: 'grid', gap: 2 }}>
+      <SettingsSection
+        title={t('theme.themeMode')}
+        description={t('theme.modeDescription')}
+      >
+        <RadioGroup
+          aria-label={t('theme.themeMode')}
+          name='theme-mode'
+          value={mode || 'system'}
+          onChange={event => {
+            setThemeMode(event.target.value)
+            setMode(event.target.value)
+          }}
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+            gap: { xs: 1, sm: 1.5 },
+          }}
         >
-          {t('theme.themeMode')}
-        </FormLabel>
-        <div className='flex items-center gap-4'>
-          <ToggleButtonGroup
-            id={ELEMENTID}
-            variant='outlined'
-            value={themeMode}
-            onChange={handleThemeModeChange}
-          >
-            <Button startDecorator={<LightModeOutlined />} value='light'>
-              {t('theme.light')}
-            </Button>
-            <Button startDecorator={<DarkModeOutlined />} value='dark'>
-              {t('theme.dark')}
-            </Button>
-            <Button startDecorator={<LaptopOutlined />} value='system'>
-              {t('theme.system')}
-            </Button>
-          </ToggleButtonGroup>
-        </div>
-      </FormControl>
-    </div>
+          {['light', 'dark', 'system'].map(value => (
+            <Sheet
+              key={value}
+              sx={{
+                position: 'relative',
+                minWidth: 0,
+                p: { xs: 1, sm: 1.5 },
+                border: '1px solid',
+                borderColor:
+                  mode === value ? 'primary.outlinedColor' : 'divider',
+                borderRadius: 'lg',
+                bgcolor:
+                  mode === value ? 'primary.softBg' : 'background.surface',
+                '&:focus-within': {
+                  outline: '2px solid',
+                  outlineColor: 'focusVisible',
+                  outlineOffset: 2,
+                },
+              }}
+            >
+              <Box
+                sx={{
+                  mb: 1.5,
+                  position: 'relative',
+                  '& > *': { minWidth: 0 },
+                }}
+              >
+                {(value === 'system' ? ['light', 'dark'] : [value]).map(
+                  (previewMode, index) => (
+                    <Box
+                      key={previewMode}
+                      sx={
+                        index
+                          ? {
+                              position: 'absolute',
+                              inset: 0,
+                              clipPath: 'inset(0 0 0 50%)',
+                            }
+                          : undefined
+                      }
+                    >
+                      <AppearancePreview
+                        palette={preset[previewMode]}
+                        accent={preset.swatch}
+                      />
+                    </Box>
+                  ),
+                )}
+              </Box>
+              <Radio
+                overlay
+                value={value}
+                label={t(`theme.${value}`)}
+                size='sm'
+                sx={{
+                  fontWeight: 600,
+                  alignItems: 'center',
+                  '& .MuiRadio-label': { overflowWrap: 'anywhere' },
+                }}
+              />
+            </Sheet>
+          ))}
+        </RadioGroup>
+        <Typography level='body-xs' textColor='text.tertiary' sx={{ mt: 1.5 }}>
+          {t('theme.systemHint')}
+        </Typography>
+      </SettingsSection>
+      <SettingsSection
+        title={t('theme.skin')}
+        description={t('theme.skinDescription')}
+      >
+        <ThemeSkinPicker />
+      </SettingsSection>
+    </Box>
   )
 }
-
 export default ThemeToggle
