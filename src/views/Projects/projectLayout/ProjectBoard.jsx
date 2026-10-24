@@ -21,6 +21,7 @@ import {
   Add,
   ChevronRight,
   DeleteOutline,
+  DragIndicator,
   EditOutlined,
   ExpandMore,
   MoreVert,
@@ -62,22 +63,43 @@ import {
 const columnDndId = id => `section:${id}`
 const taskDndId = id => `task:${id}`
 
-// Keep nested controls usable when the surrounding surface starts a drag.
-const surfaceListeners = listeners =>
-  Object.fromEntries(
-    Object.entries(listeners || {}).map(([name, listener]) => [
-      name,
-      event => {
-        const control = event.target.closest(
-          'button, input, textarea, select, a, [role="button"], [role="checkbox"], [contenteditable="true"]',
-        )
-        if (control && control !== event.currentTarget) return
-        if (name === 'onKeyDown' && event.target !== event.currentTarget) return
-        event.stopPropagation()
-        listener(event)
-      },
-    ]),
-  )
+const interactiveControlSelector =
+  'button, input, textarea, select, a, [role="button"], [role="checkbox"], [role="menuitem"], [contenteditable="true"]'
+
+// Only this control starts a drag. The rest of the card remains scrollable
+// and can use press-and-hold for selection without competing with DnD.
+const DragHandle = ({
+  attributes,
+  listeners,
+  label,
+  setActivatorNodeRef,
+  isDragging,
+  isOverlay,
+}) => (
+  <IconButton
+    {...attributes}
+    {...listeners}
+    ref={setActivatorNodeRef}
+    aria-label={label}
+    tabIndex={isOverlay ? -1 : attributes?.tabIndex}
+    variant='plain'
+    color='neutral'
+    size='sm'
+    onPointerDown={event => event.stopPropagation()}
+    onClick={event => event.stopPropagation()}
+    sx={{
+      flexShrink: 0,
+      alignSelf: 'center',
+      touchAction: 'none',
+      userSelect: 'none',
+      cursor: isDragging ? 'grabbing' : 'grab',
+      color: 'text.tertiary',
+      '@media (pointer: coarse)': { minWidth: 44, minHeight: 44 },
+    }}
+  >
+    <DragIndicator sx={{ fontSize: 20 }} />
+  </IconButton>
+)
 
 const flattenSubtasks = (tasks, parentId = null, level = 0) =>
   tasks
@@ -95,6 +117,7 @@ const TaskCard = ({
   isDragging = false,
   isOverlay = false,
   setNodeRef,
+  setActivatorNodeRef,
   transform,
   transition,
   displayMode,
@@ -147,9 +170,11 @@ const TaskCard = ({
   return (
     <Sheet
       {...longPressHandlers}
-      {...dragAttributes}
-      {...surfaceListeners(dragListeners)}
-      aria-label={t('board.dragTask')}
+      onPointerDown={event => {
+        if (event.target.closest(interactiveControlSelector)) return
+        longPressHandlers.onPointerDown(event)
+      }}
+      aria-hidden={isOverlay || undefined}
       ref={setNodeRef}
       variant='outlined'
       onClick={() => {
@@ -164,12 +189,8 @@ const TaskCard = ({
         pointerEvents: isOverlay ? 'none' : undefined,
         transform: CSS.Translate.toString(transform),
         transition,
-        touchAction: 'pan-y',
-        cursor: isMultiSelectMode
-          ? 'default'
-          : isDragging
-            ? 'grabbing'
-            : 'grab',
+        touchAction: 'auto',
+        cursor: 'pointer',
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'stretch' }}>
@@ -192,18 +213,29 @@ const TaskCard = ({
             {subtasksExpanded ? <ExpandMore /> : <ChevronRight />}
           </IconButton>
         )}
-        <CompactChoreCard
-          chore={chore}
-          performers={membersData?.res || []}
-          isMultiSelectMode={isMultiSelectMode}
-          isSelected={isSelected}
-          onAction={onAction}
-          onChipClick={onChipClick}
-          onSelectionToggle={onSelectionToggle}
-          sections={sections}
-          showDivider={false}
-          sx={{ minWidth: 0, flex: 1 }}
-        />
+        <Box sx={{ minWidth: 0, flex: 1 }}>
+          <CompactChoreCard
+            chore={chore}
+            performers={membersData?.res || []}
+            isMultiSelectMode={isMultiSelectMode}
+            isSelected={isSelected}
+            onAction={onAction}
+            onChipClick={onChipClick}
+            onSelectionToggle={onSelectionToggle}
+            sections={sections}
+            showDivider={false}
+          />
+        </Box>
+        {!isMultiSelectMode && (
+          <DragHandle
+            attributes={dragAttributes}
+            listeners={dragListeners}
+            label={`${t('board.dragTask')}: ${chore.name}`}
+            setActivatorNodeRef={setActivatorNodeRef}
+            isDragging={isDragging}
+            isOverlay={isOverlay}
+          />
+        )}
       </Box>
       {showSubtasks && subtasksExpanded && (
         <Box
@@ -250,6 +282,7 @@ const SortableTask = props => {
     attributes,
     isDragging,
     listeners,
+    setActivatorNodeRef,
     setNodeRef,
     transform,
     transition,
@@ -268,6 +301,7 @@ const SortableTask = props => {
       dragListeners={listeners}
       isDragging={isDragging}
       setNodeRef={setNodeRef}
+      setActivatorNodeRef={setActivatorNodeRef}
       transform={transform}
       transition={transition}
     />
@@ -305,6 +339,7 @@ const BoardColumn = ({
     attributes,
     isDragging,
     listeners,
+    setActivatorNodeRef,
     setNodeRef,
     transform,
     transition,
@@ -325,21 +360,13 @@ const BoardColumn = ({
 
   return (
     <Sheet
-      {...attributes}
-      {...surfaceListeners(listeners)}
-      aria-label={t('board.dragSection')}
       ref={setNodeRef}
       variant='soft'
       sx={{
         width: displayMode === 'list' ? '100%' : { xs: 292, sm: 320 },
         minWidth: displayMode === 'list' ? 0 : { xs: 292, sm: 320 },
         alignSelf: 'flex-start',
-        cursor: isMultiSelectMode
-          ? 'default'
-          : isDragging
-            ? 'grabbing'
-            : 'grab',
-        touchAction: 'pan-y',
+        touchAction: 'auto',
         position: 'relative',
         pt: displayMode === 'list' && isExpanded ? '40px' : 0,
         borderRadius: 'lg',
@@ -362,9 +389,7 @@ const BoardColumn = ({
       >
         <Box
           onClick={event => {
-            const control = event.target.closest(
-              'button, input, textarea, select, a, [role="button"], [role="checkbox"], [role="menuitem"], [contenteditable="true"]',
-            )
+            const control = event.target.closest(interactiveControlSelector)
             if (
               displayMode !== 'list' ||
               (control && event.currentTarget.contains(control))
@@ -392,6 +417,15 @@ const BoardColumn = ({
             borderColor: 'divider',
           }}
         >
+          {!isMultiSelectMode && (
+            <DragHandle
+              attributes={attributes}
+              listeners={listeners}
+              label={`${t('board.dragSection')}: ${section.name}`}
+              setActivatorNodeRef={setActivatorNodeRef}
+              isDragging={isDragging}
+            />
+          )}
           {displayMode === 'list' && (
             <IconButton
               aria-label={t(
@@ -580,9 +614,7 @@ const ProjectBoard = ({
   userLabels = [],
 }) => {
   const { t } = useTranslation('chores')
-  const [activeTask, setActiveTask] = useState(null)
-  const [activeSubtasksExpanded, setActiveSubtasksExpanded] = useState(false)
-  const [activeTaskSize, setActiveTaskSize] = useState(null)
+  const [dragPreview, setDragPreview] = useState(null)
   const [pendingTaskOrder, setPendingTaskOrder] = useState(null)
   const [pendingSectionOrder, setPendingSectionOrder] = useState(null)
   const [newSectionName, setNewSectionName] = useState('')
@@ -715,21 +747,26 @@ const ProjectBoard = ({
 
   const handleDragStart = ({ active }) => {
     if (active.data.current?.type === 'task') {
-      setActiveTask(
-        chores.find(chore => String(chore.id) === active.data.current.taskId) ||
-          null,
+      const task = chores.find(
+        chore => String(chore.id) === active.data.current.taskId,
       )
-      setActiveSubtasksExpanded(active.data.current.subtasksExpanded)
       const rect = active.rect.current?.initial
-      setActiveTaskSize(
-        rect ? { width: rect.width, height: rect.height } : null,
+      setDragPreview(
+        task
+          ? {
+              task,
+              subtasksExpanded: active.data.current.subtasksExpanded,
+              size: rect
+                ? { width: rect.width, height: rect.height }
+                : undefined,
+            }
+          : null,
       )
     }
   }
 
   const handleDragEnd = ({ active, over }) => {
-    setActiveTask(null)
-    setActiveTaskSize(null)
+    setDragPreview(null)
     if (!over || active.id === over.id) return
 
     const activeData = active.data.current
@@ -852,10 +889,7 @@ const ProjectBoard = ({
         }
         sensors={sensors}
         onDragStart={handleDragStart}
-        onDragCancel={() => {
-          setActiveTask(null)
-          setActiveTaskSize(null)
-        }}
+        onDragCancel={() => setDragPreview(null)}
         onDragEnd={handleDragEnd}
       >
         <SortableContext
@@ -937,11 +971,11 @@ const ProjectBoard = ({
           </Box>
         </SortableContext>
         <DragOverlay adjustScale={false}>
-          {activeTask ? (
-            <Box sx={{ ...activeTaskSize, '& > *': { height: '100%' } }}>
+          {dragPreview ? (
+            <Box sx={{ ...dragPreview.size, '& > *': { height: '100%' } }}>
               <TaskCard
-                chore={activeTask}
-                subtasksExpanded={activeSubtasksExpanded}
+                chore={dragPreview.task}
+                subtasksExpanded={dragPreview.subtasksExpanded}
                 displayMode={displayMode}
                 isOverlay
                 isDragging
