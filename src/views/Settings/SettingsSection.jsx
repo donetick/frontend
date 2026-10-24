@@ -18,22 +18,27 @@ const SettingsSection = ({ action, children, description, title }) => {
         minWidth: 0,
       }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'start', gap: 2, mb: 2.5 }}>
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Typography id={headingId} component='h3' level='title-md'>
+      <Box sx={{ mb: 2.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Typography
+            id={headingId}
+            component='h3'
+            level='title-md'
+            sx={{ flex: 1, minWidth: 0 }}
+          >
             {title}
           </Typography>
-          {description && (
-            <Typography
-              level='body-sm'
-              textColor='text.secondary'
-              sx={{ mt: 0.5 }}
-            >
-              {description}
-            </Typography>
-          )}
+          {action}
         </Box>
-        {action}
+        {description && (
+          <Typography
+            level='body-sm'
+            textColor='text.secondary'
+            sx={{ mt: 0.5 }}
+          >
+            {description}
+          </Typography>
+        )}
       </Box>
       {children}
     </Sheet>

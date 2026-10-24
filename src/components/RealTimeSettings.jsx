@@ -1,44 +1,40 @@
-import { Sync, SyncDisabled } from '@mui/icons-material'
-import { Box, Card, FormHelperText, Switch, Typography } from '@mui/joy'
-import { useState } from 'react'
+import { Circle } from '@mui/icons-material'
+import { Box, Chip, Divider, Sheet, Switch, Typography } from '@mui/joy'
+import PropTypes from 'prop-types'
+import { useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { PAYWALL_REASON, usePaywall } from '../contexts/PaywallContext'
 import { useSSEContext } from '../hooks/useSSEContext'
 import { useUserProfile } from '../queries/UserQueries'
 import { isPlusAccount } from '../utils/Helpers'
-import SSEConnectionStatus from './SSEConnectionStatus'
 
 const REALTIME_TYPES = {
   DISABLED: 'disabled',
   SSE: 'sse',
 }
 
-const RealTimeSettings = () => {
+const RealTimeSettings = ({ embedded = false }) => {
   const { t } = useTranslation('settings')
   const { data: userProfile } = useUserProfile()
   const { showPaywall } = usePaywall()
-
-  // SSE context
   const sseContext = useSSEContext()
+  const toggleId = useId()
+  const descriptionId = useId()
 
-  // Get current realtime type from localStorage
   const getCurrentRealtimeType = () => {
     const sseEnabled = localStorage.getItem('sse_enabled') === 'true'
     return sseEnabled ? REALTIME_TYPES.SSE : REALTIME_TYPES.DISABLED
   }
+  const [realtimeType, setRealtimeType] = useState(getCurrentRealtimeType)
 
-  const [realtimeType, setRealtimeType] = useState(getCurrentRealtimeType())
-
-  const handleRealtimeTypeChange = (event, newValue) => {
+  const handleRealtimeTypeChange = newValue => {
     if (!isPlusAccount(userProfile)) {
       showPaywall(PAYWALL_REASON.REALTIME_SYNC)
       return
     }
 
     setRealtimeType(newValue)
-
-    // Update localStorage and toggle connections
     switch (newValue) {
       case REALTIME_TYPES.DISABLED:
         localStorage.setItem('sse_enabled', 'false')
@@ -51,130 +47,124 @@ const RealTimeSettings = () => {
     }
   }
 
-  const getCurrentContext = () => {
-    switch (realtimeType) {
-      case REALTIME_TYPES.SSE:
-        return sseContext
-      default:
-        return {
-          isConnected: false,
-          isConnecting: false,
-          error: null,
-          getConnectionStatus: () => 'disabled',
-        }
-    }
+  const enabled = realtimeType !== REALTIME_TYPES.DISABLED
+  const getStatus = () => {
+    if (!enabled) return 'off'
+    if (sseContext.isConnected) return 'connected'
+    if (sseContext.isConnecting) return 'connecting'
+    if (sseContext.error) return 'error'
+    return 'disconnected'
   }
-
-  const context = getCurrentContext()
-
+  const status = getStatus()
+  const statusColor = {
+    off: 'neutral',
+    connected: 'success',
+    connecting: 'warning',
+    error: 'danger',
+    disconnected: 'warning',
+  }[status]
   const getStatusDescription = () => {
-    if (realtimeType === REALTIME_TYPES.DISABLED) {
-      return t('advanced.realtime.disabled')
+    if (!enabled) return t('advanced.realtime.disabled')
+    if (sseContext.isConnected) return t('advanced.realtime.connected')
+    if (sseContext.isConnecting) return t('advanced.realtime.connecting')
+    if (sseContext.error) {
+      return t('advanced.realtime.errored', { error: sseContext.error })
     }
-
-    if (context.isConnected) {
-      return t('advanced.realtime.connected')
-    }
-
-    if (context.isConnecting) {
-      return t('advanced.realtime.connecting')
-    }
-
-    if (context.error) {
-      return t('advanced.realtime.errored', { error: context.error })
-    }
-
     return t('advanced.realtime.notConnected')
   }
-
-  const getConnectionStatusComponent = () => {
-    switch (realtimeType) {
-      case REALTIME_TYPES.SSE:
-        return <SSEConnectionStatus variant='chip' />
-      default:
-        return null
-    }
-  }
+  const Container = embedded ? Box : Sheet
 
   return (
-    <Card sx={{ mt: 2, p: 3 }}>
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, mb: 2 }}>
-        <Switch
-          checked={realtimeType !== REALTIME_TYPES.DISABLED}
-          onChange={e => {
-            handleRealtimeTypeChange(
-              null,
-              e.target.checked ? REALTIME_TYPES.SSE : REALTIME_TYPES.DISABLED,
-            )
-          }}
-          color={
-            realtimeType !== REALTIME_TYPES.DISABLED ? 'success' : 'neutral'
-          }
-          inputProps={{ 'aria-label': t('advanced.realtime.toggleLabel') }}
-        />
-        <Box sx={{ flex: 1 }}>
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              mb: 0.5,
-            }}
+    <Container
+      sx={
+        embedded
+          ? { minWidth: 0 }
+          : {
+              bgcolor: 'background.surface',
+              border: '1px solid',
+              borderColor: 'divider',
+              borderRadius: 'xl',
+              p: { xs: 2, sm: 2.5 },
+              minWidth: 0,
+            }
+      }
+    >
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography
+            component='label'
+            htmlFor={toggleId}
+            level='title-sm'
+            sx={{ cursor: 'pointer' }}
           >
-            <Typography level='title-md'>
-              {t('advanced.realtime.title')}
-            </Typography>
-
-            {realtimeType !== REALTIME_TYPES.DISABLED &&
-            isPlusAccount(userProfile) ? (
-              <Sync color={context.isConnected ? 'success' : 'disabled'} />
-            ) : (
-              <SyncDisabled color='disabled' />
-            )}
-          </Box>
-          <Typography level='body-sm' color='neutral'>
+            {t('advanced.realtime.toggleLabel')}
+          </Typography>
+          <Typography
+            id={descriptionId}
+            level='body-sm'
+            textColor='text.secondary'
+            sx={{ mt: 0.5 }}
+          >
             {t('advanced.realtime.subtitle')}
           </Typography>
         </Box>
+        <Switch
+          checked={enabled}
+          onChange={event =>
+            handleRealtimeTypeChange(
+              event.target.checked
+                ? REALTIME_TYPES.SSE
+                : REALTIME_TYPES.DISABLED,
+            )
+          }
+          color={enabled ? 'primary' : 'neutral'}
+          slotProps={{
+            input: { id: toggleId, 'aria-describedby': descriptionId },
+          }}
+          sx={{ flexShrink: 0, minHeight: 44 }}
+        />
       </Box>
-
-      {/* <FormControl orientation='horizontal' sx={{ mb: 2 }}>
-        <Box sx={{ flex: 1 }}>
-          <FormLabel>Real-time Connection Type</FormLabel>
-          <FormHelperText sx={{ mt: 0 }}>
-            Choose how to receive real-time updates
-          </FormHelperText>
-        </Box>
-        <Select
-          value={realtimeType}
-          onChange={handleRealtimeTypeChange}
-          disabled={!isPlusAccount(userProfile)}
-          sx={{ minWidth: 140 }}
+      <Divider sx={{ my: 2 }} />
+      <Box role='status' aria-atomic='true'>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            flexWrap: 'wrap',
+          }}
         >
-          <Option value={REALTIME_TYPES.DISABLED}>Disabled</Option>
-          <Option value={REALTIME_TYPES.WEBSOCKET}>WebSocket</Option>
-          <Option value={REALTIME_TYPES.SSE}>SSE</Option>
-        </Select>
-      </FormControl> */}
-
-      <FormHelperText sx={{ mb: 2 }}>{getStatusDescription()}</FormHelperText>
-
-      {realtimeType !== REALTIME_TYPES.DISABLED &&
-        isPlusAccount(userProfile) && (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
-            <Typography level='body-xs' color='neutral'>
-              {t('advanced.realtime.statusLabel')}
-            </Typography>
-            {getConnectionStatusComponent()}
-            {context.error && (
-              <Typography level='body-xs' color='danger'>
-                {context.error}
-              </Typography>
-            )}
-          </Box>
-        )}
-    </Card>
+          <Typography level='body-xs' textColor='text.secondary'>
+            {t('advanced.realtime.statusLabel')}
+          </Typography>
+          <Chip
+            size='sm'
+            variant='soft'
+            color={statusColor}
+            startDecorator={<Circle sx={{ fontSize: 8 }} />}
+          >
+            {t(`advanced.realtime.status.${status}`)}
+          </Chip>
+        </Box>
+        <Typography
+          level='body-sm'
+          textColor='text.secondary'
+          sx={{ mt: 1, overflowWrap: 'anywhere' }}
+        >
+          {getStatusDescription()}
+        </Typography>
+      </Box>
+      {!isPlusAccount(userProfile) && (
+        <Typography level='body-xs' textColor='text.tertiary' sx={{ mt: 1.5 }}>
+          {t('advanced.realtime.basicPlanNotice')}
+        </Typography>
+      )}
+    </Container>
   )
+}
+
+RealTimeSettings.propTypes = {
+  embedded: PropTypes.bool,
 }
 
 export default RealTimeSettings

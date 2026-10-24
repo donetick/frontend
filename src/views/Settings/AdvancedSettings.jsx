@@ -1,9 +1,10 @@
+import { WarningAmberRounded } from '@mui/icons-material'
 import {
   Box,
-  Checkbox,
   Chip,
-  FormControl,
-  FormHelperText,
+  CircularProgress,
+  Divider,
+  Switch,
   Typography,
 } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
@@ -22,6 +23,7 @@ import {
 import { syncEngine } from '../../utils/SyncEngine'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import SettingsLayout from './SettingsLayout'
+import SettingsSection from './SettingsSection'
 
 const AdvancedSettings = () => {
   const { t } = useTranslation('settings')
@@ -102,53 +104,103 @@ const AdvancedSettings = () => {
 
   return (
     <SettingsLayout title={t('advanced.title')}>
-      <div className='grid gap-4'>
-        <Typography level='body-md'>{t('advanced.description')}</Typography>
-
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 2 }}>
-          <Typography level='title-lg'>{t('advanced.offlineTitle')}</Typography>
-          <Chip
-            variant='outlined'
-            size='sm'
-            sx={{
-              height: '20px',
-              fontSize: '0.65rem',
-              fontWeight: 'bold',
-              color: 'warning.main',
-              borderColor: 'warning.main',
-            }}
+      <Box sx={{ maxWidth: 680, pb: 4 }}>
+        <Typography
+          level='body-md'
+          textColor='text.secondary'
+          sx={{ maxWidth: 560, mb: 3, mt: -1, textWrap: 'pretty' }}
+        >
+          {t('advanced.description')}
+        </Typography>
+        <Box sx={{ display: 'grid', gap: 2 }}>
+          <SettingsSection
+            title={t('advanced.offlineTitle')}
+            description={t('advanced.offlineDescription')}
+            action={
+              <Chip size='sm' color='warning' variant='soft'>
+                {t('common.earlyAccess')}
+              </Chip>
+            }
           >
-            {t('common.earlyAccess')}
-          </Chip>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Typography
+                component='label'
+                htmlFor='settings-offline-support'
+                level='title-sm'
+                sx={{ flex: 1, minWidth: 0, cursor: 'pointer' }}
+              >
+                {t('advanced.offlineToggle')}
+              </Typography>
+              <Switch
+                checked={offlineEnabled}
+                onChange={handleOfflineToggle}
+                disabled={offlineLoading}
+                color={offlineEnabled ? 'primary' : 'neutral'}
+                slotProps={{
+                  input: {
+                    id: 'settings-offline-support',
+                    'aria-describedby': 'settings-offline-warning',
+                    'aria-busy': offlineLoading,
+                  },
+                }}
+                sx={{ flexShrink: 0, minHeight: 44 }}
+              />
+            </Box>
+            <Divider sx={{ my: 2 }} />
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: 1,
+                p: 1.5,
+                borderRadius: 'lg',
+                bgcolor: 'warning.softBg',
+                color: 'text.secondary',
+              }}
+            >
+              <WarningAmberRounded
+                sx={{ fontSize: 18, mt: 0.25, flexShrink: 0 }}
+              />
+              <Typography
+                id='settings-offline-warning'
+                level='body-sm'
+                textColor='text.primary'
+              >
+                {t('advanced.offlineHelper')}
+              </Typography>
+            </Box>
+            {offlineLoading && (
+              <Box
+                role='status'
+                sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1.5 }}
+              >
+                <CircularProgress size='sm' />
+                <Typography level='body-sm' textColor='text.secondary'>
+                  {t('advanced.clearingOffline')}
+                </Typography>
+              </Box>
+            )}
+          </SettingsSection>
+
+          <SettingsSection
+            title={t('advanced.realtimeTitle')}
+            description={t('advanced.realtimeDescription')}
+            action={
+              <Chip size='sm' color='primary' variant='soft'>
+                Donetick Plus
+              </Chip>
+            }
+          >
+            <RealTimeSettings embedded />
+          </SettingsSection>
         </Box>
-        <Typography level='body-md' mt={-1}>
-          {t('advanced.offlineDescription')}
+        <Typography level='body-xs' textColor='text.tertiary' sx={{ mt: 2 }}>
+          {t('layout.savedOnDevice')}
         </Typography>
-        <FormControl sx={{ mt: 1 }}>
-          <Checkbox
-            checked={offlineEnabled}
-            onChange={handleOfflineToggle}
-            variant='soft'
-            label={t('advanced.offlineToggle')}
-            disabled={offlineLoading}
-            overlay
-          />
-          <FormHelperText>{t('advanced.offlineHelper')}</FormHelperText>
-        </FormControl>
-
-        {/* Real-time Settings */}
-        <Typography level='title-lg' mt={2}>
-          {t('advanced.realtimeTitle')}
-        </Typography>
-        <Typography level='body-md' mt={-1}>
-          {t('advanced.realtimeDescription')}
-        </Typography>
-        <RealTimeSettings />
-
         {confirmModalConfig?.isOpen && (
           <ConfirmationModal config={confirmModalConfig} />
         )}
-      </div>
+      </Box>
     </SettingsLayout>
   )
 }

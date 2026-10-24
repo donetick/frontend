@@ -790,10 +790,11 @@
   },
   "advanced": {
     "title": "Advanced Settings",
-    "description": "Manage offline support and real-time updates. External connections are managed in Integrations.",
-    "offlineTitle": "Offline Support",
+    "description": "Control offline access and how your circle stays in sync.",
+    "offlineTitle": "Offline support",
     "offlineDescription": "Keep using Donetick when you're offline on this device/browser. Your changes are saved locally and synced when you're back online.",
-    "offlineToggle": "Enable Offline Support",
+    "offlineToggle": "Use offline support",
+    "clearingOffline": "Clearing offline data…",
     "offlineHelper": "Turning this off removes unsynced offline changes and saved offline data from this device/browser.",
     "offlineEnabled": "Offline mode turned on for this device/browser",
     "offlineDisabled": "Offline mode turned off and local data was cleared",
@@ -809,20 +810,27 @@
     "webhookURL": "Webhook URL",
     "webhookUpdated": "Webhook URL updated successfully",
     "webhookUpdateFailed": "Failed to update webhook URL",
-    "realtimeTitle": "Real-time Updates",
-    "realtimeDescription": "Configure how you receive live updates when tasks and activities change in your circle.",
+    "realtimeTitle": "Real-time updates",
+    "realtimeDescription": "Stay in sync with the people in your circle.",
     "realtime": {
-      "toggleLabel": "Enable Real-time Updates",
+      "toggleLabel": "Live updates",
       "title": "Real-time Updates",
-      "subtitle": "Get instant notifications when tasks are updated",
-      "statusLabel": "Status:",
+      "subtitle": "See task changes without refreshing.",
+      "statusLabel": "Connection",
+      "status": {
+        "off": "Off",
+        "connected": "Connected",
+        "connecting": "Connecting…",
+        "error": "Connection issue",
+        "disconnected": "Disconnected"
+      },
       "basicPlan": "Real-time updates are not available in the Basic plan. Upgrade to Plus to receive instant notifications when tasks are updated.",
-      "disabled": "Real-time updates are disabled. Enable them to see live changes when you or other circle members complete, skip, or modify tasks.",
-      "connected": "Real-time updates are working. You'll see live changes when you or other circle members complete, skip, or modify tasks.",
+      "disabled": "Live updates are off. Refresh to see the latest changes.",
+      "connected": "Changes from your circle appear automatically.",
       "connecting": "Connecting to real-time updates...",
       "errored": "Real-time updates are enabled but not working: {{error}}",
       "notConnected": "Real-time updates are enabled but not currently connected.",
-      "basicPlanNotice": "Real-time updates are not available in the Basic plan. Upgrade to Plus to receive instant notifications when you or other circle members complete, skip, or modify tasks."
+      "basicPlanNotice": "Available with Donetick Plus. Turn on live updates to explore the upgrade."
     }
   },
   "privacyAnalytics": {
