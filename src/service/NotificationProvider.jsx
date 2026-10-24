@@ -192,7 +192,10 @@ export const NotificationProvider = ({ children }) => {
       )
     }
 
-    // Handle standard notifications
+    // Custom skins use one accent for all toast types. Icons and titles still
+    // communicate severity without introducing unrelated status colors.
+    const notificationColor = isCustomTheme ? 'primary' : config.color
+
     // Determine the icon to use
     const notificationIcon =
       notification.icon ||
@@ -208,7 +211,7 @@ export const NotificationProvider = ({ children }) => {
       <Snackbar
         key={notification.id}
         open={true}
-        color={isCustomTheme ? config.color : 'neutral'}
+        color={isCustomTheme ? 'primary' : 'neutral'}
         autoHideDuration={config.autoHideDuration}
         onClose={() => removeNotification(notification.id)}
         startDecorator={notificationIcon}
@@ -216,7 +219,7 @@ export const NotificationProvider = ({ children }) => {
           notification.undoAction ? (
             <Button
               variant='outlined'
-              color={config.color}
+              color={notificationColor}
               onClick={() => {
                 notification.undoAction()
                 removeNotification(notification.id)
@@ -227,7 +230,7 @@ export const NotificationProvider = ({ children }) => {
           ) : config.showDismissButton ? (
             <Button
               variant='outlined'
-              color={config.color}
+              color={notificationColor}
               onClick={() => removeNotification(notification.id)}
             >
               {t('notification.dismiss')}
@@ -246,14 +249,14 @@ export const NotificationProvider = ({ children }) => {
         {title && message ? (
           <Box>
             <Typography
-              color={config.color}
+              color={notificationColor}
               level='title-sm'
               sx={notificationTextSx}
             >
               {title}
             </Typography>
             <Typography
-              color={config.color}
+              color={notificationColor}
               level='body-sm'
               sx={notificationTextSx}
             >
@@ -262,7 +265,7 @@ export const NotificationProvider = ({ children }) => {
           </Box>
         ) : (
           <Typography
-            color={config.color}
+            color={notificationColor}
             level='body-md'
             sx={notificationTextSx}
           >

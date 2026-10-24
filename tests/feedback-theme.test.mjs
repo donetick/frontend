@@ -53,6 +53,25 @@ test('explicit solid and plain feedback variants are not overridden', () => {
   }
 })
 
+test('standard snackbars use a single theme accent while preserving status icons and titles', () => {
+  const provider = readFileSync(
+    new URL('../src/service/NotificationProvider.jsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(
+    provider,
+    /const notificationColor = isCustomTheme \? 'primary' : config.color/,
+  )
+  assert.match(provider, /color=\{isCustomTheme \? 'primary' : 'neutral'\}/)
+  assert.equal((provider.match(/color=\{notificationColor\}/g) || []).length, 5)
+  assert.match(
+    provider,
+    /React.cloneElement\(config.icon, \{ color: 'inherit' \}\)/,
+  )
+  assert.match(provider, /notification.title \|\| t\(config.defaultTitle\)/)
+  assert.doesNotMatch(provider, /color=\{config.color\}/)
+})
+
 test('both loaders follow the primary accent, not success green or hardcoded cyan', () => {
   const readSource = path =>
     readFileSync(new URL(path, import.meta.url), 'utf8')
