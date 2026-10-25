@@ -260,7 +260,7 @@ const CompactChoreCard = ({
                 <Box sx={{ display: 'flex', gap: 0.25 }}>
                   <IconButton
                     variant='soft'
-                    color='success'
+                    color='primary'
                     size='sm'
                     onClick={e => {
                       e.stopPropagation()
@@ -324,7 +324,7 @@ const CompactChoreCard = ({
             ) : (
               <IconButton
                 variant='soft'
-                color={chore.status === 0 ? 'success' : 'warning'}
+                color={chore.status === 0 ? 'primary' : 'warning'}
                 size='sm'
                 onClick={e => {
                   e.stopPropagation()

@@ -2,14 +2,14 @@ import { Box, CircularProgress, Typography } from '@mui/joy'
 import { styled } from '@mui/joy/styles'
 
 // Styled components with keyframe animations
-const LoadingContainer = styled(Box)({
+const LoadingContainer = styled(Box)(({ theme }) => ({
   position: 'fixed',
   top: 0,
   left: 0,
   right: 0,
   bottom: 0,
-  backgroundColor: 'rgba(255, 255, 255, 0.95)',
-  backdropFilter: 'blur(8px)',
+  backgroundColor: theme.vars.palette.background.body,
+  color: theme.vars.palette.text.primary,
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
@@ -24,7 +24,7 @@ const LoadingContainer = styled(Box)({
       opacity: 1,
     },
   },
-})
+}))
 
 const LoadingContent = styled(Box)({
   display: 'flex',
@@ -77,17 +77,20 @@ const LoadingScreen = ({ message = null, showLogo = true, size = 'lg' }) => {
               sx={{
                 fontSize: { xs: '2rem', sm: '2.5rem' },
                 fontWeight: 700,
-                color: 'primary.500',
+                color: 'text.primary',
                 mb: 1,
               }}
             >
               {t('done')}
-              <span style={{ color: '#06b6d4' }}>tick</span>
+              <Box component='span' sx={{ color: 'primary.plainColor' }}>
+                tick
+              </Box>
             </Typography>
           </LogoContainer>
         )}
 
         <CircularProgress
+          color='primary'
           size={size}
           sx={{
             '--CircularProgress-size': size === 'lg' ? '60px' : '40px',

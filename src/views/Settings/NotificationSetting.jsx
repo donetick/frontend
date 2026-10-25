@@ -7,7 +7,6 @@ import {
   AccessTimeRounded,
   Android,
   Apple,
-  LinkRounded,
   NotificationsNoneRounded,
   SendRounded,
   SmartphoneRounded,
@@ -21,8 +20,6 @@ import {
   FormControl,
   FormHelperText,
   FormLabel,
-  Input,
-  Link,
   Option,
   Select,
   Sheet,
@@ -41,7 +38,6 @@ import { useLocalization } from '../../contexts/LocalizationContext'
 import {
   useDeviceTokens,
   useNotificationPreferences,
-  useUserProfile,
 } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { getAppVersion, getStableDeviceId } from '../../utils/DeviceInfo'
@@ -49,9 +45,9 @@ import { isOfficialDonetickInstanceSync } from '../../utils/FeatureToggle'
 import {
   UnregisterDeviceToken,
   UpdateNotificationPreferences,
-  UpdateNotificationTarget,
 } from '../../utils/Fetcher'
 import SettingsLayout from './SettingsLayout'
+import SettingsLinks from './SettingsLinks'
 
 const surfaceSx = {
   bgcolor: 'background.surface',
@@ -141,7 +137,6 @@ const NotificationSetting = () => {
   const { t } = useTranslation('settings')
   const { fmt } = useLocalization()
   const { showError, showSuccess, showWarning } = useNotification()
-  const { data: userProfile, refetch: refetchUserProfile } = useUserProfile()
   const { data: deviceTokens, refetch: refetchDevices } = useDeviceTokens()
   const {
     data: notificationPreference,
@@ -158,14 +153,6 @@ const NotificationSetting = () => {
   const [local, setLocal] = useState({ granted: false, dueNotification: true })
   const [push, setPush] = useState(false)
   const [currentDevice, setCurrentDevice] = useState(null)
-  const [targetDraft, setTarget] = useState(null)
-  const [chatIDDraft, setChatID] = useState(null)
-  const target =
-    targetDraft ?? String(userProfile?.notification_target?.type ?? 0)
-  const chatID =
-    chatIDDraft ?? String(userProfile?.notification_target?.target_id ?? '')
-  const [error, setError] = useState('')
-  const [savingTarget, setSavingTarget] = useState(false)
   const [savingPreference, setSavingPreference] = useState(false)
   const [deviceBusy, setDeviceBusy] = useState(false)
   const [removingDevice, setRemovingDevice] = useState(null)
@@ -332,50 +319,6 @@ const NotificationSetting = () => {
       showError({ message: t('notifications.preferenceUpdateFailed') })
     } finally {
       setSavingPreference(false)
-    }
-  }
-
-  const saveTarget = async (disable = false) => {
-    if (
-      !disable &&
-      target === '1' &&
-      (!chatID.trim() || isNaN(chatID) || Number(chatID) === 0)
-    ) {
-      setError(
-        t(
-          chatID.trim()
-            ? 'notifications.chatIdInvalid'
-            : 'notifications.chatIdRequired',
-        ),
-      )
-      return
-    }
-    if (!disable && target === '2' && !chatID.trim()) {
-      setError(t('notifications.userKeyRequired'))
-      return
-    }
-    setError('')
-    setSavingTarget(true)
-    try {
-      const response = await UpdateNotificationTarget({
-        target: disable ? '' : chatID.trim(),
-        type: disable ? 0 : Number(target),
-      })
-      if (response.status !== 200) throw new Error(response.statusText)
-      if (disable) {
-        setTarget('0')
-        setChatID('')
-      }
-      await refetchUserProfile()
-      showSuccess({ message: t('notifications.targetUpdated') })
-    } catch (error) {
-      showError({
-        message: t('notifications.targetUpdateFailed', {
-          error: error.message,
-        }),
-      })
-    } finally {
-      setSavingTarget(false)
     }
   }
 
@@ -638,117 +581,8 @@ const NotificationSetting = () => {
           </Sheet>
         </Box>
 
-        <Box component='section' sx={{ mb: 3.5 }}>
-          <SectionHeading
-            icon={<LinkRounded />}
-            title={t('notifications.customSection')}
-            description={t('notifications.customSectionDescription')}
-          />
-          <Sheet sx={surfaceSx}>
-            <ToggleRow
-              title={t('notifications.customLabel')}
-              description={t('notifications.customHelper')}
-              checked={target !== '0'}
-              disabled={savingTarget || !userProfile}
-              onChange={() =>
-                target !== '0' ? saveTarget(true) : setTarget('1')
-              }
-            />
-            {target !== '0' && (
-              <Box sx={{ px: { xs: 2, sm: 2.5 }, pb: 2.5 }}>
-                <Divider sx={{ mb: 2 }} />
-                <Box
-                  component='form'
-                  onSubmit={event => {
-                    event.preventDefault()
-                    saveTarget()
-                  }}
-                  sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
-                >
-                  <FormControl disabled={savingTarget}>
-                    <FormLabel>{t('notifications.serviceLabel')}</FormLabel>
-                    <Select
-                      value={target}
-                      onChange={(_, value) => {
-                        if (value) {
-                          setTarget(value)
-                          setChatID('')
-                          setError('')
-                        }
-                      }}
-                    >
-                      <Option value='1'>
-                        {t('notifications.targetTelegram')}
-                      </Option>
-                      <Option value='2'>
-                        {t('notifications.targetPushover')}
-                      </Option>
-                      <Option value='3'>
-                        {t('notifications.targetWebhooks')}
-                      </Option>
-                    </Select>
-                  </FormControl>
-                  {target === '1' && (
-                    <Typography level='body-sm' textColor='text.secondary'>
-                      {t('notifications.telegramBotHelpBefore')}{' '}
-                      <Link
-                        href='https://t.me/DonetickBot'
-                        target='_blank'
-                        rel='noopener noreferrer'
-                      >
-                        {t('notifications.clickHere')}
-                      </Link>{' '}
-                      {t('notifications.telegramBotHelpAfter')}
-                    </Typography>
-                  )}
-                  {(target === '1' || target === '2') && (
-                    <FormControl error={Boolean(error)} disabled={savingTarget}>
-                      <FormLabel>
-                        {t(
-                          target === '1'
-                            ? 'notifications.chatId'
-                            : 'notifications.userKey',
-                        )}
-                      </FormLabel>
-                      <Input
-                        value={chatID}
-                        onChange={event => {
-                          setChatID(event.target.value)
-                          setError('')
-                        }}
-                        placeholder={t(
-                          target === '1'
-                            ? 'notifications.chatIdPlaceholder'
-                            : 'notifications.userKeyPlaceholder',
-                        )}
-                      />
-                      {error && <FormHelperText>{error}</FormHelperText>}
-                      {target === '1' && (
-                        <FormHelperText sx={{ display: 'block' }}>
-                          {t('notifications.telegramChatIdHelpBefore')}{' '}
-                          <Link
-                            href='https://t.me/userinfobot'
-                            target='_blank'
-                            rel='noopener noreferrer'
-                          >
-                            {t('notifications.clickHere')}
-                          </Link>{' '}
-                          {t('notifications.telegramChatIdHelpAfter')}
-                        </FormHelperText>
-                      )}
-                    </FormControl>
-                  )}
-                  <Button
-                    type='submit'
-                    loading={savingTarget}
-                    sx={{ alignSelf: { xs: 'stretch', sm: 'flex-end' } }}
-                  >
-                    {t('common.save')}
-                  </Button>
-                </Box>
-              </Box>
-            )}
-          </Sheet>
+        <Box sx={{ mb: 3.5 }}>
+          <SettingsLinks ids={['notification-integrations']} />
         </Box>
 
         {official && (

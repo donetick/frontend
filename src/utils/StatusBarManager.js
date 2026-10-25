@@ -64,7 +64,10 @@ class StatusBarManager {
 
       await StatusBar.setStyle({ style })
       await StatusBar.setBackgroundColor({
-        color: THEME_BACKGROUND[resolvedTheme],
+        color:
+          getComputedStyle(document.documentElement)
+            .getPropertyValue('--joy-palette-background-body')
+            .trim() || THEME_BACKGROUND[resolvedTheme],
       })
       console.log(`StatusBarManager: Theme set to ${theme}, style: ${style}`)
     } catch (error) {

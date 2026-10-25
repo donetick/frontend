@@ -1,5 +1,4 @@
-import { Box, Button, CircularProgress, Container } from '@mui/joy'
-import { Typography } from '@mui/material'
+import { Box, Button, CircularProgress, Container, Typography } from '@mui/joy'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -39,7 +38,7 @@ const LoadingComponent = () => {
         }}
       >
         <CircularProgress
-          color='success'
+          color='primary'
           determinate={!isOnline}
           sx={{ '--CircularProgress-size': '200px' }}
         >

@@ -1,7 +1,8 @@
 .reactCalendar {
   width: 100%;
   min-width: 280px;
-  font-family: 'Roboto', sans-serif;
+  font-family: var(--joy-fontFamily-body);
+  color: var(--joy-palette-text-primary);
   background-color: transparent;
   border: none;
   margin: 0 auto;
@@ -71,7 +72,7 @@
   text-decoration: none;
   font-weight: 500;
   padding: 0.5em;
-  color: #666;
+  color: var(--joy-palette-text-secondary);
   font-size: 0.875rem;
   display: flex;
   align-items: center;
@@ -109,6 +110,7 @@
   transition: all 0.2s ease-in-out;
   position: relative;
   font-size: clamp(0.75rem, 2vw, 0.875rem);
+  color: var(--joy-palette-text-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -119,7 +121,7 @@
 
 .reactCalendar :global(.react-calendar__tile:enabled:hover) {
   background-color: var(--joy-palette-primary-softBg);
-  color: var(--joy-palette-primary-solidColor);
+  color: var(--joy-palette-primary-softColor);
 }
 
 /* Active/Selected date */
@@ -138,7 +140,7 @@
 .reactCalendar :global(.react-calendar__tile--now) {
   background-color: transparent !important;
   border: 1.5px solid var(--joy-palette-primary-solidBg) !important;
-  color: var(--joy-palette-primary-solidBg) !important;
+  color: var(--joy-palette-primary-plainColor) !important;
   font-weight: 500;
 }
 
@@ -201,8 +203,9 @@
   top: 100%;
   left: 50%;
   transform: translateX(-50%);
-  background-color: #333;
-  color: white;
+  background-color: var(--joy-palette-background-popup);
+  color: var(--joy-palette-text-primary);
+  border: 1px solid var(--joy-palette-divider);
   padding: 5px 10px;
   border-radius: 4px;
   z-index: 10;
@@ -226,7 +229,7 @@
 .reactCalendar
   :global(.react-calendar__year-view__months__month:enabled:hover) {
   background-color: var(--joy-palette-primary-softBg) !important;
-  color: var(--joy-palette-primary-solidColor) !important;
+  color: var(--joy-palette-primary-softColor) !important;
 }
 
 /* Decade view year tiles - similar fix */
@@ -242,7 +245,7 @@
 .reactCalendar
   :global(.react-calendar__decade-view__years__year:enabled:hover) {
   background-color: var(--joy-palette-primary-softBg) !important;
-  color: var(--joy-palette-primary-solidColor) !important;
+  color: var(--joy-palette-primary-softColor) !important;
 }
 
 /* Century view decade tiles */
@@ -258,7 +261,7 @@
 .reactCalendar
   :global(.react-calendar__century-view__decades__decade:enabled:hover) {
   background-color: var(--joy-palette-primary-softBg) !important;
-  color: var(--joy-palette-primary-solidColor) !important;
+  color: var(--joy-palette-primary-softColor) !important;
 }
 
 /* Navigation buttons (month/year selectors and arrows) */
@@ -284,7 +287,7 @@
 
 .reactCalendar :global(.react-calendar__navigation button:enabled:hover) {
   background-color: var(--joy-palette-primary-softBg) !important;
-  color: var(--joy-palette-primary-solidColor) !important;
+  color: var(--joy-palette-primary-softColor) !important;
   border-color: var(--joy-palette-primary-outlinedBorder);
 }
 

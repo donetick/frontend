@@ -1,12 +1,11 @@
-import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd'
 import {
   Archive,
   Checklist,
-  DragIndicator,
   FilterAlt,
   FolderOpen,
   History,
   ListAlt,
+  MoreHoriz,
   SearchRounded,
   SettingsOutlined,
   SpaceDashboard,
@@ -16,18 +15,10 @@ import {
 import {
   Box,
   Button,
-  Card,
-  Checkbox,
-  FormControl,
-  FormHelperText,
-  FormLabel,
-  IconButton,
-  List,
-  ListItem,
-  ListItemContent,
-  ListItemDecorator,
+  Chip,
   Radio,
   RadioGroup,
+  Sheet,
   Switch,
   Typography,
 } from '@mui/joy'
@@ -55,6 +46,8 @@ import {
 } from '../../utils/TaskEditorPreferences'
 import { isMobileBottomNavEligible } from '../components/MobileBottomNav'
 import SettingsLayout from './SettingsLayout'
+import SettingsReorderList from './SettingsReorderList'
+import SettingsSection from './SettingsSection'
 import SidepanelSettings from './SidepanelSettings'
 
 const ICONS = {
@@ -72,339 +65,326 @@ const ICONS = {
 }
 
 const LayoutSettings = () => {
-  // The nav item labels are the ones the bar itself renders, and those live
-  // in the shared `common` namespace — reuse them rather than retranslating.
   const { t } = useTranslation(['settings', 'common'])
   const singlePageTaskEditor = useSinglePageTaskEditor()
   const isMobile = useMediaQuery('(max-width:768px)')
   const bottomNavEligible = isMobileBottomNavEligible(isMobile)
-  // Same breakpoint Sidepanel itself checks before rendering.
   const hasSidepanel = useMediaQuery(theme => theme.breakpoints.up('lg'))
-
   const [defaultView, setDefaultView] = useState(getDefaultView)
-  const [config, setConfig] = useState(getBottomNavConfig)
+  const [config, setConfig] = useState(() =>
+    [...getBottomNavConfig()].sort((a, b) => a.order - b.order),
+  )
   const [hideLabels, setHideLabels] = useState(getBottomNavHideLabels)
-
   const enabledCount = config.filter(item => item.enabled).length
-
-  const handleHideLabelsChange = hide => {
-    setHideLabels(hide)
-    saveBottomNavHideLabels(hide)
-  }
-
-  const handleDefaultViewChange = view => {
-    setDefaultView(view)
-    saveDefaultView(view)
-  }
+  const labelFor = item =>
+    t(`common:${item.translationKey}`, {
+      defaultValue: item.translationDefault,
+    })
 
   const saveConfig = newConfig => {
     setConfig(newConfig)
     saveBottomNavConfig(newConfig)
   }
-
   const handleToggleEnabled = (id, enabled) => {
     if (enabled && enabledCount >= MAX_BOTTOM_NAV_ITEMS) return
-
-    const newConfig = config.map(item =>
-      item.id === id ? { ...item, enabled } : item,
+    saveConfig(
+      config.map(item => (item.id === id ? { ...item, enabled } : item)),
     )
-    saveConfig(newConfig)
   }
-
-  const handleDragEnd = result => {
-    if (!result.destination) return
-
-    const newConfig = Array.from(config)
-    const [reorderedItem] = newConfig.splice(result.source.index, 1)
-    newConfig.splice(result.destination.index, 0, reorderedItem)
-
-    const updatedConfig = newConfig.map((item, index) => ({
-      ...item,
-      order: index,
-    }))
-
-    saveConfig(updatedConfig)
-  }
-
-  const resetToDefaults = () => {
-    saveConfig(DEFAULT_BOTTOM_NAV_CONFIG)
-  }
+  const navItems = config.flatMap(item => {
+    const poolItem = BOTTOM_NAV_ITEM_POOL.find(entry => entry.id === item.id)
+    return poolItem
+      ? [
+          {
+            ...item,
+            label: labelFor(poolItem),
+            icon: ICONS[poolItem.iconName],
+            disabled: !item.enabled && enabledCount >= MAX_BOTTOM_NAV_ITEMS,
+          },
+        ]
+      : []
+  })
 
   return (
     <SettingsLayout title={t('layout.title')}>
-      <div className='grid gap-4'>
-        {/* Where the app opens. It comes first because it decides what you
-            see before any of the shortcuts below get a chance to matter. */}
-        <Box>
-          <Typography level='title-md' sx={{ fontWeight: 600 }}>
-            {t('layout.defaultView.title')}
-          </Typography>
-          <Typography level='body-md' sx={{ mb: 2 }}>
-            {t('layout.defaultView.description')}
-          </Typography>
-
-          <RadioGroup
-            value={defaultView}
-            onChange={e => handleDefaultViewChange(e.target.value)}
-            sx={{ gap: 1 }}
+      <Box sx={{ maxWidth: 680, pb: 4 }}>
+        <Typography
+          level='body-md'
+          textColor='text.secondary'
+          sx={{ maxWidth: 560, mb: 3, mt: -1, textWrap: 'pretty' }}
+        >
+          {t('layout.detailedDescription')}
+        </Typography>
+        <Box sx={{ display: 'grid', gap: 2 }}>
+          <SettingsSection
+            title={t('layout.defaultView.title')}
+            description={t('layout.defaultView.description')}
           >
-            {DEFAULT_VIEW_OPTIONS.map(option => (
-              <Card
-                key={option}
-                sx={{
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  flexDirection: 'row',
-                  gap: 2,
-                  p: 2,
-                  border:
-                    defaultView === option
-                      ? '2px solid var(--joy-palette-primary-400)'
-                      : '1px solid var(--joy-palette-divider)',
-                }}
-              >
-                <Radio
-                  value={option}
-                  overlay
-                  slotProps={{ label: { sx: { flex: 1 } } }}
-                  label={
-                    <Box>
-                      <Typography level='title-sm' sx={{ fontWeight: 600 }}>
-                        {t(`layout.defaultView.options.${option}.name`)}
-                      </Typography>
-                      <Typography
-                        level='body-xs'
-                        sx={{ color: 'var(--joy-palette-text-tertiary)' }}
-                      >
-                        {t(`layout.defaultView.options.${option}.description`)}
-                      </Typography>
-                    </Box>
-                  }
-                />
-              </Card>
-            ))}
-          </RadioGroup>
-        </Box>
-
-        {/* The bar itself only exists on mobile, so there is nothing to
-            configure here on a desktop-sized screen. */}
-        {bottomNavEligible && (
-          <Box
-            sx={{
-              mt: 2,
-              pt: 3,
-              borderTop: '1px solid var(--joy-palette-divider)',
-            }}
-          >
-            <Typography level='title-md' sx={{ fontWeight: 600 }}>
-              {t('layout.bottomNav.title')}
-            </Typography>
-            <Typography level='body-md' sx={{ mb: 3 }}>
-              {t('layout.bottomNav.description', {
-                max: MAX_BOTTOM_NAV_ITEMS,
-              })}
-            </Typography>
-
-            <Card
+            <RadioGroup
+              aria-label={t('layout.defaultView.title')}
+              name='default-view'
+              value={defaultView}
+              onChange={event => {
+                setDefaultView(event.target.value)
+                saveDefaultView(event.target.value)
+              }}
               sx={{
-                mb: 3,
-                display: 'flex',
-                alignItems: 'center',
-                flexDirection: 'row',
-                gap: 2,
-                p: 2,
-                border: '1px solid var(--joy-palette-divider)',
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
+                gap: 1.5,
               }}
             >
-              <Box sx={{ flex: 1 }}>
-                <FormLabel sx={{ fontWeight: 600 }}>
-                  {t('layout.bottomNav.hideLabels.title')}
-                </FormLabel>
-                <FormHelperText sx={{ mt: 0.5 }}>
-                  {t('layout.bottomNav.hideLabels.description')}
-                </FormHelperText>
+              {DEFAULT_VIEW_OPTIONS.map(option => (
+                <Sheet
+                  key={option}
+                  sx={{
+                    position: 'relative',
+                    border: '1px solid',
+                    borderColor:
+                      defaultView === option
+                        ? 'primary.outlinedColor'
+                        : 'divider',
+                    bgcolor:
+                      defaultView === option
+                        ? 'primary.softBg'
+                        : 'background.surface',
+                    borderRadius: 'lg',
+                    p: 2,
+                    '&:focus-within': {
+                      outline: '2px solid',
+                      outlineColor: 'focusVisible',
+                      outlineOffset: 2,
+                    },
+                  }}
+                >
+                  <Box
+                    aria-hidden='true'
+                    sx={{
+                      color:
+                        defaultView === option
+                          ? 'primary.plainColor'
+                          : 'text.tertiary',
+                      mb: 1.5,
+                    }}
+                  >
+                    {option === 'home' ? <SpaceDashboard /> : <Checklist />}
+                  </Box>
+                  <Radio
+                    overlay
+                    value={option}
+                    label={t(`layout.defaultView.options.${option}.name`)}
+                    sx={{ fontWeight: 600 }}
+                  />
+                  <Typography
+                    level='body-sm'
+                    textColor='text.secondary'
+                    sx={{ mt: 0.75 }}
+                  >
+                    {t(`layout.defaultView.options.${option}.description`)}
+                  </Typography>
+                </Sheet>
+              ))}
+            </RadioGroup>
+          </SettingsSection>
+
+          <SettingsSection
+            title={t('layout.taskEditor.title')}
+            description={t('layout.taskEditor.description')}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography level='title-sm' id='single-page-editor-label'>
+                  {t('layout.taskEditor.singlePage')}
+                </Typography>
+                <Typography
+                  level='body-sm'
+                  textColor='text.secondary'
+                  id='single-page-editor-description'
+                  sx={{ mt: 0.5 }}
+                >
+                  {t('layout.taskEditor.helper')}
+                </Typography>
               </Box>
               <Switch
-                checked={hideLabels}
-                onChange={e => handleHideLabelsChange(e.target.checked)}
+                checked={singlePageTaskEditor}
+                onChange={event =>
+                  setSinglePageTaskEditor(event.target.checked)
+                }
+                color={singlePageTaskEditor ? 'primary' : 'neutral'}
+                slotProps={{
+                  input: {
+                    'aria-labelledby': 'single-page-editor-label',
+                    'aria-describedby': 'single-page-editor-description',
+                  },
+                }}
+                sx={{ flexShrink: 0 }}
               />
-            </Card>
+            </Box>
+          </SettingsSection>
 
-            <DragDropContext onDragEnd={handleDragEnd}>
-              <Droppable droppableId='bottom-nav-items'>
-                {provided => (
-                  <List
-                    {...provided.droppableProps}
-                    ref={provided.innerRef}
-                    sx={{ gap: 1 }}
-                  >
-                    {config.map((item, index) => {
-                      // The stored config only keeps id/enabled/order — the
-                      // icon and label live in the pool.
-                      const poolItem = BOTTOM_NAV_ITEM_POOL.find(
-                        entry => entry.id === item.id,
-                      )
-                      if (!poolItem) return null
-
-                      const disableToggleOn =
-                        !item.enabled && enabledCount >= MAX_BOTTOM_NAV_ITEMS
-
-                      return (
-                        <Draggable
-                          key={item.id}
-                          draggableId={item.id}
-                          index={index}
-                        >
-                          {(provided, snapshot) => (
-                            <ListItem
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              sx={{
-                                p: 0,
-                                backgroundColor: snapshot.isDragging
-                                  ? 'var(--joy-palette-neutral-softBg)'
-                                  : 'transparent',
-                                borderRadius: 'var(--joy-radius-md)',
-                              }}
-                            >
-                              <Card
-                                sx={{
-                                  width: '100%',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  flexDirection: 'row',
-                                  gap: 2,
-                                  p: 2,
-                                  opacity: item.enabled ? 1 : 0.6,
-                                  border: snapshot.isDragging
-                                    ? '2px solid var(--joy-palette-primary-400)'
-                                    : '1px solid var(--joy-palette-divider)',
-                                }}
-                              >
-                                <ListItemDecorator>
-                                  <IconButton
-                                    {...provided.dragHandleProps}
-                                    variant='plain'
-                                    size='sm'
-                                    sx={{
-                                      cursor: 'grab',
-                                      '&:active': { cursor: 'grabbing' },
-                                    }}
-                                  >
-                                    <DragIndicator />
-                                  </IconButton>
-                                </ListItemDecorator>
-
-                                <IconButton
-                                  sx={{
-                                    color: 'var(--joy-palette-primary-500)',
-                                  }}
-                                >
-                                  {ICONS[poolItem.iconName]}
-                                </IconButton>
-
-                                <ListItemContent sx={{ flex: 1 }}>
-                                  <Typography
-                                    level='title-sm'
-                                    sx={{ fontWeight: 600 }}
-                                  >
-                                    {t(`common:${poolItem.translationKey}`, {
-                                      defaultValue: poolItem.translationDefault,
-                                    })}
-                                  </Typography>
-                                </ListItemContent>
-
-                                <FormControl>
-                                  <Checkbox
-                                    checked={item.enabled}
-                                    disabled={disableToggleOn}
-                                    onChange={e =>
-                                      handleToggleEnabled(
-                                        item.id,
-                                        e.target.checked,
-                                      )
-                                    }
-                                    size='lg'
-                                  />
-                                </FormControl>
-                              </Card>
-                            </ListItem>
-                          )}
-                        </Draggable>
-                      )
-                    })}
-                    {provided.placeholder}
-                  </List>
-                )}
-              </Droppable>
-            </DragDropContext>
-
-            <Box
-              sx={{
-                mt: 3,
-                pt: 2,
-                borderTop: '1px solid var(--joy-palette-divider)',
-              }}
+          {bottomNavEligible && (
+            <SettingsSection
+              title={t('layout.bottomNav.title')}
+              description={t('layout.bottomNav.description', {
+                max: MAX_BOTTOM_NAV_ITEMS,
+              })}
             >
-              <Button
-                variant='outlined'
-                color='neutral'
-                onClick={resetToDefaults}
+              <Box sx={{ mb: 2.5 }}>
+                <Typography
+                  level='body-xs'
+                  textColor='text.tertiary'
+                  sx={{ mb: 1 }}
+                >
+                  {t('layout.preview')}
+                </Typography>
+                <Sheet
+                  aria-hidden='true'
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'stretch',
+                    p: 1,
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    borderRadius: 'lg',
+                    bgcolor: 'background.level1',
+                  }}
+                >
+                  {[
+                    ...navItems.filter(item => item.enabled),
+                    {
+                      id: 'more',
+                      label: t('common:navigation.more'),
+                      icon: <MoreHoriz />,
+                    },
+                  ].map(item => (
+                    <Box
+                      key={item.id}
+                      sx={{
+                        flex: 1,
+                        minWidth: 0,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: 0.5,
+                        py: 0.75,
+                        color: 'text.secondary',
+                      }}
+                    >
+                      {item.icon}
+                      {!hideLabels && (
+                        <Typography
+                          level='body-xs'
+                          sx={{
+                            width: '100%',
+                            textAlign: 'center',
+                            overflowWrap: 'anywhere',
+                          }}
+                        >
+                          {item.label}
+                        </Typography>
+                      )}
+                    </Box>
+                  ))}
+                </Sheet>
+              </Box>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2,
+                  mb: 2.5,
+                  pb: 2.5,
+                  borderBottom: '1px solid',
+                  borderColor: 'divider',
+                }}
+              >
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography level='title-sm' id='hide-nav-labels'>
+                    {t('layout.bottomNav.hideLabels.title')}
+                  </Typography>
+                  <Typography
+                    level='body-sm'
+                    textColor='text.secondary'
+                    sx={{ mt: 0.5 }}
+                  >
+                    {t('layout.bottomNav.hideLabels.description')}
+                  </Typography>
+                </Box>
+                <Switch
+                  checked={hideLabels}
+                  onChange={event => {
+                    setHideLabels(event.target.checked)
+                    saveBottomNavHideLabels(event.target.checked)
+                  }}
+                  color={hideLabels ? 'primary' : 'neutral'}
+                  slotProps={{
+                    input: { 'aria-labelledby': 'hide-nav-labels' },
+                  }}
+                  sx={{ flexShrink: 0 }}
+                />
+              </Box>
+              <Chip
                 size='sm'
+                variant='soft'
+                color={
+                  enabledCount >= MAX_BOTTOM_NAV_ITEMS ? 'primary' : 'neutral'
+                }
+                sx={{ mb: 1 }}
+              >
+                {t('layout.bottomNav.selectedCount', {
+                  count: enabledCount,
+                  max: MAX_BOTTOM_NAV_ITEMS,
+                })}
+              </Chip>
+              <Typography
+                level='body-xs'
+                textColor='text.tertiary'
+                sx={{ mb: 1 }}
+              >
+                {t(
+                  enabledCount >= MAX_BOTTOM_NAV_ITEMS
+                    ? 'layout.bottomNav.limitHint'
+                    : 'layout.reorderHint',
+                )}
+              </Typography>
+              <SettingsReorderList
+                id='bottom-nav-items'
+                items={navItems}
+                onToggle={handleToggleEnabled}
+                onReorder={ids =>
+                  saveConfig(
+                    ids.map((id, order) => ({
+                      ...config.find(item => item.id === id),
+                      order,
+                    })),
+                  )
+                }
+              />
+              <Button
+                variant='plain'
+                color='neutral'
+                size='sm'
+                onClick={() => saveConfig(DEFAULT_BOTTOM_NAV_CONFIG)}
+                sx={{ mt: 2 }}
               >
                 {t('layout.bottomNav.resetToDefaults')}
               </Button>
-              <FormHelperText sx={{ mt: 1 }}>
-                {t('layout.bottomNav.resetHelper')}
-              </FormHelperText>
-            </Box>
-          </Box>
-        )}
-
-        <Box
-          sx={{
-            mt: 2,
-            pt: 3,
-            borderTop: '1px solid var(--joy-palette-divider)',
-          }}
-        >
-          <Typography level='title-md' sx={{ fontWeight: 600, mb: 2 }}>
-            Task editor
-          </Typography>
-          <FormControl>
-            <Checkbox
-              checked={singlePageTaskEditor}
-              onChange={event => setSinglePageTaskEditor(event.target.checked)}
-              variant='soft'
-              label='Show task editor on one page'
-            />
-            <FormHelperText>
-              Show all task settings in one scrolling page instead of separate
-              steps. Saved for this device/browser.
-            </FormHelperText>
-          </FormControl>
+            </SettingsSection>
+          )}
+          {hasSidepanel && (
+            <SettingsSection
+              title={t('layout.sidepanel.title')}
+              description={t('sidepanel.description')}
+            >
+              <SidepanelSettings />
+            </SettingsSection>
+          )}
         </Box>
-
-        {/* Mirror image of the bottom bar: the sidepanel only renders from
-            `lg` up, so it is configurable exactly where it exists. */}
-        {hasSidepanel && (
-          <Box
-            sx={{
-              mt: 2,
-              pt: 3,
-              borderTop: '1px solid var(--joy-palette-divider)',
-            }}
-          >
-            <Typography level='title-md' sx={{ fontWeight: 600 }}>
-              {t('layout.sidepanel.title')}
-            </Typography>
-            <SidepanelSettings />
-          </Box>
-        )}
-      </div>
+        <Typography level='body-xs' textColor='text.tertiary' sx={{ mt: 2 }}>
+          {t('layout.savedOnDevice')}
+        </Typography>
+      </Box>
     </SettingsLayout>
   )
 }
-
 export default LayoutSettings

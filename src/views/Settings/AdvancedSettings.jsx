@@ -1,11 +1,10 @@
+import { WarningAmberRounded } from '@mui/icons-material'
 import {
   Box,
-  Button,
-  Checkbox,
   Chip,
-  FormControl,
-  FormHelperText,
-  Input,
+  CircularProgress,
+  Divider,
+  Switch,
   Typography,
 } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
@@ -13,11 +12,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import RealTimeSettings from '../../components/RealTimeSettings'
-import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
-import { useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
-import { GetUserCircle, PutWebhookURL } from '../../utils/Fetcher'
-import { isPlusAccount } from '../../utils/Helpers'
 import { offlineDB } from '../../utils/OfflineDB'
 import {
   clearBrowserCacheStorage,
@@ -28,18 +23,13 @@ import {
 import { syncEngine } from '../../utils/SyncEngine'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import SettingsLayout from './SettingsLayout'
+import SettingsSection from './SettingsSection'
 
 const AdvancedSettings = () => {
   const { t } = useTranslation('settings')
-  const { data: userProfile } = useUserProfile()
-  const { showPaywall } = usePaywall()
   const queryClient = useQueryClient()
   const { showNotification } = useNotification()
 
-  const [userCircles, setUserCircles] = useState([])
-  const [webhookURL, setWebhookURL] = useState(null)
-  const [webhookError, setWebhookError] = useState(null)
-  const [isAdmin, setIsAdmin] = useState(false)
   const [offlineEnabled, setOfflineEnabled] = useState(
     isOfflineFeatureEnabled(),
   )
@@ -50,22 +40,6 @@ const AdvancedSettings = () => {
     const unsubscribe = subscribeToOfflineFeature(setOfflineEnabled)
     return unsubscribe
   }, [])
-
-  useEffect(() => {
-    GetUserCircle().then(resp => {
-      resp.json().then(data => {
-        setUserCircles(data.res ? data.res : [])
-        setWebhookURL(data.res ? data.res[0].webhook_url : null)
-      })
-    })
-  }, [])
-
-  // Check if user is admin based on userRole from the circle data
-  useEffect(() => {
-    if (userCircles.length > 0) {
-      setIsAdmin(userCircles[0]?.userRole === 'admin')
-    }
-  }, [userCircles])
 
   const disableOfflineSupport = async () => {
     setOfflineLoading(true)
@@ -128,138 +102,105 @@ const AdvancedSettings = () => {
     showDisableOfflineConfirmation()
   }
 
-  // if (!userProfile) {
-  //   return (
-  //     <SettingsLayout title="Advanced Settings">
-  //       <div>Loading...</div>
-  //     </SettingsLayout>
-  //   )
-  // }
-
   return (
     <SettingsLayout title={t('advanced.title')}>
-      <div className='grid gap-4'>
-        <Typography level='body-md'>{t('advanced.description')}</Typography>
-
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 2 }}>
-          <Typography level='title-lg'>{t('advanced.offlineTitle')}</Typography>
-          <Chip
-            variant='outlined'
-            size='sm'
-            sx={{
-              height: '20px',
-              fontSize: '0.65rem',
-              fontWeight: 'bold',
-              color: 'warning.main',
-              borderColor: 'warning.main',
-            }}
-          >
-            {t('common.earlyAccess')}
-          </Chip>
-        </Box>
-        <Typography level='body-md' mt={-1}>
-          {t('advanced.offlineDescription')}
+      <Box sx={{ maxWidth: 680, pb: 4 }}>
+        <Typography
+          level='body-md'
+          textColor='text.secondary'
+          sx={{ maxWidth: 560, mb: 3, mt: -1, textWrap: 'pretty' }}
+        >
+          {t('advanced.description')}
         </Typography>
-        <FormControl sx={{ mt: 1 }}>
-          <Checkbox
-            checked={offlineEnabled}
-            onChange={handleOfflineToggle}
-            variant='soft'
-            label={t('advanced.offlineToggle')}
-            disabled={offlineLoading}
-            overlay
-          />
-          <FormHelperText>{t('advanced.offlineHelper')}</FormHelperText>
-        </FormControl>
-
-        {/* Webhook Settings - Only show for admins */}
-        {isAdmin && (
-          <>
-            <Typography level='title-lg' mt={2}>
-              {t('advanced.webhookTitle')}
-            </Typography>
-            <Typography level='body-md' mt={-1}>
-              {t('advanced.webhookDescription')}
-            </Typography>
-            <FormControl sx={{ mt: 1 }}>
-              <Checkbox
-                checked={webhookURL !== null}
-                onClick={() => {
-                  if (!isPlusAccount(userProfile)) {
-                    showPaywall(PAYWALL_REASON.WEBHOOKS)
-                    return
-                  }
-                  if (webhookURL === null) {
-                    setWebhookURL('')
-                  } else {
-                    setWebhookURL(null)
-                  }
+        <Box sx={{ display: 'grid', gap: 2 }}>
+          <SettingsSection
+            title={t('advanced.offlineTitle')}
+            description={t('advanced.offlineDescription')}
+            action={
+              <Chip size='sm' color='warning' variant='soft'>
+                {t('common.earlyAccess')}
+              </Chip>
+            }
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Typography
+                component='label'
+                htmlFor='settings-offline-support'
+                level='title-sm'
+                sx={{ flex: 1, minWidth: 0, cursor: 'pointer' }}
+              >
+                {t('advanced.offlineToggle')}
+              </Typography>
+              <Switch
+                checked={offlineEnabled}
+                onChange={handleOfflineToggle}
+                disabled={offlineLoading}
+                color={offlineEnabled ? 'primary' : 'neutral'}
+                slotProps={{
+                  input: {
+                    id: 'settings-offline-support',
+                    'aria-describedby': 'settings-offline-warning',
+                    'aria-busy': offlineLoading,
+                  },
                 }}
-                variant='soft'
-                label={t('advanced.webhookToggle')}
-                overlay
+                sx={{ flexShrink: 0, minHeight: 44 }}
               />
-              <FormHelperText>{t('advanced.webhookHelper')}</FormHelperText>
-            </FormControl>
-
-            {webhookURL !== null && (
-              <Box>
-                <Typography level='title-sm'>
-                  {t('advanced.webhookURL')}
+            </Box>
+            <Divider sx={{ my: 2 }} />
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: 1,
+                p: 1.5,
+                borderRadius: 'lg',
+                bgcolor: 'warning.softBg',
+                color: 'text.secondary',
+              }}
+            >
+              <WarningAmberRounded
+                sx={{ fontSize: 18, mt: 0.25, flexShrink: 0 }}
+              />
+              <Typography
+                id='settings-offline-warning'
+                level='body-sm'
+                textColor='text.primary'
+              >
+                {t('advanced.offlineHelper')}
+              </Typography>
+            </Box>
+            {offlineLoading && (
+              <Box
+                role='status'
+                sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1.5 }}
+              >
+                <CircularProgress size='sm' />
+                <Typography level='body-sm' textColor='text.secondary'>
+                  {t('advanced.clearingOffline')}
                 </Typography>
-                <Input
-                  value={webhookURL ? webhookURL : ''}
-                  onChange={e => setWebhookURL(e.target.value)}
-                  size='lg'
-                  sx={{
-                    width: '220px',
-                    mb: 1,
-                  }}
-                />
-                {webhookError && (
-                  <Typography level='body-sm' color='danger'>
-                    {webhookError}
-                  </Typography>
-                )}
-                <Button
-                  variant='soft'
-                  sx={{ width: '110px', mt: 1 }}
-                  onClick={() => {
-                    PutWebhookURL(webhookURL).then(resp => {
-                      if (resp.ok) {
-                        showNotification({
-                          type: 'success',
-                          message: t('advanced.webhookUpdated'),
-                        })
-                      } else {
-                        showNotification({
-                          type: 'error',
-                          message: t('advanced.webhookUpdateFailed'),
-                        })
-                      }
-                    })
-                  }}
-                >
-                  {t('common.save')}
-                </Button>
               </Box>
             )}
-          </>
-        )}
+          </SettingsSection>
 
-        {/* Real-time Settings */}
-        <Typography level='title-lg' mt={2}>
-          {t('advanced.realtimeTitle')}
+          <SettingsSection
+            title={t('advanced.realtimeTitle')}
+            description={t('advanced.realtimeDescription')}
+            action={
+              <Chip size='sm' color='primary' variant='soft'>
+                Donetick Plus
+              </Chip>
+            }
+          >
+            <RealTimeSettings embedded />
+          </SettingsSection>
+        </Box>
+        <Typography level='body-xs' textColor='text.tertiary' sx={{ mt: 2 }}>
+          {t('layout.savedOnDevice')}
         </Typography>
-        <Typography level='body-md' mt={-1}>
-          {t('advanced.realtimeDescription')}
-        </Typography>
-        <RealTimeSettings />
-
         {confirmModalConfig?.isOpen && (
           <ConfirmationModal config={confirmModalConfig} />
         )}
-      </div>
+      </Box>
     </SettingsLayout>
   )
 }

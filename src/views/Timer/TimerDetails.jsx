@@ -56,8 +56,9 @@ import { useNotification } from '../../service/NotificationProvider'
 import { commandQueue, CommandType } from '../../utils/CommandQueue'
 import { resolvePhotoURL } from '../../utils/Helpers'
 import { isOfflineFeatureEnabled } from '../../utils/OfflineFeatureToggle'
-import { getSafeBottom } from '../../utils/SafeAreaUtils'
+import { getSafeBottom, getSafeBottomStyles } from '../../utils/SafeAreaUtils'
 import LoadingComponent from '../components/Loading'
+import ScrollHideFab from '../components/ScrollHideFab'
 
 // Effectively "can this action be queued offline?" — requires the offline
 // feature, otherwise there is no command queue to replay it later.
@@ -470,7 +471,7 @@ const TimerDetails = () => {
                     <Box>
                       <Typography
                         level='h4'
-                        color='success'
+                        color='primary'
                         sx={{
                           fontWeight: 'bold',
                           lineHeight: 1.5,
@@ -690,7 +691,7 @@ const TimerDetails = () => {
                   sx={{
                     height: '100%',
                     width: `${Math.round((calculateCurrentActiveDuration() / Math.max(calculateTotalDuration(), 1)) * 100)}%`,
-                    backgroundColor: 'success.400',
+                    backgroundColor: 'primary.solidBg',
                     borderRadius: 'sm',
                     transition: 'width 0.3s ease-in-out',
                   }}
@@ -759,15 +760,13 @@ const TimerDetails = () => {
                                 width: `${widthPercent}%`,
                                 height: '100%',
                                 backgroundColor: isOngoing
-                                  ? 'success.500'
-                                  : 'success.400',
+                                  ? 'primary.solidHoverBg'
+                                  : 'primary.solidBg',
                                 borderRight: isOngoing ? '2px solid' : 'none',
-                                borderRightColor: 'success.600',
+                                borderRightColor: 'primary.outlinedBorder',
                                 transition: 'all 0.3s ease-in-out',
                                 '&:hover': {
-                                  backgroundColor: isOngoing
-                                    ? 'success.600'
-                                    : 'success.500',
+                                  backgroundColor: 'primary.solidActiveBg',
                                   zIndex: 1,
                                 },
                               }}
@@ -803,7 +802,7 @@ const TimerDetails = () => {
                             sx={{
                               width: 12,
                               height: 12,
-                              backgroundColor: 'success.400',
+                              backgroundColor: 'primary.solidBg',
                               borderRadius: 'xs',
                             }}
                           />
@@ -850,10 +849,10 @@ const TimerDetails = () => {
                               sx={{
                                 width: 12,
                                 height: 12,
-                                backgroundColor: 'success.500',
+                                backgroundColor: 'primary.solidHoverBg',
                                 borderRadius: 'xs',
                                 border: '2px solid',
-                                borderColor: 'success.600',
+                                borderColor: 'primary.outlinedBorder',
                               }}
                             />
                             <Typography
@@ -891,7 +890,7 @@ const TimerDetails = () => {
                         {!timerData.endTime && (
                           <Typography
                             level='body-xs'
-                            sx={{ color: 'success.500' }}
+                            sx={{ color: 'primary.plainColor' }}
                           >
                             {t('timeline.now', { time: fmt.time(currentTime) })}
                           </Typography>
@@ -1094,7 +1093,7 @@ const TimerDetails = () => {
                                   gap: 2,
                                   minHeight: 'auto',
                                   borderColor: isOngoing
-                                    ? 'success.300'
+                                    ? 'primary.outlinedBorder'
                                     : 'divider',
                                   borderRadius: 0,
                                   borderBottom: '1px solid',
@@ -1108,7 +1107,7 @@ const TimerDetails = () => {
                                     height: 8,
                                     borderRadius: '50%',
                                     backgroundColor: isOngoing
-                                      ? 'success.500'
+                                      ? 'primary.solidBg'
                                       : 'neutral.400',
                                     flexShrink: 0,
                                   }}
@@ -1121,7 +1120,7 @@ const TimerDetails = () => {
                                     sx={{
                                       fontWeight: 'bold',
                                       color: isOngoing
-                                        ? 'success.600'
+                                        ? 'primary.plainColor'
                                         : 'text.primary',
                                       lineHeight: 1,
                                       mb: 0.3,
@@ -1135,7 +1134,7 @@ const TimerDetails = () => {
                                     {isOngoing && (
                                       <Chip
                                         size='sm'
-                                        color='success'
+                                        color='primary'
                                         variant='soft'
                                         sx={{ fontSize: '0.7rem' }}
                                       >
@@ -1412,70 +1411,79 @@ const TimerDetails = () => {
 
       {/* Floating Timer Control Button */}
       {!loading && timerData && (
-        <IconButton
-          color={isTimerRunning() ? 'warning' : 'success'}
-          variant='solid'
-          onClick={isTimerRunning() ? handlePauseTimer : handleStartTimer}
-          loading={timerActionLoading}
-          disabled={loading}
+        <ScrollHideFab
           sx={{
-            position: 'fixed',
-            bottom: getSafeBottom(16, 16),
-            left: 16,
-            width: 56,
-            height: 56,
-            borderRadius: '50%',
-            zIndex: 1000,
-            boxShadow: 'lg',
-            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-            transform: timerActionLoading ? 'scale(0.95)' : 'scale(1)',
-            animation: isTimerRunning()
-              ? 'pulse-warning 2s infinite'
-              : 'pulse-success 2s infinite',
-            '&:hover': {
-              transform: 'scale(1.1)',
-              boxShadow: 'xl',
-            },
-            '&:active': {
-              transform: 'scale(0.95)',
-            },
-            '@keyframes pulse-success': {
-              '0%': {
-                boxShadow:
-                  '0 4px 12px rgba(76, 175, 80, 0.3), 0 0 0 0 rgba(76, 175, 80, 0.7)',
-              },
-              '70%': {
-                boxShadow:
-                  '0 4px 12px rgba(76, 175, 80, 0.3), 0 0 0 10px rgba(76, 175, 80, 0)',
-              },
-              '100%': {
-                boxShadow:
-                  '0 4px 12px rgba(76, 175, 80, 0.3), 0 0 0 0 rgba(76, 175, 80, 0)',
-              },
-            },
-            '@keyframes pulse-warning': {
-              '0%': {
-                boxShadow:
-                  '0 4px 12px rgba(255, 152, 0, 0.3), 0 0 0 0 rgba(255, 152, 0, 0.7)',
-              },
-              '70%': {
-                boxShadow:
-                  '0 4px 12px rgba(255, 152, 0, 0.3), 0 0 0 10px rgba(255, 152, 0, 0)',
-              },
-              '100%': {
-                boxShadow:
-                  '0 4px 12px rgba(255, 152, 0, 0.3), 0 0 0 0 rgba(255, 152, 0, 0)',
-              },
+            ...getSafeBottomStyles({ bottom: 0, padding: 16 }),
+            '@media (max-width: 768px)': {
+              bottom: getSafeBottom(56, 16),
             },
           }}
-          title={isTimerRunning() ? 'Pause Timer' : 'Start Timer'}
         >
-          {isTimerRunning() ? (
-            <PauseCircle sx={{ fontSize: 24 }} />
-          ) : (
-            <PlayArrow sx={{ fontSize: 24 }} />
-          )}
-        </IconButton>
+          <IconButton
+            color={isTimerRunning() ? 'warning' : 'primary'}
+            variant='solid'
+            onClick={isTimerRunning() ? handlePauseTimer : handleStartTimer}
+            loading={timerActionLoading}
+            disabled={loading}
+            sx={{
+              width: 56,
+              height: 56,
+              borderRadius: '50%',
+              boxShadow: 'lg',
+              transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              transform: timerActionLoading ? 'scale(0.95)' : 'scale(1)',
+              animation: isTimerRunning()
+                ? 'pulse-warning 2s infinite'
+                : 'pulse-primary 2s infinite',
+              '&:hover': {
+                transform: 'scale(1.1)',
+                boxShadow: 'xl',
+              },
+              '&:active': {
+                transform: 'scale(0.95)',
+              },
+              '--Timer-actionGlow':
+                'color-mix(in srgb, var(--joy-palette-primary-solidBg) 30%, transparent)',
+              '--Timer-actionRing':
+                'color-mix(in srgb, var(--joy-palette-primary-solidBg) 70%, transparent)',
+              '@keyframes pulse-primary': {
+                '0%': {
+                  boxShadow:
+                    '0 4px 12px var(--Timer-actionGlow), 0 0 0 0 var(--Timer-actionRing)',
+                },
+                '70%': {
+                  boxShadow:
+                    '0 4px 12px var(--Timer-actionGlow), 0 0 0 10px transparent',
+                },
+                '100%': {
+                  boxShadow:
+                    '0 4px 12px var(--Timer-actionGlow), 0 0 0 0 transparent',
+                },
+              },
+              '@keyframes pulse-warning': {
+                '0%': {
+                  boxShadow:
+                    '0 4px 12px rgba(255, 152, 0, 0.3), 0 0 0 0 rgba(255, 152, 0, 0.7)',
+                },
+                '70%': {
+                  boxShadow:
+                    '0 4px 12px rgba(255, 152, 0, 0.3), 0 0 0 10px rgba(255, 152, 0, 0)',
+                },
+                '100%': {
+                  boxShadow:
+                    '0 4px 12px rgba(255, 152, 0, 0.3), 0 0 0 0 rgba(255, 152, 0, 0)',
+                },
+              },
+            }}
+            title={isTimerRunning() ? 'Pause Timer' : 'Start Timer'}
+          >
+            {isTimerRunning() ? (
+              <PauseCircle sx={{ fontSize: 24 }} />
+            ) : (
+              <PlayArrow sx={{ fontSize: 24 }} />
+            )}
+          </IconButton>
+        </ScrollHideFab>
       )}
     </Container>
   )

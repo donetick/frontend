@@ -88,7 +88,7 @@ const TimerSplitButton = ({
     >
       <ButtonGroup
         variant='soft'
-        color={chore.status === 1 ? 'warning' : 'success'}
+        color={chore.status === 1 ? 'warning' : 'primary'}
         sx={{
           '--ButtonGroup-separatorSize': '1px',
           '--ButtonGroup-connected': '1',

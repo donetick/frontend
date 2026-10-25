@@ -45,13 +45,16 @@ import ProjectView from '../views/Projects/ProjectView'
 import APITokenSettings from '../views/Settings/APITokenSettings'
 import CalendarSettings from '../views/Settings/CalendarSettings'
 import HomeSectionsSettings from '../views/Settings/HomeSectionsSettings'
+import IntegrationsSettings from '../views/Settings/IntegrationsSettings'
 import LayoutSettings from '../views/Settings/LayoutSettings'
 import LocalizationSettings from '../views/Settings/LocalizationSettings'
 import MFASettings from '../views/Settings/MFASettings'
+import NotificationIntegrationsSettings from '../views/Settings/NotificationIntegrationsSettings'
 import NotificationSetting from '../views/Settings/NotificationSetting'
 import PrivacyAnalyticsSettings from '../views/Settings/PrivacyAnalyticsSettings'
 import ProfileSettings from '../views/Settings/ProfileSettings'
 import StorageSettings from '../views/Settings/StorageSettings'
+import WebhookSettings from '../views/Settings/WebhookSettings'
 import WidgetSettings from '../views/Settings/WidgetSettings'
 import TermsView from '../views/Terms/TermsView'
 import TestView from '../views/TestView/Test'
@@ -101,6 +104,18 @@ const Router = createBrowserRouter([
           {
             path: 'subaccounts',
             element: <ChildUserSettings />,
+          },
+          {
+            path: 'webhooks',
+            element: <WebhookSettings />,
+          },
+          {
+            path: 'integrations',
+            element: <IntegrationsSettings />,
+          },
+          {
+            path: 'notification-integrations',
+            element: <NotificationIntegrationsSettings />,
           },
           {
             path: 'notifications',

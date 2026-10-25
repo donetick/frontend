@@ -45,7 +45,7 @@ const NavBarLink = ({ compact = false, link }) => {
             width: compact ? 48 : '100%',
             transition: 'background-color 160ms ease, color 160ms ease',
             '& .MuiListItemDecorator-root': {
-              color: active ? 'primary.plainColor' : 'text.tertiary',
+              color: active ? 'primary.softColor' : 'text.secondary',
               marginInlineEnd: compact ? '0 !important' : undefined,
               minInlineSize: compact ? 0 : 34,
             },
@@ -54,7 +54,10 @@ const NavBarLink = ({ compact = false, link }) => {
         >
           <ListItemDecorator>{icon}</ListItemDecorator>
           {!compact && (
-            <Typography level='body-sm' sx={{ fontWeight: 400 }}>
+            <Typography
+              level='body-sm'
+              sx={{ color: 'inherit', fontWeight: active ? 600 : 400 }}
+            >
               {label}
             </Typography>
           )}

@@ -1393,7 +1393,7 @@ const ChoreView = () => {
                       fullWidth
                       size='lg'
                       onClick={handleApproveChore}
-                      color='success'
+                      color='primary'
                       startDecorator={<ThumbUp />}
                       sx={{
                         flex: 1,
@@ -1435,7 +1435,7 @@ const ChoreView = () => {
                     disabled={
                       notInCompletionWindow(chore) || chore.isActive === false
                     }
-                    color='success'
+                    color='primary'
                     startDecorator={<Check />}
                     sx={{
                       flex: 4,
@@ -1503,7 +1503,7 @@ const ChoreView = () => {
                   handleChoreStart()
                 }}
                 variant='soft'
-                color='success'
+                color='primary'
                 disabled={
                   notInCompletionWindow(chore) || chore.isActive === false
                 }

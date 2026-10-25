@@ -1,4 +1,4 @@
-import { Typography } from '@mui/joy'
+import { Box, Typography } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
 
 import SettingsLayout from './SettingsLayout'
@@ -9,10 +9,16 @@ const ThemeSettings = () => {
 
   return (
     <SettingsLayout title={t('theme.title')}>
-      <div className='grid gap-4'>
-        <Typography level='body-md'>{t('theme.description')}</Typography>
+      <Box sx={{ maxWidth: 680, pb: 4 }}>
+        <Typography
+          level='body-md'
+          textColor='text.secondary'
+          sx={{ maxWidth: 560, mb: 3, mt: -1, textWrap: 'pretty' }}
+        >
+          {t('theme.description')}
+        </Typography>
         <ThemeToggle />
-      </div>
+      </Box>
     </SettingsLayout>
   )
 }

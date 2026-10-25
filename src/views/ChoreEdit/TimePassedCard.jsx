@@ -170,7 +170,7 @@ const TimePassedCard = ({ chore, handleAction, onShowDetails }) => {
         ) : (
           <Chip
             variant='solid'
-            color='success'
+            color='primary'
             size='md'
             startDecorator={<PlayArrow sx={{ fontSize: 14 }} />}
             onClick={() => {
