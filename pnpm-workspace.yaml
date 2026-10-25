@@ -1,8 +1,0 @@
-allowBuilds:
-  '@posthog/cli': true
-  '@swc/core': true
-  core-js: true
-  esbuild: true
-  sharp: true
-  tesseract.js: true
-  yarn: true
