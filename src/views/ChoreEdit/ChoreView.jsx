@@ -36,7 +36,6 @@ import {
 import { useQueryClient } from '@tanstack/react-query'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
-import { useXPTranslation as useTranslation } from '../../queries/XPQueries'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import EmptyState from '../../components/common/EmptyState'
@@ -56,6 +55,7 @@ import {
   useStartChore,
 } from '../../queries/TimeQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
+import { useXPTranslation as useTranslation } from '../../queries/XPQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import {
   ChoreHistoryStatus,
