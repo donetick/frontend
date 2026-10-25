@@ -1050,7 +1050,7 @@ const ArchivedTasks = () => {
               <Button
                 size='sm'
                 variant='solid'
-                color='success'
+                color='primary'
                 onClick={handleBulkRestore}
                 startDecorator={<Unarchive />}
                 disabled={selectedChores.size === 0}

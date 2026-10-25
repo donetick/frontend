@@ -4,6 +4,8 @@ import { isOfflineFeatureEnabled } from './OfflineFeatureToggle'
 // Domain command types
 export const CommandType = {
   CREATE_CHORE: 'create_chore',
+  MOVE_PROJECT_CHORE: 'move_project_chore',
+  MOVE_PROJECT_SECTION: 'move_project_section',
   UPDATE_CHORE: 'update_chore',
   UPDATE_CHORE_HISTORY: 'update_chore_history',
   COMPLETE_CHORE: 'complete_chore',
@@ -166,8 +168,6 @@ class CommandQueue {
     for (const cmd of commands) {
       const entityId = String(cmd.entityId)
       const matches = entityId === tempKey || entityId.startsWith(`${tempKey}:`)
-      if (!matches) continue
-
       const newEntityId =
         entityId === tempKey
           ? realKey
@@ -179,16 +179,21 @@ class CommandQueue {
         if (parsed && typeof parsed === 'object') {
           if (String(parsed.id) === tempKey) parsed.id = realId
           if (String(parsed.choreId) === tempKey) parsed.choreId = realId
+          // A different task can be dropped after this offline-created task.
+          if (String(parsed.afterChoreId) === tempKey)
+            parsed.afterChoreId = realId
           newPayload = JSON.stringify(parsed)
         }
       } catch {
         // unparseable payload — remap the entity id only
       }
 
-      await offlineDB.updateCommand(cmd.id, {
-        entityId: newEntityId,
-        payload: newPayload,
-      })
+      if (matches || newPayload !== cmd.payload) {
+        await offlineDB.updateCommand(cmd.id, {
+          entityId: matches ? newEntityId : entityId,
+          payload: newPayload,
+        })
+      }
     }
   }
 

@@ -5,6 +5,7 @@ import {
   GetAllUsers,
   GetChildUsers,
   GetDeviceTokens,
+  GetNotificationPreferences,
   GetUserProfile,
 } from '../utils/Fetcher'
 import { offlineDB } from '../utils/OfflineDB'
@@ -119,6 +120,29 @@ export const useDeviceTokens = () => {
     isLoading,
     refetch: () =>
       queryClient.invalidateQueries({ queryKey: ['deviceTokens'] }),
+  }
+}
+
+export const useNotificationPreferences = () => {
+  const queryClient = useQueryClient()
+
+  const { data, error, isLoading } = useQuery({
+    queryKey: ['notificationPreferences'],
+    queryFn: async () => {
+      if (!isTokenValid()) {
+        return null
+      }
+      const resp = await GetNotificationPreferences()
+      return resp.json()
+    },
+  })
+
+  return {
+    data,
+    error,
+    isLoading,
+    refetch: () =>
+      queryClient.invalidateQueries({ queryKey: ['notificationPreferences'] }),
   }
 }
 

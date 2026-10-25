@@ -1,13 +1,14 @@
+import { OpenInNewRounded } from '@mui/icons-material'
 import {
   Box,
-  Button,
-  ButtonGroup,
-  Divider,
   FormControl,
   FormHelperText,
   Link,
   Option,
+  Radio,
+  RadioGroup,
   Select,
+  Sheet,
   Typography,
 } from '@mui/joy'
 import moment from 'moment'
@@ -21,6 +22,22 @@ import {
 
 import { track } from '../../analytics'
 import SettingsLayout from './SettingsLayout'
+import SettingsSection from './SettingsSection'
+
+const choiceSx = selected => ({
+  position: 'relative',
+  minWidth: 0,
+  p: 1.5,
+  border: '1px solid',
+  borderColor: selected ? 'primary.outlinedColor' : 'divider',
+  bgcolor: selected ? 'primary.softBg' : 'background.surface',
+  borderRadius: 'lg',
+  '&:focus-within': {
+    outline: '2px solid',
+    outlineColor: 'focusVisible',
+    outlineOffset: 2,
+  },
+})
 
 const LocalizationSettings = () => {
   const { t } = useTranslation('settings')
@@ -37,10 +54,9 @@ const LocalizationSettings = () => {
     timeFormat,
   } = useLocalization()
 
-  const sampleDate = moment('2024-01-15 14:30:00')
-
-  const translateUrl = code => `https://crowdin.com/project/donetick/${code}`
-
+  // One fixed example makes formats easy to compare, including after a
+  // language switch (without waiting for Moment's global locale effect).
+  const sampleDate = moment('2026-01-15T14:30:00').locale(language)
   const dateFormatOptions = [
     { value: DATE_FORMATS.MDY, label: t('localization.formats.mdy') },
     { value: DATE_FORMATS.DMY, label: t('localization.formats.dmy') },
@@ -48,204 +64,257 @@ const LocalizationSettings = () => {
     { value: DATE_FORMATS.LONG, label: t('localization.formats.long') },
     { value: DATE_FORMATS.SHORT, label: t('localization.formats.short') },
   ]
+  const weekStarts = [
+    { value: 0, name: 'sunday' },
+    { value: 1, name: 'monday' },
+    { value: 6, name: 'saturday' },
+  ]
 
   return (
     <SettingsLayout title={t('localization.title')}>
-      <div className='grid gap-4 py-4'>
-        <Typography level='body-md'>{t('localization.description')}</Typography>
-
-        <Typography level='h3'>{t('localization.language')}</Typography>
-        <Divider />
-        <Typography level='body-md'>
-          {t('localization.languageDescription')}
+      <Box sx={{ maxWidth: 680, pb: 4 }}>
+        <Typography
+          level='body-md'
+          textColor='text.secondary'
+          sx={{ maxWidth: 560, mb: 3, mt: -1, textWrap: 'pretty' }}
+        >
+          {t('localization.description')}
         </Typography>
-        <FormControl>
-          <Select
-            value={language}
-            onChange={(_, value) => {
-              setLanguage(value)
-              track('localization_setting_changed', {
-                setting: 'language',
-                value,
-              })
-            }}
-            sx={{ maxWidth: '300px' }}
+        <Box sx={{ display: 'grid', gap: 2 }}>
+          <SettingsSection
+            title={t('localization.language')}
+            description={t('localization.languageDescription')}
           >
-            {availableLanguages.map(lang => (
-              <Option key={lang.code} value={lang.code}>
-                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                  <Typography>{lang.nativeName}</Typography>
-                  <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-                    ({lang.name})
-                  </Typography>
-                </Box>
-              </Option>
-            ))}
-          </Select>
-          {isRTL && (
-            <FormHelperText>{t('localization.rtlNotice')}</FormHelperText>
-          )}
-          {language !== 'en' && (
-            <FormHelperText>
-              <Link
-                href={translateUrl(language)}
-                target='_blank'
-                rel='noopener'
-                onClick={() =>
-                  track('localization_help_translate_clicked', {
-                    language,
+            <FormControl>
+              <Select
+                value={language}
+                slotProps={{
+                  button: { 'aria-label': t('localization.language') },
+                  listbox: {
+                    sx: { maxHeight: 320, maxWidth: 'calc(100vw - 32px)' },
+                  },
+                }}
+                onChange={(_, value) => {
+                  if (!value) return
+                  setLanguage(value)
+                  track('localization_setting_changed', {
+                    setting: 'language',
+                    value,
                   })
+                }}
+                sx={{
+                  minHeight: 48,
+                  '& .MuiSelect-button': { whiteSpace: 'normal' },
+                }}
+              >
+                {availableLanguages.map(lang => (
+                  <Option
+                    key={lang.code}
+                    value={lang.code}
+                    sx={{ minHeight: 44 }}
+                  >
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        gap: 1,
+                        flexWrap: 'wrap',
+                        alignItems: 'baseline',
+                        minWidth: 0,
+                      }}
+                    >
+                      <Typography component='span' lang={lang.code} dir='auto'>
+                        {lang.nativeName}
+                      </Typography>
+                      {lang.nativeName !== lang.name && (
+                        <Typography
+                          component='span'
+                          level='body-sm'
+                          textColor='text.secondary'
+                        >
+                          ({lang.name})
+                        </Typography>
+                      )}
+                    </Box>
+                  </Option>
+                ))}
+              </Select>
+              <FormHelperText>
+                {t('localization.languageDefaultsHint')}
+              </FormHelperText>
+              {isRTL && (
+                <FormHelperText>{t('localization.rtlNotice')}</FormHelperText>
+              )}
+            </FormControl>
+            {language !== 'en' && (
+              <Link
+                href={`https://crowdin.com/project/donetick/${language}`}
+                target='_blank'
+                rel='noopener noreferrer'
+                endDecorator={<OpenInNewRounded sx={{ fontSize: 16 }} />}
+                onClick={() =>
+                  track('localization_help_translate_clicked', { language })
                 }
+                sx={{ mt: 1.5, fontSize: 'sm' }}
               >
                 {t('localization.helpTranslate')}
               </Link>
-            </FormHelperText>
-          )}
-        </FormControl>
+            )}
+          </SettingsSection>
 
-        <Typography level='h3'>{t('localization.dateFormat')}</Typography>
-        <Divider />
-        <Typography level='body-md'>
-          {t('localization.dateFormatDescription')}
-        </Typography>
-        <FormControl>
-          <Select
-            value={dateFormat}
-            onChange={(_, value) => {
-              setDateFormat(value)
-              track('localization_setting_changed', {
-                setting: 'date_format',
-                value,
-              })
-            }}
-            sx={{ maxWidth: '300px' }}
+          <SettingsSection
+            title={t('localization.dateFormat')}
+            description={t('localization.dateFormatDescription')}
           >
-            {dateFormatOptions.map(option => (
-              <Option key={option.value} value={option.value}>
-                <Box
-                  sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    width: '100%',
-                    gap: 2,
-                  }}
+            <RadioGroup
+              aria-label={t('localization.dateFormat')}
+              name='date-format'
+              value={dateFormat}
+              onChange={event => {
+                const value = event.target.value
+                setDateFormat(value)
+                track('localization_setting_changed', {
+                  setting: 'date_format',
+                  value,
+                })
+              }}
+              sx={{ gap: 1 }}
+            >
+              {dateFormatOptions.map(option => (
+                <Sheet
+                  key={option.value}
+                  sx={choiceSx(dateFormat === option.value)}
                 >
-                  <Typography>{option.label}</Typography>
-                  <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-                    {sampleDate.format(option.value)}
-                  </Typography>
-                </Box>
-              </Option>
-            ))}
-          </Select>
-          <FormHelperText>
-            {t('localization.preview', {
-              value: sampleDate.format(dateFormat),
-            })}
-          </FormHelperText>
-        </FormControl>
+                  <Radio
+                    overlay
+                    value={option.value}
+                    label={
+                      <Box sx={{ minWidth: 0, display: 'grid', gap: 0.25 }}>
+                        <Typography level='title-sm'>
+                          {sampleDate.format(option.value)}
+                        </Typography>
+                        <Typography
+                          level='body-sm'
+                          textColor='text.secondary'
+                          sx={{ mt: 0.25, overflowWrap: 'anywhere' }}
+                        >
+                          {option.label}
+                        </Typography>
+                      </Box>
+                    }
+                    sx={{
+                      alignItems: 'flex-start',
+                      '& .MuiRadio-radio': { mt: 0.25 },
+                    }}
+                  />
+                </Sheet>
+              ))}
+            </RadioGroup>
+          </SettingsSection>
 
-        <Typography level='h3'>{t('localization.timeFormat')}</Typography>
-        <Divider />
-        <Typography level='body-md'>
-          {t('localization.timeFormatDescription')}
-        </Typography>
-        <FormControl>
-          <Select
-            value={timeFormat}
-            onChange={(_, value) => {
-              setTimeFormat(value)
-              track('localization_setting_changed', {
-                setting: 'time_format',
-                value,
-              })
-            }}
-            sx={{ maxWidth: '300px' }}
+          <SettingsSection
+            title={t('localization.timeFormat')}
+            description={t('localization.timeFormatDescription')}
           >
-            <Option value={TIME_FORMATS.HOUR_12}>
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  width: '100%',
-                  gap: 2,
-                }}
-              >
-                <Typography>{t('localization.12hour')}</Typography>
-                <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-                  {sampleDate.format(TIME_FORMATS.HOUR_12)}
-                </Typography>
-              </Box>
-            </Option>
-            <Option value={TIME_FORMATS.HOUR_24}>
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  width: '100%',
-                  gap: 2,
-                }}
-              >
-                <Typography>{t('localization.24hour')}</Typography>
-                <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-                  {sampleDate.format(TIME_FORMATS.HOUR_24)}
-                </Typography>
-              </Box>
-            </Option>
-          </Select>
-          <FormHelperText>
-            {t('localization.preview', {
-              value: sampleDate.format(timeFormat),
-            })}
-          </FormHelperText>
-        </FormControl>
+            <RadioGroup
+              aria-label={t('localization.timeFormat')}
+              name='time-format'
+              value={timeFormat}
+              onChange={event => {
+                const value = event.target.value
+                setTimeFormat(value)
+                track('localization_setting_changed', {
+                  setting: 'time_format',
+                  value,
+                })
+              }}
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                gap: 1.5,
+              }}
+            >
+              {[TIME_FORMATS.HOUR_12, TIME_FORMATS.HOUR_24].map(value => (
+                <Sheet key={value} sx={choiceSx(timeFormat === value)}>
+                  <Typography
+                    aria-hidden='true'
+                    level='title-lg'
+                    sx={{
+                      mb: 1.5,
+                      overflowWrap: 'anywhere',
+                      fontVariantNumeric: 'tabular-nums',
+                    }}
+                  >
+                    {sampleDate.format(value)}
+                  </Typography>
+                  <Radio
+                    overlay
+                    value={value}
+                    label={t(
+                      value === TIME_FORMATS.HOUR_12
+                        ? 'localization.12hour'
+                        : 'localization.24hour',
+                    )}
+                    sx={{
+                      alignItems: 'flex-start',
+                      '& .MuiRadio-label': { overflowWrap: 'anywhere' },
+                    }}
+                  />
+                </Sheet>
+              ))}
+            </RadioGroup>
+          </SettingsSection>
 
-        <Typography level='h3'>{t('localization.firstDayOfWeek')}</Typography>
-        <Divider />
-        <Typography level='body-md'>
-          {t('localization.firstDayOfWeekDescription')}
+          <SettingsSection
+            title={t('localization.firstDayOfWeek')}
+            description={t('localization.firstDayOfWeekDescription')}
+          >
+            <RadioGroup
+              aria-label={t('localization.firstDayOfWeek')}
+              name='week-start'
+              value={String(firstDayOfWeek)}
+              onChange={event => {
+                const value = Number(event.target.value)
+                setFirstDayOfWeek(value)
+                track('localization_setting_changed', {
+                  setting: 'first_day_of_week',
+                  value: weekStarts.find(day => day.value === value).name,
+                })
+              }}
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: {
+                  xs: '1fr',
+                  sm: 'repeat(3, minmax(0, 1fr))',
+                },
+                gap: 1,
+              }}
+            >
+              {weekStarts.map(day => (
+                <Sheet
+                  key={day.value}
+                  sx={choiceSx(firstDayOfWeek === day.value)}
+                >
+                  <Radio
+                    overlay
+                    value={String(day.value)}
+                    label={t(`localization.${day.name}`)}
+                    sx={{
+                      display: 'flex',
+                      justifyContent: { xs: 'flex-start', sm: 'center' },
+                      alignItems: 'center',
+                      textAlign: { xs: 'start', sm: 'center' },
+                      '& .MuiRadio-label': { overflowWrap: 'anywhere' },
+                    }}
+                  />
+                </Sheet>
+              ))}
+            </RadioGroup>
+          </SettingsSection>
+        </Box>
+        <Typography level='body-xs' textColor='text.tertiary' sx={{ mt: 2 }}>
+          {t('layout.savedOnDevice')}
         </Typography>
-        <FormControl>
-          <ButtonGroup variant='outlined'>
-            <Button
-              variant={firstDayOfWeek === 0 ? 'solid' : 'outlined'}
-              onClick={() => {
-                setFirstDayOfWeek(0)
-                track('localization_setting_changed', {
-                  setting: 'first_day_of_week',
-                  value: 'sunday',
-                })
-              }}
-            >
-              {t('localization.sunday')}
-            </Button>
-            <Button
-              variant={firstDayOfWeek === 1 ? 'solid' : 'outlined'}
-              onClick={() => {
-                setFirstDayOfWeek(1)
-                track('localization_setting_changed', {
-                  setting: 'first_day_of_week',
-                  value: 'monday',
-                })
-              }}
-            >
-              {t('localization.monday')}
-            </Button>
-            <Button
-              variant={firstDayOfWeek === 6 ? 'solid' : 'outlined'}
-              onClick={() => {
-                setFirstDayOfWeek(6)
-                track('localization_setting_changed', {
-                  setting: 'first_day_of_week',
-                  value: 'saturday',
-                })
-              }}
-            >
-              {t('localization.saturday')}
-            </Button>
-          </ButtonGroup>
-        </FormControl>
-      </div>
+      </Box>
     </SettingsLayout>
   )
 }

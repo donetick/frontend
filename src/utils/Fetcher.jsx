@@ -396,6 +396,21 @@ const UpdateNotificationTarget = notificationTarget => {
   })
 }
 
+const GetNotificationPreferences = () => {
+  return Fetch(`/users/notifications/preferences`, {
+    method: 'GET',
+    headers: HEADERS(),
+  })
+}
+
+const UpdateNotificationPreferences = preference => {
+  return Fetch(`/users/notifications/preferences`, {
+    method: 'PUT',
+    headers: HEADERS(),
+    body: JSON.stringify(preference),
+  })
+}
+
 const GetSubscriptionSession = () => {
   return Fetch(`/payments/create-subscription`, {
     method: 'GET',
@@ -945,6 +960,7 @@ const RegisterDeviceToken = (
 ) => {
   return Fetch(`/devices/tokens`, {
     method: 'POST',
+    skipAuthRecovery: true,
     headers: HEADERS(),
     body: JSON.stringify({
       token,
@@ -965,6 +981,17 @@ const UnregisterDeviceToken = (deviceId, token) => {
       deviceId,
       token,
     }),
+  })
+}
+
+// Launch-time heartbeat that keeps this device's registration from being
+// reaped as inactive, without re-sending an unchanged token. A 404 means the
+// server has no active row for this device and the caller must re-register.
+const UpdateDeviceActivity = deviceId => {
+  return Fetch(`/devices/tokens/${encodeURIComponent(deviceId)}/activity`, {
+    method: 'PUT',
+    skipAuthRecovery: true,
+    headers: HEADERS(),
   })
 }
 
@@ -1061,6 +1088,57 @@ const PreviewProjectAccess = (id, access) => {
   })
 }
 
+// Project board: sections (columns) are shared by everyone who can see the
+// project; the view preference (board vs list) is private to each user.
+const GetProjectSections = projectId => {
+  return Fetch(`/projects/${projectId}/sections`, {
+    method: 'GET',
+    headers: HEADERS(),
+  })
+}
+
+const CreateProjectSection = (projectId, name) => {
+  return Fetch(`/projects/${projectId}/sections`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify({ name }),
+  })
+}
+
+const RenameProjectSection = (projectId, sectionId, name) => {
+  return Fetch(`/projects/${projectId}/sections/${sectionId}`, {
+    method: 'PUT',
+    headers: HEADERS(),
+    body: JSON.stringify({ name }),
+  })
+}
+
+const DeleteProjectSection = (projectId, sectionId) => {
+  return Fetch(`/projects/${projectId}/sections/${sectionId}`, {
+    method: 'DELETE',
+    headers: HEADERS(),
+  })
+}
+
+const MoveProjectSection = (projectId, sectionId, afterSectionId) => {
+  return Fetch(`/projects/${projectId}/sections/${sectionId}/move`, {
+    method: 'PUT',
+    headers: HEADERS(),
+    body: JSON.stringify({ afterSectionId: afterSectionId ?? null }),
+  })
+}
+
+const MoveProjectChore = (projectId, choreId, sectionId, afterChoreId) => {
+  return Fetch(`/projects/${projectId}/board/chores/${choreId}/move`, {
+    method: 'PUT',
+    headers: HEADERS(),
+    body: JSON.stringify({
+      sectionId,
+      afterChoreId: afterChoreId ?? null,
+    }),
+  })
+}
+
 // Filter-related API functions
 const GetFilters = () => {
   return Fetch(`/filters`, {
@@ -1148,6 +1226,7 @@ export {
   CreateLabel,
   CreateLongLiveToken,
   CreateProject,
+  CreateProjectSection,
   CreateReward,
   CreateThing,
   DeclineCircleMemberRequest,
@@ -1161,6 +1240,7 @@ export {
   DeleteLabel,
   DeleteLongLiveToken,
   DeleteProject,
+  DeleteProjectSection,
   DeleteReward,
   DeleteThing,
   DeleteTimeSession,
@@ -1189,9 +1269,11 @@ export {
   GetLabels,
   GetLongLiveTokens,
   GetMFAStatus,
+  GetNotificationPreferences,
   GetPinnedFilters,
   GetProjectById,
   GetProjects,
+  GetProjectSections,
   GetRedemptions,
   GetResource,
   GetRewards,
@@ -1206,6 +1288,8 @@ export {
   login,
   logout,
   MarkChoreComplete,
+  MoveProjectChore,
+  MoveProjectSection,
   NudgeChore,
   PauseChore,
   PreviewProjectAccess,
@@ -1218,6 +1302,7 @@ export {
   RegisterDeviceToken,
   RejectChore,
   RejectRedemption,
+  RenameProjectSection,
   ResetChoreTimer,
   ResetPassword,
   RestoreBackup,
@@ -1240,10 +1325,12 @@ export {
   UpdateChoreAssignee,
   UpdateChoreHistory,
   UpdateChorePriority,
+  UpdateDeviceActivity,
   UpdateDueDate,
   UpdateFilter,
   UpdateLabel,
   UpdateMemberRole,
+  UpdateNotificationPreferences,
   UpdateNotificationTarget,
   UpdatePassword,
   UpdateProject,

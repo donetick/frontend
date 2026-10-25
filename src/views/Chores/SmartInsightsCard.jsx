@@ -391,7 +391,7 @@ const SmartInsightsCard = ({
             <Button
               key={insight.id}
               variant={isActive ? 'outlined' : 'soft'}
-              color='neutral'
+              color={isActive ? 'primary' : 'neutral'}
               onClick={() => handleInsightClick(insight)}
               sx={{
                 display: 'flex',

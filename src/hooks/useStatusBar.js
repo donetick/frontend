@@ -1,17 +1,17 @@
 import { useColorScheme } from '@mui/joy'
 import { useEffect } from 'react'
 
-import { THEME_BACKGROUND } from '@/constants/theme'
+import { THEME_PRESETS } from '@/constants/themePresets'
+import { useThemeSkin } from '@/contexts/ThemeSkinContext'
 
 import statusBarManager from '../utils/StatusBarManager'
 
 // The Capacitor StatusBar plugin only runs on native builds. On the web/PWA the
 // OS reads <meta name="theme-color"> for the status bar, so sync it here —
 // otherwise it stays at the hardcoded light value even in dark mode.
-const setMetaThemeColor = resolvedTheme => {
+const setMetaThemeColor = color => {
   const meta = document.querySelector('meta[name="theme-color"]')
   if (!meta) return
-  const color = THEME_BACKGROUND[resolvedTheme] ?? THEME_BACKGROUND.light
   meta.setAttribute('content', color)
 }
 
@@ -21,6 +21,7 @@ const setMetaThemeColor = resolvedTheme => {
  */
 export const useStatusBar = () => {
   const { mode, systemMode } = useColorScheme()
+  const { skin } = useThemeSkin()
 
   useEffect(() => {
     // Initialize status bar on mount
@@ -48,7 +49,7 @@ export const useStatusBar = () => {
 
       // Sync the web/PWA theme-color meta tag (browser equivalent of the
       // native StatusBar update below).
-      setMetaThemeColor(resolvedTheme)
+      setMetaThemeColor(THEME_PRESETS[skin][resolvedTheme || 'light'].body)
 
       // Update the status bar with the resolved theme
       await statusBarManager.updateResolvedTheme(resolvedTheme)
@@ -58,7 +59,7 @@ export const useStatusBar = () => {
     }
 
     updateStatusBarTheme()
-  }, [mode, systemMode]) // Update when either mode or systemMode changes
+  }, [mode, systemMode, skin]) // Keep browser and native chrome in sync with the skin.
 
   return {
     statusBarManager,

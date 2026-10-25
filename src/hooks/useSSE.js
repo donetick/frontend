@@ -218,6 +218,16 @@ export const useSSE = () => {
             queryClient.invalidateQueries({ queryKey: ['chores'] })
             break
 
+          case 'project.board_updated':
+            // Another viewer changed the shared board (sections, or a task's
+            // section/position). Sections and chore placements live on
+            // separate caches; refetch both so this user's board matches.
+            queryClient.invalidateQueries({
+              queryKey: ['projectSections', eventData.data.projectId],
+            })
+            queryClient.invalidateQueries({ queryKey: ['chores'] })
+            break
+
           case 'subtask.updated':
           case 'subtask.completed':
             queryClient.setQueryData(

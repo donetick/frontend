@@ -6,40 +6,73 @@ import {
   CloudQueue,
   Code,
   FamilyRestroom,
+  Hub,
   Language,
+  Link,
   Notifications,
   Palette,
   Person,
   PrivacyTip,
   Security,
   Settings,
+  SpaceDashboard,
   Storage,
   ViewSidebar,
+  Webhook,
   Widgets,
 } from '@mui/icons-material'
 
-// Single source of truth for the settings sections: id, icon, and access
-// gating. Titles/descriptions live in locales/settings.json under
-// `overview.sections.<id>`, keyed off the same ids.
-export const SETTINGS_SECTIONS = [
-  { id: 'bridge', icon: CloudQueue, parentOnly: true, isBeta: true },
-  { id: 'profile', icon: Person },
-  { id: 'circle', icon: Circle, parentOnly: true },
-  { id: 'account', icon: AccountCircle, parentOnly: true },
-  { id: 'subaccounts', icon: FamilyRestroom },
-  { id: 'notifications', icon: Notifications },
-  { id: 'mfa', icon: Security, parentOnly: true },
-  { id: 'apitokens', icon: Api, parentOnly: true },
-  { id: 'calendar', icon: CalendarMonth },
-  { id: 'storage', icon: Storage },
-  // Default landing view, plus whichever chrome this device actually has:
-  // the bottom bar on mobile, the sidepanel on desktop.
-  { id: 'layout', icon: ViewSidebar },
-  { id: 'theme', icon: Palette },
-  // Home-screen widgets only exist in the iOS/Android builds.
-  { id: 'widgets', icon: Widgets, nativeOnly: true },
-  { id: 'localization', icon: Language, isBeta: true },
-  { id: 'advanced', icon: Settings },
-  { id: 'privacy', icon: PrivacyTip },
-  { id: 'developer', icon: Code },
+// Routes stay stable; parent identifies the destination's home in settings.
+// Shared by the overview, contextual navigation, and global search.
+export const SETTINGS_GROUPS = [
+  'account',
+  'circle',
+  'preferences',
+  'connections',
+  'data',
+  'advanced',
 ]
+
+export const SETTINGS_SECTIONS = [
+  { id: 'profile', icon: Person, group: 'account' },
+  { id: 'account', icon: AccountCircle, group: 'account', parentOnly: true },
+  { id: 'mfa', icon: Security, group: 'account', parentOnly: true },
+  { id: 'circle', icon: Circle, group: 'circle', parentOnly: true },
+  {
+    id: 'subaccounts',
+    icon: FamilyRestroom,
+    parent: 'circle',
+    parentOnly: true,
+  },
+  { id: 'notifications', icon: Notifications, group: 'preferences' },
+  { id: 'theme', icon: Palette, group: 'preferences' },
+  { id: 'layout', icon: ViewSidebar, group: 'preferences' },
+  { id: 'home-sections', icon: SpaceDashboard, parent: 'layout' },
+  { id: 'widgets', icon: Widgets, parent: 'layout', nativeOnly: true },
+  { id: 'localization', icon: Language, group: 'preferences', isBeta: true },
+  { id: 'integrations', icon: Hub, group: 'connections' },
+  { id: 'calendar', icon: CalendarMonth, parent: 'integrations' },
+  { id: 'notification-integrations', icon: Link, parent: 'integrations' },
+  { id: 'apitokens', icon: Api, parent: 'integrations', parentOnly: true },
+  { id: 'webhooks', icon: Webhook, parent: 'integrations', parentOnly: true },
+  {
+    id: 'bridge',
+    icon: CloudQueue,
+    group: 'connections',
+    parentOnly: true,
+    selfHostedOnly: true,
+    isBeta: true,
+  },
+  { id: 'storage', icon: Storage, group: 'data' },
+  { id: 'privacy', icon: PrivacyTip, group: 'data' },
+  { id: 'advanced', icon: Settings, group: 'advanced' },
+  { id: 'developer', icon: Code, parent: 'advanced' },
+]
+
+export const getVisibleSettings = ({ isCloud, isNative, isParent }) =>
+  SETTINGS_SECTIONS.filter(
+    section =>
+      (!section.parentOnly || isParent) &&
+      (!section.nativeOnly || isNative) &&
+      (!section.selfHostedOnly || isCloud === false),
+  )

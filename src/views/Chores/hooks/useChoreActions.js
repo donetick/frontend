@@ -22,6 +22,7 @@ import {
   UpdateChorePriority,
   UpdateDueDate,
 } from '../../../utils/Fetcher'
+import { MoveProjectChore } from '../../../utils/Fetcher'
 import { offlineDB } from '../../../utils/OfflineDB'
 import { isOfflineFeatureEnabled } from '../../../utils/OfflineFeatureToggle'
 
@@ -1173,6 +1174,32 @@ export const useChoreActions = ({
     [getSelectedChoresData, chores, runBulk, patchLocalChores],
   )
 
+  const handleBulkMoveToSection = useCallback(
+    async section => {
+      runBulk({
+        targets: getSelectedChoresData(chores),
+        perChore: chore =>
+          expectOk(
+            MoveProjectChore(
+              chore.projectId,
+              Number(chore.id),
+              section.id,
+              null,
+            ),
+          ),
+        successTitle: 'Tasks Moved',
+        successVerb: `Moved to ${section?.name || 'section'} —`,
+        failureVerb: 'moved',
+        onSucceeded: succeeded =>
+          patchLocalChores(
+            succeeded.map(c => c.id),
+            { sectionId: section.id },
+          ),
+      })
+    },
+    [getSelectedChoresData, chores, runBulk, patchLocalChores],
+  )
+
   // Takes the picker's { dueDateOnly, dueTime, useCustomTime } parts, or null to
   // unplan. Moving a batch is a date operation: each task keeps the time of day
   // it was already due at, so "next week 5am" moved to tomorrow becomes
@@ -1326,6 +1353,7 @@ export const useChoreActions = ({
     handleBulkDelete,
     handleBulkSkip,
     handleBulkMoveToProject,
+    handleBulkMoveToSection,
     handleBulkDueDate,
     handleBulkAssignee,
     handleBulkPriority,

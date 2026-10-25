@@ -71,7 +71,7 @@ export default [
     },
   },
   {
-    files: ['e2e/**/*.{js,mjs}'],
+    files: ['e2e/**/*.{js,mjs}', 'tests/**/*.{js,mjs}'],
     languageOptions: {
       globals: {
         ...globals.node,

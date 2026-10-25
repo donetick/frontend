@@ -38,12 +38,13 @@ const STRIP_LIMIT = 6
 export const DEFAULT_PROJECT_ID = 'default'
 
 /**
- * Home is mine-first: a task is "mine" when it is assigned to me or to nobody.
- * Work that belongs to someone else is context, and lives in the circle strip
- * rather than in the triage counts. For a solo account this is every task.
+ * The personal scope is deliberately strict: shared/unassigned work belongs in
+ * “Everyone's tasks”, while this view shows only work explicitly assigned to
+ * the current user (including multi-assignee tasks).
  */
 const isMine = (chore, userId) =>
-  !chore.assignedTo || chore.assignedTo === userId
+  chore.assignedTo === userId ||
+  chore.assignees?.some(assignee => assignee.userId === userId)
 
 /**
  * Due date first, priority as the tiebreak. ChoreSorter (priority first) is
@@ -87,7 +88,10 @@ const buildVerdict = ({ dueToday, hasAnyTask, needsReview, overdue }) => {
  * directly is what lets Home share one optimistic list with useChoreActions,
  * the same arrangement MyChores uses.
  */
-const useHomeSummary = chores => {
+const useHomeSummary = (
+  chores,
+  { scope = 'mine', userId: scopedUserId } = {},
+) => {
   const { data: userProfile, isLoading: profileLoading } = useUserProfile()
   const { data: membersData, isLoading: membersLoading } = useCircleMembers()
   const { data: projects = [], isLoading: projectsLoading } = useProjects()
@@ -97,7 +101,7 @@ const useHomeSummary = chores => {
   // screens already ask for, so this usually lands on a warm cache.
   const { data: historyData } = useChoresHistory(HORIZON_DAYS, true)
 
-  const userId = userProfile?.id
+  const userId = scopedUserId || userProfile?.id
   const members = useMemo(() => membersData?.res ?? [], [membersData?.res])
 
   const summary = useMemo(() => {
@@ -105,16 +109,22 @@ const useHomeSummary = chores => {
     const endOfToday = moment().endOf('day')
     const endOfTomorrow = moment().add(1, 'day').endOf('day')
 
-    const mine = chores.filter(chore => isMine(chore, userId))
+    // Keep one source of truth for every actionable Home bucket. This avoids a
+    // confusing mix where the headline is personal but the cards include the
+    // whole circle (or vice versa) when the scope switch changes.
+    const scopedChores =
+      scope === 'everyone'
+        ? chores
+        : chores.filter(chore => isMine(chore, userId))
 
-    const overdue = mine.filter(
+    const overdue = scopedChores.filter(
       chore =>
         chore.status !== ChoreStatus.PENDING_APPROVAL &&
         chore.nextDueDate &&
         moment(chore.nextDueDate).isBefore(now),
     )
 
-    const dueToday = mine.filter(
+    const dueToday = scopedChores.filter(
       chore =>
         chore.status !== ChoreStatus.PENDING_APPROVAL &&
         chore.nextDueDate &&
@@ -122,7 +132,7 @@ const useHomeSummary = chores => {
         moment(chore.nextDueDate).isSameOrBefore(endOfToday),
     )
 
-    const dueTomorrow = mine.filter(
+    const dueTomorrow = scopedChores.filter(
       chore =>
         chore.status !== ChoreStatus.PENDING_APPROVAL &&
         chore.nextDueDate &&
@@ -130,7 +140,7 @@ const useHomeSummary = chores => {
         moment(chore.nextDueDate).isSameOrBefore(endOfTomorrow),
     )
 
-    const horizon = mine.filter(
+    const horizon = scopedChores.filter(
       chore =>
         chore.status !== ChoreStatus.PENDING_APPROVAL &&
         chore.nextDueDate &&
@@ -140,9 +150,9 @@ const useHomeSummary = chores => {
         ),
     )
 
-    // Matches the "Pending Approval" insight already in SmartInsightsCard:
-    // anything a circle member finished that still needs signing off.
-    const needsReview = chores.filter(
+    // Matches the "Pending Approval" insight already in SmartInsightsCard,
+    // narrowed to the selected task scope like the other actionable buckets.
+    const needsReview = scopedChores.filter(
       chore => chore.status === ChoreStatus.PENDING_APPROVAL,
     )
 
@@ -169,8 +179,8 @@ const useHomeSummary = chores => {
     const upcoming = dueTomorrow
 
     // Scoped the same as overdue/dueToday/upcoming: a task with no due date
-    // that belongs to someone else isn't mine to plan.
-    const unplanned = mine.filter(chore => chore.nextDueDate === null)
+    // only appears here when it belongs to the selected task scope.
+    const unplanned = scopedChores.filter(chore => chore.nextDueDate === null)
 
     return {
       dueToday,
@@ -190,7 +200,7 @@ const useHomeSummary = chores => {
         overdue,
       }),
     }
-  }, [chores, userId])
+  }, [chores, scope, userId])
 
   /**
    * A week per person: what they finished, what is still open, and how much of

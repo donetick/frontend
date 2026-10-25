@@ -145,7 +145,7 @@ export const parseVoiceTask = (
 // Builds the same chore payload shape AddTaskModal.createChore submits.
 export const buildChorePayload = (
   parsed,
-  { notificationTemplates, projectId, userProfile },
+  { notificationTemplates, projectId, sectionId, userProfile },
 ) => {
   let finalAssignees = parsed.assignees
   let finalAssignedTo = null
@@ -183,6 +183,7 @@ export const buildChorePayload = (
     notificationMetadata: {},
     subTasks: null,
     projectId: projectId === 'default' ? null : projectId,
+    sectionId: projectId === 'default' ? null : (sectionId ?? null),
     draftId: generateUUID(),
   }
 

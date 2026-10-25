@@ -26,11 +26,13 @@ import {
   CheckBoxOutlineBlank,
   DisplaySettings,
   FilterList,
+  FormatListBulleted,
   Save,
   Sort,
   Tune,
   ViewAgenda,
   ViewComfy,
+  ViewKanban,
 } from '@mui/icons-material'
 import {
   Badge,
@@ -195,6 +197,7 @@ const ChoreToolbar = ({
   activeFilterId,
   applyTempFilter,
   clearTempFilter,
+  enableBoard = false,
   isMultiSelectMode,
   labels = [],
   members = [],
@@ -614,6 +617,20 @@ const ChoreToolbar = ({
       label: t('toolbar.calendar'),
       icon: <CalendarMonth sx={{ fontSize: 16 }} />,
     },
+    ...(enableBoard
+      ? [
+          {
+            value: 'project-list',
+            label: t('toolbar.list'),
+            icon: <FormatListBulleted sx={{ fontSize: 16 }} />,
+          },
+          {
+            value: 'board',
+            label: t('toolbar.board'),
+            icon: <ViewKanban sx={{ fontSize: 16 }} />,
+          },
+        ]
+      : []),
   ]
 
   return (

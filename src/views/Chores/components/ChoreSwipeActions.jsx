@@ -132,8 +132,9 @@ export const getChoreLeadingActions = ({
           }}
         >
           <SwipeActionTile
-            bgcolor='success.500'
-            icon={<ThumbUp sx={{ color: 'white' }} />}
+            bgcolor='primary.solidBg'
+            color='primary.solidColor'
+            icon={<ThumbUp />}
             label={t('choreView.approve')}
             offsetTop={offsetTop}
           />
@@ -153,14 +154,9 @@ export const getChoreLeadingActions = ({
         }}
       >
         <SwipeActionTile
-          bgcolor='success.500'
-          icon={
-            isInProgress ? (
-              <Check sx={{ color: 'white' }} />
-            ) : (
-              <PlayArrow sx={{ color: 'white' }} />
-            )
-          }
+          bgcolor='primary.solidBg'
+          color='primary.solidColor'
+          icon={isInProgress ? <Check /> : <PlayArrow />}
           label={isInProgress ? t('list.complete') : t('choreView.start')}
           offsetTop={offsetTop}
         />
@@ -253,8 +249,9 @@ export const getChoreTrailingActions = ({
       }}
     >
       <SwipeActionTile
-        bgcolor='primary.500'
-        icon={<Edit sx={{ color: 'white' }} />}
+        bgcolor='primary.solidBg'
+        color='primary.solidColor'
+        icon={<Edit />}
         label={t('common:edit')}
         offsetTop={offsetTop}
       />
@@ -301,8 +298,9 @@ export const getArchivedLeadingActions = ({
         }}
       >
         <SwipeActionTile
-          bgcolor='success.500'
-          icon={<Unarchive sx={{ color: 'white' }} />}
+          bgcolor='primary.solidBg'
+          color='primary.solidColor'
+          icon={<Unarchive />}
           label={t('archived.restore')}
         />
       </SwipeAction>

@@ -15,9 +15,26 @@
     "plusFeature": "Plus Feature",
     "earlyAccess": "Early Access"
   },
+  "navigation": {
+    "breadcrumbs": "Settings navigation"
+  },
+  "integrations": {
+    "adminOnly": "Only circle admins can manage webhook connections.",
+    "loadFailed": "Unable to load your circle. Please try again.",
+    "hint": "Connect Donetick to the services you use. Notification timing and reminder preferences are still managed in Notifications."
+  },
   "overview": {
     "title": "Settings",
-    "subtitle": "Customize your experience and manage your account preferences",
+    "subtitle": "Your account, your circle, and the way Donetick works for you.",
+    "support": "Help and feedback",
+    "groups": {
+      "account": "Your account",
+      "circle": "Your circle",
+      "preferences": "Preferences",
+      "connections": "Connections",
+      "data": "Data & privacy",
+      "advanced": "Advanced"
+    },
     "upgrade": {
       "title": "Upgrade to Plus",
       "description": "Unlock powerful features to enhance your productivity",
@@ -30,28 +47,40 @@
       }
     },
     "sections": {
+      "integrations": {
+        "title": "Integrations",
+        "description": "Connect calendars, notification services, and other apps."
+      },
+      "webhooks": {
+        "title": "Circle webhooks",
+        "description": "Send circle task and thing updates to an external service."
+      },
+      "notification-integrations": {
+        "title": "Notification integrations",
+        "description": "Connect Telegram, Pushover, or webhooks for task notifications."
+      },
       "profile": {
-        "title": "Profile Settings",
+        "title": "Profile",
         "description": "Update your profile information, photo, display name, and timezone preferences."
       },
       "circle": {
-        "title": "Circle Settings",
-        "description": "Manage your circle, invite members, and handle join requests."
+        "title": "Circle",
+        "description": "Members, invitations, join requests, and managed accounts."
       },
       "account": {
-        "title": "Account Settings",
-        "description": "Manage your subscription, change password, and account deletion options."
+        "title": "Account & subscription",
+        "description": "Manage your plan, password, and account deletion."
       },
       "subaccounts": {
         "title": "Managed Accounts",
-        "description": "Create and manage sub accounts to log in and complete assigned tasks."
+        "description": "Create and manage accounts for household members who need your help signing in."
       },
       "notifications": {
         "title": "Notifications",
-        "description": "Configure push notifications, email alerts, and notification targets for tasks."
+        "description": "Choose reminder timing, in-app and push alerts, and registered devices."
       },
       "mfa": {
-        "title": "Multi-Factor Authentication",
+        "title": "Security",
         "description": "Add an extra layer of security with MFA using authenticator apps."
       },
       "apitokens": {
@@ -67,7 +96,7 @@
         "description": "Subscribe to your tasks from Apple Calendar, Google Calendar, Outlook, or another calendar app."
       },
       "storage": {
-        "title": "Storage Settings",
+        "title": "Storage & backups",
         "description": "Backup and restore your data, manage local storage and sync preferences."
       },
       "layout": {
@@ -75,23 +104,23 @@
         "description": "Pick the screen the app opens on, and which shortcuts and panels surround it."
       },
       "theme": {
-        "title": "Theme Preferences",
+        "title": "Appearance",
         "description": "Choose your preferred theme and configure dark/light mode settings."
       },
       "localization": {
-        "title": "Localization",
+        "title": "Language & region",
         "description": "Customize language, date format, time format, and regional preferences."
       },
       "advanced": {
-        "title": "Advanced Settings",
-        "description": "Configure webhooks, real-time updates, and other advanced features for enhanced productivity."
+        "title": "Advanced options",
+        "description": "Offline behavior, real-time updates, and developer tools."
       },
       "privacy": {
         "title": "Privacy & Analytics",
         "description": "Control anonymous usage analytics and crash reporting."
       },
       "developer": {
-        "title": "Developer Settings",
+        "title": "Developer tools",
         "description": "View technical information about authentication tokens, SSE connections, and debug data."
       },
       "feedback": {
@@ -101,6 +130,10 @@
       "bugReport": {
         "title": "Report an Issue",
         "description": "Tell us what's not working and we'll attach the technical details for you."
+      },
+      "home-sections": {
+        "title": "Overview customization",
+        "description": "Show, hide, and reorder sections on your Home screen."
       },
       "widgets": {
         "title": "Home Screen Widgets",
@@ -267,6 +300,14 @@
   },
   "notifications": {
     "title": "Notification Settings",
+    "description": "A little nudge, on your terms. Choose what you hear about and where your reminders arrive.",
+    "taskReminders": "Task reminders",
+    "summaries": "Summaries",
+    "deliveryTitle": "Where you get notified",
+    "deliveryDescription": "Manage reminders on this device and push notifications for your account.",
+    "serviceLabel": "Service",
+    "thisDevice": "This device",
+    "testFailed": "Could not send a test notification. Please try again.",
     "deviceSection": "Device Notification",
     "deviceSectionDescription": "Manage your Device Notification",
     "deviceLabel": "Device Notification",
@@ -292,9 +333,9 @@
     "deviceCreatedAt": "Created At: {{date}}",
     "noDevices": "No devices registered for push notifications",
     "customSection": "Custom Notification",
-    "customSectionDescription": "Notification through other platform like Telegram or Pushover",
+    "customSectionDescription": "Receive task notifications through Telegram, Pushover, or your circle's webhook connection.",
     "customLabel": "Custom Notification",
-    "customHelper": "Receive notification on other platform",
+    "customHelper": "Choose an external service for your task notifications.",
     "targetNone": "None",
     "targetTelegram": "Telegram",
     "targetPushover": "Pushover",
@@ -327,7 +368,32 @@
     "permissionDeniedMessage": "You have denied notification permissions. You can enable them later in your device settings.",
     "pushPermissionDeniedTitle": "Push Notification Permission Denied",
     "pushPermissionDeniedMessage": "Push notifications have been disabled. You can enable them in your device settings if needed.",
-    "unregisterFailed": "Failed to unregister device"
+    "unregisterFailed": "Failed to unregister device",
+    "preferenceSection": "Notification Preferences",
+    "preferenceSectionDescription": "Choose a notification profile, then fine-tune individual reminders including daily and weekly digests.",
+    "profileLabel": "Notification Profile",
+    "profileHelper": "A profile sets the defaults for every reminder below. You can still override any individual reminder.",
+    "profileBalanced": "Balanced",
+    "profilePlanner": "Planner",
+    "profileJustInTime": "Just in Time",
+    "profilePersistent": "Persistent",
+    "profileQuiet": "Quiet",
+    "profileCustom": "Custom",
+    "eventPreDueTitle": "Pre-Due Reminder",
+    "eventPreDueLabel": "Remind me before a chore is due",
+    "eventDueTitle": "Due Reminder",
+    "eventDueLabel": "Remind me when a chore becomes due",
+    "eventOverdueFollowupTitle": "Overdue Follow-up",
+    "eventOverdueFollowupLabel": "Remind me about chores that are still overdue",
+    "eventEscalationTitle": "Priority Escalation",
+    "eventEscalationLabel": "Extra push nudge, only for high/urgent priority chores",
+    "eventDailyDigestTitle": "Daily Digest",
+    "eventDailyDigestLabel": "One daily summary of overdue and upcoming chores",
+    "eventWeeklyDigestTitle": "Weekly Digest",
+    "eventWeeklyDigestLabel": "One weekly preview of the week ahead",
+    "digestHourLabel": "Digest Delivery Time",
+    "digestHourHelper": "Local hour (in your profile timezone) that digests are sent",
+    "preferenceUpdateFailed": "Failed to update notification preference. Please try again."
   },
   "mfa": {
     "title": "Multi-Factor Authentication",
@@ -570,8 +636,9 @@
     }
   },
   "homeSections": {
-    "title": "Overview Customization",
-    "description": "Customize which sections appear on the Home screen and their order. Drag and drop to reorder, or toggle visibility for each section.",
+    "title": "Overview customization",
+    "description": "Make your Home screen work for you. Choose which sections to show and put the ones you use most first.",
+    "sectionsTitle": "Home screen sections",
     "resetToDefaults": "Reset to Defaults",
     "resetHelper": "This will restore all sections to their default visibility and order.",
     "sections": {
@@ -612,7 +679,17 @@
   },
   "layout": {
     "title": "Layout & Navigation",
-    "detailedDescription": "Choose the screen the app opens on and which shortcuts and panels sit around it.",
+    "detailedDescription": "Make room for the way you work. Choose your start screen and keep your favorite tools close.",
+    "savedOnDevice": "Changes are saved automatically on this device or browser.",
+    "preview": "Preview",
+    "reorderItem": "Reorder {{name}}",
+    "reorderHint": "Drag the handles to reorder. With a keyboard, focus a handle, press Space, then use the arrow keys.",
+    "taskEditor": {
+      "title": "Task editor",
+      "description": "Choose how you move through task settings.",
+      "singlePage": "Keep everything on one page",
+      "helper": "Show all task settings in one scrolling page instead of separate steps."
+    },
     "defaultView": {
       "title": "Default View",
       "description": "Choose which screen the app opens on.",
@@ -628,7 +705,9 @@
       }
     },
     "bottomNav": {
-      "title": "Bottom Navigation",
+      "title": "Bottom navigation",
+      "selectedCount": "{{count}} of {{max}} shortcuts selected",
+      "limitHint": "All shortcut slots are in use. Turn one off to choose another.",
       "description": "Choose up to {{max}} shortcuts for the mobile bottom navigation bar and drag to reorder them. \"More\" always stays as the last item and opens the full menu.",
       "resetToDefaults": "Reset to Defaults",
       "resetHelper": "This will restore the bottom navigation to its default shortcuts and order.",
@@ -638,13 +717,29 @@
       }
     },
     "sidepanel": {
-      "title": "Sidepanel"
+      "title": "Desktop side panel"
     }
   },
   "theme": {
     "title": "Theme Preferences",
-    "description": "Choose how the site looks to you. Select a single theme, or sync with your system and automatically switch between day and night themes.",
-    "themeMode": "Theme mode",
+    "description": "Personalize Donetick with a color theme and choose light, dark, or system mode.",
+    "skin": "Color theme",
+    "skinDescription": "Every theme supports light and dark mode. Your selection is saved on this device.",
+    "skins": {
+      "default": "Default",
+      "forest": "Forest",
+      "lavender": "Lavender",
+      "sand": "Sand",
+      "ocean": "Ocean",
+      "rose": "Rose",
+      "sunset": "Sunset",
+      "bubblegum": "Hot Pink",
+      "mint": "Mint",
+      "graphite": "Graphite"
+    },
+    "themeMode": "Display mode",
+    "modeDescription": "Choose a look that feels comfortable throughout your day.",
+    "systemHint": "System automatically follows your device’s light or dark appearance.",
     "light": "Light",
     "dark": "Dark",
     "system": "System"
@@ -671,38 +766,40 @@
   },
   "localization": {
     "title": "Localization",
-    "description": "Customize language, date format, and regional preferences for your account.",
+    "description": "Make Donetick feel familiar with your language, date style, and weekly rhythm.",
     "language": "Language",
-    "languageDescription": "Select your preferred language",
+    "languageDescription": "Choose the language you use in Donetick.",
+    "languageDefaultsHint": "Changing language also sets regional defaults for dates, time, and the start of the week. You can adjust them below.",
     "rtlNotice": "This language uses right-to-left (RTL) text direction",
-    "dateFormat": "Date Format",
-    "dateFormatDescription": "Choose how dates should be displayed throughout the application",
-    "timeFormat": "Time Format",
-    "timeFormatDescription": "Select 12-hour or 24-hour time format",
+    "dateFormat": "Date format",
+    "dateFormatDescription": "Choose how dates appear. Each option shows the same example date.",
+    "timeFormat": "Time format",
+    "timeFormatDescription": "Choose a 12-hour or 24-hour clock.",
     "preview": "Preview: {{value}}",
     "12hour": "12-hour (AM/PM)",
     "24hour": "24-hour",
-    "firstDayOfWeek": "First Day of Week",
-    "firstDayOfWeekDescription": "Select which day starts your week",
+    "firstDayOfWeek": "Start of the week",
+    "firstDayOfWeekDescription": "Choose which day comes first in your calendar.",
     "sunday": "Sunday",
     "monday": "Monday",
     "saturday": "Saturday",
     "helpTranslate": "Help improve this translation",
     "formats": {
-      "mdy": "MM/DD/YYYY (US)",
-      "dmy": "DD/MM/YYYY (Europe)",
-      "ymd": "YYYY-MM-DD (ISO)",
-      "long": "Long format (e.g., January 1, 2024)",
-      "short": "Short format (e.g., Jan 1, 2024)"
+      "mdy": "Month / day / year",
+      "dmy": "Day / month / year",
+      "ymd": "Year / month / day",
+      "long": "Full month name",
+      "short": "Short month name"
     },
     "descriptionLong": "Customize language, date format, and regional preferences for your account. These settings will apply throughout the application."
   },
   "advanced": {
     "title": "Advanced Settings",
-    "description": "Configure advanced features like webhooks and real-time updates for enhanced productivity.",
-    "offlineTitle": "Offline Support",
+    "description": "Control offline access and how your circle stays in sync.",
+    "offlineTitle": "Offline support",
     "offlineDescription": "Keep using Donetick when you're offline on this device/browser. Your changes are saved locally and synced when you're back online.",
-    "offlineToggle": "Enable Offline Support",
+    "offlineToggle": "Use offline support",
+    "clearingOffline": "Clearing offline data…",
     "offlineHelper": "Turning this off removes unsynced offline changes and saved offline data from this device/browser.",
     "offlineEnabled": "Offline mode turned on for this device/browser",
     "offlineDisabled": "Offline mode turned off and local data was cleared",
@@ -718,20 +815,27 @@
     "webhookURL": "Webhook URL",
     "webhookUpdated": "Webhook URL updated successfully",
     "webhookUpdateFailed": "Failed to update webhook URL",
-    "realtimeTitle": "Real-time Updates",
-    "realtimeDescription": "Configure how you receive live updates when tasks and activities change in your circle.",
+    "realtimeTitle": "Real-time updates",
+    "realtimeDescription": "Stay in sync with the people in your circle.",
     "realtime": {
-      "toggleLabel": "Enable Real-time Updates",
+      "toggleLabel": "Live updates",
       "title": "Real-time Updates",
-      "subtitle": "Get instant notifications when tasks are updated",
-      "statusLabel": "Status:",
+      "subtitle": "See task changes without refreshing.",
+      "statusLabel": "Connection",
+      "status": {
+        "off": "Off",
+        "connected": "Connected",
+        "connecting": "Connecting…",
+        "error": "Connection issue",
+        "disconnected": "Disconnected"
+      },
       "basicPlan": "Real-time updates are not available in the Basic plan. Upgrade to Plus to receive instant notifications when tasks are updated.",
-      "disabled": "Real-time updates are disabled. Enable them to see live changes when you or other circle members complete, skip, or modify tasks.",
-      "connected": "Real-time updates are working. You'll see live changes when you or other circle members complete, skip, or modify tasks.",
+      "disabled": "Live updates are off. Refresh to see the latest changes.",
+      "connected": "Changes from your circle appear automatically.",
       "connecting": "Connecting to real-time updates...",
       "errored": "Real-time updates are enabled but not working: {{error}}",
       "notConnected": "Real-time updates are enabled but not currently connected.",
-      "basicPlanNotice": "Real-time updates are not available in the Basic plan. Upgrade to Plus to receive instant notifications when you or other circle members complete, skip, or modify tasks."
+      "basicPlanNotice": "Available with Donetick Plus. Turn on live updates to explore the upgrade."
     }
   },
   "privacyAnalytics": {

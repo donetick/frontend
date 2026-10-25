@@ -3,13 +3,25 @@ import { CacheProvider } from '@emotion/react'
 import { CssBaseline } from '@mui/joy'
 import { CssVarsProvider, extendTheme } from '@mui/joy/styles'
 import PropType from 'prop-types'
-import { useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { prefixer } from 'stylis'
 import rtlPlugin from 'stylis-plugin-rtl'
 
 import { COLORS, THEME_BACKGROUND } from '@/constants/theme'
+import {
+  readThemeSkin,
+  resolveThemeSkin,
+  THEME_PRESETS,
+  THEME_SKIN_STORAGE_KEY,
+} from '@/constants/themePresets'
+import {
+  feedbackDecoratorStyles,
+  feedbackSurfaceStyles,
+} from '@/utils/feedbackTheme'
+import { tintNeutralPalette } from '@/utils/themePalette'
 
 import { useLocalization } from './LocalizationContext'
+import { ThemeSkinContext } from './ThemeSkinContext'
 
 const primaryColor = 'cyan'
 const shades = [
@@ -248,20 +260,122 @@ const byDirection = {
   },
 }
 
+const skinThemes = new Map()
+const getSkinTheme = (skin, direction) => {
+  if (skin === 'default') return byDirection[direction].theme
+  const key = `${skin}-${direction}`
+  if (!skinThemes.has(key)) {
+    const preset = THEME_PRESETS[skin]
+    const solidShade = preset.solidShade ?? 700
+    const colorSchemes = Object.fromEntries(
+      ['light', 'dark'].map(mode => [
+        mode,
+        {
+          ...themeConfig.colorSchemes[mode],
+          palette: {
+            ...themeConfig.colorSchemes[mode].palette,
+            primary: {
+              ...getPalette(preset.accent),
+              // White button labels need a darker accent, especially on Sand.
+              solidBg: COLORS[preset.accent][solidShade],
+              solidHoverBg: COLORS[preset.accent][solidShade + 100],
+              solidActiveBg: COLORS[preset.accent][solidShade + 200],
+              ...(mode === 'light' && {
+                plainColor: COLORS[preset.accent][700],
+                outlinedColor: COLORS[preset.accent][700],
+              }),
+              ...(mode === 'dark' && preset.darkPrimary),
+            },
+            neutral: tintNeutralPalette(
+              getPalette(preset.neutral),
+              getPalette(preset.accent),
+            ),
+            success: {
+              ...getPalette('emerald'),
+              solidBg: COLORS.emerald[700],
+              solidHoverBg: COLORS.emerald[800],
+              solidActiveBg: COLORS.emerald[900],
+              plainColor: COLORS.emerald[mode === 'light' ? 800 : 300],
+              outlinedColor: COLORS.emerald[mode === 'light' ? 800 : 300],
+              softColor: COLORS.emerald[mode === 'light' ? 800 : 300],
+            },
+            warning: {
+              ...getPalette('amber'),
+              solidBg: COLORS.amber[700],
+              solidHoverBg: COLORS.amber[800],
+              solidActiveBg: COLORS.amber[900],
+              plainColor: COLORS.amber[mode === 'light' ? 800 : 300],
+              outlinedColor: COLORS.amber[mode === 'light' ? 800 : 300],
+              softColor: COLORS.amber[mode === 'light' ? 800 : 300],
+            },
+            background: preset[mode],
+          },
+        },
+      ]),
+    )
+    skinThemes.set(
+      key,
+      extendTheme({
+        ...themeConfig,
+        direction,
+        colorSchemes,
+        components: {
+          ...themeConfig.components,
+          ...Object.fromEntries(
+            ['JoyAlert', 'JoySnackbar'].map(component => [
+              component,
+              {
+                styleOverrides: {
+                  root: feedbackSurfaceStyles,
+                  startDecorator: feedbackDecoratorStyles,
+                },
+              },
+            ]),
+          ),
+        },
+      }),
+    )
+  }
+  return skinThemes.get(key)
+}
+
 const ThemeContext = ({ children }) => {
   const { isRTL } = useLocalization()
-  const { cache, theme } = useMemo(
-    () => byDirection[isRTL ? 'rtl' : 'ltr'],
-    [isRTL],
-  )
+  const [skin, setSkinState] = useState(() => readThemeSkin())
+  const setSkin = useCallback(value => {
+    const next = resolveThemeSkin(value)
+    setSkinState(next)
+    try {
+      window.localStorage.setItem(THEME_SKIN_STORAGE_KEY, next)
+    } catch {
+      // Keep the selection usable even when persistence is unavailable.
+    }
+  }, [])
+
+  useEffect(() => {
+    const syncSkin = event => {
+      if (event.key === THEME_SKIN_STORAGE_KEY || event.key === null) {
+        setSkinState(readThemeSkin())
+      }
+    }
+    window.addEventListener('storage', syncSkin)
+    return () => window.removeEventListener('storage', syncSkin)
+  }, [])
+
+  const direction = isRTL ? 'rtl' : 'ltr'
+  const cache = byDirection[direction].cache
+  const theme = useMemo(() => getSkinTheme(skin, direction), [skin, direction])
+  const skinContext = useMemo(() => ({ skin, setSkin }), [skin, setSkin])
 
   return (
-    <CacheProvider value={cache}>
-      <CssVarsProvider theme={theme}>
-        <CssBaseline />
-        {children}
-      </CssVarsProvider>
-    </CacheProvider>
+    <ThemeSkinContext.Provider value={skinContext}>
+      <CacheProvider value={cache}>
+        <CssVarsProvider theme={theme}>
+          <CssBaseline />
+          {children}
+        </CssVarsProvider>
+      </CacheProvider>
+    </ThemeSkinContext.Provider>
   )
 }
 

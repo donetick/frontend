@@ -30,15 +30,13 @@ import {
   Typography,
 } from '@mui/joy'
 import useMediaQuery from '@mui/material/useMediaQuery'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 
-import { version } from '../../../package.json'
 import DoneTickLogo from '../../assets/logo.svg'
 import UserProfileAvatar from '../../components/UserProfileAvatar'
 import { useNavBarTitleContext } from '../../contexts/NavBarTitleContext'
 import { useScrollDirection } from '../../hooks/useScrollDirection'
-import { useResource } from '../../queries/ResourceQueries'
 import { useXPTranslation as useTranslation } from '../../queries/XPQueries'
 import { useGlobalSearch } from '../../search/GlobalSearchContext'
 import { apiClient } from '../../utils/ApiClient'
@@ -77,7 +75,6 @@ const SHELL_FREE_PAGES = [
 
 const NavBar = () => {
   const { t } = useTranslation('common')
-  const { data: resource } = useResource()
   const { navBarConfig } = useNavBarTitleContext()
   const { openSearch } = useGlobalSearch()
   const navigate = useNavigate()
@@ -91,6 +88,7 @@ const NavBar = () => {
   const isMobile = useMediaQuery('(max-width:768px)')
   const isDesktop = useMediaQuery('(min-width:1024px)')
   const headerHidden = useScrollDirection({ enabled: !isDesktop })
+  const mobileHeaderRef = useRef(null)
   const normalizedPath =
     location.pathname.length > 1
       ? location.pathname.replace(/\/$/, '')
@@ -108,6 +106,27 @@ const NavBar = () => {
     return () =>
       window.removeEventListener(OPEN_NAVIGATION_DRAWER_EVENT, handleOpenDrawer)
   }, [])
+
+  // Share the visible header height with sticky content below the navigation.
+  useEffect(() => {
+    const header = mobileHeaderRef.current
+    const style = document.documentElement.style
+    const update = () => {
+      style.setProperty(
+        '--app-header-offset',
+        header && !isDesktop && !headerHidden
+          ? `${header.getBoundingClientRect().height}px`
+          : '0px',
+      )
+    }
+    update()
+    const observer = new ResizeObserver(update)
+    if (header) observer.observe(header)
+    return () => {
+      observer.disconnect()
+      style.removeProperty('--app-header-offset')
+    }
+  }, [headerHidden, isDesktop, location.pathname])
 
   // Keep page content and overlays clear of the navigation's current width.
   useEffect(() => {
@@ -385,18 +404,6 @@ const NavBar = () => {
           </ListItemButton>
         </Tooltip>
       </List>
-      {!compact && (
-        <Typography
-          level='body-xs'
-          onClick={() => window.location.reload()}
-          sx={{ color: 'text.tertiary', cursor: 'pointer', px: 1, py: 0.75 }}
-        >
-          {t('versionInfo', {
-            version,
-            apiVersion: resource?.api_version || t('apiVersionUnavailable'),
-          })}
-        </Typography>
-      )}
     </Box>
   )
 
@@ -428,7 +435,7 @@ const NavBar = () => {
             component='aside'
             variant='plain'
             sx={{
-              bgcolor: 'background.surface',
+              bgcolor: 'background.body',
               borderInlineEnd: '1px solid',
               borderColor: 'divider',
               boxShadow: desktopExpanded ? 'lg' : 'none',
@@ -536,7 +543,7 @@ const NavBar = () => {
                     }}
                   >
                     Done
-                    <Box component='span' sx={{ color: '#06b6d4' }}>
+                    <Box component='span' sx={{ color: 'primary.plainColor' }}>
                       tick
                     </Box>
                   </Typography>
@@ -549,6 +556,11 @@ const NavBar = () => {
                 minHeight: 0,
                 overflowY: 'auto',
                 overflowX: 'hidden',
+                ...(!desktopExpanded && {
+                  scrollbarWidth: 'none',
+                  msOverflowStyle: 'none',
+                  '&::-webkit-scrollbar': { display: 'none' },
+                }),
               }}
             >
               {navigation(false, !desktopExpanded)}
@@ -561,16 +573,16 @@ const NavBar = () => {
       ) : (
         <>
           <Sheet
+            ref={mobileHeaderRef}
             component='header'
             variant='plain'
             sx={{
               alignItems: 'center',
-              backdropFilter: 'blur(16px)',
-              bgcolor:
-                'rgba(var(--joy-palette-background-surfaceChannel) / 0.88)',
-              borderBottom: 'none',
+              // Use the opaque page canvas: unsupported channel variables made
+              // this transparent, letting scrolling content bleed through.
+              bgcolor: 'background.body',
+              borderBottom: '1px solid',
               borderColor: 'divider',
-              '@media (min-width: 769px)': { borderBottom: '1px solid' },
               display: 'flex',
               gap: 1,
               minHeight: 56,
@@ -626,6 +638,7 @@ const NavBar = () => {
               '--Drawer-horizontalSize': 'min(72vw, 248px)',
               '@media (min-width: 1024px)': { display: 'none' },
               '& .MuiDrawer-content': {
+                bgcolor: 'background.body',
                 display: 'flex',
                 flexDirection: 'column',
                 fontFamily: 'var(--joy-fontFamily-body)',
