@@ -337,7 +337,11 @@ const ProjectTaskRow = memo(function ProjectTaskRow({
             sx={{
               color: 'text.tertiary',
               '--IconButton-size': '28px',
+              width: 28,
+              height: 28,
               minWidth: 28,
+              left: 0,
+              p: 0,
             }}
           />
         </Box>

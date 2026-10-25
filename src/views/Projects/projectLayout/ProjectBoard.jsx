@@ -509,7 +509,7 @@ const BoardColumn = ({
           displayMode === 'list' && isExpanded
             ? {
                 position: 'absolute',
-                inset: '0 0 min(72px, calc(100% - 40px))',
+                inset: '1px 1px min(72px, calc(100% - 40px))',
                 pointerEvents: 'none',
                 zIndex: 2,
               }
@@ -540,8 +540,12 @@ const BoardColumn = ({
             '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
             zIndex: 2,
             bgcolor: 'background.level1',
-            borderTopLeftRadius: 'lg',
-            borderTopRightRadius: 'lg',
+            borderRadius:
+              displayMode === 'list'
+                ? isExpanded
+                  ? 'calc(var(--joy-radius-lg) - 1px) calc(var(--joy-radius-lg) - 1px) 0 0'
+                  : 'calc(var(--joy-radius-lg) - 1px)'
+                : 'var(--joy-radius-lg) var(--joy-radius-lg) 0 0',
             borderBottom: isExpanded ? '1px solid' : 'none',
             borderColor: 'divider',
           }}

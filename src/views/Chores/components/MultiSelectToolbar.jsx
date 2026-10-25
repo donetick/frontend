@@ -306,7 +306,10 @@ const MultiSelectToolbar = ({
   const [picker, setPicker] = useState(null)
   const [submenuAnchor, setSubmenuAnchor] = useState(null)
   const dueMenuRef = useRef(null)
+  const duePopupRef = useRef(null)
   const editButtonRef = useRef(null)
+  const editMenuRef = useRef(null)
+  const submenuRef = useRef(null)
 
   const closeDueMenu = () => setDueMenuAnchor(null)
 
@@ -325,6 +328,37 @@ const MultiSelectToolbar = ({
     setPicker(null)
     setSubmenuAnchor(null)
   }, [])
+
+  // Both popups are portaled, so treat them as one surface for dismissal.
+  useEffect(() => {
+    if (isSmallScreen || (!editOpen && !dueMenuAnchor)) return
+
+    const handleOutsideClick = event => {
+      if (
+        !editButtonRef.current?.contains(event.target) &&
+        !editMenuRef.current?.contains(event.target) &&
+        !submenuRef.current?.contains(event.target)
+      ) {
+        closeEditPanel()
+      }
+      if (
+        !dueMenuRef.current?.contains(event.target) &&
+        !duePopupRef.current?.contains(event.target)
+      ) {
+        setDueMenuAnchor(null)
+      }
+    }
+
+    document.addEventListener('mousedown', handleOutsideClick)
+    return () => document.removeEventListener('mousedown', handleOutsideClick)
+  }, [closeEditPanel, dueMenuAnchor, editOpen, isSmallScreen])
+
+  const handleDesktopMenuHover = event => {
+    const item = event.target.closest('[role="menuitem"]')
+    if (!item || !event.currentTarget.contains(item)) return
+    if (item.dataset.picker) openPicker(item.dataset.picker, item)
+    else closeSubmenu()
+  }
 
   // Leaving multi-select (or losing the selection to a bulk action) has to take
   // the menu with it, or a popup is left anchored to a bar that slid away.
@@ -731,6 +765,7 @@ const MultiSelectToolbar = ({
       {onSetDueDate && (
         <Menu
           size='sm'
+          ref={duePopupRef}
           anchorEl={dueMenuAnchor}
           open={Boolean(dueMenuAnchor)}
           onClose={closeDueMenu}
@@ -1016,6 +1051,9 @@ const MultiSelectToolbar = ({
       ) : (
         <Menu
           size='sm'
+          ref={editMenuRef}
+          onMouseOver={handleDesktopMenuHover}
+          onFocus={handleDesktopMenuHover}
           anchorEl={editButtonRef.current}
           open={editOpen && Boolean(editButtonRef.current)}
           onClose={closeEditPanel}
@@ -1026,6 +1064,7 @@ const MultiSelectToolbar = ({
         >
           {onSetPriority && (
             <MenuItem
+              data-picker='priority'
               onClick={event => openPicker('priority', event.currentTarget)}
             >
               <ListItemDecorator>
@@ -1046,6 +1085,7 @@ const MultiSelectToolbar = ({
 
           {onSetAssignee && assignableMembers.length > 0 && (
             <MenuItem
+              data-picker='assignee'
               onClick={event => openPicker('assignee', event.currentTarget)}
             >
               <ListItemDecorator>
@@ -1064,6 +1104,7 @@ const MultiSelectToolbar = ({
 
           {onToggleLabel && labels.length > 0 && (
             <MenuItem
+              data-picker='labels'
               onClick={event => openPicker('labels', event.currentTarget)}
             >
               <ListItemDecorator>
@@ -1096,6 +1137,7 @@ const MultiSelectToolbar = ({
 
           {onMoveToProject && (
             <MenuItem
+              data-picker='project'
               onClick={event => openPicker('project', event.currentTarget)}
             >
               <ListItemDecorator>
@@ -1108,6 +1150,7 @@ const MultiSelectToolbar = ({
 
           {onMoveToSection && sections.length > 0 && (
             <MenuItem
+              data-picker='section'
               onClick={event => openPicker('section', event.currentTarget)}
             >
               <ListItemDecorator>
@@ -1147,6 +1190,7 @@ const MultiSelectToolbar = ({
           item on a pointer, anchored to the sheet row on a phone. */}
       <Menu
         size='sm'
+        ref={submenuRef}
         anchorEl={submenuAnchor}
         open={Boolean(submenuAnchor && picker)}
         onClose={closeSubmenu}
