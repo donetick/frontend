@@ -93,6 +93,7 @@ const interactiveControlSelector =
 const DragHandle = memo(function DragHandle({
   attributes,
   className,
+  compact = false,
   listeners,
   label,
   setActivatorNodeRef,
@@ -119,10 +120,18 @@ const DragHandle = memo(function DragHandle({
         userSelect: 'none',
         cursor: isDragging ? 'grabbing' : 'grab',
         color: 'text.tertiary',
-        '@media (pointer: coarse)': { minWidth: 44, minHeight: 44 },
+        ...(compact
+          ? {
+              minWidth: 28,
+              minHeight: 28,
+              p: 0,
+              mr: -0.25,
+              '@media (pointer: coarse)': { minWidth: 32, minHeight: 32 },
+            }
+          : { '@media (pointer: coarse)': { minWidth: 44, minHeight: 44 } }),
       }}
     >
-      <DragIndicator sx={{ fontSize: 20 }} />
+      <DragIndicator sx={{ fontSize: compact ? 18 : 20 }} />
     </IconButton>
   )
 })
@@ -131,7 +140,7 @@ const ColumnDragContext = createContext(null)
 
 const ColumnDragHandle = ({ label }) => {
   const dragProps = useContext(ColumnDragContext)
-  return <DragHandle {...dragProps} label={label} />
+  return <DragHandle {...dragProps} compact label={label} />
 }
 
 // Keep Joy/Emotion entirely outside the per-frame render path. This surface
