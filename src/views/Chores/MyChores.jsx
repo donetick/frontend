@@ -56,7 +56,15 @@ import ScrollHideFab from '../components/ScrollHideFab'
 import { useLabels } from '../Labels/LabelQueries'
 import AdvancedFilterBuilder from '../Modals/Inputs/AdvancedFilterBuilder'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
-import { useProjects } from '../Projects/ProjectQueries.js'
+import ProjectBoard from '../Projects/projectLayout/ProjectBoard.jsx'
+import {
+  projectViewToViewMode,
+  useProjects,
+  useProjectSections,
+  useProjectView,
+  useSetProjectView,
+  viewModeToProjectView,
+} from '../Projects/ProjectQueries.js'
 import ChoreListView from './ChoreListView.jsx'
 import ChoreModals from './components/ChoreModals'
 import ChoreToolbar from './components/ChoreToolbarPrototype'
@@ -153,6 +161,10 @@ const MyChores = () => {
   const [addTaskModalOpen, setAddTaskModalOpen] = useState(false)
   // 'voice' | 'scan' | null — set by the quick-capture widget deep links
   const [addTaskInitialMode, setAddTaskInitialMode] = useState(null)
+  // { projectId, sectionId } when the modal was opened from a board column's
+  // own "add task" button — locks the project and preselects the section
+  // instead of showing the usual project switcher.
+  const [addTaskSectionContext, setAddTaskSectionContext] = useState(null)
   const [initialShare, setInitialShare] = useState(null)
   const searchInputRef = useRef(null)
   const [selectedChoreSection, setSelectedChoreSection] = useState(
@@ -189,6 +201,19 @@ const MyChores = () => {
 
   const { projectsWithDefault, selectedProject, setSelectedProjectWithCache } =
     useProjectFilter(projects, !projectsLoading)
+
+  // Per-user, per-project choice of board vs. list, shared across devices.
+  const isCustomProjectSelected = Boolean(
+    selectedProject && selectedProject.id !== 'default',
+  )
+  const { data: savedProjectView } = useProjectView(
+    isCustomProjectSelected ? selectedProject.id : null,
+  )
+  const setProjectViewMutation = useSetProjectView()
+  const { data: multiSelectSections = [] } = useProjectSections(
+    isCustomProjectSelected ? selectedProject.id : null,
+  )
+  const lastSyncedProjectIdRef = useRef(null)
 
   const {
     nonProjectFilteredChores,
@@ -831,6 +856,7 @@ const MyChores = () => {
     handleBulkDueDate,
     handleBulkLabels,
     handleBulkMoveToProject,
+    handleBulkMoveToSection,
     handleBulkPriority,
     handleBulkSkip,
     handleChangeDueDate,
@@ -1038,19 +1064,39 @@ const MyChores = () => {
     localStorage.setItem('openChoreSections', JSON.stringify(value))
   }
 
-  const toggleViewMode = value => {
-    const newMode =
-      value ??
-      (() => {
-        const modes = ['default', 'compact', 'calendar']
-        return modes[(modes.indexOf(viewMode) + 1) % modes.length]
-      })()
-    setViewMode(newMode)
-    localStorage.setItem('choreCardViewMode', newMode)
-    if (newMode !== 'calendar') {
-      setSelectedCalendarDate(null)
-    }
-  }
+  const toggleViewMode = useCallback(
+    value => {
+      const newMode =
+        value ??
+        (() => {
+          const modes = ['default', 'compact', 'calendar']
+          return modes[(modes.indexOf(viewMode) + 1) % modes.length]
+        })()
+      setViewMode(newMode)
+      localStorage.setItem('choreCardViewMode', newMode)
+      if (newMode !== 'calendar') {
+        setSelectedCalendarDate(null)
+      }
+      // An explicit layout pick for the currently selected project is this
+      // user's own preference for it; save it so it's there next time, on any
+      // device. Marking it "synced" here too stops the loader effect above
+      // from immediately overwriting this pick with a stale value.
+      const projectView = viewModeToProjectView(newMode)
+      if (isCustomProjectSelected && projectView) {
+        lastSyncedProjectIdRef.current = selectedProject.id
+        setProjectViewMutation.mutate({
+          projectId: selectedProject.id,
+          view: projectView,
+        })
+      }
+    },
+    [
+      viewMode,
+      isCustomProjectSelected,
+      selectedProject,
+      setProjectViewMutation,
+    ],
+  )
 
   const selectedDateChores = useMemo(() => {
     if (!selectedCalendarDate) return []
@@ -1080,9 +1126,9 @@ const MyChores = () => {
     activeFilterId ||
     hasAssigneeFilter,
   )
-  const isCustomProjectSelected = Boolean(
-    selectedProject && selectedProject.id !== 'default',
-  )
+  const isProjectWorkflowView =
+    viewMode === 'board' || viewMode === 'project-list'
+  const isListView = viewMode !== 'calendar' && !isProjectWorkflowView
   // Worth its own wording: the assignee filter is the one narrowing that is
   // easy to forget you left on, so name it rather than saying "filters".
   const isAssigneeOnlyNarrowing = Boolean(
@@ -1091,6 +1137,37 @@ const MyChores = () => {
     !hasQuickFilters &&
     !activeFilterId,
   )
+
+  // Workflow layouts belong to real projects. If the user leaves a project
+  // while viewing its board or section list, return to the standard list
+  // instead of rendering a layout with nowhere to persist its sections.
+  useEffect(() => {
+    if (isProjectWorkflowView && !isCustomProjectSelected) {
+      toggleViewMode('default')
+    }
+  }, [isCustomProjectSelected, isProjectWorkflowView, toggleViewMode])
+
+  // Selecting a project loads its own saved layout choice, once per project —
+  // after that, the user's explicit picks (persisted by toggleViewMode below)
+  // win over this sync, even if they differ from what was saved. This has to
+  // apply even when not already in a workflow view: on a fresh browser
+  // `viewMode` starts at its 'default' fallback (nothing in localStorage yet),
+  // so gating on isProjectWorkflowView would mean the saved view never gets a
+  // chance to switch layouts at all.
+  useEffect(() => {
+    if (!isCustomProjectSelected) return
+    if (savedProjectView == null) return
+    if (lastSyncedProjectIdRef.current === selectedProject.id) return
+    lastSyncedProjectIdRef.current = selectedProject.id
+    const mapped = projectViewToViewMode(savedProjectView)
+    if (mapped && mapped !== viewMode) {
+      setViewMode(mapped)
+      localStorage.setItem('choreCardViewMode', mapped)
+      if (mapped !== 'calendar') {
+        setSelectedCalendarDate(null)
+      }
+    }
+  }, [isCustomProjectSelected, savedProjectView, selectedProject, viewMode])
 
   // What the list actually renders. Sections are the source of truth outside
   // of search, since they are the only place the assignee filter is applied.
@@ -1102,6 +1179,17 @@ const MyChores = () => {
       ),
     [choreSections],
   )
+
+  // ChoresGrouper can put a task in more than one calculated label section.
+  // A workflow view must render each task once, so de-duplicate the visible
+  // section contents while preserving their current order.
+  const boardChores = useMemo(() => {
+    const source =
+      searchTerm?.length > 0
+        ? getFilteredChores
+        : choreSections.flatMap(section => section.content || [])
+    return [...new Map(source.map(chore => [String(chore.id), chore])).values()]
+  }, [choreSections, getFilteredChores, searchTerm])
 
   const clearNarrowing = () => {
     clearQuickFilters()
@@ -1178,10 +1266,13 @@ const MyChores = () => {
       }}
     >
       <Container
-        maxWidth='md'
+        maxWidth={
+          viewMode === 'board' && isCustomProjectSelected ? false : 'md'
+        }
         sx={{ px: 1, pt: { xs: 1, md: 3 }, minWidth: 0 }}
       >
         <ChoreToolbar
+          enableBoard={isCustomProjectSelected}
           members={membersData?.res || []}
           labels={userLabels || []}
           projects={projectsWithDefault}
@@ -1277,9 +1368,11 @@ const MyChores = () => {
           selectedCount={selectedChores.size}
           onSelectAll={() =>
             selectAllVisibleChores(
-              searchTerm?.length > 0 || hasQuickFilters || activeFilterId
-                ? getFilteredChores
-                : null,
+              isProjectWorkflowView
+                ? boardChores
+                : searchTerm?.length > 0 || hasQuickFilters || activeFilterId
+                  ? getFilteredChores
+                  : null,
               choreSections,
               openChoreSections,
             )
@@ -1290,6 +1383,9 @@ const MyChores = () => {
           onArchive={handleBulkArchive}
           onDelete={handleBulkDelete}
           onMoveToProject={handleBulkMoveToProject}
+          onMoveToSection={
+            isProjectWorkflowView ? handleBulkMoveToSection : undefined
+          }
           onSetDueDate={handleBulkDueDate}
           onSetAssignee={handleBulkAssignee}
           onSetPriority={handleBulkPriority}
@@ -1298,12 +1394,15 @@ const MyChores = () => {
           members={membersData?.res || []}
           labels={userLabels || []}
           projects={projects}
+          sections={isProjectWorkflowView ? multiSelectSections : []}
           showKeyboardShortcuts={showKeyboardShortcuts}
           selectAllDisabled={
-            searchTerm?.length > 0 || hasQuickFilters
-              ? selectedChores.size === getFilteredChores.length
-              : selectedChores.size ===
-                choreSections.flatMap(s => s.content || []).length
+            isProjectWorkflowView
+              ? selectedChores.size === boardChores.length
+              : searchTerm?.length > 0 || hasQuickFilters
+                ? selectedChores.size === getFilteredChores.length
+                : selectedChores.size ===
+                  choreSections.flatMap(s => s.content || []).length
           }
         />
 
@@ -1316,8 +1415,8 @@ const MyChores = () => {
         {(searchTerm?.length > 0
           ? getFilteredChores.length === 0
           : visibleChoreCount === 0) &&
-          // only if not in calendar view:
-          viewMode !== 'calendar' &&
+          // Boards remain useful when empty because users can still manage columns.
+          isListView &&
           (chores.length === 0 ? (
             <EmptyState
               variant='empty'
@@ -1394,7 +1493,7 @@ const MyChores = () => {
               }}
             />
           ))}
-        {searchTerm?.length > 0 && viewMode !== 'calendar' && (
+        {searchTerm?.length > 0 && isListView && (
           <ChoreListView
             chores={getFilteredChores}
             viewMode={viewMode}
@@ -1406,6 +1505,31 @@ const MyChores = () => {
             selectedChores={selectedChores}
             toggleChoreSelection={toggleChoreSelection}
             onLongPressChore={enterMultiSelectWithChore}
+          />
+        )}
+        {isProjectWorkflowView && isCustomProjectSelected && (
+          <ProjectBoard
+            chores={boardChores}
+            projectId={selectedProject.id}
+            displayMode={viewMode === 'project-list' ? 'list' : 'board'}
+            membersData={membersData}
+            handleChoreAction={handleChoreAction}
+            handleLabelFiltering={handleLabelFiltering}
+            isMultiSelectMode={isMultiSelectMode}
+            selectedChores={selectedChores}
+            toggleChoreSelection={toggleChoreSelection}
+            toggleSectionSelection={toggleSectionSelection}
+            onLongPressChore={enterMultiSelectWithChore}
+            onTaskCreated={updateChores}
+            userLabels={userLabels || []}
+            onAddTask={(sectionId, text) => {
+              setAddTaskSectionContext({
+                projectId: selectedProject.id,
+                sectionId,
+                text,
+              })
+              setAddTaskModalOpen(true)
+            }}
           />
         )}
         {viewMode === 'calendar' && (
@@ -1479,7 +1603,7 @@ const MyChores = () => {
             )}
           </>
         )}
-        {searchTerm.length === 0 && viewMode !== 'calendar' && (
+        {searchTerm.length === 0 && isListView && (
           <AccordionGroup transition='0.2s ease' disableDivider>
             {choreSections.map((section, index) => {
               if (section.content.length === 0) return null
@@ -1636,9 +1760,13 @@ const MyChores = () => {
             })}
           </AccordionGroup>
         )}
+        {/* The selection bar lives in this same bottom slot, so the add button
+            steps aside for it rather than stacking on top of it: while you are
+            picking tasks, creating one is not the action you want. */}
         <ScrollHideFab
           sx={{
             bottom: getSafeBottom(10, 10),
+            display: isMultiSelectMode ? 'none' : undefined,
             '@media (max-width: 768px)': {
               bottom: getSafeBottom(66, 10),
             },
@@ -1713,11 +1841,16 @@ const MyChores = () => {
             onChoreUpdate={updateChores}
             isModalOpen={addTaskModalOpen}
             initialMode={addTaskInitialMode}
+            lockedProjectId={addTaskSectionContext?.projectId}
+            initialSectionId={addTaskSectionContext?.sectionId}
+            initialText={addTaskSectionContext?.text}
             initialShare={initialShare}
             onClose={forceRefresh => {
               setAddTaskModalOpen(false)
               setAddTaskInitialMode(null)
               setInitialShare(null)
+              setAddTaskSectionContext(null)
+
               if (forceRefresh) {
                 refetchChores()
               }

@@ -30,7 +30,7 @@ import {
   Typography,
 } from '@mui/joy'
 import useMediaQuery from '@mui/material/useMediaQuery'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 
@@ -88,6 +88,7 @@ const NavBar = () => {
   const isMobile = useMediaQuery('(max-width:768px)')
   const isDesktop = useMediaQuery('(min-width:1024px)')
   const headerHidden = useScrollDirection({ enabled: !isDesktop })
+  const mobileHeaderRef = useRef(null)
   const normalizedPath =
     location.pathname.length > 1
       ? location.pathname.replace(/\/$/, '')
@@ -105,6 +106,27 @@ const NavBar = () => {
     return () =>
       window.removeEventListener(OPEN_NAVIGATION_DRAWER_EVENT, handleOpenDrawer)
   }, [])
+
+  // Share the visible header height with sticky content below the navigation.
+  useEffect(() => {
+    const header = mobileHeaderRef.current
+    const style = document.documentElement.style
+    const update = () => {
+      style.setProperty(
+        '--app-header-offset',
+        header && !isDesktop && !headerHidden
+          ? `${header.getBoundingClientRect().height}px`
+          : '0px',
+      )
+    }
+    update()
+    const observer = new ResizeObserver(update)
+    if (header) observer.observe(header)
+    return () => {
+      observer.disconnect()
+      style.removeProperty('--app-header-offset')
+    }
+  }, [headerHidden, isDesktop, location.pathname])
 
   // Keep page content and overlays clear of the navigation's current width.
   useEffect(() => {
@@ -551,6 +573,7 @@ const NavBar = () => {
       ) : (
         <>
           <Sheet
+            ref={mobileHeaderRef}
             component='header'
             variant='plain'
             sx={{

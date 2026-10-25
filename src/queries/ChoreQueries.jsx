@@ -3,6 +3,7 @@ import { useState } from 'react'
 
 import { track } from '../analytics'
 import { networkManager } from '../hooks/NetworkManager'
+import { appendChoreToSection } from '../utils/BoardOrdering'
 import { commandQueue, CommandType } from '../utils/CommandQueue'
 import {
   ApproveChore,
@@ -189,7 +190,11 @@ export const useCreateChore = () => {
     mutationFn: async rawTask => {
       // `source` is analytics-only metadata (typed/voice/scan/clone) — never
       // send it to the backend as part of the chore payload.
-      const { source, ...newTask } = rawTask
+      const { source, ...taskData } = rawTask
+      const newTask = appendChoreToSection(
+        taskData,
+        queryClient.getQueryData(['chores', false])?.res || [],
+      )
       if (isOfflineFeatureEnabled() && !networkManager.isOnline) {
         return queueOfflineCreate(newTask)
       }

@@ -1,3 +1,4 @@
+import { reorderedChoresAfter } from './BoardOrdering'
 import { commandQueue, CommandType } from './CommandQueue'
 
 // Chores created while offline only exist in the command queue until they are
@@ -13,8 +14,6 @@ export const mergePendingCreates = async chores => {
       .filter(cmd => cmd.commandType === CommandType.DELETE_CHORE)
       .map(cmd => String(cmd.entityId)),
   )
-
-  if (pendingCreates.length === 0) return chores
 
   const existingIds = new Set((chores || []).map(chore => String(chore.id)))
   const createdFromQueue = pendingCreates
@@ -33,5 +32,14 @@ export const mergePendingCreates = async chores => {
       }
     })
 
-  return [...(chores || []), ...createdFromQueue]
+  // Network/delta reads can arrive before replay finishes. Keep queued board
+  // moves visible instead of allowing those reads to snap cards back.
+  return pending.reduce(
+    (current, command) => {
+      if (command.commandType !== CommandType.MOVE_PROJECT_CHORE) return current
+      const { afterChoreId, choreId, sectionId } = command.payload
+      return reorderedChoresAfter(current, choreId, sectionId, afterChoreId)
+    },
+    [...(chores || []), ...createdFromQueue],
+  )
 }

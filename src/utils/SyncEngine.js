@@ -7,6 +7,8 @@ import {
   DeleteChore,
   DeleteChoreHistory,
   MarkChoreComplete,
+  MoveProjectChore,
+  MoveProjectSection,
   PauseChore,
   SaveChore,
   SkipChore,
@@ -142,9 +144,15 @@ class SyncEngine {
   async _replayCommands() {
     const commands = await commandQueue.getPending()
 
-    for (const cmd of commands) {
+    for (const queuedCommand of commands) {
       if (!networkManager.isOnline) break
 
+      // A preceding create may have remapped this command's task or anchor.
+      // Never replay the stale snapshot captured before that create.
+      const cmd = (await commandQueue.getPending()).find(
+        command => command.id === queuedCommand.id,
+      )
+      if (!cmd) continue
       await commandQueue.markSyncing(cmd.id)
 
       try {
@@ -213,6 +221,32 @@ class SyncEngine {
           }
         }
         break
+
+      case CommandType.MOVE_PROJECT_CHORE: {
+        const { afterChoreId, choreId, projectId, sectionId } = cmd.payload
+        if (
+          [choreId, afterChoreId].some(id => String(id).startsWith('temp_'))
+        ) {
+          throw new Error('Task move is waiting for an offline-created task')
+        }
+        response = await MoveProjectChore(
+          projectId,
+          choreId,
+          sectionId,
+          afterChoreId,
+        )
+        break
+      }
+
+      case CommandType.MOVE_PROJECT_SECTION: {
+        const { afterSectionId, projectId, sectionId } = cmd.payload
+        response = await MoveProjectSection(
+          projectId,
+          sectionId,
+          afterSectionId,
+        )
+        break
+      }
 
       case CommandType.UPDATE_CHORE:
         response = await SaveChore(cmd.payload)

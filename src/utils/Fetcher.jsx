@@ -1088,6 +1088,57 @@ const PreviewProjectAccess = (id, access) => {
   })
 }
 
+// Project board: sections (columns) are shared by everyone who can see the
+// project; the view preference (board vs list) is private to each user.
+const GetProjectSections = projectId => {
+  return Fetch(`/projects/${projectId}/sections`, {
+    method: 'GET',
+    headers: HEADERS(),
+  })
+}
+
+const CreateProjectSection = (projectId, name) => {
+  return Fetch(`/projects/${projectId}/sections`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify({ name }),
+  })
+}
+
+const RenameProjectSection = (projectId, sectionId, name) => {
+  return Fetch(`/projects/${projectId}/sections/${sectionId}`, {
+    method: 'PUT',
+    headers: HEADERS(),
+    body: JSON.stringify({ name }),
+  })
+}
+
+const DeleteProjectSection = (projectId, sectionId) => {
+  return Fetch(`/projects/${projectId}/sections/${sectionId}`, {
+    method: 'DELETE',
+    headers: HEADERS(),
+  })
+}
+
+const MoveProjectSection = (projectId, sectionId, afterSectionId) => {
+  return Fetch(`/projects/${projectId}/sections/${sectionId}/move`, {
+    method: 'PUT',
+    headers: HEADERS(),
+    body: JSON.stringify({ afterSectionId: afterSectionId ?? null }),
+  })
+}
+
+const MoveProjectChore = (projectId, choreId, sectionId, afterChoreId) => {
+  return Fetch(`/projects/${projectId}/board/chores/${choreId}/move`, {
+    method: 'PUT',
+    headers: HEADERS(),
+    body: JSON.stringify({
+      sectionId,
+      afterChoreId: afterChoreId ?? null,
+    }),
+  })
+}
+
 // Filter-related API functions
 const GetFilters = () => {
   return Fetch(`/filters`, {
@@ -1175,6 +1226,7 @@ export {
   CreateLabel,
   CreateLongLiveToken,
   CreateProject,
+  CreateProjectSection,
   CreateReward,
   CreateThing,
   DeclineCircleMemberRequest,
@@ -1188,6 +1240,7 @@ export {
   DeleteLabel,
   DeleteLongLiveToken,
   DeleteProject,
+  DeleteProjectSection,
   DeleteReward,
   DeleteThing,
   DeleteTimeSession,
@@ -1220,6 +1273,7 @@ export {
   GetPinnedFilters,
   GetProjectById,
   GetProjects,
+  GetProjectSections,
   GetRedemptions,
   GetResource,
   GetRewards,
@@ -1234,6 +1288,8 @@ export {
   login,
   logout,
   MarkChoreComplete,
+  MoveProjectChore,
+  MoveProjectSection,
   NudgeChore,
   PauseChore,
   PreviewProjectAccess,
@@ -1246,6 +1302,7 @@ export {
   RegisterDeviceToken,
   RejectChore,
   RejectRedemption,
+  RenameProjectSection,
   ResetChoreTimer,
   ResetPassword,
   RestoreBackup,

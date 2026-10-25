@@ -56,6 +56,11 @@ const AppModal = forwardRef(
     const handleClose = (event, reason) => {
       if (reason === 'backdropClick' && !closeOnBackdrop) return
       if (reason === 'escapeKeyDown' && !closeOnEscape) return
+      // Closing must never leak through to whatever is behind the modal —
+      // without this, a backdrop tap or the close button bubbles up to any
+      // click handler on the element that opened the modal (e.g. a card's
+      // own navigate-on-click).
+      event?.stopPropagation?.()
       onClose?.(event, reason)
     }
 
