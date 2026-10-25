@@ -147,6 +147,7 @@ function setupMoves({ enabled = true, online = false, reject } = {}) {
     [JSON.stringify(['projectSections', 'p1']), kv.get('project_sections:p1')],
   ])
   const calls = []
+  const createCalls = []
   const networkManager = { isOnline: online }
   const offlineDB = {
     getCommands: async () => structuredClone(commands),
@@ -208,7 +209,10 @@ function setupMoves({ enabled = true, online = false, reject } = {}) {
       if (reject) throw reject
       return { ok: true }
     },
-    CreateChore: async () => ({ ok: true, json: async () => ({ res: 99 }) }),
+    CreateChore: async payload => {
+      createCalls.push(payload)
+      return { ok: true, json: async () => ({ res: 99 }) }
+    },
   }
   const queryClient = {
     cancelQueries: async () => {},
@@ -252,6 +256,23 @@ function setupMoves({ enabled = true, online = false, reject } = {}) {
     },
     { console },
   )
+  const choreHooks = load('../src/queries/ChoreQueries.jsx', {
+    '@tanstack/react-query': {
+      useMutation: value => value,
+      useQueryClient: () => queryClient,
+    },
+    react: {},
+    '../analytics': { track: () => {} },
+    '../hooks/NetworkManager': { networkManager },
+    '../utils/BoardOrdering': ordering,
+    '../utils/CommandQueue': queueModule,
+    '../utils/Fetcher': fetchers,
+    '../utils/ImageCache': {},
+    '../utils/OfflineDB': { offlineDB },
+    '../utils/OfflineFeatureToggle': toggle,
+    '../utils/PendingChores': pending,
+    '../utils/SyncEngine': { syncEngine },
+  })
   const mutate = async (mutation, variables) => {
     const context = await mutation.onMutate(variables)
     try {
@@ -268,6 +289,8 @@ function setupMoves({ enabled = true, online = false, reject } = {}) {
     ...pending,
     hooks,
     calls,
+    choreHooks,
+    createCalls,
     offlineDB,
     networkManager,
     syncEngine,
@@ -423,6 +446,47 @@ test('request timeouts also queue column moves', async () => {
   await app.mutate(app.hooks.useMoveSection(), sectionMove)
   const [command] = await app.commandQueue.getPending()
   assert.equal(command.commandType, app.CommandType.MOVE_PROJECT_SECTION)
+})
+
+test('new tasks append at the bottom online and offline, ignoring copied positions', async () => {
+  for (const online of [false, true]) {
+    const app = setupMoves({ online })
+    app.queryClient.setQueryData(['chores', false], {
+      res: [
+        { id: 1, projectId: 'p1', sectionId: 20, boardPosition: 3000 },
+        { id: 2, projectId: 'p1', sectionId: 10, boardPosition: 90000 },
+      ],
+    })
+    const create = app.choreHooks.useCreateChore()
+    const created = await create.mutationFn({
+      projectId: 'p1',
+      sectionId: 20,
+      boardPosition: -1,
+    })
+    assert.equal(created.boardPosition, 4000)
+    if (online) {
+      assert.equal(app.createCalls[0].boardPosition, 4000)
+    } else {
+      const second = await create.mutationFn({ projectId: 'p1', sectionId: 20 })
+      assert.equal(second.boardPosition, 5000)
+      const restored = await app.mergePendingCreates([])
+      assert.deepEqual(
+        Array.from(restored, chore => chore.boardPosition),
+        [4000, 5000],
+      )
+    }
+  }
+})
+
+test('unplaced new tasks append after the first section fallback', () => {
+  const result = ordering.appendChoreToSection(
+    { projectId: 'p1', sectionId: null },
+    [
+      { projectId: 'p1', sectionId: 10, boardPosition: 8000 },
+      { projectId: 'p2', sectionId: 10, boardPosition: 99000 },
+    ],
+  )
+  assert.equal(result.boardPosition, 9000)
 })
 
 test('transient replay errors leave moves pending for retry', async () => {

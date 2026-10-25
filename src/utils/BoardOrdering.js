@@ -1,6 +1,24 @@
 // IDs from drag-and-drop are strings; persisted/server IDs may be numbers.
 const sameId = (a, b) => String(a) === String(b)
 
+// The server chooses the authoritative position under the project's lock.
+// Mirror append behavior locally so new/queued tasks never flash at the top.
+export const appendChoreToSection = (task, chores) => {
+  if (!task.projectId || task.projectId === 'default') return task
+  const siblings = chores.filter(
+    chore =>
+      sameId(chore.projectId, task.projectId) &&
+      (task.sectionId == null ||
+        chore.sectionId == null ||
+        sameId(chore.sectionId, task.sectionId)),
+  )
+  return {
+    ...task,
+    boardPosition:
+      Math.max(0, ...siblings.map(chore => chore.boardPosition || 0)) + 1000,
+  }
+}
+
 export const reorderedAfter = (sections, sectionId, afterSectionId) => {
   const next = [...sections]
   const fromIndex = next.findIndex(section => sameId(section.id, sectionId))
