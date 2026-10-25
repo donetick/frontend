@@ -54,16 +54,18 @@ export function useVoiceToTask({ members = [], userLabels = [] } = {}) {
   // inside voiceInputService.stop() are visible immediately afterwards.
   const segmentsRef = useRef([])
   const membersRef = useRef(members)
-  membersRef.current = members
   const userLabelsRef = useRef(userLabels)
-  userLabelsRef.current = userLabels
   const vocabularyRef = useRef(buildVocabulary(members, userLabels))
-  vocabularyRef.current = buildVocabulary(members, userLabels)
-
   const phaseRef = useRef(phase)
-  phaseRef.current = phase
   const lockedRef = useRef(isLocked)
-  lockedRef.current = isLocked
+
+  useEffect(() => {
+    membersRef.current = members
+    userLabelsRef.current = userLabels
+    vocabularyRef.current = buildVocabulary(members, userLabels)
+    phaseRef.current = phase
+    lockedRef.current = isLocked
+  }, [members, userLabels, phase, isLocked])
 
   const pressStartedAtRef = useRef(0)
   const pressStartedListeningRef = useRef(false)

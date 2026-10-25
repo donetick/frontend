@@ -63,6 +63,15 @@ export const hydrateQueriesFromOfflineCache = async queryClient => {
     seed(queryClient, ['labels'], asList(labels))
     seed(queryClient, ['projects'], asList(projects))
     seed(queryClient, ['filters'], asList(filters))
+
+    // Sections live outside the chore delta-sync feed. Restore each visited
+    // project's columns too, otherwise cached tasks have nowhere to render.
+    await Promise.all(
+      (asList(projects) || []).map(async project => {
+        const sections = await offlineDB.getKV(`project_sections:${project.id}`)
+        seed(queryClient, ['projectSections', project.id], asList(sections))
+      }),
+    )
     const members = asList(circleMembers)
     if (members) seed(queryClient, ['allCircleMembers'], { res: members })
 
