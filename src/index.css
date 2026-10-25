@@ -23,7 +23,9 @@
   gap: 1rem;
   background: #f8fafc;
   color: #155e75;
-  font: 600 1rem system-ui, sans-serif;
+  font:
+    600 1rem system-ui,
+    sans-serif;
 }
 
 .startup-fallback__spinner {
