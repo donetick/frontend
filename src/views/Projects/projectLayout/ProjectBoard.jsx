@@ -85,6 +85,8 @@ const ignoreActionMenu = () => {}
 
 const columnDndId = id => `section:${id}`
 const taskDndId = id => `task:${id}`
+// Keep offline-created IDs intact until SyncEngine maps them to server IDs.
+const taskMutationId = id => (String(id).startsWith('temp_') ? id : Number(id))
 
 const interactiveControlSelector =
   'button, input, textarea, select, a, [role="button"], [role="checkbox"], [role="menuitem"], [contenteditable="true"]'
@@ -836,7 +838,7 @@ const ProjectBoard = ({
     if (action === 'moveToSection') {
       moveChoreMutation.mutate({
         projectId,
-        choreId: Number(chore.id),
+        choreId: taskMutationId(chore.id),
         sectionId: extraData.section.id,
         afterChoreId: null,
       })
@@ -961,13 +963,13 @@ const ProjectBoard = ({
     if (!order) return
     const newIndex = order.orderedIds.indexOf(taskId)
     const afterChoreId =
-      newIndex <= 0 ? null : Number(order.orderedIds[newIndex - 1])
+      newIndex <= 0 ? null : taskMutationId(order.orderedIds[newIndex - 1])
     const pendingOrder = { ...order, projectId }
     setPendingTaskOrder(pendingOrder)
     moveChoreMutation.mutate(
       {
         projectId,
-        choreId: Number(taskId),
+        choreId: taskMutationId(taskId),
         sectionId: order.sectionId,
         afterChoreId,
       },

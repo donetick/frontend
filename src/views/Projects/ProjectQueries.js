@@ -3,6 +3,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { track } from '../../analytics'
 import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
 import { networkManager } from '../../hooks/NetworkManager'
+import { reorderedAfter, reorderedChoresAfter } from '../../utils/BoardOrdering'
+import { commandQueue, CommandType } from '../../utils/CommandQueue'
 import { canCreateProject } from '../../utils/entitlements'
 import {
   CreateProject,
@@ -18,6 +20,19 @@ import {
 } from '../../utils/Fetcher'
 import { offlineDB } from '../../utils/OfflineDB'
 import { isOfflineFeatureEnabled } from '../../utils/OfflineFeatureToggle'
+import { mergePendingCreates } from '../../utils/PendingChores'
+
+// Queue behind earlier offline writes too, so a reconnect cannot overtake them.
+const shouldQueueMove = async () =>
+  isOfflineFeatureEnabled() &&
+  (!networkManager.isOnline || (await commandQueue.getPending()).length > 0)
+
+const isMoveNetworkError = error =>
+  isOfflineFeatureEnabled() &&
+  !error.status &&
+  (error instanceof TypeError ||
+    error?.name === 'AbortError' ||
+    !networkManager.isOnline)
 
 // Query hook for fetching all projects
 export const useProjects = () => {
@@ -224,7 +239,15 @@ export const useProjectSections = projectId => {
     queryKey: ['projectSections', projectId],
     queryFn: async () => {
       const cacheKey = `project_sections:${projectId}`
-      if (isOfflineFeatureEnabled() && !networkManager.isOnline) {
+      const pendingSectionMove = (await commandQueue.getPending()).some(
+        command =>
+          command.commandType === CommandType.MOVE_PROJECT_SECTION &&
+          command.payload.projectId === projectId,
+      )
+      if (
+        pendingSectionMove ||
+        (isOfflineFeatureEnabled() && !networkManager.isOnline)
+      ) {
         const cached = await offlineDB.getKV(cacheKey)
         if (Array.isArray(cached)) return cached
         throw new Error('No cached sections available for this project')
@@ -329,33 +352,41 @@ export const useDeleteSection = () => {
   })
 }
 
-// Reorders sections[] so sectionId sits right after afterSectionId (or
-// first, when null), mirroring what the server will settle on, so the
-// column doesn't jump back and forth before the request resolves.
-const reorderedAfter = (sections, sectionId, afterSectionId) => {
-  const next = [...sections]
-  const fromIndex = next.findIndex(section => section.id === sectionId)
-  if (fromIndex === -1) return sections
-  const [moved] = next.splice(fromIndex, 1)
-  const afterIndex =
-    afterSectionId == null
-      ? -1
-      : next.findIndex(section => section.id === afterSectionId)
-  next.splice(afterIndex + 1, 0, moved)
-  return next
-}
-
+// Section moves use the same optimistic order online and offline.
 export const useMoveSection = () => {
   const queryClient = useQueryClient()
   return useMutation({
+    networkMode: 'always',
     mutationFn: async ({ afterSectionId, projectId, sectionId }) => {
-      const response = await MoveProjectSection(
-        projectId,
-        sectionId,
-        afterSectionId,
-      )
-      if (!response.ok) {
-        throw await errorFrom(response, 'Failed to move section')
+      const queueMove = async () => {
+        const key = `project_sections:${projectId}`
+        const sections =
+          queryClient.getQueryData(['projectSections', projectId]) ??
+          (await offlineDB.getKV(key)) ??
+          []
+        await commandQueue.enqueue(
+          CommandType.MOVE_PROJECT_SECTION,
+          `project:${projectId}:section:${sectionId}`,
+          { afterSectionId, projectId, sectionId },
+        )
+        await offlineDB.saveKV(
+          key,
+          reorderedAfter(sections, sectionId, afterSectionId),
+        )
+        return { queued: true }
+      }
+      if (await shouldQueueMove()) return queueMove()
+      try {
+        const response = await MoveProjectSection(
+          projectId,
+          sectionId,
+          afterSectionId,
+        )
+        if (!response.ok)
+          throw await errorFrom(response, 'Failed to move section')
+      } catch (error) {
+        if (isMoveNetworkError(error)) return queueMove()
+        throw error
       }
     },
     onMutate: async ({ afterSectionId, projectId, sectionId }) => {
@@ -376,34 +407,14 @@ export const useMoveSection = () => {
         )
       }
     },
-    onSettled: (_data, _err, { projectId }) => {
-      queryClient.invalidateQueries({
-        queryKey: ['projectSections', projectId],
-      })
+    onSettled: (data, _err, { projectId }) => {
+      queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
+      if (!data?.queued)
+        queryClient.invalidateQueries({
+          queryKey: ['projectSections', projectId],
+        })
     },
   })
-}
-
-// Reassigns boardPosition for every chore in sectionId so choreId lands right
-// after afterChoreId (or first, when null), mirroring what the server will
-// settle on, so the column doesn't snap back before the request resolves.
-const reorderedChoresAfter = (chores, choreId, sectionId, afterChoreId) => {
-  const siblings = chores
-    .filter(chore => chore.sectionId === sectionId && chore.id !== choreId)
-    .sort((a, b) => (a.boardPosition || 0) - (b.boardPosition || 0))
-  const afterIndex =
-    afterChoreId == null
-      ? -1
-      : siblings.findIndex(chore => chore.id === afterChoreId)
-  const moved = chores.find(chore => chore.id === choreId)
-  if (!moved) return chores
-  siblings.splice(afterIndex + 1, 0, moved)
-  const positions = new Map(siblings.map((chore, index) => [chore.id, index]))
-  return chores.map(chore =>
-    positions.has(chore.id)
-      ? { ...chore, sectionId, boardPosition: positions.get(chore.id) }
-      : chore,
-  )
 }
 
 // Moves one chore into sectionId, right after afterChoreId (or first, when
@@ -413,15 +424,41 @@ const reorderedChoresAfter = (chores, choreId, sectionId, afterChoreId) => {
 export const useMoveChore = () => {
   const queryClient = useQueryClient()
   return useMutation({
+    networkMode: 'always',
     mutationFn: async ({ afterChoreId, choreId, projectId, sectionId }) => {
-      const response = await MoveProjectChore(
-        projectId,
-        choreId,
-        sectionId,
-        afterChoreId,
-      )
-      if (!response.ok) {
-        throw await errorFrom(response, 'Failed to move task')
+      const queueMove = async () => {
+        const cached = await mergePendingCreates(
+          await offlineDB.getChores(true),
+        )
+        const visible = queryClient.getQueryData(['chores', false])?.res || []
+        const chores = [
+          ...new Map(
+            [...cached, ...visible].map(chore => [String(chore.id), chore]),
+          ).values(),
+        ]
+        await commandQueue.enqueue(CommandType.MOVE_PROJECT_CHORE, choreId, {
+          afterChoreId,
+          choreId,
+          projectId,
+          sectionId,
+        })
+        await offlineDB.saveChores(
+          reorderedChoresAfter(chores, choreId, sectionId, afterChoreId),
+        )
+        return { queued: true }
+      }
+      if (await shouldQueueMove()) return queueMove()
+      try {
+        const response = await MoveProjectChore(
+          projectId,
+          choreId,
+          sectionId,
+          afterChoreId,
+        )
+        if (!response.ok) throw await errorFrom(response, 'Failed to move task')
+      } catch (error) {
+        if (isMoveNetworkError(error)) return queueMove()
+        throw error
       }
     },
     onMutate: async ({ afterChoreId, choreId, sectionId }) => {
@@ -441,8 +478,9 @@ export const useMoveChore = () => {
         queryClient.setQueryData(['chores', false], context.previous)
       }
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['chores'] })
+    onSettled: data => {
+      queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
+      if (!data?.queued) queryClient.invalidateQueries({ queryKey: ['chores'] })
     },
   })
 }
