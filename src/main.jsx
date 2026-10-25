@@ -17,9 +17,16 @@ export const Site = React.lazy(() =>
   isMarketingSite ? import('./MarketingApp.jsx') : import('./Application.jsx'),
 )
 
+const StartupFallback = () => (
+  <div className='startup-fallback' role='status' aria-label='Loading Donetick'>
+    <span className='startup-fallback__spinner' aria-hidden='true' />
+    <span>Donetick</span>
+  </div>
+)
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <React.Suspense fallback={null}>
+    <React.Suspense fallback={<StartupFallback />}>
       <Site />
     </React.Suspense>
   </React.StrictMode>,

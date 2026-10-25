@@ -12,6 +12,36 @@
   }
 }
 
+.startup-fallback {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  background: #f8fafc;
+  color: #155e75;
+  font: 600 1rem system-ui, sans-serif;
+}
+
+.startup-fallback__spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid #bae6fd;
+  border-top-color: #06b6d4;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@media (prefers-color-scheme: dark) {
+  .startup-fallback {
+    background: #111827;
+    color: #e5e7eb;
+  }
+}
+
 /* Smooth scrolling for better UX */
 html {
   scroll-behavior: smooth;
