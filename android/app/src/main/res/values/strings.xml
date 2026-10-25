@@ -4,6 +4,8 @@
     <string name="title_activity_main">Donetick</string>
     <string name="package_name">com.donetick.app</string>
     <string name="custom_url_scheme">com.donetick.app</string>
+    <string name="share_make_task">Make Task</string>
+    <string name="share_attach_to_task">Attach to Task</string>
 
     <!-- Home-screen widgets -->
     <string name="widget_today_label">Today</string>
@@ -23,19 +25,51 @@
     <string name="widget_group_tomorrow">Tomorrow</string>
     <string name="widget_updated_at">Updated %s</string>
     <string name="widget_add_task">Add task</string>
+    <string name="widget_refresh">Refresh</string>
     <string name="widget_people_label">People</string>
     <string name="widget_people_description">Everyone in your circle with their tasks for today and the week ahead.</string>
     <string name="widget_people_title">People</string>
     <string name="widget_empty_people">No circle members yet</string>
     <string name="widget_person_counts">%1$d today · %2$d this week</string>
+    <string name="widget_project_label">Project Tasks</string>
+    <string name="widget_project_description">Browse and complete tasks one project at a time.</string>
+    <string name="widget_filter_label">Filter Tasks</string>
+    <string name="widget_filter_description">Browse and complete tasks from your saved filters.</string>
     <string name="widget_quick_label">Quick Capture</string>
     <string name="widget_quick_description">Capture a task in one tap — type it, scan it, or say it.</string>
     <string name="widget_quick_type">Type</string>
     <string name="widget_quick_scan">Scan</string>
     <string name="widget_quick_voice">Speak</string>
+    <string name="widget_actions_label">Quick Actions</string>
+    <string name="widget_actions_description">Four customizable shortcuts for capturing and navigating Donetick.</string>
+    <string name="widget_action_text">Text capture</string>
+    <string name="widget_action_voice">Voice capture</string>
+    <string name="widget_action_photo">Photo capture</string>
+    <string name="widget_action_search">Search</string>
+    <string name="widget_action_projects">Projects</string>
+    <string name="widget_action_overview">Overview</string>
+    <string name="widget_config_quick_actions">Actions</string>
+    <string-array name="widget_quick_action_choices">
+        <item>@string/widget_action_text</item>
+        <item>@string/widget_action_voice</item>
+        <item>@string/widget_action_photo</item>
+        <item>@string/widget_action_search</item>
+        <item>@string/widget_action_projects</item>
+        <item>@string/widget_action_overview</item>
+    </string-array>
     <string name="widget_config_title">Widget options</string>
     <string name="widget_config_include_others">Show everyone\'s tasks</string>
     <string name="widget_config_include_others_hint">Include tasks assigned to other members of your circle. Their avatar appears next to their tasks.</string>
+    <string name="widget_config_opacity">Background opacity</string>
+    <string name="widget_config_opacity_hint">How solid this widget\'s background is. Lower values let your wallpaper show through.</string>
+    <string name="widget_config_opacity_default">Use the app setting (%1$d%%)</string>
+    <string name="widget_config_opacity_value">%1$d%%</string>
+    <string name="widget_config_theme">Colors</string>
+    <string name="widget_config_theme_hint">Which palette this widget draws with. Automatic follows your phone\'s light or dark mode.</string>
+    <string name="widget_config_theme_default">Use the app setting (%1$s)</string>
+    <string name="widget_theme_auto">Automatic</string>
+    <string name="widget_theme_light">Always light</string>
+    <string name="widget_theme_dark">Always dark</string>
     <string name="widget_config_save">Save</string>
 
     <!-- Sample data for the widget-picker previews (never shown on a placed

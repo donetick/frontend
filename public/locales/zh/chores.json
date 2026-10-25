@@ -627,7 +627,15 @@
     "dueDate": "截止日期：{{date}}",
     "hideRawText": "隐藏原始文本",
     "showRawText": "显示原始文本",
-    "cameraUnavailableUseUpload": "相机不可用 — 请改用上传"
+    "cameraUnavailableUseUpload": "相机不可用 — 请改用上传",
+    "noTextFound": "未在图片中找到文字。请换一张更清晰的照片。",
+    "noTaskIdentified": "无法识别任务。请换一张照片试试。",
+    "processingFailed": "处理失败。",
+    "scannerError": "扫描器错误：{{error}}",
+    "scanFailed": "扫描失败。",
+    "preparingScan": "正在启动…",
+    "failedTitle": "未找到任务",
+    "continueWithoutTask": "不使用任务继续"
   },
   "descriptionPlaceholder": "",
   "notificationTemplate": {
@@ -793,7 +801,22 @@
     "processing": "",
     "create": "",
     "descriptionLabel": "Description:",
-    "subtasksLabel": "Subtasks:"
+    "subtasksLabel": "Subtasks:",
+    "createAnother": "再创建一个",
+    "createAndAddAnother": "创建并再添加一个",
+    "createAndClose": "创建并关闭",
+    "findingDetails": "正在从您的照片中查找任务详情…",
+    "findingDetailsHint": "您可以在查找期间继续编辑。",
+    "detailsFound": "我们找到了任务详情",
+    "suggestedDue": "建议的截止日期：{{date}}",
+    "useSuggestion": "使用建议",
+    "useAndKeepAttachment": "使用建议并保留照片",
+    "dismissSuggestion": "忽略建议",
+    "noDetailsFound": "未找到任务详情",
+    "analysisFailed": "我们无法分析此照片",
+    "attachmentStillAdded": "您的照片仍已附加。",
+    "continueManually": "您可以继续手动创建任务。",
+    "dismissAnalysis": "忽略照片分析"
   },
   "repeat": {
     "days": {

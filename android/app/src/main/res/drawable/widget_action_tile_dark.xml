@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Dark-scheme copy of widget_action_tile, for forced themes. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval">
+    <solid android:color="#12395F" />
+    <size android:width="100dp" android:height="100dp" />
+</shape>

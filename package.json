@@ -1,7 +1,7 @@
 {
   "name": "donetick",
   "private": true,
-  "version": "1.2.56",
+  "version": "1.2.62",
   "type": "module",
   "engines": {
     "node": ">=20.0.0",
@@ -53,6 +53,7 @@
     "@capacitor/browser": "^8.0.0",
     "@capacitor/core": "^8.0.0",
     "@capacitor/device": "^8.0.0",
+    "@capacitor/filesystem": "^8.1.5",
     "@capacitor/haptics": "^8.0.2",
     "@capacitor/ios": "^8.0.0",
     "@capacitor/local-llm": "^1.0.0",
@@ -83,6 +84,7 @@
     "@revenuecat/purchases-capacitor": "^12.0.0",
     "@revenuecat/purchases-capacitor-ui": "^12.0.0",
     "@stylistic/eslint-plugin": "^5.10.0",
+    "@supernotes/capacitor-send-intent": "^7.0.0",
     "@swc/core": "^1.12.5",
     "@tanstack/react-query": "^5.17.0",
     "@typescript-eslint/eslint-plugin": "^8.59.4",

@@ -29,6 +29,9 @@ PODS:
   - CapacitorCordova (8.4.2)
   - CapacitorDevice (8.0.3):
     - Capacitor
+  - CapacitorFilesystem (8.1.5):
+    - Capacitor
+    - IONFilesystemLib (= 2.0.1)
   - CapacitorHaptics (8.0.2):
     - Capacitor
   - CapacitorLocalLlm (1.0.0):
@@ -113,6 +116,7 @@ PODS:
     - AppAuth/Core (~> 2.0)
     - GTMSessionFetcher/Core (< 4.0, >= 3.3)
   - GTMSessionFetcher/Core (3.5.0)
+  - IONFilesystemLib (2.0.1)
   - JcesarmobileCapacitorOcr (0.3.0):
     - Capacitor
   - nanopb (3.30910.0):
@@ -143,6 +147,8 @@ PODS:
   - SQLCipher/common (4.10.0)
   - SQLCipher/standard (4.10.0):
     - SQLCipher/common
+  - SupernotesCapacitorSendIntent (7.0.0):
+    - Capacitor
   - ZIPFoundation (0.9.20)
 
 DEPENDENCIES:
@@ -154,6 +160,7 @@ DEPENDENCIES:
   - "CapacitorCommunitySqlite (from `../../node_modules/@capacitor-community/sqlite`)"
   - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorDevice (from `../../node_modules/@capacitor/device`)"
+  - "CapacitorFilesystem (from `../../node_modules/@capacitor/filesystem`)"
   - "CapacitorHaptics (from `../../node_modules/@capacitor/haptics`)"
   - "CapacitorLocalLlm (from `../../node_modules/@capacitor/local-llm`)"
   - "CapacitorLocalNotifications (from `../../node_modules/@capacitor/local-notifications`)"
@@ -171,6 +178,7 @@ DEPENDENCIES:
   - "JcesarmobileCapacitorOcr (from `../../node_modules/@jcesarmobile/capacitor-ocr`)"
   - "RevenuecatPurchasesCapacitor (from `../../node_modules/@revenuecat/purchases-capacitor`)"
   - "RevenuecatPurchasesCapacitorUi (from `../../node_modules/@revenuecat/purchases-capacitor-ui`)"
+  - "SupernotesCapacitorSendIntent (from `../../node_modules/@supernotes/capacitor-send-intent`)"
 
 SPEC REPOS:
   trunk:
@@ -186,6 +194,7 @@ SPEC REPOS:
     - GoogleUtilities
     - GTMAppAuth
     - GTMSessionFetcher
+    - IONFilesystemLib
     - nanopb
     - PromisesObjC
     - PromisesSwift
@@ -214,6 +223,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/ios"
   CapacitorDevice:
     :path: "../../node_modules/@capacitor/device"
+  CapacitorFilesystem:
+    :path: "../../node_modules/@capacitor/filesystem"
   CapacitorHaptics:
     :path: "../../node_modules/@capacitor/haptics"
   CapacitorLocalLlm:
@@ -246,6 +257,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@revenuecat/purchases-capacitor"
   RevenuecatPurchasesCapacitorUi:
     :path: "../../node_modules/@revenuecat/purchases-capacitor-ui"
+  SupernotesCapacitorSendIntent:
+    :path: "../../node_modules/@supernotes/capacitor-send-intent"
 
 SPEC CHECKSUMS:
   Alamofire: 7193b3b92c74a07f85569e1a6c4f4237291e7496
@@ -259,6 +272,7 @@ SPEC CHECKSUMS:
   CapacitorCommunitySqlite: eac6acfb852f46e7988fc59604d7f900498d354e
   CapacitorCordova: 345eacdc4c8282415446aea4acd8c77d82480bd4
   CapacitorDevice: 708e742b60a61572cd593e44c809592e8f31da14
+  CapacitorFilesystem: e3bc7123acb1554df1b7b099fa5847064b9e1bd4
   CapacitorHaptics: 296f771ecd89c7a1bd92a7b6826a7d268e2e70f5
   CapacitorLocalLlm: a05516151a02923a9e7dae9949d3817e85e321f0
   CapacitorLocalNotifications: 908a69a3cf7ae345426de3223d4980befb0103c6
@@ -281,6 +295,7 @@ SPEC CHECKSUMS:
   GoogleUtilities: 766ace00c6b10d8148408f329d10c4f051931850
   GTMAppAuth: 217a876b249c3c585a54fd6f73e6b58c4f5c4238
   GTMSessionFetcher: 5aea5ba6bd522a239e236100971f10cb71b96ab6
+  IONFilesystemLib: 306469e4c563f61de82d7bca2bbfed9e64d1b2d2
   JcesarmobileCapacitorOcr: d3668e104d7ad8968a9d00fd4766e18fea0fe305
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
   PromisesObjC: 752c3227f599e3467650e47ea36f433eeb10c273
@@ -293,8 +308,9 @@ SPEC CHECKSUMS:
   RevenuecatPurchasesCapacitorUi: dc2ec0d97638ebe4ac0078452f5c212b1525ea1c
   RevenueCatUI: 6f9291da540f98baf405b5bdfc46b2d5547b704a
   SQLCipher: eb79c64049cb002b4e9fcb30edb7979bf4706dfc
+  SupernotesCapacitorSendIntent: 4a7b0752b9c8297236d8b550455ae483ac85e6f6
   ZIPFoundation: dfd3d681c4053ff7e2f7350bc4e53b5dba3f5351
 
-PODFILE CHECKSUM: 48a563e3ddeb2f3434ca36849d028fb5d8e5fc37
+PODFILE CHECKSUM: b2d3db9b2eccb5b09cac9a10acced315f6232cf2
 
 COCOAPODS: 1.16.2

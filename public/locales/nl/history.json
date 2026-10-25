@@ -1,185 +1,185 @@
 {
   "edit": {
-    "title": "Edit History",
-    "completedDate": "Completed Date",
-    "note": "Note",
-    "additionalNotes": "Additional Notes",
-    "deleteTitle": "Delete History",
-    "deleteMessage": "Are you sure you want to delete this history?"
+    "title": "Geschiedenis bewerken",
+    "completedDate": "Datum voltooid",
+    "note": "Notitie",
+    "additionalNotes": "Extra notities",
+    "deleteTitle": "Geschiedenis verwijderen",
+    "deleteMessage": "Weet je zeker dat je deze geschiedenis wilt verwijderen?"
   },
   "status": {
-    "inProgress": "In Progress",
-    "completed": "Completed",
-    "skipped": "Skipped",
-    "pendingApproval": "Pending Approval",
-    "rejected": "Rejected",
-    "missed": "Missed",
-    "rescheduled": "Rescheduled",
-    "scheduled": "Scheduled"
+    "inProgress": "Bezig",
+    "completed": "Voltooid",
+    "skipped": "Overgeslagen",
+    "pendingApproval": "Wacht op goedkeuring",
+    "rejected": "Afgewezen",
+    "missed": "Gemist",
+    "rescheduled": "Verzet",
+    "scheduled": "Gepland"
   },
   "badge": {
-    "onTime": "On Time",
-    "onTimeLabel": "On time"
+    "onTime": "Op tijd",
+    "onTimeLabel": "Op tijd"
   },
   "card": {
-    "wasDue": "",
-    "daysBeforeDue_one": "",
-    "daysBeforeDue_other": "",
-    "daysAfterDue_one": "",
-    "daysAfterDue_other": "",
-    "hoursBeforeDue_one": "",
-    "hoursBeforeDue_other": "",
-    "hoursAfterDue_one": "",
-    "hoursAfterDue_other": "",
-    "assignedTo": "",
-    "points_one": "",
-    "points_other": ""
+    "wasDue": "Vervaldatum was {{date}}",
+    "daysBeforeDue_one": "{{count}}d voor vervaldatum",
+    "daysBeforeDue_other": "{{count}}d voor vervaldatum",
+    "daysAfterDue_one": "{{count}}d na vervaldatum",
+    "daysAfterDue_other": "{{count}}d na vervaldatum",
+    "hoursBeforeDue_one": "{{count}}u voor vervaldatum",
+    "hoursBeforeDue_other": "{{count}}u voor vervaldatum",
+    "hoursAfterDue_one": "{{count}}u na vervaldatum",
+    "hoursAfterDue_other": "{{count}}u na vervaldatum",
+    "assignedTo": "Toegewezen aan {{name}}",
+    "points_one": "★ {{count}} pt",
+    "points_other": "★ {{count}} ptn"
   },
   "detail": {
-    "title": "Activity Detail",
-    "openTask": "Open Task",
-    "editEntry": "Edit Entry",
-    "performedBy": "Performed by",
-    "assignedTo": "Assigned to",
-    "lastUpdated": "Last updated",
-    "duration": "Duration",
-    "pointsEarned": "Points earned",
+    "title": "Activiteitdetails",
+    "openTask": "Taak openen",
+    "editEntry": "Item bewerken",
+    "performedBy": "Uitgevoerd door",
+    "assignedTo": "Toegewezen aan",
+    "lastUpdated": "Laatst bijgewerkt",
+    "duration": "Duur",
+    "pointsEarned": "Verdiende punten",
     "points_one": "{{count}} pt",
-    "points_other": "{{count}} pts",
-    "note": "Note",
+    "points_other": "{{count}} ptn",
+    "note": "Notitie",
     "reason": "Reden",
     "notes": "Notities"
   },
   "charts": {
-    "noData": "No data available",
-    "noLabels": "No Labels",
-    "unassigned": "Unassigned",
-    "unknownTask": "Unknown Task",
-    "late": "Late",
+    "noData": "Geen gegevens beschikbaar",
+    "noLabels": "Geen labels",
+    "unassigned": "Niet toegewezen",
+    "unknownTask": "Onbekende taak",
+    "late": "Te laat",
     "status": {
       "title": "Status",
-      "description": "Completed tasks status"
+      "description": "Status van voltooide taken"
     },
     "due": {
-      "title": "Due Date",
-      "description": "Current tasks due date"
+      "title": "Vervaldatum",
+      "description": "Vervaldatum van huidige taken"
     },
     "priority": {
-      "title": "Priority",
-      "description": "Tasks by priority"
+      "title": "Prioriteit",
+      "description": "Taken per prioriteit"
     },
     "labels": {
       "title": "Labels",
-      "description": "Tasks by labels"
+      "description": "Taken per label"
     },
     "labelsDuration": {
-      "title": "Labels (time)",
-      "description": "Time spent by labels (hours)"
+      "title": "Labels (tijd)",
+      "description": "Bestede tijd per label (uren)"
     },
     "tasksTime": {
-      "title": "Tasks (time)",
-      "description": "Time spent by individual tasks (hours)"
+      "title": "Taken (tijd)",
+      "description": "Bestede tijd per taak (uren)"
     },
     "assigneeBreakdown": {
-      "title": "by Assignee",
-      "description": "Tasks grouped by assignee"
+      "title": "per toegewezen persoon",
+      "description": "Taken gegroepeerd per toegewezen persoon"
     }
   },
   "filter": {
     "status": "Status",
-    "pending": "Pending",
+    "pending": "In behandeling",
     "labels": "Labels",
-    "hasNotes": "Has Notes",
-    "hasPoints": "Has Points",
-    "timePeriod": "Time Period",
-    "user": "User",
-    "completedBy": "",
-    "completedAt": ""
+    "hasNotes": "Met notities",
+    "hasPoints": "Met punten",
+    "timePeriod": "Periode",
+    "user": "Gebruiker",
+    "completedBy": "Voltooid door",
+    "completedAt": "Voltooid op"
   },
   "period": {
-    "days_one": "{{count}} Day",
-    "days_other": "{{count}} Days",
-    "allTime": "All Time"
+    "days_one": "{{count}} dag",
+    "days_other": "{{count}} dagen",
+    "allTime": "Altijd"
   },
   "search": {
-    "placeholder": "",
-    "clear": ""
+    "placeholder": "Geschiedenis doorzoeken...",
+    "clear": "Zoekopdracht wissen"
   },
   "sort": {
-    "date": "",
-    "updatedDate": "",
-    "performer": "",
-    "status": "",
-    "points": ""
+    "date": "Datum voltooid",
+    "updatedDate": "Datum bijgewerkt",
+    "performer": "Voltooid door",
+    "status": "Status",
+    "points": "Punten"
   },
   "activities": {
-    "title": "Activities",
-    "subtitle": "",
-    "emptyTitle": "",
-    "emptyDescriptionEveryone": "",
-    "emptyDescriptionMember": "",
-    "periodSoFar": "",
-    "periodLastDays": "",
-    "unknownMember": "",
-    "searchPlaceholder": "",
+    "title": "Activiteiten",
+    "subtitle": "Bekijk wat er is voltooid, overgeslagen of gemist",
+    "emptyTitle": "Geen activiteit in deze periode",
+    "emptyDescriptionEveryone": "Niemand in je kring heeft iets voltooid {{period}}. Probeer een langere periode of een ander lid.",
+    "emptyDescriptionMember": "{{name}} heeft niets voltooid {{period}}. Probeer een langere periode of een ander lid.",
+    "periodSoFar": "tot nu toe",
+    "periodLastDays": "in de afgelopen {{count}} dagen",
+    "unknownMember": "dit lid",
+    "searchPlaceholder": "Activiteiten zoeken...",
     "sort": {
-      "date": "",
-      "name": "",
-      "status": "",
-      "points": ""
+      "date": "Datum",
+      "name": "Taaknaam",
+      "status": "Status",
+      "points": "Punten"
     }
   },
   "title": {
-    "summary": "",
-    "activity": ""
+    "summary": "Taakoverzicht",
+    "activity": "Taakactiviteit"
   },
   "noResults": {
-    "clear": ""
+    "clear": "Filters wissen"
   },
   "toast": {
     "updateQueued": {
-      "title": "",
-      "message": ""
+      "title": "Wijziging geschiedenis in wachtrij",
+      "message": "Je bent offline. De wijziging in de geschiedenis wordt gesynchroniseerd zodra de verbinding hersteld is."
     },
     "updated": {
-      "title": "",
-      "message": ""
+      "title": "Geschiedenis bijgewerkt",
+      "message": "Het geschiedenisitem is bijgewerkt."
     },
     "deleteQueued": {
-      "title": "",
-      "message": ""
+      "title": "Verwijdering geschiedenis in wachtrij",
+      "message": "Je bent offline. De verwijdering wordt gesynchroniseerd zodra de verbinding hersteld is."
     },
     "deleted": {
-      "title": "",
-      "message": ""
+      "title": "Geschiedenis verwijderd",
+      "message": "Het geschiedenisitem is verwijderd."
     }
   },
   "delete": {
-    "title": "",
-    "message": ""
+    "title": "Geschiedenisitem verwijderen",
+    "message": "Weet je zeker dat je dit geschiedenisitem wilt verwijderen?"
   },
   "empty": {
-    "title": "",
-    "description": "",
-    "backToTasks": "",
-    "noResultsTitle": "",
-    "noResultsDescription": ""
+    "title": "Nog geen geschiedenis",
+    "description": "Elke keer dat deze taak wordt voltooid of overgeslagen, verschijnt dat hier, met wie het deed en wanneer. Er is nog niets gebeurd.",
+    "backToTasks": "Terug naar taken",
+    "noResultsTitle": "Geen geschiedenis die bij deze filters past",
+    "noResultsDescription": "Er is wel geschiedenis, maar niets past bij de filters die nu aan staan."
   },
   "info": {
-    "allCompleted": "",
-    "timesSuffix": "",
-    "averageTiming": "",
-    "onTime": "",
-    "longestDelay": "",
-    "neverLate": "",
-    "completedMost": "",
-    "unknown": "",
-    "membersInvolved": "",
-    "membersSuffix": "",
-    "lastCompleted": ""
+    "allCompleted": "Totaal voltooid",
+    "timesSuffix": "{{count}} keer",
+    "averageTiming": "Gemiddelde timing",
+    "onTime": "Op tijd",
+    "longestDelay": "Langste vertraging",
+    "neverLate": "Nooit te laat",
+    "completedMost": "Vaakst voltooid door",
+    "unknown": "Onbekend",
+    "membersInvolved": "Betrokken leden",
+    "membersSuffix": "{{count}} leden",
+    "lastCompleted": "Laatst voltooid"
   },
   "noteViewer": {
-    "updatedAt": ""
+    "updatedAt": "Bijgewerkt op {{date}}"
   },
   "plan": {
     "lockedTitle": "Oudere geschiedenis wordt in het Free‑plan {{days}} dagen bewaard",

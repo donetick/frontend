@@ -16,6 +16,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ConcurrentHashMap;
 
 /** Builds the shell RemoteViews shared by the widgets and pushes updates. */
 public final class WidgetUi {
@@ -23,6 +24,13 @@ public final class WidgetUi {
     public static final String MODE_WEEK = "week";
     public static final String MODE_PEOPLE = "people";
     public static final String EXTRA_MODE = "com.donetick.app.widget.MODE";
+    public static final String ACTION_REFRESH = "com.donetick.app.widget.REFRESH";
+
+    // Keep the feedback simple: refresh, briefly point down, then return to
+    // refresh. An up arrow looks like a navigation control in a widget header.
+    private static final String[] REFRESH_FRAMES = { "↻", "↓" };
+    private static final ConcurrentHashMap<String, Integer> REFRESHING =
+            new ConcurrentHashMap<>();
 
     private WidgetUi() {}
 
@@ -36,6 +44,27 @@ public final class WidgetUi {
                 widgetIds(context, manager, WeekWidgetProvider.class), R.id.widget_list);
         manager.notifyAppWidgetViewDataChanged(
                 widgetIds(context, manager, PeopleWidgetProvider.class), R.id.widget_list);
+        ProjectWidgetProvider.refreshAll(context);
+        FilterWidgetProvider.refreshAll(context);
+        QuickCaptureWidgetProvider.refreshAll(context);
+        QuickActionsWidgetProvider.refreshAll(context);
+    }
+
+    /**
+     * Fade a widget's background layer to its configured opacity. The layer is
+     * a separate ImageView so only the background goes translucent — text and
+     * icons stay fully opaque and legible over the wallpaper.
+     */
+    public static void applyOpacity(Context context, RemoteViews views, int appWidgetId) {
+        views.setInt(R.id.widget_background_layer, "setImageAlpha",
+                WidgetStore.alphaOf(WidgetStore.opacity(context, appWidgetId)));
+    }
+
+    /** Same, for widgets whose background takes a project/filter color. */
+    public static void applyOpacity(Context context, RemoteViews views, int appWidgetId,
+                                    int color) {
+        views.setInt(R.id.widget_background_layer, "setColorFilter", color);
+        applyOpacity(context, views, appWidgetId);
     }
 
     /** Redraw title/count/subtitle only — safe to call from the list factory. */
@@ -54,6 +83,58 @@ public final class WidgetUi {
 
     private static int[] widgetIds(Context context, AppWidgetManager manager, Class<?> provider) {
         return manager.getAppWidgetIds(new ComponentName(context, provider));
+    }
+
+    /** Runs the same forced refresh + visible animation used by project/filter widgets. */
+    public static void refresh(Context context, String mode, int appWidgetId,
+                               android.content.BroadcastReceiver.PendingResult pending) {
+        Context appContext = context.getApplicationContext();
+        String key = refreshKey(mode, appWidgetId);
+        if (REFRESHING.putIfAbsent(key, 0) != null) {
+            pending.finish();
+            return;
+        }
+        // Draw the first frame before starting I/O so even a very fast response
+        // gives immediate tap feedback.
+        update(appContext, mode, appWidgetId);
+        new Thread(() -> {
+            int frame = 0;
+            while (REFRESHING.replace(key, frame++ % REFRESH_FRAMES.length) != null) {
+                update(appContext, mode, appWidgetId);
+                try {
+                    Thread.sleep(180);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+        }, mode + "-widget-refresh-animation").start();
+        new Thread(() -> {
+            try {
+                WidgetStore.refreshFromServer(appContext, true);
+            } finally {
+                REFRESHING.remove(key);
+                update(appContext, mode, appWidgetId);
+                AppWidgetManager.getInstance(appContext).notifyAppWidgetViewDataChanged(
+                        appWidgetId, R.id.widget_list);
+                pending.finish();
+            }
+        }, mode + "-widget-refresh").start();
+    }
+
+    private static void update(Context context, String mode, int appWidgetId) {
+        AppWidgetManager.getInstance(context).updateAppWidget(
+                appWidgetId, build(context, mode, appWidgetId));
+    }
+
+    private static String refreshKey(String mode, int appWidgetId) {
+        return mode + ":" + appWidgetId;
+    }
+
+    private static Class<?> providerFor(String mode) {
+        if (MODE_TODAY.equals(mode)) return TodayWidgetProvider.class;
+        if (MODE_PEOPLE.equals(mode)) return PeopleWidgetProvider.class;
+        return WeekWidgetProvider.class;
     }
 
     public static RemoteViews build(Context context, String mode, int appWidgetId) {
@@ -78,6 +159,20 @@ public final class WidgetUi {
         }
 
         views.setTextViewText(R.id.widget_subtitle, subtitle(context));
+
+        Integer refreshFrame = REFRESHING.get(refreshKey(mode, appWidgetId));
+        views.setTextViewText(R.id.widget_refresh,
+                refreshFrame == null ? "↻" : REFRESH_FRAMES[refreshFrame]);
+        Intent refreshIntent = new Intent(context, providerFor(mode));
+        refreshIntent.setAction(ACTION_REFRESH);
+        refreshIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
+        views.setOnClickPendingIntent(R.id.widget_refresh, PendingIntent.getBroadcast(
+                context, appWidgetId * 1000 + 90, refreshIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
+
+        WidgetTheme theme = WidgetTheme.of(context, appWidgetId);
+        theme.applyBackground(context, views, appWidgetId);
+        theme.apply(views);
 
         if (!WidgetStore.hasConfig(context)) {
             views.setTextViewText(R.id.widget_empty,
@@ -134,6 +229,8 @@ public final class WidgetUi {
                 .format(new Date());
         long lastUpdated = WidgetStore.lastUpdated(context);
         if (lastUpdated <= 0) return date;
+        // Respect the device's 12/24-hour setting and keep the compact widget
+        // timestamp to hours and minutes only.
         String time = android.text.format.DateFormat.getTimeFormat(context)
                 .format(new Date(lastUpdated));
         return date + " · " + context.getString(R.string.widget_updated_at, time);

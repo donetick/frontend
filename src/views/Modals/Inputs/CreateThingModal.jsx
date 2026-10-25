@@ -92,7 +92,7 @@ function CreateThingModal({ currentThing, isOpen, onClose, onSave }) {
           placeholder={t('namePlaceholder')}
           value={name}
           onChange={e => setName(e.target.value)}
-          sx={{ minWidth: 300 }}
+          sx={{ width: '100%' }}
         />
         <FormHelperText color='danger'>{errors.name}</FormHelperText>
       </FormControl>
@@ -115,7 +115,7 @@ function CreateThingModal({ currentThing, isOpen, onClose, onSave }) {
             placeholder={t('valuePlaceholder')}
             value={state || ''}
             onChange={e => setState(e.target.value)}
-            sx={{ minWidth: 300 }}
+            sx={{ width: '100%' }}
           />
           <FormHelperText color='danger'>{errors.state}</FormHelperText>
         </FormControl>
@@ -130,7 +130,7 @@ function CreateThingModal({ currentThing, isOpen, onClose, onSave }) {
             emptyValue=''
             integer={false}
             onValueChange={setState}
-            sx={{ minWidth: 300 }}
+            sx={{ width: '100%' }}
           />
         </FormControl>
       )}

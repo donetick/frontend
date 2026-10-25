@@ -1,5 +1,7 @@
 import { Capacitor } from '@capacitor/core'
 
+import statusBarManager from '../utils/StatusBarManager'
+
 /**
  * Normalizes a raw image string from the native document scanner into a
  * format that can be used as an <img> src and passed to Tesseract.js.
@@ -54,6 +56,12 @@ export function useDocumentScanner() {
     } catch (e) {
       console.error('[DocumentScanner] scan failed:', e)
       return { image: null, cancelled: false, error: e.message }
+    } finally {
+      // The native scanner's full-screen view controller can leave the
+      // WebView laid out under the status bar once dismissed, same as
+      // SFSafariViewController — see CapacitorListener.js's browserFinished
+      // handling.
+      void statusBarManager.restoreAfterNativeOverlayDismissal()
     }
   }
 

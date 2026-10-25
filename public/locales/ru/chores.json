@@ -627,7 +627,15 @@
     "dueDate": "Срок: {{date}}",
     "hideRawText": "Скрыть исходный текст",
     "showRawText": "Показать исходный текст",
-    "cameraUnavailableUseUpload": "Камера недоступна — используйте загрузку вместо этого"
+    "cameraUnavailableUseUpload": "Камера недоступна — используйте загрузку вместо этого",
+    "noTextFound": "На изображении не найден текст. Попробуйте более чёткое фото.",
+    "noTaskIdentified": "Не удалось распознать задачу. Попробуйте другое фото.",
+    "processingFailed": "Не удалось обработать.",
+    "scannerError": "Ошибка сканера: {{error}}",
+    "scanFailed": "Ошибка сканирования.",
+    "preparingScan": "Запуск…",
+    "failedTitle": "Задача не найдена",
+    "continueWithoutTask": "Продолжить без задачи"
   },
   "descriptionPlaceholder": "Введите описание...",
   "notificationTemplate": {
@@ -793,7 +801,22 @@
     "processing": "Обработка",
     "create": "Создать",
     "descriptionLabel": "Description:",
-    "subtasksLabel": "Subtasks:"
+    "subtasksLabel": "Subtasks:",
+    "createAnother": "Создать ещё",
+    "createAndAddAnother": "Создать и добавить ещё",
+    "createAndClose": "Создать и закрыть",
+    "findingDetails": "Поиск деталей задачи на вашем фото…",
+    "findingDetailsHint": "Вы можете продолжать редактирование, пока мы ищем.",
+    "detailsFound": "Мы нашли детали задачи",
+    "suggestedDue": "Предложенный срок выполнения: {{date}}",
+    "useSuggestion": "Использовать предложение",
+    "useAndKeepAttachment": "Использовать предложение и сохранить фото",
+    "dismissSuggestion": "Отклонить предложение",
+    "noDetailsFound": "Детали задачи не найдены",
+    "analysisFailed": "Не удалось проанализировать это фото",
+    "attachmentStillAdded": "Ваше фото всё ещё прикреплено.",
+    "continueManually": "Вы можете продолжить создание задачи вручную.",
+    "dismissAnalysis": "Отклонить анализ фото"
   },
   "repeat": {
     "days": {

@@ -125,19 +125,23 @@ class StatusBarManager {
   }
 
   /**
-   * Restore the WebView frame after dismissing a native browser on iOS.
+   * Restore the WebView frame after dismissing a full-screen native view
+   * controller on iOS (SFSafariViewController, the document scanner,
+   * ASWebAuthenticationSession-backed social login, the RevenueCat paywall,
+   * etc).
    *
-   * SFSafariViewController can leave Capacitor's WebView at the full-screen
-   * frame. The StatusBar plugin remembers that overlay is already disabled,
-   * so setting it to false again is a no-op. Toggling the value forces the
+   * Any of those can leave Capacitor's WebView at the full-screen frame.
+   * The StatusBar plugin remembers that overlay is already disabled, so
+   * setting it to false again is a no-op. Toggling the value forces the
    * plugin to recalculate the WebView frame below the status bar.
    */
-  async restoreAfterBrowserDismissal() {
+  async restoreAfterNativeOverlayDismissal() {
     if (!this.isNativePlatform) return
 
     try {
-      // browserFinished can arrive while the dismissal animation is still
-      // completing. Wait until UIKit has restored the app view hierarchy.
+      // The dismissal event/promise can resolve while the dismissal
+      // animation is still completing. Wait until UIKit has restored the
+      // app view hierarchy.
       await new Promise(resolve => setTimeout(resolve, 250))
 
       await StatusBar.show()
@@ -149,7 +153,7 @@ class StatusBarManager {
       await this.applySafeAreaInsets(true)
     } catch (error) {
       console.error(
-        'StatusBarManager: Failed to restore after browser dismissal:',
+        'StatusBarManager: Failed to restore after native overlay dismissal:',
         error,
       )
     }

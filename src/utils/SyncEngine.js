@@ -28,6 +28,10 @@ class SyncEngine {
   constructor() {
     this.isSyncing = false
     this.listeners = []
+    // Timestamp of the next scheduled retry, published by the scheduler in
+    // useSyncOnReconnect so the UI can count down to the real attempt instead
+    // of guessing with a clock of its own. null = nothing scheduled.
+    this.nextRetryAt = null
     // The run currently in flight, and the single follow-up run queued behind
     // it. See sync() for why a follow-up is needed rather than just waiting.
     this.inFlight = null
@@ -46,6 +50,11 @@ class SyncEngine {
     this.listeners.forEach(cb => cb(state))
   }
 
+  setNextRetryAt(timestamp) {
+    this.nextRetryAt = timestamp
+    this._notify({ nextRetryAt: timestamp })
+  }
+
   // Main sync entry point — returns true if sync succeeded, false otherwise.
   //
   // Concurrent callers are coalesced rather than dropped. Returning early while
@@ -58,6 +67,12 @@ class SyncEngine {
   // reason, so callers that arrive mid-run share one follow-up run instead.
   async sync() {
     if (!isOfflineFeatureEnabled()) return false
+
+    // With no network on the device there is nothing a sync can accomplish:
+    // the command replay bails immediately and the delta loop never runs, so
+    // the run used to "succeed" without talking to the server — marking the
+    // server reachable again and reporting a fresh lastSync while offline.
+    if (!networkManager.deviceOnline) return false
 
     if (this.inFlight) {
       if (!this.queued) {
@@ -91,9 +106,19 @@ class SyncEngine {
       await this._replayCommands()
 
       // Step 3: Delta sync from server
-      await this._deltaSync()
+      const reachedServer = await this._deltaSync()
 
-      // Sync succeeded — server is reachable (only sync success restores online status)
+      // Sync succeeded — server is reachable (only sync success restores online
+      // status). Requires an actual answered request: if the device dropped off
+      // the network mid-run the delta loop exits without ever asking, which
+      // says nothing about whether the server is up.
+      if (!reachedServer) {
+        // Never reached the server (the device went offline mid-run), so this
+        // is not a sync the UI should report as successful.
+        this._notify({ syncing: false })
+        return false
+      }
+
       networkManager.setServerReachable()
       this._notify({ syncing: false, lastSync: Date.now() })
       // Reconcile the offline image store against the full cached chore list
@@ -259,12 +284,15 @@ class SyncEngine {
     }
   }
 
+  // Returns true when at least one /sync/changes request was answered, which
+  // is the only proof the caller has that the server is actually reachable.
   async _deltaSync() {
     const cursor = (await offlineDB.getSyncCursor()) || -1
 
     let hasMore = true
     let currentCursor = cursor
     let pages = 0
+    let reachedServer = false
 
     while (hasMore && networkManager.deviceOnline) {
       // Bail out if the user logged out (or switched servers) mid-sync —
@@ -296,6 +324,7 @@ class SyncEngine {
         throw error
       }
 
+      reachedServer = true
       const data = await response.json()
 
       // Upsert changed chores first
@@ -339,8 +368,12 @@ class SyncEngine {
       }
     }
 
-    await offlineDB.setSyncCursor(currentCursor)
-    await offlineDB.setLastSyncTime(Date.now())
+    if (reachedServer) {
+      await offlineDB.setSyncCursor(currentCursor)
+      await offlineDB.setLastSyncTime(Date.now())
+    }
+
+    return reachedServer
   }
 
   // Cache current chores (call after a successful online fetch).

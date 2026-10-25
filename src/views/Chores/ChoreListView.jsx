@@ -161,6 +161,9 @@ const ChoreListView = ({
         onChangeDueDate={() =>
           handleChoreAction('changeDueDate', actionMenuChore)
         }
+        onChangePriority={priority =>
+          handleChoreAction('changePriority', actionMenuChore, { priority })
+        }
         onWriteNFC={() => handleChoreAction('writeNFC', actionMenuChore)}
         onNudge={() => handleChoreAction('nudge', actionMenuChore)}
         onDelete={() => handleChoreAction('delete', actionMenuChore)}

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_project_preview_background"
+    android:orientation="vertical"
+    android:padding="10dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="24dp"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="⌂"
+            android:textColor="#FFFFFF"
+            android:textSize="17sp" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:text="Home"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="16dp"
+        android:gravity="center_vertical"
+        android:text="8 tasks · 5 assigned to me"
+        android:textColor="#D9FFFFFF"
+        android:textSize="10sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="top"
+        android:orientation="vertical">
+
+        <LinearLayout style="@style/ProjectWidgetRow"><ImageView style="@style/ProjectWidgetCheck"/><TextView style="@style/ProjectWidgetTask" android:text="Water the plants" android:textColor="#FFFFFF"/></LinearLayout>
+        <LinearLayout style="@style/ProjectWidgetRow"><ImageView style="@style/ProjectWidgetCheck"/><TextView style="@style/ProjectWidgetTask" android:text="Take out the bins" android:textColor="#FFFFFF"/></LinearLayout>
+        <LinearLayout style="@style/ProjectWidgetRow"><ImageView style="@style/ProjectWidgetCheck" android:src="@drawable/widget_project_check_circle"/><TextView style="@style/ProjectWidgetTask" android:text="Clean the kitchen" android:textColor="#D9FFFFFF"/></LinearLayout>
+        <LinearLayout style="@style/ProjectWidgetRow"><ImageView style="@style/ProjectWidgetCheck"/><TextView style="@style/ProjectWidgetTask" android:text="Book the plumber" android:textColor="#FFFFFF"/></LinearLayout>
+        <LinearLayout style="@style/ProjectWidgetRow"><ImageView style="@style/ProjectWidgetCheck"/><TextView style="@style/ProjectWidgetTask" android:text="Change air filter" android:textColor="#FFFFFF"/></LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:orientation="horizontal">
+
+        <TextView style="@style/ProjectWidgetButton" android:layout_width="0dp" android:layout_height="30dp" android:layout_weight="1" android:text="‹" android:textColor="#FFFFFF"/>
+        <TextView style="@style/ProjectWidgetButton" android:layout_width="0dp" android:layout_height="30dp" android:layout_weight="1" android:text="▲" android:textColor="#FFFFFF" android:textSize="12sp"/>
+        <TextView style="@style/ProjectWidgetButton" android:layout_width="0dp" android:layout_height="30dp" android:layout_weight="1" android:text="↻" android:textColor="#FFFFFF"/>
+        <TextView style="@style/ProjectWidgetButton" android:layout_width="0dp" android:layout_height="30dp" android:layout_weight="1" android:text="▼" android:textColor="#FFFFFF" android:textSize="12sp"/>
+        <TextView style="@style/ProjectWidgetButton" android:layout_width="0dp" android:layout_height="30dp" android:layout_weight="1" android:text="›" android:textColor="#FFFFFF"/>
+    </LinearLayout>
+</LinearLayout>

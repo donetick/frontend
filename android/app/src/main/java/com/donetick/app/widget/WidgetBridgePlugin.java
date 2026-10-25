@@ -16,8 +16,10 @@ public class WidgetBridgePlugin extends Plugin {
     public void update(PluginCall call) {
         String data = call.getString("data");
         String config = call.getString("config");
+        String options = call.getString("options");
         if (data != null) WidgetStore.saveData(getContext(), data);
         if (config != null) WidgetStore.saveConfig(getContext(), config);
+        if (options != null) WidgetStore.saveOptions(getContext(), options);
         WidgetUi.refreshAll(getContext());
         call.resolve();
     }

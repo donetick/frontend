@@ -17,6 +17,7 @@ public class WidgetBridgePlugin: CAPPlugin, CAPBridgedPlugin {
     static let appGroup = "group.com.donetick.app"
     static let dataKey = "widget_tasks"
     static let configKey = "widget_config"
+    static let optionsKey = "widget_options"
 
     @objc func update(_ call: CAPPluginCall) {
         guard let defaults = UserDefaults(suiteName: Self.appGroup) else {
@@ -28,6 +29,10 @@ public class WidgetBridgePlugin: CAPPlugin, CAPBridgedPlugin {
         }
         if let config = call.getString("config") {
             defaults.set(config, forKey: Self.configKey)
+        }
+        // Appearance options are device-wide and deliberately survive clear().
+        if let options = call.getString("options") {
+            defaults.set(options, forKey: Self.optionsKey)
         }
         WidgetCenter.shared.reloadAllTimelines()
         call.resolve()

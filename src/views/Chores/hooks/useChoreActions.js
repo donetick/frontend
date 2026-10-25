@@ -703,6 +703,33 @@ export const useChoreActions = ({
           break
         }
 
+        case 'changePriority': {
+          const priority = extraData?.priority?.value ?? extraData?.priority
+          if (priority === undefined || priority === null) break
+          const updatedChore = { ...chore, priority }
+          try {
+            const response = await UpdateChorePriority(chore.id, priority)
+            if (response.ok) {
+              updateChoreInState(updatedChore, 'priority-changed')
+              showSuccess({
+                title: t('actions.priorityUpdatedTitle'),
+                message: t('actions.priorityUpdatedMessage'),
+              })
+            } else {
+              showError({
+                title: t('actions.failPriorityTitle'),
+                message: t('actions.failPriorityMessage'),
+              })
+            }
+          } catch (error) {
+            showError({
+              title: t('actions.failPriorityTitle'),
+              message: error?.message || t('actions.failPriorityMessage'),
+            })
+          }
+          break
+        }
+
         case 'completeWithNote':
         case 'completeWithPastDate':
         case 'changeAssignee':

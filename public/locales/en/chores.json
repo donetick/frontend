@@ -288,6 +288,10 @@
     "failSkipTitle": "Failed to skip",
     "movedTitle": "Task Moved",
     "failMoveTitle": "Failed to move task",
+    "priorityUpdatedTitle": "Priority Updated",
+    "priorityUpdatedMessage": "The task priority has been updated.",
+    "failPriorityTitle": "Failed to update priority",
+    "failPriorityMessage": "Unable to update task priority",
     "failRescheduleTitle": "Failed to reschedule",
     "failRescheduleMessage": "Unable to update due date",
     "failRemoveDueDateTitle": "Failed to remove due date",
@@ -665,7 +669,15 @@
     "dueDate": "Due: {{date}}",
     "hideRawText": "Hide Raw Text",
     "showRawText": "Show Raw Text",
-    "cameraUnavailableUseUpload": "Camera not available — use Upload instead"
+    "cameraUnavailableUseUpload": "Camera not available — use Upload instead",
+    "noTextFound": "No text found in image. Try a clearer photo.",
+    "noTaskIdentified": "Could not identify a task. Try a different photo.",
+    "processingFailed": "Processing failed.",
+    "scannerError": "Scanner error: {{error}}",
+    "scanFailed": "Scan failed.",
+    "preparingScan": "Starting…",
+    "failedTitle": "Couldn't find a task",
+    "continueWithoutTask": "Continue without a task"
   },
   "descriptionPlaceholder": "Enter description...",
   "notificationTemplate": {
@@ -831,7 +843,22 @@
     "createCount": "Create {{count}} Tasks",
     "useTask": "Use Task",
     "processing": "Processing",
-    "create": "Create"
+    "create": "Create",
+    "createAnother": "Create another",
+    "createAndAddAnother": "Create & add another",
+    "createAndClose": "Create & close",
+    "findingDetails": "Finding task details from your photo…",
+    "findingDetailsHint": "You can continue editing while we look.",
+    "detailsFound": "We found task details",
+    "suggestedDue": "Suggested due date: {{date}}",
+    "useSuggestion": "Use suggestion",
+    "useAndKeepAttachment": "Use suggestion & keep photo",
+    "dismissSuggestion": "Dismiss suggestion",
+    "noDetailsFound": "No task details found",
+    "analysisFailed": "We couldn't analyze this photo",
+    "attachmentStillAdded": "Your photo is still attached.",
+    "continueManually": "You can continue creating the task manually.",
+    "dismissAnalysis": "Dismiss photo analysis"
   },
   "repeat": {
     "days": {

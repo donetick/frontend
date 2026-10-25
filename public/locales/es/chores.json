@@ -627,7 +627,15 @@
     "dueDate": "Vence: {{date}}",
     "hideRawText": "Ocultar texto sin procesar",
     "showRawText": "Mostrar texto sin procesar",
-    "cameraUnavailableUseUpload": "Cámara no disponible — usa Subir en su lugar"
+    "cameraUnavailableUseUpload": "Cámara no disponible — usa Subir en su lugar",
+    "noTextFound": "No se encontró texto en la imagen. Prueba con una foto más nítida.",
+    "noTaskIdentified": "No se pudo identificar una tarea. Prueba con otra foto.",
+    "processingFailed": "Error al procesar.",
+    "scannerError": "Error del escáner: {{error}}",
+    "scanFailed": "Error al escanear.",
+    "preparingScan": "Iniciando…",
+    "failedTitle": "No se encontró ninguna tarea",
+    "continueWithoutTask": "Continuar sin tarea"
   },
   "descriptionPlaceholder": "Añade una descripción...",
   "notificationTemplate": {
@@ -793,7 +801,22 @@
     "processing": "Procesando",
     "create": "Crear",
     "descriptionLabel": "Description:",
-    "subtasksLabel": "Subtasks:"
+    "subtasksLabel": "Subtasks:",
+    "createAnother": "Crear otra",
+    "createAndAddAnother": "Crear y añadir otra",
+    "createAndClose": "Crear y cerrar",
+    "findingDetails": "Buscando detalles de la tarea en tu foto…",
+    "findingDetailsHint": "Puedes seguir editando mientras buscamos.",
+    "detailsFound": "Encontramos detalles de la tarea",
+    "suggestedDue": "Fecha de vencimiento sugerida: {{date}}",
+    "useSuggestion": "Usar sugerencia",
+    "useAndKeepAttachment": "Usar sugerencia y conservar la foto",
+    "dismissSuggestion": "Descartar sugerencia",
+    "noDetailsFound": "No se encontraron detalles de la tarea",
+    "analysisFailed": "No pudimos analizar esta foto",
+    "attachmentStillAdded": "Tu foto sigue adjunta.",
+    "continueManually": "Puedes seguir creando la tarea manualmente.",
+    "dismissAnalysis": "Descartar análisis de la foto"
   },
   "repeat": {
     "days": {

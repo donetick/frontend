@@ -1,3 +1,4 @@
+import { Capacitor } from '@capacitor/core'
 import {
   ChevronRight,
   Feedback,
@@ -47,15 +48,17 @@ const SettingsOverview = () => {
   }, [])
 
   const settingsCards = [
-    ...SETTINGS_SECTIONS.filter(({ id }) => id !== 'bridge' || !isCloud).map(
-      ({ icon: Icon, id, isBeta }) => ({
-        id,
-        title: t(`overview.sections.${id}.title`),
-        description: t(`overview.sections.${id}.description`),
-        icon: <Icon />,
-        isBeta,
-      }),
-    ),
+    ...SETTINGS_SECTIONS.filter(
+      section =>
+        (!section.nativeOnly || Capacitor.isNativePlatform()) &&
+        (section.id !== 'bridge' || !isCloud),
+    ).map(({ icon: Icon, id, isBeta }) => ({
+      id,
+      title: t(`overview.sections.${id}.title`),
+      description: t(`overview.sections.${id}.description`),
+      icon: <Icon />,
+      isBeta,
+    })),
     {
       id: 'feedback',
       title: t('overview.sections.feedback.title'),

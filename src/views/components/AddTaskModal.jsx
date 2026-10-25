@@ -1,8 +1,17 @@
-import { Add, KeyboardArrowDown, Lock } from '@mui/icons-material'
 import {
+  Add,
+  AutoAwesome,
+  Close,
+  KeyboardArrowDown,
+  Lock,
+} from '@mui/icons-material'
+import {
+  Alert,
   Box,
   Button,
+  CircularProgress,
   Dropdown,
+  IconButton,
   ListItemDecorator,
   Menu,
   MenuButton,
@@ -26,10 +35,14 @@ import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 import { useCreateChore } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { localAIService } from '../../service/LocalAIService'
+import {
+  fileToDataUrl,
+  sharedItemToFile,
+} from '../../service/ShareTargetService'
 import { voiceInputService } from '../../service/VoiceInputService'
 import LABEL_COLORS, { TASK_COLOR } from '../../utils/Colors'
 import { sanitizeRemindersForPlan } from '../../utils/entitlements'
-import { CreateLabel } from '../../utils/Fetcher'
+import { CreateLabel, DeleteDraftAttachment } from '../../utils/Fetcher'
 import { imageSourceToFile } from '../../utils/FileConvert'
 import { isPlusAccount } from '../../utils/Helpers'
 import {
@@ -61,6 +74,7 @@ import PriorityPickerField from './PriorityPickerField'
 import RepeatPickerField from './RepeatPickerField'
 import RichTextEditor from './RichTextEditor'
 import ScanPanel from './ScanToTask/ScanPanel'
+import { extractTaskFromImage } from './ScanToTask/useScanToTask'
 import SmartTaskTitleInput from './SmartTaskTitleInput'
 import SubTasks from './SubTask'
 import { buildChorePayload, parseVoiceTask } from './VoiceToTask/parseVoiceTask'
@@ -195,6 +209,7 @@ const PARSE_DEBOUNCE_MS = 150
 
 const TaskInput = ({
   initialMode,
+  initialShare,
   initialSectionId,
   isModalOpen,
   lockedProjectId,
@@ -328,6 +343,8 @@ const TaskInput = ({
   const { data: sections = [] } = useProjectSections(
     isSectionContext ? projectId : null,
   )
+  const [continuousMode, setContinuousMode] = useState(false)
+
   const selectedProject = useMemo(
     () =>
       (projectId !== 'default' &&
@@ -349,7 +366,22 @@ const TaskInput = ({
   const [showScan, setShowScan] = useState(false)
   const [scanAutoCapture, setScanAutoCapture] = useState(false)
   const [pendingPhotoUrl, setPendingPhotoUrl] = useState(null)
+  const [scanImageAlreadyAttached, setScanImageAlreadyAttached] =
+    useState(false)
   const [isAttachingScan, setIsAttachingScan] = useState(false)
+  const [shareAnalysis, setShareAnalysis] = useState({
+    status: 'idle',
+    suggestion: null,
+    source: null,
+    hasAttachment: false,
+    attachmentPath: null,
+    analysisId: null,
+  })
+  // Async OCR may finish after the user dismisses it, closes the modal, or
+  // starts another task. Only the latest run is allowed to update the form.
+  const shareAnalysisRunRef = useRef(0)
+  const [removingSuggestedAttachment, setRemovingSuggestedAttachment] =
+    useState(false)
   const [llmAvailable, setLlmAvailable] = useState(false)
   const [showVoice, setShowVoice] = useState(false)
   const [voiceAvailable, setVoiceAvailable] = useState(false)
@@ -901,8 +933,12 @@ const TaskInput = ({
     }
   }
 
+  // Plain Enter is the fast path for entering several tasks in a row: create
+  // this one and leave the form open and blank for the next. Cmd+Enter (the
+  // window-level handler below) and the footer's Create button still close
+  // the modal.
   const handleEnterPressed = () => {
-    submitChore()
+    submitChore(true)
   }
 
   // The scan keeps its source image when asked: upload it against the draft so
@@ -923,8 +959,226 @@ const TaskInput = ({
         ...prev,
         { url: uploaded.url, path: uploaded.path, name: uploaded.fileName },
       ])
+      return uploaded
     } finally {
       setIsAttachingScan(false)
+    }
+  }
+
+  const dismissShareAnalysis = useCallback(() => {
+    shareAnalysisRunRef.current += 1
+    setShareAnalysis({
+      status: 'idle',
+      suggestion: null,
+      source: null,
+      hasAttachment: false,
+      attachmentPath: null,
+      analysisId: null,
+    })
+  }, [])
+
+  const analyzeImageInBackground = useCallback(
+    ({ file, hasAttachment, imageSource, source }) => {
+      const analysisRun = ++shareAnalysisRunRef.current
+      setShareAnalysis({
+        status: 'processing',
+        suggestion: null,
+        source,
+        hasAttachment,
+        attachmentPath: null,
+        analysisId: analysisRun,
+      })
+
+      void (async () => {
+        try {
+          const imageUrl = file ? await fileToDataUrl(file) : imageSource
+          const result = await extractTaskFromImage(imageUrl)
+          if (shareAnalysisRunRef.current !== analysisRun) return
+          setShareAnalysis(current => ({
+            ...current,
+            status: result.status === 'found' ? 'found' : 'empty',
+            suggestion: result.status === 'found' ? result.task : null,
+          }))
+        } catch (error) {
+          console.error('[TaskImage] failed to analyze image:', error)
+          if (shareAnalysisRunRef.current === analysisRun) {
+            setShareAnalysis(current => ({
+              ...current,
+              status: 'error',
+              suggestion: null,
+            }))
+          }
+        }
+      })()
+
+      return analysisRun
+    },
+    [],
+  )
+
+  // Empty/error notices are informational; leave them long enough to be read,
+  // then get out of the user's way. A found suggestion remains until decided.
+  useEffect(() => {
+    if (!['empty', 'error'].includes(shareAnalysis.status)) return undefined
+    const timer = setTimeout(dismissShareAnalysis, 5000)
+    return () => clearTimeout(timer)
+  }, [shareAnalysis.status, dismissShareAnalysis])
+
+  const applyShareSuggestion = async (removeAttachment = false) => {
+    const suggestion = shareAnalysis.suggestion
+    if (!suggestion) return
+
+    if (removeAttachment && shareAnalysis.attachmentPath) {
+      setRemovingSuggestedAttachment(true)
+      try {
+        await DeleteDraftAttachment(shareAnalysis.attachmentPath)
+        setAttachments(current =>
+          current.filter(item => item.path !== shareAnalysis.attachmentPath),
+        )
+      } catch (error) {
+        console.error('[TaskImage] failed to remove attachment:', error)
+        return
+      } finally {
+        setRemovingSuggestedAttachment(false)
+      }
+    }
+
+    if (suggestion.taskName) processText(suggestion.taskName)
+    if (suggestion.description) {
+      setDescription(suggestion.description)
+      setHasDescription(true)
+    }
+    if (suggestion.dueDate) {
+      const date = moment(new Date(suggestion.dueDate))
+      if (date.isValid()) {
+        setDueDateOnly(date.format('YYYY-MM-DD'))
+        setDueTime(null)
+        setUseCustomTime(false)
+      }
+    }
+    taskSourceRef.current = shareAnalysis.source || 'scan'
+    dismissShareAnalysis()
+  }
+
+  // A native share opens directly into this modal. Files are uploaded against
+  // the same draft as picker attachments. Analysis of the first image starts
+  // in parallel, while the normal task form remains available.
+  const appliedInitialShareRef = useRef(null)
+  useEffect(() => {
+    if (!isModalOpen) {
+      appliedInitialShareRef.current = null
+      return
+    }
+    if (!initialShare || appliedInitialShareRef.current === initialShare.id) {
+      return
+    }
+    appliedInitialShareRef.current = initialShare.id
+    taskSourceRef.current = 'share'
+
+    const applyShare = async () => {
+      const items = initialShare.items || []
+      const textItem = items.find(item => item.type === 'text/plain')
+      const sharedText = textItem?.url || textItem?.title || ''
+      const sharedSubject =
+        textItem?.title && textItem.title !== sharedText ? textItem.title : null
+      const attachmentItems = items.filter(item =>
+        item.type === 'text/plain'
+          ? item.url || item.description || item.title
+          : item.url,
+      )
+
+      // A shared file's title is normally just its filename. Leave the task
+      // title empty rather than presenting that implementation detail as a
+      // suggested task name.
+      const initialTitle = sharedSubject || sharedText || ''
+      if (initialTitle) processText(initialTitle)
+      if (sharedSubject && sharedText) {
+        setDescription(sharedText)
+        setHasDescription(true)
+      }
+
+      setIsAttachingScan(attachmentItems.length > 0)
+      let analyzedFile = null
+      let analysisRun = null
+
+      try {
+        for (const item of attachmentItems) {
+          try {
+            const file = await sharedItemToFile(item)
+            if (!file) continue
+            if (
+              !analyzedFile &&
+              file.type.startsWith('image/') &&
+              (await localAIService.isAvailable())
+            ) {
+              analyzedFile = file
+              // OCR/AI and attachment uploads proceed together. The returned
+              // run id associates the eventual upload path with this image.
+              analysisRun = analyzeImageInBackground({
+                file,
+                hasAttachment: true,
+                source: 'share',
+              })
+            }
+            const uploaded = await uploadFile(file)
+            if (!uploaded && file === analyzedFile) {
+              setShareAnalysis(current =>
+                current.analysisId === analysisRun
+                  ? { ...current, hasAttachment: false }
+                  : current,
+              )
+            }
+            if (uploaded) {
+              setAttachments(current => [
+                ...current,
+                {
+                  name: uploaded.fileName,
+                  path: uploaded.path,
+                  url: uploaded.url,
+                },
+              ])
+              if (file === analyzedFile) {
+                setShareAnalysis(current =>
+                  current.analysisId === analysisRun
+                    ? { ...current, attachmentPath: uploaded.path }
+                    : current,
+                )
+              }
+            }
+          } catch (error) {
+            console.error('[ShareTarget] failed to import shared file:', error)
+          }
+        }
+      } finally {
+        setIsAttachingScan(false)
+      }
+    }
+
+    void applyShare()
+  }, [
+    initialShare,
+    isModalOpen,
+    processText,
+    uploadFile,
+    analyzeImageInBackground,
+  ])
+
+  const handleBackgroundScanCaptured = ({ image, keepImage }) => {
+    taskSourceRef.current = 'scan'
+    const analysisRun = analyzeImageInBackground({
+      imageSource: image,
+      hasAttachment: keepImage,
+      source: 'scan',
+    })
+    if (keepImage) {
+      void attachScannedImage(image).then(uploaded => {
+        setShareAnalysis(current => {
+          if (current.analysisId !== analysisRun) return current
+          return uploaded
+            ? { ...current, attachmentPath: uploaded.path }
+            : { ...current, hasAttachment: false }
+        })
+      })
     }
   }
 
@@ -934,7 +1188,7 @@ const TaskInput = ({
     dueDate: extractedDue,
     taskName,
   }) => {
-    taskSourceRef.current = 'scan'
+    if (!scanImageAlreadyAttached) taskSourceRef.current = 'scan'
     if (attachmentImage) {
       attachScannedImage(attachmentImage)
     }
@@ -1023,14 +1277,10 @@ const TaskInput = ({
     }
   }
 
-  const handleCloseModal = forceRefetch => {
-    onClose(forceRefetch)
-    setShowScan(false)
-    setShowVoice(false)
-    setVoiceState({ segments: [], isListening: false })
-    setScanState({ phase: 'idle', primaryAction: null })
-    setCreatingVoiceTasks(false)
-    setIsAttachingScan(false)
+  // Clears everything a single task entry filled in, leaving the modal (and
+  // the selected project) as-is — used both on close and by "create & add
+  // another" to hand back a blank form without losing the project context.
+  const resetFormFields = () => {
     setTaskText('')
     setTaskTitle('')
     setFrequency(null)
@@ -1044,8 +1294,7 @@ const TaskInput = ({
     setLabelsV2([])
     setAssignees([])
     assigneesFromMentionRef.current = false
-    // The modal closes without a final parse, so drop the highlight identities
-    // here or nothing would animate on the next open
+    // Dropped here too or nothing would animate on the next task's parse
     prevHighlightKeysRef.current = new Set()
     setProjectId(lockedProjectId ?? getInitialProject())
     setSectionId(initialSectionId ?? null)
@@ -1060,10 +1309,34 @@ const TaskInput = ({
     setUseCustomTime(false)
     setAttachments([])
     setDraftId(generateUUID())
+    shareAnalysisRunRef.current += 1
+    setShareAnalysis({
+      status: 'idle',
+      suggestion: null,
+      source: null,
+      hasAttachment: false,
+      attachmentPath: null,
+      analysisId: null,
+    })
+    setRemovingSuggestedAttachment(false)
     taskSourceRef.current = 'quick_add'
   }
 
-  const createChore = () => {
+  const handleCloseModal = forceRefetch => {
+    onClose(forceRefetch)
+    setShowScan(false)
+    setShowVoice(false)
+    setVoiceState({ segments: [], isListening: false })
+    setScanState({ phase: 'idle', primaryAction: null })
+    setCreatingVoiceTasks(false)
+    setIsAttachingScan(false)
+    setScanImageAlreadyAttached(false)
+    resetFormFields()
+    setProjectId(getInitialProject())
+    setContinuousMode(false)
+  }
+
+  const createChore = (andContinue = false) => {
     // A scanned attachment still uploading would be orphaned by the create
     if (isAttachingScan) return
 
@@ -1171,18 +1444,24 @@ const TaskInput = ({
             nextDueDate: chore.dueDate,
           })
         }
-        setTaskText('')
       })
       .catch(error => {
         console.error('Error creating chore:', error)
       })
-    handleCloseModal(false)
+
+    // The create fires above without waiting on the network, so the next
+    // blank entry (or the closed modal) shows up immediately either way.
+    if (andContinue) {
+      resetFormFields()
+    } else {
+      handleCloseModal(false)
+    }
   }
 
   // All submit paths (Enter, Cmd+Enter, footer button) go through here: a
   // debounce may still be holding the parse of the latest text, and creating
   // from pre-parse state would drop the tail of what the user typed.
-  const submitChore = () => {
+  const submitChore = (andContinue = false) => {
     if (parseTimerRef.current) {
       clearTimeout(parseTimerRef.current)
       parseTimerRef.current = null
@@ -1190,7 +1469,7 @@ const TaskInput = ({
     }
     // Read through latestRef: after the flush, this render's createChore
     // closure is stale
-    latestRef.current.createChore()
+    latestRef.current.createChore(andContinue)
   }
 
   latestRef.current = {
@@ -1387,24 +1666,224 @@ const TaskInput = ({
               </Button>
             )}
             {!showScan && !showVoice && (
-              <Button
-                variant='solid'
-                color='primary'
-                loading={isAttachingScan}
-                disabled={!taskTitle.trim() || isAttachingScan}
-                onClick={submitChore}
-              >
-                {t('addTask.create')}
-                {showKeyboardShortcuts && (
-                  <KeyboardShortcutHint shortcut='Enter' sx={{ ml: 1 }} />
-                )}
-              </Button>
+              <Box sx={{ display: 'flex' }}>
+                <Button
+                  variant='solid'
+                  color='primary'
+                  loading={isAttachingScan}
+                  disabled={!taskTitle.trim() || isAttachingScan}
+                  onClick={() => submitChore(continuousMode)}
+                  sx={{
+                    borderTopRightRadius: 0,
+                    borderBottomRightRadius: 0,
+                  }}
+                >
+                  {continuousMode
+                    ? t('addTask.createAnother')
+                    : t('addTask.create')}
+                  {showKeyboardShortcuts && (
+                    <KeyboardShortcutHint shortcut='Enter' sx={{ ml: 1 }} />
+                  )}
+                </Button>
+                <Dropdown>
+                  <MenuButton
+                    slots={{ root: Button }}
+                    slotProps={{
+                      root: {
+                        variant: 'solid',
+                        color: 'primary',
+                        disabled: !taskTitle.trim() || isAttachingScan,
+                      },
+                    }}
+                    sx={{
+                      borderTopLeftRadius: 0,
+                      borderBottomLeftRadius: 0,
+                      borderLeft: '1px solid rgba(255, 255, 255, 0.4)',
+                      minWidth: 0,
+                      px: 0.75,
+                    }}
+                  >
+                    <KeyboardArrowDown sx={{ fontSize: 18 }} />
+                  </MenuButton>
+                  <Menu
+                    placement='top-end'
+                    sx={{ zIndex: 'calc(var(--joy-zIndex-modal) + 1)' }}
+                  >
+                    {continuousMode ? (
+                      <MenuItem
+                        onClick={() => {
+                          setContinuousMode(false)
+                          submitChore(false)
+                        }}
+                      >
+                        {t('addTask.createAndClose')}
+                      </MenuItem>
+                    ) : (
+                      <MenuItem
+                        onClick={() => {
+                          setContinuousMode(true)
+                          submitChore(true)
+                        }}
+                      >
+                        {t('addTask.createAndAddAnother')}
+                        {showKeyboardShortcuts && (
+                          <KeyboardShortcutHint
+                            shortcut='Enter'
+                            withCmd={false}
+                            sx={{ ml: 1 }}
+                          />
+                        )}
+                      </MenuItem>
+                    )}
+                  </Menu>
+                </Dropdown>
+              </Box>
             )}
           </ModalActions>
         }
       >
         {!showScan && !showVoice && (
           <>
+            {shareAnalysis.status !== 'idle' && (
+              <Alert
+                variant='soft'
+                color={
+                  shareAnalysis.status === 'found'
+                    ? 'success'
+                    : shareAnalysis.status === 'error'
+                      ? 'warning'
+                      : 'primary'
+                }
+                startDecorator={
+                  shareAnalysis.status === 'processing' ? (
+                    <CircularProgress size='sm' />
+                  ) : (
+                    <AutoAwesome />
+                  )
+                }
+                endDecorator={
+                  <IconButton
+                    size='sm'
+                    variant='plain'
+                    color='neutral'
+                    aria-label={t('addTask.dismissAnalysis')}
+                    onClick={dismissShareAnalysis}
+                  >
+                    <Close />
+                  </IconButton>
+                }
+                sx={{ mt: 1, alignItems: 'flex-start' }}
+              >
+                {shareAnalysis.status === 'processing' && (
+                  <Box>
+                    <Typography level='title-sm'>
+                      {t('addTask.findingDetails')}
+                    </Typography>
+                    <Typography level='body-sm'>
+                      {t('addTask.findingDetailsHint')}
+                    </Typography>
+                  </Box>
+                )}
+                {shareAnalysis.status === 'found' && (
+                  <Box sx={{ width: '100%' }}>
+                    <Typography level='title-sm'>
+                      {t('addTask.detailsFound')}
+                    </Typography>
+                    <Box sx={{ mt: 0.75 }}>
+                      <Typography level='body-sm' sx={{ fontWeight: 'lg' }}>
+                        {shareAnalysis.suggestion?.taskName}
+                      </Typography>
+                      {shareAnalysis.suggestion?.dueDate && (
+                        <Typography level='body-xs' sx={{ mt: 0.25 }}>
+                          {t('addTask.suggestedDue', {
+                            date: moment(
+                              shareAnalysis.suggestion.dueDate,
+                            ).format('LL'),
+                          })}
+                        </Typography>
+                      )}
+                      {shareAnalysis.suggestion?.description && (
+                        <Typography
+                          level='body-xs'
+                          sx={{
+                            mt: 0.25,
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                          }}
+                        >
+                          {shareAnalysis.suggestion.description}
+                        </Typography>
+                      )}
+                    </Box>
+                    <Box
+                      sx={{ display: 'flex', gap: 1, mt: 1, flexWrap: 'wrap' }}
+                    >
+                      <Button
+                        size='sm'
+                        variant='solid'
+                        loading={removingSuggestedAttachment}
+                        disabled={
+                          shareAnalysis.hasAttachment &&
+                          !shareAnalysis.attachmentPath
+                        }
+                        onClick={() =>
+                          void applyShareSuggestion(shareAnalysis.hasAttachment)
+                        }
+                        sx={{ borderRadius: '128px', px: 1.5 }}
+                      >
+                        {t('addTask.useSuggestion')}
+                      </Button>
+                      {shareAnalysis.hasAttachment && (
+                        <Button
+                          size='sm'
+                          variant='outlined'
+                          color='neutral'
+                          onClick={() => void applyShareSuggestion(false)}
+                          sx={{ borderRadius: '128px', px: 1.5 }}
+                        >
+                          {t('addTask.useAndKeepAttachment')}
+                        </Button>
+                      )}
+                      <Button
+                        size='sm'
+                        variant='plain'
+                        color='neutral'
+                        onClick={dismissShareAnalysis}
+                        sx={{ borderRadius: '128px', px: 1.5 }}
+                      >
+                        {t('addTask.dismissSuggestion')}
+                      </Button>
+                    </Box>
+                  </Box>
+                )}
+                {shareAnalysis.status === 'empty' && (
+                  <Box>
+                    <Typography level='title-sm'>
+                      {t('addTask.noDetailsFound')}
+                    </Typography>
+                    <Typography level='body-sm'>
+                      {shareAnalysis.hasAttachment
+                        ? t('addTask.attachmentStillAdded')
+                        : t('addTask.continueManually')}
+                    </Typography>
+                  </Box>
+                )}
+                {shareAnalysis.status === 'error' && (
+                  <Box>
+                    <Typography level='title-sm'>
+                      {t('addTask.analysisFailed')}
+                    </Typography>
+                    <Typography level='body-sm'>
+                      {shareAnalysis.hasAttachment
+                        ? t('addTask.attachmentStillAdded')
+                        : t('addTask.continueManually')}
+                    </Typography>
+                  </Box>
+                )}
+              </Alert>
+            )}
             <Box sx={{ mt: 1 }}>
               {/* <Box
                 sx={{
@@ -1738,14 +2217,18 @@ const TaskInput = ({
           <ScanPanel
             open
             autoCapture={scanAutoCapture}
-            canKeepImage={isPlusAccount(userProfile)}
+            canKeepImage={
+              isPlusAccount(userProfile) && !scanImageAlreadyAttached
+            }
             onTaskExtracted={handleTaskExtracted}
+            onImageCaptured={handleBackgroundScanCaptured}
             initialImageUrl={pendingPhotoUrl}
             onStateChange={setScanState}
             onClose={() => {
               setShowScan(false)
               setScanAutoCapture(false)
               setPendingPhotoUrl(null)
+              setScanImageAlreadyAttached(false)
               setScanState({ phase: 'idle', primaryAction: null })
             }}
           />

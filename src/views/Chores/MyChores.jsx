@@ -37,6 +37,7 @@ import { useFilter } from '../../hooks/useFilter'
 import { useChores } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
+import { consumePendingShare } from '../../service/ShareTargetService'
 import {
   ChoreFilters,
   ChoresGrouper,
@@ -164,6 +165,7 @@ const MyChores = () => {
   // own "add task" button — locks the project and preselects the section
   // instead of showing the usual project switcher.
   const [addTaskSectionContext, setAddTaskSectionContext] = useState(null)
+  const [initialShare, setInitialShare] = useState(null)
   const searchInputRef = useRef(null)
   const [selectedChoreSection, setSelectedChoreSection] = useState(
     localStorage.getItem('selectedChoreSection') || 'default',
@@ -184,6 +186,10 @@ const MyChores = () => {
   // Last `filterId` we saw in the URL, so the URL → filter-state effect can tell
   // a real URL change from its own write-back.
   const lastUrlFilterIdRef = useRef(null)
+  // While an incoming deep link is being applied, the existing temp filter is
+  // stale for one render. Keep its URL-sync effect from writing that old value
+  // back over the new deep link and causing the two filters to oscillate.
+  const applyingUrlFilterIdRef = useRef(null)
   const openSectionsInitializedRef = useRef(
     localStorage.getItem('openChoreSections') !== null,
   )
@@ -663,6 +669,23 @@ const MyChores = () => {
     }
   }, [searchParams, setSearchParams])
 
+  // Native share targets persist their payload before navigating here. Consume
+  // it once so refresh/back cannot reopen an already handled share.
+  useEffect(() => {
+    if (searchParams.get('share_task') !== '1') return
+
+    const share = consumePendingShare()
+    if (share) {
+      setInitialShare(share)
+      setAddTaskInitialMode(null)
+      setAddTaskModalOpen(true)
+    }
+
+    const params = new URLSearchParams(searchParams)
+    params.delete('share_task')
+    setSearchParams(params, { replace: true })
+  }, [searchParams, setSearchParams])
+
   // Read and apply filters from URL parameters
   useEffect(() => {
     // Check for filterId (camelCase) or filter_id (snake_case) for advanced filters
@@ -689,6 +712,7 @@ const MyChores = () => {
       tempFilterMeta?.id !== filterId
     ) {
       const def = INSIGHT_FILTER_DEFS[filterId]
+      applyingUrlFilterIdRef.current = rawFilterId
       applyTempFilter(def.filter, { id: filterId, name: def.name })
       return
     }
@@ -707,6 +731,7 @@ const MyChores = () => {
         m => String(m.userId) === String(memberId),
       )
       const memberName = member?.displayName || member?.name || member?.username
+      applyingUrlFilterIdRef.current = rawFilterId
       applyTempFilter(
         {
           conditions: [
@@ -788,6 +813,17 @@ const MyChores = () => {
     const insightId = tempFilterMeta?.id
     const params = new URLSearchParams(searchParams)
     const currentFilterId = params.get('filterId')
+
+    // URL → state takes one render. During that render `tempFilterMeta` still
+    // describes the previously selected person/insight; writing it to the URL
+    // would undo the incoming widget deep link. Once state catches up, release
+    // the guard so normal in-app filter changes can keep syncing to the URL.
+    if (applyingUrlFilterIdRef.current === currentFilterId) {
+      if (insightId === currentFilterId) {
+        applyingUrlFilterIdRef.current = null
+      }
+      return
+    }
 
     if (insightId && currentFilterId !== insightId) {
       params.delete('filter_id')
@@ -1800,15 +1836,19 @@ const MyChores = () => {
         <FeedbackPrompt />
         {addTaskModalOpen && (
           <TaskInput
+            key={initialShare?.id || 'quick-add'}
             onChoreUpdate={updateChores}
             isModalOpen={addTaskModalOpen}
             initialMode={addTaskInitialMode}
             lockedProjectId={addTaskSectionContext?.projectId}
             initialSectionId={addTaskSectionContext?.sectionId}
+            initialShare={initialShare}
             onClose={forceRefresh => {
               setAddTaskModalOpen(false)
               setAddTaskInitialMode(null)
+              setInitialShare(null)
               setAddTaskSectionContext(null)
+
               if (forceRefresh) {
                 refetchChores()
               }

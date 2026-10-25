@@ -1,71 +1,71 @@
 {
-  "shared": "Shared",
+  "shared": "Gedeeld",
   "delete": {
-    "title": "Delete Label",
-    "message": "Are you sure you want to delete this label? This will remove the label from all tasks."
+    "title": "Label verwijderen",
+    "message": "Weet je zeker dat je dit label wilt verwijderen? Het label wordt dan van alle taken verwijderd."
   },
-  "loadError": "Failed to load labels. Please try again.",
+  "loadError": "Labels laden mislukt. Probeer het opnieuw.",
   "search": {
-    "placeholder": "",
-    "noResultsTitle": "",
-    "noResultsDescription": "",
-    "noFilterResultsDescription": "",
-    "clear": "",
-    "showAll": ""
+    "placeholder": "Labels zoeken",
+    "noResultsTitle": "Geen labels gevonden",
+    "noResultsDescription": "Geen label komt overeen met \"{{searchTerm}}\".",
+    "noFilterResultsDescription": "Geen label komt overeen met het huidige filter.",
+    "clear": "Zoekopdracht wissen",
+    "showAll": "Alle labels tonen"
   },
   "detail": {
-    "taskCount_one": "",
-    "taskCount_other": "",
-    "labelActions": "",
+    "taskCount_one": "{{count}} taak",
+    "taskCount_other": "{{count}} taken",
+    "labelActions": "Labelacties",
     "filters": {
-      "all": "",
-      "overdue": "",
-      "today": "",
-      "undated": ""
+      "all": "Alle",
+      "overdue": "Achterstallig",
+      "today": "Vandaag",
+      "undated": "Geen datum"
     },
-    "noMatchingStatus": "",
-    "clearFilters": "",
-    "searchPlaceholder": "",
-    "emptyTitle": "",
-    "emptyDescription": "",
-    "browseTasks": "",
-    "noResultsTitle": "",
-    "noResultsDescription": "",
-    "notFoundTitle": "",
-    "notFoundDescription": "",
-    "backToLabels": ""
+    "noMatchingStatus": "Geen taak met dit label heeft nu die status.",
+    "clearFilters": "Alle taken tonen",
+    "searchPlaceholder": "Taken met dit label zoeken",
+    "emptyTitle": "Geen taken met dit label",
+    "emptyDescription": "Er is nog niets gelabeld met \"{{label}}\". Voeg het label toe aan een taak en die verschijnt hier.",
+    "browseTasks": "Taken bekijken",
+    "noResultsTitle": "Geen taken gevonden",
+    "noResultsDescription": "Geen taak met dit label komt overeen met \"{{searchTerm}}\".",
+    "notFoundTitle": "Label niet gevonden",
+    "notFoundDescription": "Dit label is mogelijk verwijderd of wordt niet meer met je gedeeld.",
+    "backToLabels": "Terug naar labels"
   },
-  "blurb": "Manage your labels and organize your tasks effectively. Labels will be automatically shared with your circle if they are used on a shared task.",
+  "blurb": "Beheer je labels en organiseer je taken overzichtelijk. Labels worden automatisch gedeeld met je kring als ze op een gedeelde taak worden gebruikt.",
   "modal": {
-    "errorEmptyName": "",
-    "errorDuplicate": "",
-    "errorNoColor": "",
-    "saveFailedTitle": "",
-    "saveFailedMessage": "",
-    "name": "",
-    "editTitle": "",
-    "addTitle": "",
-    "color": "",
-    "saveChanges": "",
-    "addLabel": "",
-    "colorAriaSelect": ""
+    "errorEmptyName": "Naam mag niet leeg zijn",
+    "errorDuplicate": "Er bestaat al een label met deze naam",
+    "errorNoColor": "Kies een kleur",
+    "saveFailedTitle": "Label opslaan mislukt",
+    "saveFailedMessage": "Kan label niet opslaan. Probeer het opnieuw.",
+    "name": "Naam",
+    "editTitle": "Label bewerken",
+    "addTitle": "Label toevoegen",
+    "color": "Kleur",
+    "saveChanges": "Wijzigingen opslaan",
+    "addLabel": "Label toevoegen",
+    "colorAriaSelect": "{{color}} kiezen"
   },
   "picker": {
-    "label": "",
-    "createLabel": "",
-    "labelsCount_one": "",
-    "labelsCount_other": ""
+    "label": "Labels",
+    "createLabel": "Label maken",
+    "labelsCount_one": "{{count}} label",
+    "labelsCount_other": "{{count}} labels"
   },
   "view": {
-    "emptyTitle": "",
-    "emptyDescription": "",
-    "createLabel": "",
-    "filterTitle": "",
-    "sortName": "",
-    "sortColor": "",
-    "sortRecent": "",
-    "filterAll": "",
-    "filterMine": "",
-    "filterShared": ""
+    "emptyTitle": "Nog geen labels",
+    "emptyDescription": "Labels groeperen taken binnen je kring, zoals \"keuken\" of \"rekeningen\", zodat je er met één tik op kunt filteren.",
+    "createLabel": "Label maken",
+    "filterTitle": "Tonen",
+    "sortName": "Naam",
+    "sortColor": "Kleur",
+    "sortRecent": "Recent aangemaakt",
+    "filterAll": "Alle labels",
+    "filterMine": "Door mij aangemaakt",
+    "filterShared": "Met mij gedeeld"
   }
 }
