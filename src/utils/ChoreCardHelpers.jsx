@@ -1,4 +1,6 @@
 import moment from 'moment'
+
+import { DAYS, sortWeekdays } from './WeekdayUtils'
 const allMonths = [
   'January',
   'February',
@@ -135,17 +137,11 @@ export const getRecurrentChipText = chore => {
   } else if (chore.frequencyType === 'yearly') {
     return 'Yearly'
   } else if (chore.frequencyType === 'days_of_the_week') {
-    let days = metadata.days
+    let days = sortWeekdays(metadata.days)
     if (days.length > 4) {
-      const allDays = [
-        'Sunday',
-        'Monday',
-        'Tuesday',
-        'Wednesday',
-        'Thursday',
-        'Friday',
-        'Saturday',
-      ]
+      const allDays = DAYS.map(
+        day => day.charAt(0).toUpperCase() + day.slice(1),
+      )
       const selectedDays = days.map(d => moment().day(d).format('dddd'))
       const notSelectedDay = allDays.filter(day => !selectedDays.includes(day))
       const notSelectedShortdays = notSelectedDay.map(d =>
