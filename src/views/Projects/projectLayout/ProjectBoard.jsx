@@ -475,7 +475,6 @@ const BoardColumn = ({
   const isExpanded = displayMode !== 'list' || !isCollapsed
   const [isEditing, setIsEditing] = useState(false)
   const [name, setName] = useState(section.name)
-  const [isQuickAdding, setIsQuickAdding] = useState(false)
   useDndMonitor({
     onDragOver: ({ active, over }) => {
       if (
@@ -691,39 +690,16 @@ const BoardColumn = ({
             ))}
           </Box>
         </SortableContext>
-        {!isMultiSelectMode &&
-          (isQuickAdding ? (
-            <TaskComposerRow
-              currentUserId={userProfile?.id}
-              members={membersData?.res || []}
-              userLabels={userLabels}
-              placeholder={t('board.addTaskPlaceholder')}
-              onSubmit={onQuickAdd}
-              onCancel={() => setIsQuickAdding(false)}
-              onMoreOptions={() => {
-                onAddTask?.()
-                setIsQuickAdding(false)
-              }}
-            />
-          ) : (
-            <Button
-              variant='plain'
-              color='neutral'
-              size='sm'
-              startDecorator={<Add sx={{ fontSize: 16 }} />}
-              onClick={() => setIsQuickAdding(true)}
-              sx={{
-                justifyContent: 'flex-start',
-                borderRadius: 0,
-                color: 'text.tertiary',
-                mx: 1,
-                mb: displayMode === 'list' ? 0.5 : 1,
-                mt: displayMode === 'list' ? 0.5 : 0,
-              }}
-            >
-              {t('board.addTask')}
-            </Button>
-          ))}
+        {!isMultiSelectMode && (
+          <TaskComposerRow
+            currentUserId={userProfile?.id}
+            members={membersData?.res || []}
+            userLabels={userLabels}
+            placeholder={t('board.addTaskPlaceholder')}
+            onSubmit={onQuickAdd}
+            onMoreOptions={onAddTask}
+          />
+        )}
       </Box>
     </SortableColumnShell>
   )
@@ -1039,7 +1015,7 @@ const ProjectBoard = ({
                 isMultiSelectMode={isMultiSelectMode}
                 membersData={membersData}
                 onAction={handleAction}
-                onAddTask={() => onAddTask?.(section.id)}
+                onAddTask={text => onAddTask?.(section.id, text)}
                 onChipClick={handleLabelFiltering}
                 onLongPressChore={onLongPressChore}
                 onOpenActionMenu={openActionMenu}

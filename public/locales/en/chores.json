@@ -150,7 +150,7 @@
     "add": "Add",
     "addSection": "Add section",
     "addTask": "Add task",
-    "addTaskPlaceholder": "Try \"Buy milk tomorrow p1 @alice\"",
+    "addTaskPlaceholder": "Add a new task...",
     "closeAddTask": "Close",
     "deleteSection": "Delete section",
     "dragSection": "Drag section",

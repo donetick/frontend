@@ -211,6 +211,7 @@ const TaskInput = ({
   initialMode,
   initialSectionId,
   initialShare,
+  initialText = '',
   isModalOpen,
   lockedProjectId,
   onChoreUpdate,
@@ -249,8 +250,8 @@ const TaskInput = ({
     [queryClient],
   )
 
-  const [taskText, setTaskText] = useState('')
-  const [taskTitle, setTaskTitle] = useState('')
+  const [taskText, setTaskText] = useState(initialText)
+  const [taskTitle, setTaskTitle] = useState(initialText)
   // Highlight spans paired with the text they were computed from: the parse
   // is debounced, so while typing these lag behind taskText
   const [renderedParts, setRenderedParts] = useState({ text: '', parts: [] })

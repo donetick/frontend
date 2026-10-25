@@ -1522,10 +1522,11 @@ const MyChores = () => {
             onLongPressChore={enterMultiSelectWithChore}
             onTaskCreated={updateChores}
             userLabels={userLabels || []}
-            onAddTask={sectionId => {
+            onAddTask={(sectionId, text) => {
               setAddTaskSectionContext({
                 projectId: selectedProject.id,
                 sectionId,
+                text,
               })
               setAddTaskModalOpen(true)
             }}
@@ -1842,6 +1843,7 @@ const MyChores = () => {
             initialMode={addTaskInitialMode}
             lockedProjectId={addTaskSectionContext?.projectId}
             initialSectionId={addTaskSectionContext?.sectionId}
+            initialText={addTaskSectionContext?.text}
             initialShare={initialShare}
             onClose={forceRefresh => {
               setAddTaskModalOpen(false)
