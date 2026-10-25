@@ -74,6 +74,7 @@ import {
 } from '../ProjectQueries'
 import { boardCollisionDetection } from './boardCollisionDetection'
 import { applyTaskOrder, getTaskDropOrder } from './boardTaskOrdering'
+import ProjectTaskRow from './ProjectTaskRow'
 
 // Sortable wrappers update frequently during a drag; keep the expensive card
 // content out of those renders when its task and interaction props are unchanged.
@@ -91,6 +92,7 @@ const interactiveControlSelector =
 // and can use press-and-hold for selection without competing with DnD.
 const DragHandle = memo(function DragHandle({
   attributes,
+  className,
   listeners,
   label,
   setActivatorNodeRef,
@@ -101,6 +103,7 @@ const DragHandle = memo(function DragHandle({
     <IconButton
       {...attributes}
       {...listeners}
+      className={className}
       ref={setActivatorNodeRef}
       aria-label={label}
       tabIndex={isOverlay ? -1 : attributes?.tabIndex}
@@ -145,6 +148,11 @@ const ColumnSurface = memo(function ColumnSurface({
         position: 'relative',
         pt: displayMode === 'list' && isExpanded ? '40px' : 0,
         borderRadius: 'lg',
+        ...(displayMode === 'list' && {
+          bgcolor: 'background.body',
+          border: '1px solid',
+          borderColor: 'divider',
+        }),
       }}
     >
       {children}
@@ -237,6 +245,8 @@ const TaskCard = memo(function TaskCard({
   )
   const showSubtasks =
     displayMode === 'list' && subtasks.length > 0 && !isMultiSelectMode
+  const TaskContent =
+    displayMode === 'list' ? ProjectTaskRow : MemoizedCompactChoreCard
 
   useEffect(() => setSubtasks(chore.subTasks || []), [chore.subTasks])
   useEffect(() => {
@@ -271,13 +281,21 @@ const TaskCard = memo(function TaskCard({
         longPressHandlers.onPointerDown(event)
       }}
       aria-hidden={isOverlay || undefined}
-      variant='outlined'
+      className={displayMode === 'list' ? 'project-task-row-shell' : undefined}
+      data-dragging={isDragging || undefined}
+      variant={displayMode === 'list' ? 'plain' : 'outlined'}
       onClick={() => {
         if (isMultiSelectMode) onSelectionToggle()
         else navigate(`/chores/${chore.id}`)
       }}
       sx={{
-        borderRadius: 'md',
+        borderRadius: displayMode === 'list' ? 0 : 'md',
+        ...(displayMode === 'list' && {
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+          bgcolor: isSelected ? 'primary.softBg' : 'background.body',
+          '&:hover': { bgcolor: 'background.level1' },
+        }),
         overflow: 'hidden',
         flexShrink: 0,
         opacity: isDragging && !isOverlay ? 0 : 1,
@@ -287,6 +305,9 @@ const TaskCard = memo(function TaskCard({
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'stretch' }}>
+        {displayMode === 'list' && !showSubtasks && !isMultiSelectMode && (
+          <Box sx={{ width: 24, flexShrink: 0 }} />
+        )}
         {showSubtasks && (
           <IconButton
             aria-label={t(
@@ -301,13 +322,13 @@ const TaskCard = memo(function TaskCard({
               event.stopPropagation()
               onSubtasksExpandedChange?.(!subtasksExpanded)
             }}
-            sx={{ width: 28, minWidth: 28, borderRadius: 0 }}
+            sx={{ width: 24, minWidth: 24, borderRadius: 0 }}
           >
             {subtasksExpanded ? <ExpandMore /> : <ChevronRight />}
           </IconButton>
         )}
         <Box sx={{ minWidth: 0, flex: 1 }}>
-          <MemoizedCompactChoreCard
+          <TaskContent
             chore={chore}
             performers={membersData?.res || EMPTY_MEMBERS}
             isMultiSelectMode={isMultiSelectMode}
@@ -322,6 +343,11 @@ const TaskCard = memo(function TaskCard({
         </Box>
         {!isMultiSelectMode && (
           <DragHandle
+            className={
+              displayMode === 'list'
+                ? 'project-task-secondary-action'
+                : undefined
+            }
             attributes={dragAttributes}
             listeners={dragListeners}
             label={`${t('board.dragTask')}: ${chore.name}`}
@@ -609,12 +635,12 @@ const BoardColumn = ({
             sx={{
               display: 'flex',
               flexDirection: 'column',
-              gap: 1,
-              minHeight: 88,
+              gap: displayMode === 'list' ? 0 : 1,
+              minHeight: displayMode === 'list' ? 44 : 88,
               maxHeight:
                 displayMode === 'list' ? 'none' : 'calc(100vh - 260px)',
               overflowY: displayMode === 'list' ? 'visible' : 'auto',
-              p: 1,
+              p: displayMode === 'list' ? 0 : 1,
             }}
           >
             {chores.length === 0 && (
@@ -622,8 +648,8 @@ const BoardColumn = ({
                 sx={{
                   display: 'grid',
                   placeItems: 'center',
-                  minHeight: 70,
-                  border: '1px dashed',
+                  minHeight: displayMode === 'list' ? 44 : 70,
+                  border: displayMode === 'list' ? 'none' : '1px dashed',
                   borderColor: 'divider',
                   borderRadius: 'md',
                 }}
@@ -678,7 +704,8 @@ const BoardColumn = ({
                 borderRadius: 0,
                 color: 'text.tertiary',
                 mx: 1,
-                mb: 1,
+                mb: displayMode === 'list' ? 0.5 : 1,
+                mt: displayMode === 'list' ? 0.5 : 0,
               }}
             >
               {t('board.addTask')}
