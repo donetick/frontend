@@ -209,8 +209,8 @@ const PARSE_DEBOUNCE_MS = 150
 
 const TaskInput = ({
   initialMode,
-  initialShare,
   initialSectionId,
+  initialShare,
   isModalOpen,
   lockedProjectId,
   onChoreUpdate,
@@ -1565,9 +1565,7 @@ const TaskInput = ({
                           sx={{ fontSize: 18, color: selectedProject.color }}
                         />
                       }
-                      endDecorator={
-                        <KeyboardArrowDown sx={{ fontSize: 16 }} />
-                      }
+                      endDecorator={<KeyboardArrowDown sx={{ fontSize: 16 }} />}
                       sx={{
                         mr: 'auto',
                         color: 'text.secondary',

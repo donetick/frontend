@@ -35,13 +35,13 @@ import PendingBadge from '../../components/PendingBadge'
 // visual: one baseline, an unfilled completion box, and no card decoration.
 const ProjectTaskRow = memo(function ProjectTaskRow({
   chore,
-  performers,
   isMultiSelectMode,
   isSelected,
   onAction,
   onChipClick,
-  onSelectionToggle,
   onOpenActionMenu,
+  onSelectionToggle,
+  performers,
 }) {
   const { t } = useTranslation('chores')
   const navigate = useNavigate()
@@ -74,7 +74,7 @@ const ProjectTaskRow = memo(function ProjectTaskRow({
   const extraLabels = Math.max(0, (chore.labelsV2?.length || 0) - 1)
   const recurrent =
     chore.frequencyType && !['once', 'no_repeat'].includes(chore.frequencyType)
-  const { before, after, url } = splitTextAtFirstHttpUrl(chore.name)
+  const { after, before, url } = splitTextAtFirstHttpUrl(chore.name)
   const links = [
     ...new Set([url, getFirstHttpUrl(chore.description)].filter(Boolean)),
   ]

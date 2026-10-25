@@ -183,7 +183,7 @@ export const buildChorePayload = (
     notificationMetadata: {},
     subTasks: null,
     projectId: projectId === 'default' ? null : projectId,
-    sectionId: projectId === 'default' ? null : sectionId ?? null,
+    sectionId: projectId === 'default' ? null : (sectionId ?? null),
     draftId: generateUUID(),
   }
 

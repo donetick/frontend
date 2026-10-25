@@ -62,8 +62,8 @@ import { useUserProfile } from '../../../queries/UserQueries'
 import { CompleteSubTask } from '../../../utils/Fetcher'
 import CompactChoreCard from '../../Chores/CompactChoreCard'
 import ChoreActionMenu from '../../components/ChoreActionMenu'
-import TaskComposerRow from '../../components/VoiceToTask/TaskComposerRow'
 import { buildChorePayload } from '../../components/VoiceToTask/parseVoiceTask'
+import TaskComposerRow from '../../components/VoiceToTask/TaskComposerRow'
 import {
   useCreateSection,
   useDeleteSection,
@@ -94,11 +94,11 @@ const DragHandle = memo(function DragHandle({
   attributes,
   className,
   compact = false,
-  listeners,
-  label,
-  setActivatorNodeRef,
   isDragging,
   isOverlay,
+  label,
+  listeners,
+  setActivatorNodeRef,
 }) {
   return (
     <IconButton
@@ -227,13 +227,12 @@ const flattenSubtasks = (tasks, parentId = null, level = 0) =>
 
 const TaskCard = memo(function TaskCard({
   chore,
+  displayMode,
   dragAttributes,
   dragListeners,
   isDragging = false,
-  isOverlay = false,
-  setActivatorNodeRef,
-  displayMode,
   isMultiSelectMode,
+  isOverlay = false,
   isSelected,
   membersData,
   onAction,
@@ -241,9 +240,10 @@ const TaskCard = memo(function TaskCard({
   onLongPress,
   onOpenActionMenu,
   onSelectionToggle,
-  sections,
-  subtasksExpanded = false,
   onSubtasksExpandedChange,
+  sections,
+  setActivatorNodeRef,
+  subtasksExpanded = false,
 }) {
   const { t } = useTranslation('chores')
   const [subtasks, setSubtasks] = useState(chore.subTasks || [])

@@ -185,8 +185,12 @@ const TaskComposerRow = ({
             onDueDateChange={e =>
               queueDuePatch({ date: e.target.value || null })
             }
-            onDueTimeChange={e => queueDuePatch({ time: e.target.value || null })}
-            onUseCustomTimeChange={checked => queueDuePatch({ custom: checked })}
+            onDueTimeChange={e =>
+              queueDuePatch({ time: e.target.value || null })
+            }
+            onUseCustomTimeChange={checked =>
+              queueDuePatch({ custom: checked })
+            }
             onClear={() => setOverrides(o => ({ ...o, dueDate: null }))}
           />
           <RepeatPickerField

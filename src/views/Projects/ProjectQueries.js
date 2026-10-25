@@ -236,7 +236,7 @@ export const useProjectSections = projectId => {
 export const useCreateSection = () => {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async ({ projectId, name }) => {
+    mutationFn: async ({ name, projectId }) => {
       const response = await CreateProjectSection(projectId, name)
       if (!response.ok) {
         throw await errorFrom(response, 'Failed to create section')
@@ -255,13 +255,13 @@ export const useCreateSection = () => {
 export const useRenameSection = () => {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async ({ projectId, sectionId, name }) => {
+    mutationFn: async ({ name, projectId, sectionId }) => {
       const response = await RenameProjectSection(projectId, sectionId, name)
       if (!response.ok) {
         throw await errorFrom(response, 'Failed to rename section')
       }
     },
-    onMutate: async ({ projectId, sectionId, name }) => {
+    onMutate: async ({ name, projectId, sectionId }) => {
       await queryClient.cancelQueries({
         queryKey: ['projectSections', projectId],
       })
@@ -275,7 +275,10 @@ export const useRenameSection = () => {
     },
     onError: (_err, { projectId }, context) => {
       if (context?.previous) {
-        queryClient.setQueryData(['projectSections', projectId], context.previous)
+        queryClient.setQueryData(
+          ['projectSections', projectId],
+          context.previous,
+        )
       }
     },
     onSettled: (_data, _err, { projectId }) => {
@@ -325,7 +328,7 @@ const reorderedAfter = (sections, sectionId, afterSectionId) => {
 export const useMoveSection = () => {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async ({ projectId, sectionId, afterSectionId }) => {
+    mutationFn: async ({ afterSectionId, projectId, sectionId }) => {
       const response = await MoveProjectSection(
         projectId,
         sectionId,
@@ -335,7 +338,7 @@ export const useMoveSection = () => {
         throw await errorFrom(response, 'Failed to move section')
       }
     },
-    onMutate: async ({ projectId, sectionId, afterSectionId }) => {
+    onMutate: async ({ afterSectionId, projectId, sectionId }) => {
       await queryClient.cancelQueries({
         queryKey: ['projectSections', projectId],
       })
@@ -347,7 +350,10 @@ export const useMoveSection = () => {
     },
     onError: (_err, { projectId }, context) => {
       if (context?.previous) {
-        queryClient.setQueryData(['projectSections', projectId], context.previous)
+        queryClient.setQueryData(
+          ['projectSections', projectId],
+          context.previous,
+        )
       }
     },
     onSettled: (_data, _err, { projectId }) => {
@@ -372,9 +378,7 @@ const reorderedChoresAfter = (chores, choreId, sectionId, afterChoreId) => {
   const moved = chores.find(chore => chore.id === choreId)
   if (!moved) return chores
   siblings.splice(afterIndex + 1, 0, moved)
-  const positions = new Map(
-    siblings.map((chore, index) => [chore.id, index]),
-  )
+  const positions = new Map(siblings.map((chore, index) => [chore.id, index]))
   return chores.map(chore =>
     positions.has(chore.id)
       ? { ...chore, sectionId, boardPosition: positions.get(chore.id) }
@@ -389,7 +393,7 @@ const reorderedChoresAfter = (chores, choreId, sectionId, afterChoreId) => {
 export const useMoveChore = () => {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async ({ projectId, choreId, sectionId, afterChoreId }) => {
+    mutationFn: async ({ afterChoreId, choreId, projectId, sectionId }) => {
       const response = await MoveProjectChore(
         projectId,
         choreId,
@@ -400,7 +404,7 @@ export const useMoveChore = () => {
         throw await errorFrom(response, 'Failed to move task')
       }
     },
-    onMutate: async ({ choreId, sectionId, afterChoreId }) => {
+    onMutate: async ({ afterChoreId, choreId, sectionId }) => {
       await queryClient.cancelQueries({ queryKey: ['chores'] })
       const previous = queryClient.getQueryData(['chores', false])
       queryClient.setQueryData(['chores', false], old => {

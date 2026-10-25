@@ -22,9 +22,9 @@ import {
   UpdateChorePriority,
   UpdateDueDate,
 } from '../../../utils/Fetcher'
+import { MoveProjectChore } from '../../../utils/Fetcher'
 import { offlineDB } from '../../../utils/OfflineDB'
 import { isOfflineFeatureEnabled } from '../../../utils/OfflineFeatureToggle'
-import { MoveProjectChore } from '../../../utils/Fetcher'
 
 // Effectively "can this action be queued offline?" — requires the offline
 // feature, otherwise there is no command queue to replay it later.

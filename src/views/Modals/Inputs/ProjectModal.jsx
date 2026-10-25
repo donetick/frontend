@@ -400,7 +400,10 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
                 {t('modal.displayList')}
               </Chip>
             </Box>
-            <Typography level='body-xs' sx={{ color: 'text.tertiary', mt: 0.5 }}>
+            <Typography
+              level='body-xs'
+              sx={{ color: 'text.tertiary', mt: 0.5 }}
+            >
               {t('modal.displayHint')}
             </Typography>
           </FormControl>
