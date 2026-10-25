@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { track } from '../../analytics'
 import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
+import { networkManager } from '../../hooks/NetworkManager'
 import { canCreateProject } from '../../utils/entitlements'
 import {
   CreateProject,
@@ -16,6 +17,7 @@ import {
   UpdateProject,
 } from '../../utils/Fetcher'
 import { offlineDB } from '../../utils/OfflineDB'
+import { isOfflineFeatureEnabled } from '../../utils/OfflineFeatureToggle'
 
 // Query hook for fetching all projects
 export const useProjects = () => {
@@ -221,13 +223,31 @@ export const useProjectSections = projectId => {
   return useQuery({
     queryKey: ['projectSections', projectId],
     queryFn: async () => {
-      const response = await GetProjectSections(projectId)
-      if (!response.ok) {
-        throw await errorFrom(response, 'Failed to fetch sections')
+      const cacheKey = `project_sections:${projectId}`
+      if (isOfflineFeatureEnabled() && !networkManager.isOnline) {
+        const cached = await offlineDB.getKV(cacheKey)
+        if (Array.isArray(cached)) return cached
+        throw new Error('No cached sections available for this project')
       }
-      const data = await response.json()
-      return data.res || []
+      try {
+        const response = await GetProjectSections(projectId)
+        if (!response.ok) {
+          throw await errorFrom(response, 'Failed to fetch sections')
+        }
+        const data = await response.json()
+        const sections = data.res || []
+        // Cache failures must not turn a successful request into an error.
+        await offlineDB.saveKV(cacheKey, sections).catch(() => {})
+        return sections
+      } catch (error) {
+        const cached = await offlineDB.getKV(cacheKey)
+        if (Array.isArray(cached)) return cached
+        // Missing cache is not an empty board: don't seed default columns.
+        throw error
+      }
     },
+    // Run the cache fallback even when React Query knows the device is offline.
+    networkMode: 'always',
     enabled: Boolean(projectId) && projectId !== 'default',
     staleTime: 60 * 1000,
   })

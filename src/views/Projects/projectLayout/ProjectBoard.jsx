@@ -56,6 +56,7 @@ import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
+import { networkManager } from '../../../hooks/NetworkManager'
 import useLongPress from '../../../hooks/useLongPress'
 import { useCreateChore } from '../../../queries/ChoreQueries'
 import { useUserProfile } from '../../../queries/UserQueries'
@@ -734,7 +735,12 @@ const ProjectBoard = ({
   const [newSectionName, setNewSectionName] = useState('')
   const hasEnsuredDefaultsRef = useRef(false)
 
-  const { data: sections = [], isLoading } = useProjectSections(projectId)
+  const {
+    data: sections = [],
+    isFetching: isFetchingSections,
+    isLoading,
+    isSuccess: hasLoadedSections,
+  } = useProjectSections(projectId)
   const { data: userProfile } = useUserProfile()
   const createSectionMutation = useCreateSection()
   const renameSectionMutation = useRenameSection()
@@ -775,7 +781,13 @@ const ProjectBoard = ({
   // another viewer doing the same at the same moment; worst case is a couple
   // of duplicate default sections, which anyone can rename or delete.
   useEffect(() => {
-    if (isLoading || sections.length > 0 || hasEnsuredDefaultsRef.current) {
+    if (
+      !hasLoadedSections ||
+      isFetchingSections ||
+      !networkManager.isOnline ||
+      sections.length > 0 ||
+      hasEnsuredDefaultsRef.current
+    ) {
       return
     }
     hasEnsuredDefaultsRef.current = true
@@ -787,7 +799,7 @@ const ProjectBoard = ({
       createSectionMutation.mutate({ projectId, name })
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading, sections.length, projectId])
+  }, [hasLoadedSections, isFetchingSections, sections.length, projectId])
 
   const displayedSections =
     pendingSectionOrder?.projectId === projectId
