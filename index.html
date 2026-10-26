@@ -13,43 +13,232 @@
     <!-- Inline so startup is visible before JavaScript and app CSS load. -->
     <style>
       .startup-screen {
+        --startup-bg: #fbfcfe;
+        --startup-surface: #ffffff;
+        --startup-text: #20252b;
+        --startup-muted: #747b87;
+        --startup-accent: #7c79d8;
+        --startup-soft: #eeedfc;
+        --startup-border: #e9eaf0;
         position: fixed;
         inset: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 24px;
-        background: #ffffff;
-        color: #171a1c;
+        display: grid;
+        place-items: center;
+        overflow: auto;
+        background: var(--startup-bg);
+        color: var(--startup-text);
         font-family: system-ui, sans-serif;
       }
-      .startup-screen__name {
-        font-size: 28px;
+      .startup-screen__content {
+        padding: 32px 24px;
+        text-align: center;
+      }
+      .startup-screen__visual {
+        position: relative;
+        width: 280px;
+        height: 220px;
+        margin: 0 auto 24px;
+        animation: startup-enter 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+      }
+      .startup-screen__halo {
+        position: absolute;
+        inset: 12px 30px;
+        border-radius: 50%;
+        background: radial-gradient(ellipse, #dcd9fa 0%, transparent 70%);
+        filter: blur(16px);
+        animation: startup-breathe 4s ease-in-out infinite;
+      }
+      .startup-screen__mascot {
+        position: absolute;
+        inset: 48px auto auto 78px;
+        width: 124px;
+        height: 124px;
+        display: grid;
+        place-items: center;
+        border-radius: 36px;
+        background: var(--startup-surface);
+        border: 1px solid var(--startup-border);
+        box-shadow: 0 16px 48px -16px #68629b30;
+        transform: rotate(-6deg);
+        animation: startup-float 5s ease-in-out infinite;
+      }
+      .startup-screen__mascot img {
+        display: block;
+        width: 88px;
+        height: 88px;
+      }
+      .startup-screen__card {
+        position: absolute;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 126px;
+        padding: 14px;
+        box-sizing: border-box;
+        border: 1px solid var(--startup-border);
+        border-radius: 18px;
+        background: var(--startup-surface);
+        box-shadow: 0 8px 24px -12px #68629b30;
+      }
+      .startup-screen__card--back {
+        top: 22px;
+        right: 0;
+        transform: rotate(9deg);
+        animation: startup-card-back 5s ease-in-out infinite;
+      }
+      .startup-screen__card--front {
+        bottom: 12px;
+        left: 0;
+        transform: rotate(-8deg);
+        animation: startup-card-front 5s ease-in-out infinite;
+      }
+      .startup-screen__check {
+        display: grid;
+        place-items: center;
+        flex: 0 0 26px;
+        height: 26px;
+        border-radius: 9px;
+        background: var(--startup-soft);
+        color: var(--startup-accent);
+        font-size: 16px;
         font-weight: 700;
       }
-      .startup-screen__spinner {
-        width: 28px;
-        height: 28px;
-        box-sizing: border-box;
-        border: 3px solid currentColor;
-        border-inline-end-color: transparent;
-        border-radius: 50%;
-        animation: startup-spin 0.8s linear infinite;
+      .startup-screen__card--front .startup-screen__check {
+        background: #e2f5ef;
+        color: #378776;
       }
-      @keyframes startup-spin {
+      .startup-screen__lines {
+        display: grid;
+        gap: 7px;
+        flex: 1;
+      }
+      .startup-screen__lines span {
+        height: 5px;
+        border-radius: 8px;
+        background: var(--startup-border);
+      }
+      .startup-screen__lines span + span {
+        width: 65%;
+      }
+      .startup-screen__spark {
+        position: absolute;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #f2c589;
+      }
+      .startup-screen__spark--one {
+        top: 40px;
+        left: 30px;
+      }
+      .startup-screen__spark--two {
+        right: 26px;
+        bottom: 36px;
+        width: 5px;
+        height: 5px;
+        background: #aaa5e7;
+      }
+      .startup-screen__copy {
+        animation: startup-enter 700ms cubic-bezier(0.22, 1, 0.36, 1) 100ms both;
+      }
+      .startup-screen__name {
+        font-size: 32px;
+        font-weight: 700;
+        letter-spacing: -0.04em;
+        line-height: 1.2;
+      }
+      .startup-screen__name span {
+        color: var(--startup-accent);
+      }
+      .startup-screen__caption {
+        margin-top: 12px;
+        color: var(--startup-muted);
+        font-size: 15px;
+        line-height: 1.5;
+      }
+      .startup-screen__dots {
+        display: flex;
+        justify-content: center;
+        gap: 6px;
+        margin-top: 28px;
+      }
+      .startup-screen__dots span {
+        width: 6px;
+        height: 6px;
+        border-radius: 99px;
+        background: var(--startup-accent);
+        animation: startup-dot 1.6s ease-in-out infinite;
+      }
+      .startup-screen__dots span:nth-child(2) {
+        animation-delay: 160ms;
+      }
+      .startup-screen__dots span:nth-child(3) {
+        animation-delay: 320ms;
+      }
+      @keyframes startup-enter {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
         to {
-          transform: rotate(360deg);
+          opacity: 1;
+          transform: none;
+        }
+      }
+      @keyframes startup-breathe {
+        50% {
+          transform: scale(1.12);
+          opacity: 0.65;
+        }
+      }
+      @keyframes startup-float {
+        50% {
+          transform: translateY(-7px) rotate(-3deg);
+        }
+      }
+      @keyframes startup-card-back {
+        50% {
+          transform: translateY(5px) rotate(6deg);
+        }
+      }
+      @keyframes startup-card-front {
+        50% {
+          transform: translateY(-4px) rotate(-4deg);
+        }
+      }
+      @keyframes startup-dot {
+        0%,
+        60%,
+        100% {
+          opacity: 0.3;
+          transform: translateY(0);
+        }
+        30% {
+          opacity: 1;
+          transform: translateY(-4px);
         }
       }
       @media (prefers-color-scheme: dark) {
         .startup-screen {
-          background: #0b0d0e;
-          color: #f0f4f8;
+          --startup-bg: #101216;
+          --startup-surface: #1b1e25;
+          --startup-text: #f0f1f5;
+          --startup-muted: #9ca3b1;
+          --startup-accent: #b7b1f4;
+          --startup-soft: #302c49;
+          --startup-border: #2b2f39;
+        }
+        .startup-screen__halo {
+          background: radial-gradient(ellipse, #49416d 0%, transparent 70%);
+        }
+        .startup-screen__card--front .startup-screen__check {
+          background: #203c36;
+          color: #8ed7bd;
         }
       }
       @media (prefers-reduced-motion: reduce) {
-        .startup-screen__spinner {
+        .startup-screen .startup-screen__content,
+        .startup-screen .startup-screen__content * {
           animation: none;
         }
       }
@@ -88,8 +277,39 @@
     <div id="root">
       <!-- React replaces this with the matching Suspense fallback on mount. -->
       <div class="startup-screen" role="status" aria-label="Loading Donetick">
-        <span class="startup-screen__name">Donetick</span>
-        <span class="startup-screen__spinner" aria-hidden="true"></span>
+        <div class="startup-screen__content">
+          <div class="startup-screen__visual" aria-hidden="true">
+            <div class="startup-screen__halo"></div>
+            <div class="startup-screen__card startup-screen__card--back">
+              <span class="startup-screen__check">✓</span>
+              <span class="startup-screen__lines"
+                ><span></span><span></span
+              ></span>
+            </div>
+            <div class="startup-screen__mascot">
+              <img src="/src/assets/logo.svg" width="88" height="88" alt="" />
+            </div>
+            <div class="startup-screen__card startup-screen__card--front">
+              <span class="startup-screen__check">✓</span>
+              <span class="startup-screen__lines"
+                ><span></span><span></span
+              ></span>
+            </div>
+            <span
+              class="startup-screen__spark startup-screen__spark--one"
+            ></span>
+            <span
+              class="startup-screen__spark startup-screen__spark--two"
+            ></span>
+          </div>
+          <div class="startup-screen__copy">
+            <div class="startup-screen__name">Done<span>tick</span></div>
+            <div class="startup-screen__caption">Getting things ready</div>
+          </div>
+          <div class="startup-screen__dots" aria-hidden="true">
+            <span></span><span></span><span></span>
+          </div>
+        </div>
       </div>
     </div>
     <script type="module" src="/src/main.jsx"></script>

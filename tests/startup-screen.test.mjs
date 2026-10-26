@@ -10,7 +10,12 @@ const read = path => readFileSync(new URL(path, import.meta.url), 'utf8')
 const html = read('../index.html')
 const source = read('../src/components/StartupScreen.jsx')
 const { code } = transformSync(
-  source.replace('export default StartupScreen', ''),
+  source
+    .replace(
+      "import logo from '../assets/logo.svg'",
+      "const logo = '/src/assets/logo.svg'",
+    )
+    .replace('export default StartupScreen', ''),
   {
     jsc: {
       parser: { syntax: 'ecmascript', jsx: true },
@@ -27,6 +32,9 @@ test('pre-JavaScript screen matches the React loading fallback', () => {
   const normalize = markup =>
     markup
       .replace(/<!--[\s\S]*?-->/g, '')
+      .replace(/<[^>]+>/g, tag =>
+        tag.replace(/\s+/g, ' ').replace(/\s*(\/?>)$/, '$1'),
+      )
       .replace(/>\s+</g, '><')
       .trim()
   assert.equal(
@@ -36,7 +44,8 @@ test('pre-JavaScript screen matches the React loading fallback', () => {
 })
 
 test('startup does not depend on translations, providers, or app chunks', () => {
-  assert.doesNotMatch(source, /^import\s/m)
+  const imports = source.match(/^import .+$/gm)
+  assert.deepEqual(imports, ["import logo from '../assets/logo.svg'"])
   assert.match(source, /role='status'/)
   assert.match(source, /aria-hidden='true'/)
   assert.match(
