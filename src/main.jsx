@@ -4,6 +4,8 @@ import './index.css'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 
+import StartupScreen from './components/StartupScreen.jsx'
+
 const marketingHosts = new Set(['donetick.com', 'www.donetick.com'])
 // ?site=marketing works in every build, not just dev, so preview deploys on
 // *.pages.dev can exercise the marketing bundle. Landing on the app host with
@@ -19,7 +21,7 @@ export const Site = React.lazy(() =>
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <React.Suspense fallback={null}>
+    <React.Suspense fallback={<StartupScreen />}>
       <Site />
     </React.Suspense>
   </React.StrictMode>,
