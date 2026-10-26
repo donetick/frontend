@@ -54,6 +54,16 @@ test('startup does not depend on translations, providers, or app chunks', () => 
   )
 })
 
+test('startup uses the original cyan accent in light and dark mode', () => {
+  const style = html.match(/<style>([\s\S]*?)<\/style>/)[1]
+  const [light, dark] = style.split('@media (prefers-color-scheme: dark)')
+  assert.match(light, /--startup-accent: #0891b2;/)
+  assert.match(light, /--startup-soft: #cffafe;/)
+  assert.match(dark, /--startup-accent: #67e8f9;/)
+  assert.match(dark, /--startup-soft: #164e63;/)
+  assert.doesNotMatch(style, /#7c79d8|#b7b1f4|#dcd9fa|#49416d|#aaa5e7|#68629b/i)
+})
+
 test('startup styles are inline, theme-aware and respect reduced motion', () => {
   const style = html.match(/<style>([\s\S]*?)<\/style>/)[1]
   assert.match(style, /\.startup-screen\s*\{/)
