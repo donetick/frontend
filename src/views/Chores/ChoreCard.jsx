@@ -27,6 +27,7 @@ import { useTranslation } from 'react-i18next'
 
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useLocalization } from '../../contexts/LocalizationContext'
+import { useThemeSkin } from '../../contexts/ThemeSkinContext'
 import { usePendingCommands } from '../../hooks/usePendingCommands'
 import { useUserProfile } from '../../queries/UserQueries.jsx'
 import {
@@ -77,6 +78,8 @@ const ChoreCard = ({
   viewOnly,
 }) => {
   const { t } = useTranslation('chores')
+  const { skin } = useThemeSkin()
+  const completionColor = skin === 'default' ? 'success' : 'primary'
   const { data: userProfile } = useUserProfile({ enabled: !viewOnly })
   const { timeFormat } = useLocalization()
   const { data: pendingCmds } = usePendingCommands(chore.id)
@@ -467,7 +470,7 @@ const ChoreCard = ({
                       <Box sx={{ display: 'flex', gap: 0.5 }}>
                         <IconButton
                           variant='soft'
-                          color='primary'
+                          color={completionColor}
                           onClick={e => {
                             e.stopPropagation()
                             onAction('approve', chore)
@@ -541,7 +544,7 @@ const ChoreCard = ({
                   ) : (
                     <IconButton
                       variant={chore.status === 0 ? 'solid' : 'soft'}
-                      color={chore.status === 0 ? 'primary' : 'warning'}
+                      color={chore.status === 0 ? completionColor : 'warning'}
                       onClick={e => {
                         e.stopPropagation()
                         switch (chore.status) {

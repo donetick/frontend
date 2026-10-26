@@ -8,14 +8,16 @@ import {
   Upcoming,
   WavingHand,
 } from '@mui/icons-material'
-import { Box, Button, Typography } from '@mui/joy'
+import { Box, Button, Option, Select, Typography } from '@mui/joy'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import {
   DEFAULT_HOME_SECTIONS_CONFIG,
   getHomeSectionsConfig,
+  getHomeTaskScope,
   saveHomeSectionsConfig,
+  saveHomeTaskScope,
 } from '../../utils/HomeSectionsConfig'
 import SettingsLayout from './SettingsLayout'
 import SettingsReorderList from './SettingsReorderList'
@@ -34,6 +36,7 @@ const ICONS = {
 
 const HomeSectionsSettings = () => {
   const { t } = useTranslation('settings')
+  const [taskScope, setTaskScope] = useState(getHomeTaskScope)
   const [config, setConfig] = useState(() =>
     [...getHomeSectionsConfig()].sort((a, b) => a.order - b.order),
   )
@@ -52,6 +55,40 @@ const HomeSectionsSettings = () => {
         >
           {t('homeSections.description')}
         </Typography>
+        <SettingsSection title={t('homeSections.taskScope.title')}>
+          <Box sx={{ display: 'grid', gap: 1.5 }}>
+            <Box sx={{ flex: 1 }}>
+              <Typography id='home-task-scope-label' level='title-sm'>
+                {t('homeSections.taskScope.label')}
+              </Typography>
+              <Typography
+                id='home-task-scope-description'
+                level='body-sm'
+                textColor='text.secondary'
+              >
+                {t('homeSections.taskScope.description')}
+              </Typography>
+            </Box>
+            <Select
+              value={taskScope}
+              onChange={(_, scope) => {
+                if (!scope) return
+                setTaskScope(scope)
+                saveHomeTaskScope(scope)
+              }}
+              aria-labelledby='home-task-scope-label'
+              aria-describedby='home-task-scope-description'
+              sx={{ maxWidth: 320 }}
+            >
+              <Option value='mine'>
+                {t('homeSections.taskScope.myTasks')}
+              </Option>
+              <Option value='everyone'>
+                {t('homeSections.taskScope.allCircleTasks')}
+              </Option>
+            </Select>
+          </Box>
+        </SettingsSection>
         <SettingsSection title={t('homeSections.sectionsTitle')}>
           <Typography level='body-xs' textColor='text.tertiary' sx={{ mb: 1 }}>
             {t('layout.reorderHint')}

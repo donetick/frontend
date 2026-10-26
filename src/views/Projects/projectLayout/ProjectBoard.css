@@ -19,20 +19,25 @@
 /* Keep touch controls discoverable. Only fine-pointer devices tuck them away;
    keyboard focus reveals the same controls without changing the row's width. */
 @media (hover: hover) and (pointer: fine) {
-  .project-task-row-shell .project-task-secondary-action {
+  :is(.project-task-row-shell, .project-board-card-shell)
+    .project-task-secondary-action {
     opacity: 0;
     transition: opacity 120ms ease;
   }
 
-  .project-task-row-shell:hover .project-task-secondary-action,
-  .project-task-row-shell:focus-within .project-task-secondary-action,
-  .project-task-row-shell[data-dragging] .project-task-secondary-action {
+  :is(.project-task-row-shell, .project-board-card-shell):hover
+    .project-task-secondary-action,
+  :is(.project-task-row-shell, .project-board-card-shell):focus-within
+    .project-task-secondary-action,
+  :is(.project-task-row-shell, .project-board-card-shell)[data-dragging]
+    .project-task-secondary-action {
     opacity: 1;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .project-task-row-shell .project-task-secondary-action {
+  :is(.project-task-row-shell, .project-board-card-shell)
+    .project-task-secondary-action {
     transition: none;
   }
 }

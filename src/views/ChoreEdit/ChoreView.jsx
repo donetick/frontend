@@ -10,6 +10,7 @@ import {
   HourglassEmpty,
   MoreVert,
   OpenInFull,
+  OpenInNew,
   PeopleAlt,
   Person,
   PlayArrow,
@@ -64,6 +65,12 @@ import {
 } from '../../utils/Chores.jsx'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
 import { commandQueue, CommandType } from '../../utils/CommandQueue'
+import {
+  getFirstHttpUrl,
+  getUrlHostname,
+  openExternalUrl,
+  splitTextAtFirstHttpUrl,
+} from '../../utils/ExternalLinks.js'
 import {
   ApproveChore,
   ArchiveChore,
@@ -150,6 +157,16 @@ const ChoreView = () => {
   const descriptionHtml = useDescriptionHtml(chore?.description || '', {
     choreId: chore?.id,
   })
+  const { after: titleAfterUrl, before: titleBeforeUrl } =
+    splitTextAtFirstHttpUrl(chore.name)
+  const displayName = `${titleBeforeUrl}${titleAfterUrl}`.trim()
+  const externalUrls = [
+    ...new Set(
+      [getFirstHttpUrl(chore.name), getFirstHttpUrl(chore.description)].filter(
+        Boolean,
+      ),
+    ),
+  ]
   const notesHtml = useDescriptionHtml(chore?.notes || '', {
     choreId: chore?.id,
   })
@@ -850,7 +867,7 @@ const ChoreView = () => {
             mb: 0.5,
           }}
         >
-          <Typography level='h3'>{chore.name}</Typography>
+          {displayName && <Typography level='h3'>{displayName}</Typography>}
           <PendingBadge commands={pendingCmds} />
         </Box>
         {chore.isActive === false && (
@@ -863,11 +880,44 @@ const ChoreView = () => {
             {t('choreView.archive')}
           </Chip>
         )}
-        <Chip startDecorator={<CalendarMonth />} size='md' sx={{ mb: 1 }}>
-          {chore.nextDueDate
-            ? `${t('choreView.due')} ${fmt.dateTime(chore.nextDueDate)}`
-            : t('choreView.na')}
-        </Chip>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            flexWrap: 'wrap',
+            gap: 0.5,
+            maxWidth: '100%',
+            mb: 1,
+          }}
+        >
+          <Chip startDecorator={<CalendarMonth />} size='md'>
+            {chore.nextDueDate
+              ? `${t('choreView.due')} ${fmt.dateTime(chore.nextDueDate)}`
+              : t('choreView.na')}
+          </Chip>
+          {externalUrls.map(url => (
+            <Chip
+              key={url}
+              startDecorator={<OpenInNew />}
+              size='md'
+              variant='soft'
+              color='primary'
+              onClick={() => openExternalUrl(url)}
+              title={url}
+              sx={{
+                cursor: 'pointer',
+                maxWidth: '100%',
+                '& .MuiChip-label': {
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                },
+              }}
+            >
+              {getUrlHostname(url)}
+            </Chip>
+          ))}
+        </Box>
         <Box
           sx={{
             display: 'flex',
