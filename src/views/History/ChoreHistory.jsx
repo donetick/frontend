@@ -52,6 +52,7 @@ import { useParams } from 'react-router-dom'
 
 import EmptyState from '../../components/common/EmptyState'
 import FilterBar from '../../components/common/FilterBar'
+import PermissionDeniedModal from '../../components/common/PermissionDeniedModal'
 import SortAndFilterMenu from '../../components/common/SortAndFilterMenu'
 import SwipeListItem, {
   SWIPE_COMMIT_THRESHOLD,
@@ -62,12 +63,17 @@ import useConfirmationModal from '../../hooks/useConfirmationModal'
 import { useFilter } from '../../hooks/useFilter'
 import { usePendingCommands } from '../../hooks/usePendingCommands'
 import {
+  useChore,
   useChoreHistory,
   useDeleteChoreHistory,
   useUpdateChoreHistory,
 } from '../../queries/ChoreQueries'
-import { useCircleMembers } from '../../queries/UserQueries'
+import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
+import {
+  canDeleteChoreHistory,
+  canEditChoreHistory,
+} from '../../utils/ChoreAccess'
 import { ChoreHistoryStatus } from '../../utils/Chores'
 import {
   FREE_HISTORY_DAYS,
@@ -95,6 +101,13 @@ const ChoreHistory = () => {
   // a paying subscriber is worse than briefly showing a free user everything.
   const applyHistoryWindow = isPlanKnown && !isPlus
   const [showMoreInfoId, setShowMoreInfoId] = useState(null)
+  const [permissionDeniedAction, setPermissionDeniedAction] = useState(null)
+  const permissionDeniedContext =
+    {
+      edit: 'history',
+      delete: 'historyDelete',
+      manage: 'historyManage',
+    }[permissionDeniedAction] || 'historyManage'
   const [noteViewerConfig, setNoteViewerConfig] = useState({ isOpen: false })
   const [detailModalConfig, setDetailModalConfig] = useState({ isOpen: false })
   const { showError, showSuccess } = useNotification()
@@ -115,7 +128,10 @@ const ChoreHistory = () => {
 
   // React Query hooks
   const { data: choreHistoryData, isLoading } = useChoreHistory(choreId)
-  const { data: circleMembersData } = useCircleMembers()
+  const { data: choreData, isLoading: isChoreLoading } = useChore(choreId)
+  const { data: userProfile, isLoading: isUserLoading } = useUserProfile()
+  const { data: circleMembersData, isLoading: isMembersLoading } =
+    useCircleMembers()
   const updateChoreHistory = useUpdateChoreHistory()
   const deleteChoreHistory = useDeleteChoreHistory()
   const { data: pendingCmds } = usePendingCommands(choreId)
@@ -315,7 +331,25 @@ const ChoreHistory = () => {
     searchInputRef.current?.blur()
   }
 
+  const canEditHistory = entry =>
+    canEditChoreHistory(
+      entry,
+      userProfile?.id,
+      performers,
+      userProfile?.circleID,
+    )
+  const canDeleteHistory = entry =>
+    canDeleteChoreHistory(choreData?.res, entry, userProfile?.id, performers)
+  const denyHistoryAction = action => {
+    setShowMoreInfoId(null)
+    setPermissionDeniedAction(action)
+  }
+
   const handleDelete = historyEntry => {
+    if (!canDeleteHistory(historyEntry)) {
+      denyHistoryAction('delete')
+      return
+    }
     showConfirmation(
       t('delete.message'),
       t('delete.title'),
@@ -332,6 +366,10 @@ const ChoreHistory = () => {
   }
 
   const handleEdit = historyEntry => {
+    if (!canEditHistory(historyEntry)) {
+      denyHistoryAction('edit')
+      return
+    }
     setIsEditModalOpen(true)
     setEditHistory(historyEntry)
   }
@@ -430,7 +468,7 @@ const ChoreHistory = () => {
     setHistoryInfo(historyInfo)
   }
 
-  if (isLoading) {
+  if (isLoading || isChoreLoading || isUserLoading || isMembersLoading) {
     return <LoadingComponent />
   }
   // All of this task's history predates the plan's window. Saying "no history"
@@ -673,64 +711,79 @@ const ChoreHistory = () => {
                     : null
                 }
                 trailingActions={
-                  <TrailingActions>
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        boxShadow: 'inset 2px 0 4px rgba(0,0,0,0.06)',
-                        zIndex: 0,
-                      }}
-                    >
-                      <SwipeAction onClick={() => handleEdit(historyEntry)}>
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            bgcolor: 'primary.500',
-                            color: '#fff',
-                            px: 3,
-                            height: '100%',
-                            width: '100%',
-                          }}
-                        >
-                          <EditIcon sx={{ fontSize: 20, color: 'white' }} />
-                          <Typography
-                            level='body-xs'
-                            sx={{ mt: 0.5, color: 'inherit' }}
+                  canEditHistory(historyEntry) ||
+                  canDeleteHistory(historyEntry) ? (
+                    <TrailingActions>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          boxShadow: 'inset 2px 0 4px rgba(0,0,0,0.06)',
+                          zIndex: 0,
+                        }}
+                      >
+                        {canEditHistory(historyEntry) && (
+                          <SwipeAction onClick={() => handleEdit(historyEntry)}>
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                bgcolor: 'primary.500',
+                                color: '#fff',
+                                px: 3,
+                                height: '100%',
+                                width: '100%',
+                              }}
+                            >
+                              <EditIcon sx={{ fontSize: 20, color: 'white' }} />
+                              <Typography
+                                level='body-xs'
+                                sx={{ mt: 0.5, color: 'inherit' }}
+                              >
+                                {t('common:edit')}
+                              </Typography>
+                            </Box>
+                          </SwipeAction>
+                        )}
+                        {canDeleteHistory(historyEntry) && (
+                          <SwipeAction
+                            onClick={() => handleDelete(historyEntry)}
                           >
-                            {t('common:edit')}
-                          </Typography>
-                        </Box>
-                      </SwipeAction>
-                      <SwipeAction onClick={() => handleDelete(historyEntry)}>
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            bgcolor: 'danger.500',
-                            color: '#fff',
-                            px: 3,
-                            height: '100%',
-                          }}
-                        >
-                          <DeleteIcon sx={{ fontSize: 20, color: 'white' }} />
-                          <Typography
-                            level='body-xs'
-                            sx={{ mt: 0.5, color: 'inherit' }}
-                          >
-                            {t('common:delete')}
-                          </Typography>
-                        </Box>
-                      </SwipeAction>
-                    </Box>
-                  </TrailingActions>
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                bgcolor: 'danger.500',
+                                color: '#fff',
+                                px: 3,
+                                height: '100%',
+                              }}
+                            >
+                              <DeleteIcon
+                                sx={{ fontSize: 20, color: 'white' }}
+                              />
+                              <Typography
+                                level='body-xs'
+                                sx={{ mt: 0.5, color: 'inherit' }}
+                              >
+                                {t('common:delete')}
+                              </Typography>
+                            </Box>
+                          </SwipeAction>
+                        )}
+                      </Box>
+                    </TrailingActions>
+                  ) : null
                 }
               >
                 <HistoryCard
+                  canManage={
+                    canEditHistory(historyEntry) ||
+                    canDeleteHistory(historyEntry)
+                  }
                   historyEntry={historyEntry}
                   performers={performers}
                   allHistory={choreHistory}
@@ -743,8 +796,7 @@ const ChoreHistory = () => {
                       onClose: () => setDetailModalConfig({ isOpen: false }),
                       onEdit: record => {
                         setDetailModalConfig({ isOpen: false })
-                        setEditHistory(record)
-                        setIsEditModalOpen(true)
+                        handleEdit(record)
                       },
                     })
                   }}
@@ -760,6 +812,13 @@ const ChoreHistory = () => {
                     })
                   }}
                   onToggleActions={() => {
+                    if (
+                      !canEditHistory(historyEntry) &&
+                      !canDeleteHistory(historyEntry)
+                    ) {
+                      denyHistoryAction('manage')
+                      return
+                    }
                     const id = historyEntry.id || index
                     if (showMoreInfoId === id) {
                       setShowMoreInfoId(null)
@@ -806,6 +865,14 @@ const ChoreHistory = () => {
           </Card>
         </Box>
       )}
+      <PermissionDeniedModal
+        open={!!permissionDeniedAction}
+        onClose={() => setPermissionDeniedAction(null)}
+        title={t(`common:permissionDenied.${permissionDeniedContext}Title`)}
+        description={t(
+          `common:permissionDenied.${permissionDeniedContext}Description`,
+        )}
+      />
       <EditHistoryModal
         config={{
           isOpen: isEditModalOpen,

@@ -1014,7 +1014,9 @@
     "project": "Projekt",
     "filterFallback": "Filter",
     "notPrefix": "Nicht ",
-    "customDueDate": "Benutzerdefiniert",
+    "customDueDate": {
+      "label": "Benutzerdefiniert"
+    },
     "clear": "Zurücksetzen"
   },
   "empty": {

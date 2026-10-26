@@ -20,6 +20,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
+import { useUserProfile } from '../../../queries/UserQueries'
 import { getTextColorFromBackgroundColor } from '../../../utils/Colors'
 
 const CustomFilterChips = ({
@@ -32,6 +33,7 @@ const CustomFilterChips = ({
 }) => {
   const { t } = useTranslation('chores')
   const navigate = useNavigate()
+  const { data: userProfile } = useUserProfile()
   const [menuAnchor, setMenuAnchor] = useState(null)
   const [selectedFilter, setSelectedFilter] = useState(null)
 
@@ -165,23 +167,28 @@ const CustomFilterChips = ({
                   )
                 }
                 endDecorator={
-                  <IconButton
-                    size='sm'
-                    variant='plain'
-                    color='neutral'
-                    onClick={e => {
-                      e.stopPropagation()
-                      handleContextMenu(e, filter)
-                    }}
-                    sx={{
-                      '--IconButton-size': '20px',
-                      ml: 0.25,
-                      opacity: 0.6,
-                      '&:hover': { opacity: 1, backgroundColor: 'transparent' },
-                    }}
-                  >
-                    <MoreVert sx={{ fontSize: '0.95rem' }} />
-                  </IconButton>
+                  filter.createdBy === userProfile?.id ? (
+                    <IconButton
+                      size='sm'
+                      variant='plain'
+                      color='neutral'
+                      onClick={e => {
+                        e.stopPropagation()
+                        handleContextMenu(e, filter)
+                      }}
+                      sx={{
+                        '--IconButton-size': '20px',
+                        ml: 0.25,
+                        opacity: 0.6,
+                        '&:hover': {
+                          opacity: 1,
+                          backgroundColor: 'transparent',
+                        },
+                      }}
+                    >
+                      <MoreVert sx={{ fontSize: '0.95rem' }} />
+                    </IconButton>
+                  ) : null
                 }
               >
                 <Typography
@@ -237,7 +244,7 @@ const CustomFilterChips = ({
         onClose={handleMenuClose}
         placement='bottom-start'
       >
-        {selectedFilter && (
+        {selectedFilter && selectedFilter.createdBy === userProfile?.id && (
           <>
             <MenuItem onClick={handlePin}>
               {selectedFilter.isPinned ? (

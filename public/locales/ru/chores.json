@@ -1014,7 +1014,9 @@
     "project": "Проект",
     "filterFallback": "Фильтр",
     "notPrefix": "Не ",
-    "customDueDate": "Пользовательский",
+    "customDueDate": {
+      "label": "Пользовательский"
+    },
     "clear": "Очистить"
   },
   "empty": {

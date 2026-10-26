@@ -1014,7 +1014,9 @@
     "project": "Proyecto",
     "filterFallback": "Filtro",
     "notPrefix": "No ",
-    "customDueDate": "Personalizada",
+    "customDueDate": {
+      "label": "Personalizada"
+    },
     "clear": "Limpiar"
   },
   "empty": {

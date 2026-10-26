@@ -1,4 +1,13 @@
-import { FormatListBulleted, ViewKanban } from '@mui/icons-material'
+import {
+  CalendarMonth,
+  Check,
+  DescriptionOutlined,
+  FormatListBulleted,
+  PaletteOutlined,
+  ViewAgenda,
+  ViewComfy,
+  ViewKanban,
+} from '@mui/icons-material'
 import {
   Avatar,
   Box,
@@ -27,6 +36,7 @@ import {
   sameMemberSet,
 } from '../../../utils/ProjectAccess'
 import PROJECT_ICONS, { getIconComponent } from '../../../utils/ProjectIcons'
+import EditorSection from '../../ChoreEdit/EditorSection'
 import ProjectAccessReview, {
   hasAccessImpact,
 } from '../../Projects/ProjectAccessReview'
@@ -38,6 +48,18 @@ import {
 import ProjectVisibilityField from '../../Projects/ProjectVisibilityField'
 import IconPickerModal from './IconPickerModal'
 
+const PROJECT_VIEW_OPTIONS = [
+  { value: 'default', labelKey: 'chores:toolbar.cards', icon: ViewAgenda },
+  { value: 'compact', labelKey: 'chores:toolbar.compact', icon: ViewComfy },
+  {
+    value: 'calendar',
+    labelKey: 'chores:toolbar.calendar',
+    icon: CalendarMonth,
+  },
+  { value: 'list', labelKey: 'chores:toolbar.list', icon: FormatListBulleted },
+  { value: 'board', labelKey: 'chores:toolbar.board', icon: ViewKanban },
+]
+
 const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
   const { t } = useTranslation('projects')
   const { ResponsiveModal } = useResponsiveModal()
@@ -47,7 +69,7 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
   const [projectIcon, setProjectIcon] = useState(PROJECT_ICONS[0].value)
   const [visibility, setVisibility] = useState(PROJECT_VISIBILITY.CIRCLE)
   const [memberIds, setMemberIds] = useState([])
-  // Private per-user layout preference for this project (board or list).
+  // Private per-user layout preference for this project.
   const [view, setView] = useState('board')
   // Server preview of an access change, shown for confirmation before saving.
   const [accessPreview, setAccessPreview] = useState(null)
@@ -224,6 +246,10 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
     updateProjectMutation.isPending ||
     isPreviewing
 
+  const selectedViewOption =
+    PROJECT_VIEW_OPTIONS.find(option => option.value === view) ??
+    PROJECT_VIEW_OPTIONS[4]
+
   const handleIconSelect = iconValue => {
     setProjectIcon(iconValue)
     setIsIconPickerOpen(false)
@@ -286,127 +312,187 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
               placeholder={t('modal.namePlaceholder')}
               autoFocus
               disabled={isSubmitting}
+              sx={{ minHeight: 48, borderRadius: 'md', fontSize: 'lg' }}
             />
           </FormControl>
 
-          {/* Project Description */}
-          <FormControl>
-            <FormLabel>{t('modal.descriptionLabel')}</FormLabel>
-            <Textarea
-              value={projectDescription}
-              onChange={e => setProjectDescription(e.target.value)}
-              placeholder={t('modal.descriptionPlaceholder')}
-              minRows={2}
-              maxRows={4}
-              disabled={isSubmitting}
-            />
-          </FormControl>
-
-          {/* Icon Selection */}
-          <FormControl>
-            <FormLabel>{t('modal.iconLabel')}</FormLabel>
-            <Button
-              variant='outlined'
-              onClick={() => setIsIconPickerOpen(true)}
-              startDecorator={
-                <Avatar
-                  size='sm'
-                  sx={{
-                    width: 24,
-                    height: 24,
-                    bgcolor: projectColor,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    '& svg': {
-                      display: 'block',
-                      margin: '0 auto',
-                    },
-                  }}
-                >
-                  {(() => {
-                    const IconComponent = getIconComponent(projectIcon)
-                    return (
-                      <IconComponent
-                        sx={{
-                          fontSize: 14,
-                          color: getTextColorFromBackgroundColor(projectColor),
-                          display: 'block',
-                        }}
-                      />
-                    )
-                  })()}
-                </Avatar>
-              }
-              sx={{ justifyContent: 'flex-start' }}
+          <Box
+            sx={{
+              border: '1px solid',
+              borderColor: 'divider',
+              borderRadius: 'lg',
+              overflow: 'hidden',
+            }}
+          >
+            <EditorSection
+              title={t('modal.descriptionLabel')}
+              icon={DescriptionOutlined}
+              section='project-description'
+              collapsible
+              summary={projectDescription}
             >
-              {PROJECT_ICONS.some(icon => icon.value === projectIcon)
-                ? t(`icons.${projectIcon}`)
-                : t('modal.selectIcon')}
-            </Button>
-          </FormControl>
-
-          {/* Color Selection */}
-          <FormControl>
-            <FormLabel>{t('modal.colorLabel')}</FormLabel>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-              {PROJECT_COLORS.map(colorOption => (
-                <Box
-                  key={colorOption.value}
-                  title={t(`common:colors.${colorOption.name}`)}
-                  onClick={() => setProjectColor(colorOption.value)}
-                  sx={{
-                    width: 26,
-                    height: 26,
-                    borderRadius: '50%',
-                    background: colorOption.value,
-                    cursor: 'pointer',
-                    outline:
-                      projectColor === colorOption.value
-                        ? '3px solid var(--joy-palette-primary-500)'
-                        : '2px solid transparent',
-                    outlineOffset: '2px',
-                    transition: 'all 0.15s ease',
-                    flexShrink: 0,
-                    '&:hover': { transform: 'scale(1.2)' },
-                  }}
+              {/* Project Description */}
+              <FormControl>
+                <Textarea
+                  aria-label={t('modal.descriptionLabel')}
+                  value={projectDescription}
+                  onChange={e => setProjectDescription(e.target.value)}
+                  placeholder={t('modal.descriptionPlaceholder')}
+                  minRows={2}
+                  maxRows={4}
+                  disabled={isSubmitting}
                 />
-              ))}
-            </Box>
-          </FormControl>
-
-          {/* Default view (board or list) */}
-          <FormControl>
-            <FormLabel>{t('modal.displayLabel')}</FormLabel>
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <Chip
-                variant={view === 'board' ? 'solid' : 'soft'}
-                color={view === 'board' ? 'primary' : 'neutral'}
-                startDecorator={<ViewKanban sx={{ fontSize: 16 }} />}
-                onClick={() => setView('board')}
-                disabled={isSubmitting}
-                sx={{ py: 0.64, cursor: 'pointer', userSelect: 'none' }}
-              >
-                {t('modal.displayBoard')}
-              </Chip>
-              <Chip
-                variant={view === 'list' ? 'solid' : 'soft'}
-                color={view === 'list' ? 'primary' : 'neutral'}
-                startDecorator={<FormatListBulleted sx={{ fontSize: 16 }} />}
-                onClick={() => setView('list')}
-                disabled={isSubmitting}
-                sx={{ py: 0.64, cursor: 'pointer', userSelect: 'none' }}
-              >
-                {t('modal.displayList')}
-              </Chip>
-            </Box>
-            <Typography
-              level='body-xs'
-              sx={{ color: 'text.tertiary', mt: 0.5 }}
+              </FormControl>
+            </EditorSection>
+            <EditorSection
+              title={`${t('modal.iconLabel')} & ${t('modal.colorLabel')}`}
+              icon={PaletteOutlined}
+              section='project-appearance'
+              collapsible
+              summary={t(
+                `common:colors.${PROJECT_COLORS.find(option => option.value === projectColor)?.name ?? PROJECT_COLORS[0].name}`,
+              )}
             >
-              {t('modal.displayHint')}
-            </Typography>
-          </FormControl>
+              <Stack spacing={2}>
+                {/* Icon Selection */}
+                <FormControl>
+                  <FormLabel>{t('modal.iconLabel')}</FormLabel>
+                  <Button
+                    variant='outlined'
+                    onClick={() => setIsIconPickerOpen(true)}
+                    disabled={isSubmitting}
+                    startDecorator={
+                      <Avatar
+                        size='sm'
+                        sx={{
+                          width: 24,
+                          height: 24,
+                          bgcolor: projectColor,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          '& svg': {
+                            display: 'block',
+                            margin: '0 auto',
+                          },
+                        }}
+                      >
+                        {(() => {
+                          const IconComponent = getIconComponent(projectIcon)
+                          return (
+                            <IconComponent
+                              sx={{
+                                fontSize: 14,
+                                color:
+                                  getTextColorFromBackgroundColor(projectColor),
+                                display: 'block',
+                              }}
+                            />
+                          )
+                        })()}
+                      </Avatar>
+                    }
+                    sx={{ justifyContent: 'flex-start' }}
+                  >
+                    {PROJECT_ICONS.some(icon => icon.value === projectIcon)
+                      ? t(`icons.${projectIcon}`)
+                      : t('modal.selectIcon')}
+                  </Button>
+                </FormControl>
+
+                {/* Color Selection */}
+                <FormControl>
+                  <FormLabel>{t('modal.colorLabel')}</FormLabel>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                    {PROJECT_COLORS.map(colorOption => (
+                      <Box
+                        component='button'
+                        type='button'
+                        disabled={isSubmitting}
+                        aria-label={t(`common:colors.${colorOption.name}`)}
+                        aria-pressed={projectColor === colorOption.value}
+                        key={colorOption.value}
+                        title={t(`common:colors.${colorOption.name}`)}
+                        onClick={() => setProjectColor(colorOption.value)}
+                        sx={{
+                          width: 36,
+                          height: 36,
+                          border: 0,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          '&:focus-visible': {
+                            outline: '3px solid',
+                            outlineColor: 'text.primary',
+                          },
+                          '&:disabled': { opacity: 0.5, cursor: 'default' },
+                          borderRadius: '50%',
+                          background: colorOption.value,
+                          cursor: 'pointer',
+                          outline:
+                            projectColor === colorOption.value
+                              ? '3px solid var(--joy-palette-primary-500)'
+                              : '2px solid transparent',
+                          outlineOffset: '2px',
+                          transition: 'all 0.15s ease',
+                          flexShrink: 0,
+                          '&:hover': { transform: 'scale(1.2)' },
+                        }}
+                      >
+                        {projectColor === colorOption.value && (
+                          <Check
+                            sx={{
+                              fontSize: 20,
+                              color: 'white',
+                              filter: 'drop-shadow(0 1px 2px #000)',
+                            }}
+                          />
+                        )}
+                      </Box>
+                    ))}
+                  </Box>
+                </FormControl>
+              </Stack>
+            </EditorSection>
+            <EditorSection
+              title={t('modal.displayLabel')}
+              icon={selectedViewOption.icon}
+              section='project-display'
+              collapsible
+              summary={t(selectedViewOption.labelKey)}
+              sx={{ borderBottom: 0 }}
+            >
+              {/* Default view uses the same layouts as the task toolbar. */}
+              <FormControl>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                  {PROJECT_VIEW_OPTIONS.map(
+                    ({ icon: Icon, labelKey, value }) => (
+                      <Chip
+                        key={value}
+                        variant={view === value ? 'solid' : 'soft'}
+                        color={view === value ? 'primary' : 'neutral'}
+                        startDecorator={<Icon sx={{ fontSize: 16 }} />}
+                        onClick={() => setView(value)}
+                        disabled={isSubmitting}
+                        slotProps={{
+                          action: { 'aria-pressed': view === value },
+                        }}
+                        sx={{ py: 0.64, cursor: 'pointer', userSelect: 'none' }}
+                      >
+                        {t(labelKey)}
+                      </Chip>
+                    ),
+                  )}
+                </Box>
+                <Typography
+                  level='body-xs'
+                  sx={{ color: 'text.tertiary', mt: 0.5 }}
+                >
+                  {t('modal.displayHint')}
+                </Typography>
+              </FormControl>
+            </EditorSection>
+          </Box>
 
           {/* Who can see the project and its tasks */}
           {canChangeAccess ? (

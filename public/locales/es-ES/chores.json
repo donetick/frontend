@@ -604,7 +604,9 @@
     "assignee": "Persona asignada",
     "clear": "Limpiar",
     "createdBy": "Creada por",
-    "customDueDate": "Personalizada",
+    "customDueDate": {
+      "label": "Personalizada"
+    },
     "defaultProject": "Proyecto por defecto",
     "doesntHave": "No tiene",
     "dueDate": "Fecha de vencimiento",
