@@ -39,11 +39,8 @@ const metadataSx = {
 // live in the card rather than taking a permanent rail beside its content.
 const ProjectBoardCard = memo(function ProjectBoardCard({
   chore,
-  dragHandle,
   isMultiSelectMode,
   isSelected,
-  onAction,
-  onChipClick,
   onOpenActionMenu,
   onSelectionToggle,
   performers = [],
@@ -59,7 +56,6 @@ const ProjectBoardCard = memo(function ProjectBoardCard({
   const links = [
     ...new Set([url, getFirstHttpUrl(chore.description)].filter(Boolean)),
   ]
-  const labels = chore.labelsV2 || []
   const subtasks = chore.subTasks || []
   const recurrent =
     chore.frequencyType && !['once', 'no_repeat'].includes(chore.frequencyType)
@@ -68,18 +64,21 @@ const ProjectBoardCard = memo(function ProjectBoardCard({
   return (
     <Box sx={{ p: 0.75, minWidth: 0 }}>
       <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.25 }}>
-        <Box onClick={event => event.stopPropagation()} sx={{ flexShrink: 0 }}>
-          <ProjectTaskAction
-            chore={chore}
-            isMultiSelectMode={isMultiSelectMode}
-            isSelected={isSelected}
-            onAction={onAction}
-            onSelectionToggle={onSelectionToggle}
-          />
-        </Box>
+        {isMultiSelectMode && (
+          <Box
+            onClick={event => event.stopPropagation()}
+            sx={{ flexShrink: 0 }}
+          >
+            <ProjectTaskAction
+              chore={chore}
+              isMultiSelectMode
+              isSelected={isSelected}
+              onSelectionToggle={onSelectionToggle}
+            />
+          </Box>
+        )}
         <Typography
-          component='button'
-          type='button'
+          component='span'
           title={chore.name}
           level='title-sm'
           sx={{
@@ -95,9 +94,9 @@ const ProjectBoardCard = memo(function ProjectBoardCard({
             minHeight: 44,
             lineHeight: 1.5,
             py: 1.25,
-            px: 0.25,
+            px: 1,
             overflowWrap: 'anywhere',
-            cursor: 'pointer',
+            cursor: 'inherit',
             borderRadius: 'sm',
             '&:focus-visible': {
               outline: '2px solid',
@@ -130,72 +129,6 @@ const ProjectBoardCard = memo(function ProjectBoardCard({
         )}
       </Box>
 
-      {labels.length > 0 && (
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 0.75,
-            px: 1,
-            pb: 0.5,
-            minWidth: 0,
-          }}
-        >
-          {labels.slice(0, 1).map(label => (
-            <Box
-              key={label.id}
-              component='button'
-              type='button'
-              title={label.name}
-              onClick={event => {
-                event.stopPropagation()
-                onChipClick?.({ label })
-              }}
-              sx={{
-                ...metadataSx,
-                maxWidth: '80%',
-                minHeight: 44,
-                px: 0,
-                py: 0,
-                border: 0,
-                borderRadius: 'sm',
-                bgcolor: 'transparent',
-                fontFamily: 'inherit',
-                cursor: 'pointer',
-                '&:hover': { bgcolor: 'background.level1' },
-              }}
-            >
-              <Typography
-                level='body-xs'
-                noWrap
-                sx={{
-                  color: 'inherit',
-                  border: '1px solid',
-                  borderColor: 'divider',
-                  borderRadius: 'sm',
-                  px: 0.75,
-                  py: 0.25,
-                }}
-              >
-                {label.name}
-              </Typography>
-            </Box>
-          ))}
-          {labels.length > 1 && (
-            <Typography
-              level='body-xs'
-              title={labels
-                .slice(1)
-                .map(label => label.name)
-                .join(', ')}
-              sx={{ color: 'text.tertiary' }}
-            >
-              +{labels.length - 1}
-            </Typography>
-          )}
-        </Box>
-      )}
-
       <Box
         sx={{
           display: 'flex',
@@ -216,6 +149,25 @@ const ProjectBoardCard = memo(function ProjectBoardCard({
             py: 0.5,
           }}
         >
+          {chore.status > 0 && (
+            <Typography
+              level='body-xs'
+              sx={{
+                color:
+                  chore.status === 3
+                    ? 'primary.plainColor'
+                    : 'warning.plainColor',
+              }}
+            >
+              {t(
+                chore.status === 3
+                  ? 'choreView.pendingApproval'
+                  : chore.status === 1
+                    ? 'choreView.timer.active'
+                    : 'choreView.timer.paused',
+              )}
+            </Typography>
+          )}
           {chore.nextDueDate && (
             <Typography
               component='time'
@@ -284,7 +236,6 @@ const ProjectBoardCard = memo(function ProjectBoardCard({
                 <OpenInNew sx={{ fontSize: 15 }} />
               </IconButton>
             ))}
-          {dragHandle}
         </Box>
       </Box>
     </Box>

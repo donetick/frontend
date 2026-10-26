@@ -70,6 +70,7 @@ import {
   useProjectSections,
   useRenameSection,
 } from '../ProjectQueries'
+import { boardCardInteractions } from './boardCardInteractions'
 import { boardCollisionDetection } from './boardCollisionDetection'
 import { applyTaskOrder, getTaskDropOrder } from './boardTaskOrdering'
 import ProjectBoardCard from './ProjectBoardCard'
@@ -86,8 +87,8 @@ const taskMutationId = id => (String(id).startsWith('temp_') ? id : Number(id))
 const interactiveControlSelector =
   'button, input, textarea, select, a, [role="button"], [role="checkbox"], [role="menuitem"], [contenteditable="true"]'
 
-// Only this control starts a drag. The rest of the card remains scrollable
-// and can use press-and-hold for selection without competing with DnD.
+// List rows and section headers use explicit handles. Board cards instead
+// use their whole non-interactive surface as the drag activator.
 const DragHandle = memo(function DragHandle({
   attributes,
   className,
@@ -248,7 +249,10 @@ const TaskCard = memo(function TaskCard({
   const navigate = useNavigate()
   const { cancel: cancelLongPress, handlers: longPressHandlers } = useLongPress(
     () => onLongPress?.(chore.id),
-    { enabled: Boolean(onLongPress) && !isMultiSelectMode },
+    {
+      enabled:
+        displayMode === 'list' && Boolean(onLongPress) && !isMultiSelectMode,
+    },
   )
   const showSubtasks =
     displayMode === 'list' && subtasks.length > 0 && !isMultiSelectMode
@@ -281,9 +285,30 @@ const TaskCard = memo(function TaskCard({
 
   return (
     <Sheet
-      {...longPressHandlers}
+      {...(displayMode === 'list'
+        ? longPressHandlers
+        : {
+            ...(!isMultiSelectMode && !isOverlay ? dragAttributes : {}),
+            ...boardCardInteractions({
+              isDragging,
+              isMultiSelectMode,
+              listeners: isOverlay ? undefined : dragListeners,
+              onOpen: () => navigate(`/chores/${chore.id}`),
+              onSelectionToggle,
+            }),
+            ref:
+              isMultiSelectMode || isOverlay ? undefined : setActivatorNodeRef,
+            role: 'button',
+            tabIndex: isOverlay ? -1 : 0,
+            'aria-label': chore.name,
+            'aria-pressed': isMultiSelectMode ? Boolean(isSelected) : undefined,
+          })}
       onPointerDown={event => {
-        if (event.target.closest(interactiveControlSelector)) return
+        if (
+          displayMode !== 'list' ||
+          event.target.closest(interactiveControlSelector)
+        )
+          return
         longPressHandlers.onPointerDown(event)
       }}
       aria-hidden={isOverlay || undefined}
@@ -294,10 +319,12 @@ const TaskCard = memo(function TaskCard({
       }
       data-dragging={isDragging || undefined}
       variant={displayMode === 'list' ? 'plain' : 'outlined'}
-      onClick={() => {
-        if (isMultiSelectMode) onSelectionToggle()
-        else navigate(`/chores/${chore.id}`)
-      }}
+      {...(displayMode === 'list' && {
+        onClick: () => {
+          if (isMultiSelectMode) onSelectionToggle()
+          else navigate(`/chores/${chore.id}`)
+        },
+      })}
       sx={{
         borderRadius: displayMode === 'list' ? 0 : 'md',
         ...(displayMode !== 'list' && {
@@ -322,7 +349,13 @@ const TaskCard = memo(function TaskCard({
         opacity: isDragging && !isOverlay ? 0 : 1,
         pointerEvents: isOverlay ? 'none' : undefined,
         touchAction: 'auto',
-        cursor: 'pointer',
+        cursor:
+          displayMode === 'list' || isMultiSelectMode
+            ? 'pointer'
+            : isDragging
+              ? 'grabbing'
+              : 'grab',
+        ...(displayMode !== 'list' && { userSelect: 'none' }),
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'stretch' }}>
@@ -360,19 +393,6 @@ const TaskCard = memo(function TaskCard({
             onOpenActionMenu={isOverlay ? ignoreActionMenu : onOpenActionMenu}
             sections={sections}
             showDivider={false}
-            dragHandle={
-              displayMode !== 'list' && !isMultiSelectMode ? (
-                <DragHandle
-                  className='project-task-secondary-action'
-                  attributes={dragAttributes}
-                  listeners={dragListeners}
-                  label={`${t('board.dragTask')}: ${chore.name}`}
-                  setActivatorNodeRef={setActivatorNodeRef}
-                  isDragging={isDragging}
-                  isOverlay={isOverlay}
-                />
-              ) : null
-            }
           />
         </Box>
         {displayMode === 'list' && !isMultiSelectMode && (
@@ -792,9 +812,10 @@ const ProjectBoard = ({
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
     useSensor(TouchSensor, {
-      activationConstraint: { delay: 180, tolerance: 6 },
+      activationConstraint: { delay: 250, tolerance: 6 },
     }),
     useSensor(KeyboardSensor, {
+      keyboardCodes: { start: ['Space'], cancel: ['Escape'], end: ['Space'] },
       coordinateGetter: sortableKeyboardCoordinates,
     }),
   )
