@@ -291,7 +291,7 @@ const ChoreToolbar = ({
       const describeDueDate = op =>
         DUE_DATE_OPTIONS.some(o => o.value === op)
           ? t(`filterBuilder.dueDateOption.${op}`)
-          : t('filterBuilder.customDueDate')
+          : t('filterBuilder.customDueDate.label')
       const dueDateLabel =
         condition.operator === 'anyOf'
           ? (Array.isArray(condition.value) ? condition.value : [])
