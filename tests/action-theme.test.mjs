@@ -26,11 +26,22 @@ test('task detail actions use the theme accent rather than success green', () =>
   )
 })
 
-test('card and bulk action accents change without removing semantic status colors', () => {
+test('cards preserve default green completion actions and custom theme accents', () => {
   for (const file of ['ChoreCard', 'CompactChoreCard']) {
     const card = source(`views/Chores/${file}.jsx`)
-    assert.match(card, /color=\{chore.status === 0 \? 'primary' : 'warning'\}/)
-    assert.match(card, /color='primary'[\s\S]*?onAction\('approve', chore\)/)
+    assert.match(card, /const \{ skin \} = useThemeSkin\(\)/)
+    assert.match(
+      card,
+      /const completionColor = skin === 'default' \? 'success' : 'primary'/,
+    )
+    assert.match(
+      card,
+      /color=\{chore.status === 0 \? completionColor : 'warning'\}/,
+    )
+    assert.match(
+      card,
+      /color=\{completionColor\}[\s\S]*?onAction\('approve', chore\)/,
+    )
   }
   assert.match(
     source('views/Chores/ChoreCard.jsx'),

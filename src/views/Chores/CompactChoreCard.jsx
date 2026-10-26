@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next'
 
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useLocalization } from '../../contexts/LocalizationContext'
+import { useThemeSkin } from '../../contexts/ThemeSkinContext'
 import { usePendingCommands } from '../../hooks/usePendingCommands'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
 import {
@@ -76,6 +77,8 @@ const CompactChoreCard = ({
   viewOnly,
 }) => {
   const { t } = useTranslation('chores')
+  const { skin } = useThemeSkin()
+  const completionColor = skin === 'default' ? 'success' : 'primary'
 
   const { data: userProfile } = useUserProfile()
   const { timeFormat } = useLocalization()
@@ -260,7 +263,7 @@ const CompactChoreCard = ({
                 <Box sx={{ display: 'flex', gap: 0.25 }}>
                   <IconButton
                     variant='soft'
-                    color='primary'
+                    color={completionColor}
                     size='sm'
                     onClick={e => {
                       e.stopPropagation()
@@ -324,7 +327,7 @@ const CompactChoreCard = ({
             ) : (
               <IconButton
                 variant='soft'
-                color={chore.status === 0 ? 'primary' : 'warning'}
+                color={chore.status === 0 ? completionColor : 'warning'}
                 size='sm'
                 onClick={e => {
                   e.stopPropagation()

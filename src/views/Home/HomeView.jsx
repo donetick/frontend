@@ -12,7 +12,10 @@ import { useImpersonateUser } from '../../contexts/ImpersonateUserContext'
 import { useChores } from '../../queries/ChoreQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { ChoreSorter } from '../../utils/Chores'
-import { getHomeSectionsConfig } from '../../utils/HomeSectionsConfig'
+import {
+  getHomeSectionsConfig,
+  getHomeTaskScope,
+} from '../../utils/HomeSectionsConfig'
 import { getSafeBottomPadding } from '../../utils/SafeAreaUtils'
 import ChoreModals from '../Chores/components/ChoreModals'
 import { useChoreActions } from '../Chores/hooks/useChoreActions'
@@ -111,6 +114,8 @@ const HomeView = () => {
     setChores([...choresData.res].sort(ChoreSorter))
   }, [choresData?.res])
 
+  const [taskScope, setTaskScope] = useState(getHomeTaskScope)
+
   const {
     circle,
     dueToday,
@@ -128,13 +133,19 @@ const HomeView = () => {
     upcoming,
     userProfile,
     verdict,
-  } = useHomeSummary(chores)
+  } = useHomeSummary(chores, {
+    scope: taskScope,
+    userId: impersonatedUser?.userId,
+  })
 
   // Reread on every mount and whenever the settings page saves a change, so
   // Home reflects a reorder/hide without needing a full app reload.
   const [sectionsConfig, setSectionsConfig] = useState(getHomeSectionsConfig)
   useEffect(() => {
-    const onConfigChanged = () => setSectionsConfig(getHomeSectionsConfig())
+    const onConfigChanged = () => {
+      setSectionsConfig(getHomeSectionsConfig())
+      setTaskScope(getHomeTaskScope())
+    }
     window.addEventListener('homeSectionsConfigChanged', onConfigChanged)
     return () =>
       window.removeEventListener('homeSectionsConfigChanged', onConfigChanged)
