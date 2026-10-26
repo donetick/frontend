@@ -156,6 +156,13 @@ const FilterCardContent = ({
             flexWrap: 'wrap',
           }}
         >
+          <Chip size='sm' variant='soft'>
+            {t(
+              filter.isShared
+                ? 'common:itemPrivacy.shared'
+                : 'common:itemPrivacy.private',
+            )}
+          </Chip>
           {filter.description && (
             <Typography
               level='body-xs'
@@ -626,106 +633,108 @@ const FilterView = () => {
                   }
                   key={filter.id}
                   trailingActions={
-                    <TrailingActions>
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          boxShadow: 'inset 2px 0 4px rgba(0,0,0,0.06)',
-                          zIndex: 0,
-                        }}
-                      >
-                        <SwipeAction onClick={() => handlePinFilter(filter.id)}>
-                          <Box
-                            sx={{
-                              display: 'flex',
-                              flexDirection: 'column',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              bgcolor: 'warning.500',
-                              color: '#fff',
-                              px: 3,
-                              height: '100%',
-                            }}
+                    filter.createdBy === userProfile?.id ? (
+                      <TrailingActions>
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            boxShadow: 'inset 2px 0 4px rgba(0,0,0,0.06)',
+                            zIndex: 0,
+                          }}
+                        >
+                          <SwipeAction
+                            onClick={() => handlePinFilter(filter.id)}
                           >
-                            {filter.isPinned ? (
-                              <Star sx={{ fontSize: 20, color: 'white' }} />
-                            ) : (
-                              <StarBorder
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                bgcolor: 'warning.500',
+                                color: '#fff',
+                                px: 3,
+                                height: '100%',
+                              }}
+                            >
+                              {filter.isPinned ? (
+                                <Star sx={{ fontSize: 20, color: 'white' }} />
+                              ) : (
+                                <StarBorder
+                                  sx={{ fontSize: 20, color: 'white' }}
+                                />
+                              )}
+                              <Typography
+                                level='body-xs'
+                                sx={{ mt: 0.5, color: 'inherit' }}
+                              >
+                                {filter.isPinned ? t('unpin') : t('pin')}
+                              </Typography>
+                            </Box>
+                          </SwipeAction>
+                          <SwipeAction onClick={() => handleEditFilter(filter)}>
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                bgcolor: 'primary.500',
+                                color: '#fff',
+                                px: 3,
+                                height: '100%',
+                              }}
+                            >
+                              <EditIcon sx={{ fontSize: 20, color: 'white' }} />
+                              <Typography
+                                level='body-xs'
+                                sx={{ mt: 0.5, color: 'inherit' }}
+                              >
+                                {t('common:edit')}
+                              </Typography>
+                            </Box>
+                          </SwipeAction>
+                          <SwipeAction
+                            onClick={() => handleDeleteClicked(filter.id)}
+                          >
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                bgcolor: 'danger.500',
+                                color: '#fff',
+                                px: 3,
+                                height: '100%',
+                              }}
+                            >
+                              <DeleteIcon
                                 sx={{ fontSize: 20, color: 'white' }}
                               />
-                            )}
-                            <Typography
-                              level='body-xs'
-                              sx={{ mt: 0.5, color: 'inherit' }}
-                            >
-                              {filter.isPinned ? t('unpin') : t('pin')}
-                            </Typography>
-                          </Box>
-                        </SwipeAction>
-                        <SwipeAction onClick={() => handleEditFilter(filter)}>
-                          <Box
-                            sx={{
-                              display: 'flex',
-                              flexDirection: 'column',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              bgcolor: 'primary.500',
-                              color: '#fff',
-                              px: 3,
-                              height: '100%',
-                            }}
-                          >
-                            <EditIcon sx={{ fontSize: 20, color: 'white' }} />
-                            <Typography
-                              level='body-xs'
-                              sx={{ mt: 0.5, color: 'inherit' }}
-                            >
-                              {t('common:edit')}
-                            </Typography>
-                          </Box>
-                        </SwipeAction>
-                        <SwipeAction
-                          onClick={() => handleDeleteClicked(filter.id)}
-                        >
-                          <Box
-                            sx={{
-                              display: 'flex',
-                              flexDirection: 'column',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              bgcolor: 'danger.500',
-                              color: '#fff',
-                              px: 3,
-                              height: '100%',
-                            }}
-                          >
-                            <DeleteIcon sx={{ fontSize: 20, color: 'white' }} />
-                            <Typography
-                              level='body-xs'
-                              sx={{ mt: 0.5, color: 'inherit' }}
-                            >
-                              {t('common:delete')}
-                            </Typography>
-                          </Box>
-                        </SwipeAction>
-                      </Box>
-                    </TrailingActions>
+                              <Typography
+                                level='body-xs'
+                                sx={{ mt: 0.5, color: 'inherit' }}
+                              >
+                                {t('common:delete')}
+                              </Typography>
+                            </Box>
+                          </SwipeAction>
+                        </Box>
+                      </TrailingActions>
+                    ) : null
                   }
                 >
                   <FilterCardContent
-                    onToggleActions={() => {
-                      console.log(
-                        'Toggling actions for filter:',
-                        filter.id,
-                        showMoreInfoId,
-                      )
-
-                      if (showMoreInfoId === filter.id) {
-                        setShowMoreInfoId(null)
-                      } else {
-                        setShowMoreInfoId(filter.id)
-                      }
-                    }}
+                    onToggleActions={
+                      filter.createdBy === userProfile?.id
+                        ? () => {
+                            setShowMoreInfoId(
+                              showMoreInfoId === filter.id ? null : filter.id,
+                            )
+                          }
+                        : undefined
+                    }
                     filter={filter}
                     taskCount={filterCounts[filter.id]?.count || 0}
                     overdueCount={filterCounts[filter.id]?.overdueCount || 0}

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import AppModal from '../../../components/common/AppModal'
+import ItemPrivacyField from '../../../components/common/ItemPrivacyField'
 import ModalActions from '../../../components/common/ModalActions'
 import { FILTER_COLORS } from '../../../utils/Colors'
 import { applyFilter } from '../../../utils/FilterEngine'
@@ -29,6 +30,7 @@ const AdvancedFilterBuilder = ({
 }) => {
   const { t } = useTranslation('filters')
   const [filterName, setFilterName] = useState('')
+  const [isShared, setIsShared] = useState(false)
   const [filterColor, setFilterColor] = useState(FILTER_COLORS[0].value)
   const [selections, setSelections] = useState(defaultSelections())
   const [error, setError] = useState('')
@@ -41,6 +43,7 @@ const AdvancedFilterBuilder = ({
 
   useEffect(() => {
     if (!isOpen) return
+    setIsShared(editingFilter?.isShared ?? false)
     if (editingFilter) {
       setFilterName(editingFilter.name)
       setFilterColor(editingFilter.color || FILTER_COLORS[0].value)
@@ -94,6 +97,8 @@ const AdvancedFilterBuilder = ({
       name: filterName.trim(),
       description: editingFilter?.description ?? '',
       color: filterColor,
+      isShared,
+      isPinned: editingFilter?.isPinned ?? false,
       conditions,
       operator: 'AND',
       ...(editingFilter ? { id: editingFilter.id } : {}),
@@ -232,6 +237,8 @@ const AdvancedFilterBuilder = ({
           labels={labels}
           projects={projects}
         />
+
+        <ItemPrivacyField isShared={isShared} onChange={setIsShared} />
       </Box>
     </AppModal>
   )

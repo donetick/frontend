@@ -1,4 +1,12 @@
 {
+  "itemPrivacy": {
+    "share": "Share with circle",
+    "private": "Private",
+    "shared": "Shared with circle",
+    "privateHint": "Only you can see this item.",
+    "sharedHint": "Everyone in your circle can see this item. Only you can edit it.",
+    "labelHint": "Label privacy does not change who can see its tasks."
+  },
   "save": "Save",
   "cancel": "Cancel",
   "delete": "Delete",

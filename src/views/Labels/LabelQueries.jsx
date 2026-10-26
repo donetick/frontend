@@ -15,9 +15,9 @@ export const useLabels = () => {
             ? data
             : []
 
-        if (labels.length > 0) {
-          offlineDB.saveKV('labels', labels)
-        }
+        // An empty response is authoritative too (e.g. a shared label became
+        // private). Do not resurrect previously visible labels while offline.
+        offlineDB.saveKV('labels', labels).catch(() => {})
         return labels
       } catch {
         const cached = await offlineDB.getKV('labels')

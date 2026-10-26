@@ -209,34 +209,38 @@ const LabelDetailView = () => {
           sx={{ color: 'text.secondary', flex: 1, minWidth: 0 }}
         >
           {t('detail.taskCount', { count: counts.all })}
-          {!isOwnedByCurrentUser && (
-            <Chip size='sm' variant='soft' color='warning' sx={{ ml: 1 }}>
-              {t('shared')}
-            </Chip>
-          )}
+          <Chip size='sm' variant='soft' color='neutral' sx={{ ml: 1 }}>
+            {t(
+              label.isShared
+                ? 'common:itemPrivacy.shared'
+                : 'common:itemPrivacy.private',
+            )}
+          </Chip>
         </Typography>
 
         {/* Delete is destructive, so it stays behind one overflow target. */}
-        <Dropdown>
-          <MenuButton
-            slots={{ root: IconButton }}
-            slotProps={{ root: { variant: 'plain', color: 'neutral' } }}
-            aria-label={t('detail.labelActions')}
-          >
-            <MoreVert />
-          </MenuButton>
-          <Menu placement='bottom-end'>
-            <MenuItem onClick={() => setModalOpen(true)}>
-              <EditIcon fontSize='small' />
-              {t('common:edit')}
-            </MenuItem>
-            <Divider />
-            <MenuItem color='danger' onClick={handleDeleteClicked}>
-              <DeleteIcon fontSize='small' />
-              {t('common:delete')}
-            </MenuItem>
-          </Menu>
-        </Dropdown>
+        {isOwnedByCurrentUser && (
+          <Dropdown>
+            <MenuButton
+              slots={{ root: IconButton }}
+              slotProps={{ root: { variant: 'plain', color: 'neutral' } }}
+              aria-label={t('detail.labelActions')}
+            >
+              <MoreVert />
+            </MenuButton>
+            <Menu placement='bottom-end'>
+              <MenuItem onClick={() => setModalOpen(true)}>
+                <EditIcon fontSize='small' />
+                {t('common:edit')}
+              </MenuItem>
+              <Divider />
+              <MenuItem color='danger' onClick={handleDeleteClicked}>
+                <DeleteIcon fontSize='small' />
+                {t('common:delete')}
+              </MenuItem>
+            </Menu>
+          </Dropdown>
+        )}
       </Box>
 
       {/* Status chips double as the filter control: the counts users want to

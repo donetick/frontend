@@ -128,21 +128,18 @@ const LabelCardContent = ({ currentUserId, label, onToggleActions }) => {
 
         {/* Color Info */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-          {!isOwnedByCurrentUser && (
-            <Chip
-              size='sm'
-              variant='soft'
-              color='warning'
-              sx={{
-                fontSize: 9,
-                height: 16,
-                px: 0.5,
-                fontWeight: 'md',
-              }}
-            >
-              {t('shared')}
-            </Chip>
-          )}
+          <Chip
+            size='sm'
+            variant='soft'
+            color='neutral'
+            sx={{ fontSize: 9, height: 16, px: 0.5, fontWeight: 'md' }}
+          >
+            {t(
+              label.isShared
+                ? 'common:itemPrivacy.shared'
+                : 'common:itemPrivacy.private',
+            )}
+          </Chip>
         </Box>
       </Box>
       <Box>
@@ -198,7 +195,10 @@ const LabelView = () => {
       return userLabels.filter(label => label.created_by === userProfile?.id)
     }
     if (ownershipFilter === 'shared') {
-      return userLabels.filter(label => label.created_by !== userProfile?.id)
+      return userLabels.filter(label => label.isShared)
+    }
+    if (ownershipFilter === 'private') {
+      return userLabels.filter(label => !label.isShared)
     }
     return userLabels
   }, [ownershipFilter, userLabels, userProfile?.id])
@@ -376,7 +376,8 @@ const LabelView = () => {
             filterOptions={[
               { name: t('view.filterAll'), value: 'all' },
               { name: t('view.filterMine'), value: 'mine' },
-              { name: t('view.filterShared'), value: 'shared' },
+              { name: t('common:itemPrivacy.shared'), value: 'shared' },
+              { name: t('common:itemPrivacy.private'), value: 'private' },
             ]}
             selectedFilter={ownershipFilter}
             onFilterChange={value => {
@@ -440,72 +441,78 @@ const LabelView = () => {
               onClick={() => navigate(`/labels/${label.id}`)}
               swipeActionOpen={showMoreInfoId === label.id ? 'trailing' : null}
               trailingActions={
-                <TrailingActions>
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      boxShadow: 'inset 2px 0 4px rgba(0,0,0,0.06)',
-                      zIndex: 0,
-                    }}
-                  >
-                    <SwipeAction onClick={() => handleEditLabel(label)}>
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          bgcolor: 'primary.500',
-                          color: '#fff',
-                          px: 3,
-                          height: '100%',
-                        }}
-                      >
-                        <EditIcon sx={{ fontSize: 20, color: 'white' }} />
-                        <Typography
-                          level='body-xs'
-                          sx={{ mt: 0.5, color: 'inherit' }}
+                label.created_by === userProfile?.id ? (
+                  <TrailingActions>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        boxShadow: 'inset 2px 0 4px rgba(0,0,0,0.06)',
+                        zIndex: 0,
+                      }}
+                    >
+                      <SwipeAction onClick={() => handleEditLabel(label)}>
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            bgcolor: 'primary.500',
+                            color: '#fff',
+                            px: 3,
+                            height: '100%',
+                          }}
                         >
-                          {t('common:edit')}
-                        </Typography>
-                      </Box>
-                    </SwipeAction>
-                    <SwipeAction onClick={() => handleDeleteClicked(label.id)}>
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          bgcolor: 'danger.500',
-                          color: '#fff',
-                          px: 3,
-                          height: '100%',
-                        }}
+                          <EditIcon sx={{ fontSize: 20, color: 'white' }} />
+                          <Typography
+                            level='body-xs'
+                            sx={{ mt: 0.5, color: 'inherit' }}
+                          >
+                            {t('common:edit')}
+                          </Typography>
+                        </Box>
+                      </SwipeAction>
+                      <SwipeAction
+                        onClick={() => handleDeleteClicked(label.id)}
                       >
-                        <DeleteIcon sx={{ fontSize: 20, color: 'white' }} />
-                        <Typography
-                          level='body-xs'
-                          sx={{ mt: 0.5, color: 'inherit' }}
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            bgcolor: 'danger.500',
+                            color: '#fff',
+                            px: 3,
+                            height: '100%',
+                          }}
                         >
-                          {t('common:delete')}
-                        </Typography>
-                      </Box>
-                    </SwipeAction>
-                  </Box>
-                </TrailingActions>
+                          <DeleteIcon sx={{ fontSize: 20, color: 'white' }} />
+                          <Typography
+                            level='body-xs'
+                            sx={{ mt: 0.5, color: 'inherit' }}
+                          >
+                            {t('common:delete')}
+                          </Typography>
+                        </Box>
+                      </SwipeAction>
+                    </Box>
+                  </TrailingActions>
+                ) : null
               }
             >
               <LabelCardContent
                 label={label}
                 currentUserId={userProfile?.id}
-                onToggleActions={() => {
-                  if (showMoreInfoId === label.id) {
-                    setShowMoreInfoId(null)
-                  } else {
-                    setShowMoreInfoId(label.id)
-                  }
-                }}
+                onToggleActions={
+                  label.created_by === userProfile?.id
+                    ? () => {
+                        setShowMoreInfoId(
+                          showMoreInfoId === label.id ? null : label.id,
+                        )
+                      }
+                    : undefined
+                }
               />
             </SwipeListItem>
           ))}

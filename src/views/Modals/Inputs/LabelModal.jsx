@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import ItemPrivacyField from '../../../components/common/ItemPrivacyField'
 import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal.js'
 import { useNotification } from '../../../service/NotificationProvider.jsx'
@@ -16,6 +17,7 @@ function LabelModal({ isOpen, label, onClose }) {
 
   const [labelName, setLabelName] = useState('')
   const [color, setColor] = useState('')
+  const [isShared, setIsShared] = useState(false)
   const [error, setError] = useState('')
   const { data: userLabels = [] } = useLabels()
   const queryClient = useQueryClient()
@@ -23,6 +25,8 @@ function LabelModal({ isOpen, label, onClose }) {
 
   // Populate the form fields when editing
   useEffect(() => {
+    if (!isOpen) return
+    setIsShared(label?.isShared ?? false)
     if (label) {
       setLabelName(label.name)
       setColor(label.color)
@@ -31,7 +35,7 @@ function LabelModal({ isOpen, label, onClose }) {
       setColor('')
     }
     setError('')
-  }, [label])
+  }, [label, isOpen])
 
   // Validation logic
   const validateLabel = () => {
@@ -61,12 +65,17 @@ function LabelModal({ isOpen, label, onClose }) {
       id: label?.id,
       name: labelName,
       color,
+      isShared,
     })
-      .then(res => {
-        if (res?.error) {
-          setError(res.error)
+      .then(async res => {
+        if (!res.ok) {
+          const data = await res.json()
+          setError(data.error || t('modal.saveFailedMessage'))
         } else {
           queryClient.invalidateQueries({ queryKey: ['labels'] })
+          queryClient.invalidateQueries({ queryKey: ['chores'] })
+          queryClient.invalidateQueries({ queryKey: ['choreDetails'] })
+          queryClient.invalidateQueries({ queryKey: ['chore'] })
           onClose()
         }
       })
@@ -152,6 +161,12 @@ function LabelModal({ isOpen, label, onClose }) {
             ))}
           </Box>
         </FormControl>
+
+        <ItemPrivacyField
+          isShared={isShared}
+          onChange={setIsShared}
+          kind='label'
+        />
 
         {error && (
           <Typography color='warning' level='body-sm'>
