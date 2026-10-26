@@ -61,7 +61,6 @@ import useLongPress from '../../../hooks/useLongPress'
 import { useCreateChore } from '../../../queries/ChoreQueries'
 import { useUserProfile } from '../../../queries/UserQueries'
 import { CompleteSubTask } from '../../../utils/Fetcher'
-import CompactChoreCard from '../../Chores/CompactChoreCard'
 import ChoreActionMenu from '../../components/ChoreActionMenu'
 import { buildChorePayload } from '../../components/VoiceToTask/parseVoiceTask'
 import TaskComposerRow from '../../components/VoiceToTask/TaskComposerRow'
@@ -75,11 +74,8 @@ import {
 } from '../ProjectQueries'
 import { boardCollisionDetection } from './boardCollisionDetection'
 import { applyTaskOrder, getTaskDropOrder } from './boardTaskOrdering'
+import ProjectBoardCard from './ProjectBoardCard'
 import ProjectTaskRow from './ProjectTaskRow'
-
-// Sortable wrappers update frequently during a drag; keep the expensive card
-// content out of those renders when its task and interaction props are unchanged.
-const MemoizedCompactChoreCard = memo(CompactChoreCard)
 const EMPTY_MEMBERS = []
 const ignoreActionMenu = () => {}
 
@@ -257,8 +253,7 @@ const TaskCard = memo(function TaskCard({
   )
   const showSubtasks =
     displayMode === 'list' && subtasks.length > 0 && !isMultiSelectMode
-  const TaskContent =
-    displayMode === 'list' ? ProjectTaskRow : MemoizedCompactChoreCard
+  const TaskContent = displayMode === 'list' ? ProjectTaskRow : ProjectBoardCard
 
   useEffect(() => setSubtasks(chore.subTasks || []), [chore.subTasks])
   useEffect(() => {
@@ -293,7 +288,11 @@ const TaskCard = memo(function TaskCard({
         longPressHandlers.onPointerDown(event)
       }}
       aria-hidden={isOverlay || undefined}
-      className={displayMode === 'list' ? 'project-task-row-shell' : undefined}
+      className={
+        displayMode === 'list'
+          ? 'project-task-row-shell'
+          : 'project-board-card-shell'
+      }
       data-dragging={isDragging || undefined}
       variant={displayMode === 'list' ? 'plain' : 'outlined'}
       onClick={() => {
@@ -302,6 +301,17 @@ const TaskCard = memo(function TaskCard({
       }}
       sx={{
         borderRadius: displayMode === 'list' ? 0 : 'md',
+        ...(displayMode !== 'list' && {
+          minWidth: 0,
+          bgcolor: isSelected ? 'primary.softBg' : 'background.surface',
+          borderColor: isSelected ? 'primary.outlinedBorder' : 'divider',
+          '&:hover': { borderColor: 'neutral.outlinedHoverBorder' },
+          '&:focus-within': {
+            outline: '2px solid',
+            outlineColor: 'primary.500',
+            outlineOffset: 2,
+          },
+        }),
         ...(displayMode === 'list' && {
           borderBottom: '1px solid',
           borderColor: 'divider',
@@ -351,9 +361,22 @@ const TaskCard = memo(function TaskCard({
             onOpenActionMenu={isOverlay ? ignoreActionMenu : onOpenActionMenu}
             sections={sections}
             showDivider={false}
+            dragHandle={
+              displayMode !== 'list' && !isMultiSelectMode ? (
+                <DragHandle
+                  className='project-task-secondary-action'
+                  attributes={dragAttributes}
+                  listeners={dragListeners}
+                  label={`${t('board.dragTask')}: ${chore.name}`}
+                  setActivatorNodeRef={setActivatorNodeRef}
+                  isDragging={isDragging}
+                  isOverlay={isOverlay}
+                />
+              ) : null
+            }
           />
         </Box>
-        {!isMultiSelectMode && (
+        {displayMode === 'list' && !isMultiSelectMode && (
           <DragHandle
             className={
               displayMode === 'list'
