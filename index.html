@@ -10,6 +10,51 @@
 
     <title>Donetick</title>
 
+    <!-- Inline so startup is visible before JavaScript and app CSS load. -->
+    <style>
+      .startup-screen {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 24px;
+        background: #ffffff;
+        color: #171a1c;
+        font-family: system-ui, sans-serif;
+      }
+      .startup-screen__name {
+        font-size: 28px;
+        font-weight: 700;
+      }
+      .startup-screen__spinner {
+        width: 28px;
+        height: 28px;
+        box-sizing: border-box;
+        border: 3px solid currentColor;
+        border-inline-end-color: transparent;
+        border-radius: 50%;
+        animation: startup-spin 0.8s linear infinite;
+      }
+      @keyframes startup-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @media (prefers-color-scheme: dark) {
+        .startup-screen {
+          background: #0b0d0e;
+          color: #f0f4f8;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .startup-screen__spinner {
+          animation: none;
+        }
+      }
+    </style>
+
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
@@ -40,7 +85,13 @@
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- React replaces this with the matching Suspense fallback on mount. -->
+      <div class="startup-screen" role="status" aria-label="Loading Donetick">
+        <span class="startup-screen__name">Donetick</span>
+        <span class="startup-screen__spinner" aria-hidden="true"></span>
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
