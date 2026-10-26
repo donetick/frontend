@@ -66,6 +66,15 @@ export const DEFAULT_HOME_SECTIONS_CONFIG = [
 ]
 
 const STORAGE_KEY = 'homeSectionsConfig'
+const TASK_SCOPE_KEY = 'homeTaskScope'
+
+export const getHomeTaskScope = () =>
+  localStorage.getItem(TASK_SCOPE_KEY) === 'mine' ? 'mine' : 'everyone'
+
+export const saveHomeTaskScope = scope => {
+  localStorage.setItem(TASK_SCOPE_KEY, scope === 'mine' ? 'mine' : 'everyone')
+  window.dispatchEvent(new Event('homeSectionsConfigChanged'))
+}
 
 export const getHomeSectionsConfig = () => {
   const saved = localStorage.getItem(STORAGE_KEY)

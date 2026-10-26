@@ -104,18 +104,18 @@ const useHomeSummary = (
   const userId = scopedUserId || userProfile?.id
   const members = useMemo(() => membersData?.res ?? [], [membersData?.res])
 
+  const scopedChores = useMemo(
+    () =>
+      scope === 'everyone'
+        ? chores
+        : chores.filter(chore => isMine(chore, userId)),
+    [chores, scope, userId],
+  )
+
   const summary = useMemo(() => {
     const now = moment()
     const endOfToday = moment().endOf('day')
     const endOfTomorrow = moment().add(1, 'day').endOf('day')
-
-    // Keep one source of truth for every actionable Home bucket. This avoids a
-    // confusing mix where the headline is personal but the cards include the
-    // whole circle (or vice versa) when the scope switch changes.
-    const scopedChores =
-      scope === 'everyone'
-        ? chores
-        : chores.filter(chore => isMine(chore, userId))
 
     const overdue = scopedChores.filter(
       chore =>
@@ -200,7 +200,7 @@ const useHomeSummary = (
         overdue,
       }),
     }
-  }, [chores, scope, userId])
+  }, [chores, scopedChores])
 
   /**
    * A week per person: what they finished, what is still open, and how much of
@@ -265,7 +265,7 @@ const useHomeSummary = (
 
     const now = moment()
     const counts = new Map()
-    chores.forEach(chore => {
+    scopedChores.forEach(chore => {
       // A task with no project belongs to the default project, which the rest
       // of the app synthesizes under the id 'default' rather than storing.
       const projectId = chore.projectId || DEFAULT_PROJECT_ID
@@ -307,7 +307,7 @@ const useHomeSummary = (
       }))
       .sort((a, b) => b.open - a.open)
       .slice(0, STRIP_LIMIT)
-  }, [chores, projects])
+  }, [projects, scopedChores])
 
   /**
    * The same shortcut list the Filters screen leads with: pinned filters
@@ -322,18 +322,18 @@ const useHomeSummary = (
     return [...filters]
       .map(filter => ({
         color: filter.color,
-        count: getFilterCount(chores, filter, context),
+        count: getFilterCount(scopedChores, filter, context),
         id: filter.id,
         isPinned: filter.isPinned,
         name: filter.name,
-        overdueCount: getFilterOverdueCount(chores, filter, context),
+        overdueCount: getFilterOverdueCount(scopedChores, filter, context),
       }))
       .sort((a, b) => {
         if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1
         return b.count - a.count
       })
       .slice(0, STRIP_LIMIT)
-  }, [chores, filters, userId])
+  }, [filters, scopedChores, userId])
 
   return {
     ...summary,
