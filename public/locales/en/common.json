@@ -1,4 +1,13 @@
 {
+  "permissionDenied": {
+    "title": "Managed by its creator",
+    "itemDescription": "You can view this item, but only its creator can edit or delete it. Ask them if something needs to change.",
+    "labelDescription": "This label was shared with you. Only its creator can edit or delete it. You can still use it to organize tasks.",
+    "projectDescription": "This project was shared with you. Only its creator can change its settings or delete it. You can still open it to see the tasks you have access to.",
+    "taskDescription": "You don’t have permission to change this task. Ask its creator if something needs to change.",
+    "dismiss": "Got it",
+    "moreActions": "More actions for {{name}}"
+  },
   "itemPrivacy": {
     "share": "Share with circle",
     "private": "Private",

@@ -33,6 +33,7 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import EmptyState from '../../components/common/EmptyState'
+import PermissionDeniedModal from '../../components/common/PermissionDeniedModal'
 import SortAndFilterMenu from '../../components/common/SortAndFilterMenu'
 import SwipeListItem, {
   SWIPE_COMMIT_THRESHOLD,
@@ -321,6 +322,9 @@ const ProjectCardContent = ({
             color='neutral'
             variant='plain'
             size='sm'
+            aria-label={t('common:permissionDenied.moreActions', {
+              name: project.name,
+            })}
             onClick={e => {
               e.stopPropagation()
               onToggleActions()
@@ -360,6 +364,7 @@ const ProjectView = () => {
   const queryClient = useQueryClient()
   const [confirmationModel, setConfirmationModel] = useState({})
   const [showMoreInfoId, setShowMoreInfoId] = useState(null)
+  const [permissionDeniedItem, setPermissionDeniedItem] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [sortBy, setSortBy] = useState(
     () => localStorage.getItem('projectsSortBy') || 'name',
@@ -696,62 +701,64 @@ const ProjectView = () => {
                 showMoreInfoId === project.id ? 'trailing' : null
               }
               trailingActions={
-                <TrailingActions>
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      boxShadow: 'inset 2px 0 4px rgba(0,0,0,0.06)',
-                      zIndex: 0,
-                    }}
-                  >
-                    <SwipeAction onClick={() => handleEditProject(project)}>
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          bgcolor: 'primary.500',
-                          color: '#fff',
-                          px: 3,
-                          height: '100%',
-                        }}
-                      >
-                        <EditIcon sx={{ fontSize: 20, color: 'white' }} />
-                        <Typography
-                          level='body-xs'
-                          sx={{ mt: 0.5, color: 'inherit' }}
-                        >
-                          {t('common:edit')}
-                        </Typography>
-                      </Box>
-                    </SwipeAction>
-                    <SwipeAction
-                      onClick={() => handleDeleteClicked(project.id)}
+                project.created_by === userProfile?.id ? (
+                  <TrailingActions>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        boxShadow: 'inset 2px 0 4px rgba(0,0,0,0.06)',
+                        zIndex: 0,
+                      }}
                     >
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          bgcolor: 'danger.500',
-                          color: '#fff',
-                          px: 3,
-                          height: '100%',
-                        }}
-                      >
-                        <DeleteIcon sx={{ fontSize: 20, color: 'white' }} />
-                        <Typography
-                          level='body-xs'
-                          sx={{ mt: 0.5, color: 'inherit' }}
+                      <SwipeAction onClick={() => handleEditProject(project)}>
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            bgcolor: 'primary.500',
+                            color: '#fff',
+                            px: 3,
+                            height: '100%',
+                          }}
                         >
-                          {t('common:delete')}
-                        </Typography>
-                      </Box>
-                    </SwipeAction>
-                  </Box>
-                </TrailingActions>
+                          <EditIcon sx={{ fontSize: 20, color: 'white' }} />
+                          <Typography
+                            level='body-xs'
+                            sx={{ mt: 0.5, color: 'inherit' }}
+                          >
+                            {t('common:edit')}
+                          </Typography>
+                        </Box>
+                      </SwipeAction>
+                      <SwipeAction
+                        onClick={() => handleDeleteClicked(project.id)}
+                      >
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            bgcolor: 'danger.500',
+                            color: '#fff',
+                            px: 3,
+                            height: '100%',
+                          }}
+                        >
+                          <DeleteIcon sx={{ fontSize: 20, color: 'white' }} />
+                          <Typography
+                            level='body-xs'
+                            sx={{ mt: 0.5, color: 'inherit' }}
+                          >
+                            {t('common:delete')}
+                          </Typography>
+                        </Box>
+                      </SwipeAction>
+                    </Box>
+                  </TrailingActions>
+                ) : null
               }
             >
               <ProjectCardContent
@@ -760,6 +767,11 @@ const ProjectView = () => {
                 currentUserId={userProfile?.id}
                 taskCounts={taskCounts}
                 onToggleActions={() => {
+                  if (project.created_by !== userProfile?.id) {
+                    setShowMoreInfoId(null)
+                    setPermissionDeniedItem(project)
+                    return
+                  }
                   if (showMoreInfoId === project.id) {
                     setShowMoreInfoId(null)
                   } else {
@@ -771,6 +783,13 @@ const ProjectView = () => {
           ))}
         </SwipeableList>
       </Box>
+
+      <PermissionDeniedModal
+        open={!!permissionDeniedItem}
+        onClose={() => setPermissionDeniedItem(null)}
+        resourceType='project'
+        resourceName={permissionDeniedItem?.name}
+      />
 
       {modalOpen && (
         <ProjectModal

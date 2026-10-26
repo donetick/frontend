@@ -33,6 +33,7 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import EmptyState from '../../components/common/EmptyState'
+import PermissionDeniedModal from '../../components/common/PermissionDeniedModal'
 import SortAndFilterMenu from '../../components/common/SortAndFilterMenu'
 import SwipeListItem, {
   SWIPE_COMMIT_THRESHOLD,
@@ -148,6 +149,9 @@ const LabelCardContent = ({ currentUserId, label, onToggleActions }) => {
             color='neutral'
             variant='plain'
             size='sm'
+            aria-label={t('common:permissionDenied.moreActions', {
+              name: label.name,
+            })}
             onClick={e => {
               e.stopPropagation()
               onToggleActions()
@@ -175,6 +179,7 @@ const LabelView = () => {
   const queryClient = useQueryClient()
   const [confirmationModel, setConfirmationModel] = useState({})
   const [showMoreInfoId, setShowMoreInfoId] = useState(null)
+  const [permissionDeniedItem, setPermissionDeniedItem] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [sortBy, setSortBy] = useState(
     () => localStorage.getItem('labelsSortBy') || 'name',
@@ -504,20 +509,28 @@ const LabelView = () => {
               <LabelCardContent
                 label={label}
                 currentUserId={userProfile?.id}
-                onToggleActions={
-                  label.created_by === userProfile?.id
-                    ? () => {
-                        setShowMoreInfoId(
-                          showMoreInfoId === label.id ? null : label.id,
-                        )
-                      }
-                    : undefined
-                }
+                onToggleActions={() => {
+                  if (label.created_by !== userProfile?.id) {
+                    setShowMoreInfoId(null)
+                    setPermissionDeniedItem(label)
+                    return
+                  }
+                  setShowMoreInfoId(
+                    showMoreInfoId === label.id ? null : label.id,
+                  )
+                }}
               />
             </SwipeListItem>
           ))}
         </SwipeableList>
       </Box>
+
+      <PermissionDeniedModal
+        open={!!permissionDeniedItem}
+        onClose={() => setPermissionDeniedItem(null)}
+        resourceType='label'
+        resourceName={permissionDeniedItem?.name}
+      />
 
       {modalOpen && (
         <LabelModal
