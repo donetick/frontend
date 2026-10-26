@@ -20,7 +20,6 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import {
-  Add,
   ChevronRight,
   DeleteOutline,
   DragIndicator,
@@ -30,7 +29,6 @@ import {
 } from '@mui/icons-material'
 import {
   Box,
-  Button,
   Checkbox,
   CircularProgress,
   Dropdown,
@@ -75,6 +73,7 @@ import {
 import { boardCollisionDetection } from './boardCollisionDetection'
 import { applyTaskOrder, getTaskDropOrder } from './boardTaskOrdering'
 import ProjectBoardCard from './ProjectBoardCard'
+import ProjectSectionComposer from './ProjectSectionComposer'
 import ProjectTaskRow from './ProjectTaskRow'
 const EMPTY_MEMBERS = []
 const ignoreActionMenu = () => {}
@@ -757,7 +756,6 @@ const ProjectBoard = ({
   const [pendingTaskOrder, setPendingTaskOrder] = useState(null)
   const [dragTaskOrder, setDragTaskOrder] = useState(null)
   const [pendingSectionOrder, setPendingSectionOrder] = useState(null)
-  const [newSectionName, setNewSectionName] = useState('')
   const hasEnsuredDefaultsRef = useRef(false)
 
   const {
@@ -870,12 +868,8 @@ const ProjectBoard = ({
     handleChoreAction(action, chore, extraData)
   }
 
-  const addSection = () => {
-    const name = newSectionName.trim()
-    if (!name) return
-    createSectionMutation.mutate({ projectId, name })
-    setNewSectionName('')
-  }
+  const addSection = name =>
+    createSectionMutation.mutateAsync({ projectId, name })
 
   const renameSection = (sectionId, name) =>
     renameSectionMutation.mutate({ projectId, sectionId, name })
@@ -1067,38 +1061,10 @@ const ProjectBoard = ({
                 userProfile={userProfile}
               />
             ))}
-            <Sheet
-              variant='outlined'
-              sx={{
-                display: 'flex',
-                gap: 1,
-                width: displayMode === 'list' ? '100%' : 'auto',
-                minWidth:
-                  displayMode === 'list' ? 0 : { xs: 292, sm: 320, md: 260 },
-                flexShrink: 0,
-                alignSelf: 'flex-start',
-                p: 1,
-                borderRadius: 'lg',
-              }}
-            >
-              <Input
-                value={newSectionName}
-                placeholder={t('board.newSectionPlaceholder')}
-                onChange={event => setNewSectionName(event.target.value)}
-                onKeyDown={event => {
-                  if (event.key === 'Enter') addSection()
-                }}
-                sx={{ flex: 1 }}
-              />
-              <Button
-                aria-label={t('board.addSection')}
-                disabled={!newSectionName.trim()}
-                onClick={addSection}
-                startDecorator={<Add />}
-              >
-                {t('board.add')}
-              </Button>
-            </Sheet>
+            <ProjectSectionComposer
+              displayMode={displayMode}
+              onSubmit={addSection}
+            />
           </Box>
         </SortableContext>
         {createPortal(
