@@ -144,7 +144,7 @@ const LabelCardContent = ({ currentUserId, label, onToggleActions }) => {
         </Box>
       </Box>
       <Box>
-        {onToggleActions && (
+        {isOwnedByCurrentUser && onToggleActions && (
           <IconButton
             color='neutral'
             variant='plain'

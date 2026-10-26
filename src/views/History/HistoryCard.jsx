@@ -54,6 +54,7 @@ const statusConfig = {
 
 const HistoryCard = ({
   allHistory,
+  canManage = false,
   historyEntry,
   index,
   onToggleActions,
@@ -239,7 +240,7 @@ const HistoryCard = ({
         sx={{ display: 'flex', alignItems: 'center', pr: 0.5 }}
         onClick={e => e.stopPropagation()}
       >
-        {onToggleActions && (
+        {canManage && onToggleActions && (
           <IconButton
             color='neutral'
             variant='plain'

@@ -1,15 +1,26 @@
-import { FormLabel, Input } from '@mui/joy'
+import { CircularProgress, FormLabel, Input } from '@mui/joy'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import ModalActions from '../../components/common/ModalActions'
+import PermissionDeniedModal from '../../components/common/PermissionDeniedModal'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
+import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
+import { canEditChoreHistory } from '../../utils/ChoreAccess'
 import ConfirmationModal from './Inputs/ConfirmationModal'
 
 function EditHistoryModal({ config, historyRecord }) {
   const { t } = useTranslation('history')
   const { ResponsiveModal } = useResponsiveModal()
+  const { data: userProfile, isLoading: isUserLoading } = useUserProfile()
+  const { data: membersData, isLoading: isMembersLoading } = useCircleMembers()
+  const canEdit = canEditChoreHistory(
+    historyRecord,
+    userProfile?.id,
+    membersData?.res || [],
+    userProfile?.circleID,
+  )
 
   const [completedDate, setCompletedDate] = useState('')
   const [dueDate, setDueDate] = useState('')
@@ -34,6 +45,31 @@ function EditHistoryModal({ config, historyRecord }) {
   // Don't render modal content if no valid historyRecord
   if (!historyRecord?.performedAt) {
     return null
+  }
+
+  if (!config?.isOpen) return null
+
+  if (isUserLoading || isMembersLoading) {
+    return (
+      <ResponsiveModal
+        open
+        onClose={config.onClose}
+        title={t('common:loading')}
+      >
+        <CircularProgress aria-label={t('common:loading')} />
+      </ResponsiveModal>
+    )
+  }
+
+  if (!canEdit) {
+    return (
+      <PermissionDeniedModal
+        open
+        onClose={config.onClose}
+        title={t('common:permissionDenied.historyTitle')}
+        description={t('common:permissionDenied.historyDescription')}
+      />
+    )
   }
 
   return (

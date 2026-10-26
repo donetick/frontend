@@ -317,7 +317,7 @@ const ProjectCardContent = ({
           </Typography>
           <ProjectMembersStack members={projectMembers} />
         </Box>
-        {onToggleActions && (
+        {isOwnedByCurrentUser && onToggleActions && (
           <IconButton
             color='neutral'
             variant='plain'
