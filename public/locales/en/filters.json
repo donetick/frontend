@@ -8,7 +8,13 @@
     "save": "Save Filter",
     "name": "Filter Name",
     "namePlaceholder": "e.g. Overdue tasks for Alice",
-    "color": "Color"
+    "color": "Color",
+    "sharing": "Sharing",
+    "shared": "Shared with your circle",
+    "private": "Only you",
+    "conditions": "Filter conditions",
+    "conditionsHint": "Expand a section to refine your filter. Tasks must match every configured section; multiple choices within a section match any of them.",
+    "anyValue": "Any"
   },
   "nameExists": "A filter with this name already exists",
   "tasks_one": "{{count}} task",

@@ -1,3 +1,5 @@
+import { customDueDateBounds } from './CustomDueDate.js'
+
 /**
  * Filter Engine - Evaluates filter conditions against chores
  *
@@ -163,7 +165,11 @@ const evaluateDueDate = (chore, operator, value) => {
   // OR'd — even though the filter as a whole is AND'd across condition types.
   if (operator === 'anyOf') {
     const operators = Array.isArray(value) ? value : [value]
-    return operators.some(op => evaluateDueDate(chore, op, null))
+    return operators.some(op =>
+      typeof op === 'string'
+        ? evaluateDueDate(chore, op, null)
+        : op && evaluateDueDate(chore, op.operator, op.value),
+    )
   }
 
   // Handle "no due date" case
@@ -184,6 +190,11 @@ const evaluateDueDate = (chore, operator, value) => {
   tomorrow.setDate(tomorrow.getDate() + 1)
 
   switch (operator) {
+    case 'custom': {
+      const bounds = customDueDateBounds(value)
+      return bounds !== null && dueDate >= bounds[0] && dueDate < bounds[1]
+    }
+
     case 'isOverdue':
       return dueDate < now
 
