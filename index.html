@@ -17,8 +17,8 @@
         --startup-surface: #ffffff;
         --startup-text: #20252b;
         --startup-muted: #747b87;
-        --startup-accent: #7c79d8;
-        --startup-soft: #eeedfc;
+        --startup-accent: #0891b2;
+        --startup-soft: #cffafe;
         --startup-border: #e9eaf0;
         position: fixed;
         inset: 0;
@@ -44,7 +44,7 @@
         position: absolute;
         inset: 12px 30px;
         border-radius: 50%;
-        background: radial-gradient(ellipse, #dcd9fa 0%, transparent 70%);
+        background: radial-gradient(ellipse, #a5f3fc 0%, transparent 70%);
         filter: blur(16px);
         animation: startup-breathe 4s ease-in-out infinite;
       }
@@ -58,7 +58,7 @@
         border-radius: 36px;
         background: var(--startup-surface);
         border: 1px solid var(--startup-border);
-        box-shadow: 0 16px 48px -16px #68629b30;
+        box-shadow: 0 16px 48px -16px #155e7530;
         transform: rotate(-6deg);
         animation: startup-float 5s ease-in-out infinite;
       }
@@ -78,7 +78,7 @@
         border: 1px solid var(--startup-border);
         border-radius: 18px;
         background: var(--startup-surface);
-        box-shadow: 0 8px 24px -12px #68629b30;
+        box-shadow: 0 8px 24px -12px #155e7530;
       }
       .startup-screen__card--back {
         top: 22px;
@@ -136,7 +136,7 @@
         bottom: 36px;
         width: 5px;
         height: 5px;
-        background: #aaa5e7;
+        background: var(--startup-accent);
       }
       .startup-screen__copy {
         animation: startup-enter 700ms cubic-bezier(0.22, 1, 0.36, 1) 100ms both;
@@ -224,12 +224,12 @@
           --startup-surface: #1b1e25;
           --startup-text: #f0f1f5;
           --startup-muted: #9ca3b1;
-          --startup-accent: #b7b1f4;
-          --startup-soft: #302c49;
+          --startup-accent: #67e8f9;
+          --startup-soft: #164e63;
           --startup-border: #2b2f39;
         }
         .startup-screen__halo {
-          background: radial-gradient(ellipse, #49416d 0%, transparent 70%);
+          background: radial-gradient(ellipse, #155e75 0%, transparent 70%);
         }
         .startup-screen__card--front .startup-screen__check {
           background: #203c36;
