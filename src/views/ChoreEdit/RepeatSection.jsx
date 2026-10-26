@@ -24,6 +24,7 @@ import { useLocalization } from '../../contexts/LocalizationContext'
 import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
 import { useUserProfile } from '../../queries/UserQueries'
 import { isPlusAccount } from '../../utils/Helpers'
+import { DAYS, sortWeekdays } from '../../utils/WeekdayUtils'
 import ThingTriggerSection from './ThingTriggerSection'
 
 const FREQUENCY_TYPES_RADIOS = [
@@ -53,16 +54,6 @@ const MONTHS = [
   'december',
 ]
 
-const DAYS = [
-  'monday',
-  'tuesday',
-  'wednesday',
-  'thursday',
-  'friday',
-  'saturday',
-  'sunday',
-]
-
 const WEEK_PATTERNS = ['every_week', 'week_of_month']
 
 const DAY_OCCURRENCE_VALUES = [1, 2, 3, 4, -1]
@@ -74,7 +65,7 @@ const occurrenceKey = value => (value === -1 ? 'last' : String(value))
 const generateSchedulePreview = (metadata, formatTimeFn, t) => {
   if (!metadata?.days?.length) return ''
 
-  const dayNames = metadata.days
+  const dayNames = sortWeekdays(metadata.days)
     .map(day => t(`repeat.daysShort.${day}`))
     .join(', ')
 
@@ -220,7 +211,7 @@ export const RepeatOnSections = ({
 
                         onFrequencyMetadataUpdate({
                           ...frequencyMetadata,
-                          days: newDaysOfTheWeek.sort(),
+                          days: sortWeekdays(newDaysOfTheWeek),
                         })
                       }}
                       overlay
