@@ -107,6 +107,7 @@ import { getIconComponent } from '../../utils/ProjectIcons'
 import { getSafeBottomPadding } from '../../utils/SafeAreaUtils.js'
 import { useSinglePageTaskEditor } from '../../utils/TaskEditorPreferences'
 import { generateUUID } from '../../utils/UUID'
+import { sortWeekdays } from '../../utils/WeekdayUtils'
 import { useProjectFilter } from '../Chores/hooks/useProjectFilter.js'
 import LoadingComponent from '../components/Loading.jsx'
 import RichTextEditor from '../components/RichTextEditor.jsx'
@@ -420,7 +421,9 @@ const ChoreEdit = () => {
     yearly: 'Yearly',
     adaptive: 'Adaptive schedule',
     interval: `Every ${frequency} ${frequencyMetadata?.unit || 'days'}`,
-    days_of_the_week: frequencyMetadata?.days?.join(', ') || 'Choose weekdays',
+    days_of_the_week: frequencyMetadata?.days?.length
+      ? sortWeekdays(frequencyMetadata.days).join(', ')
+      : 'Choose weekdays',
     day_of_the_month: 'Selected days of the month',
   }[frequencyType]
   const scheduleSummary =

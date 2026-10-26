@@ -1026,14 +1026,14 @@
   "filterBuilder": {
     "customDueDate": {
       "label": "Custom",
-      "mode": "Date range type",
+      "mode": "Range type",
       "relative": "Relative to today",
       "fixed": "Fixed dates",
-      "relativeHint": "Days from today: 0 is today, negative numbers are in the past, positive numbers are in the future. Updates automatically each day.",
-      "fixedHint": "Includes the entire start and end dates.",
+      "relativeHint": "Days from today. Use negative numbers for the past, e.g. -7 to 7 covers last week through next week.",
+      "fixedHint": "Both dates are included in the range.",
       "start": "From",
-      "end": "Through",
-      "invalid": "Enter a valid range with the start on or before the end. Relative offsets must be whole days between -36500 and 36500."
+      "end": "To",
+      "invalid": "Enter a valid range: the start must not be after the end."
     },
     "dueDateOption": {
       "isOverdue": "Overdue",
