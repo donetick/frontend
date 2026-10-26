@@ -35,6 +35,7 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import EmptyState from '../../components/common/EmptyState'
+import ItemAudience from '../../components/common/ItemAudience'
 import SortAndFilterMenu from '../../components/common/SortAndFilterMenu'
 import SwipeListItem, {
   SWIPE_COMMIT_THRESHOLD,
@@ -59,12 +60,16 @@ import {
 } from './FilterQueries'
 
 const FilterCardContent = ({
+  circleMembers = [],
   filter,
   onToggleActions,
   overdueCount = 0,
   taskCount = 0,
 }) => {
   const { t } = useTranslation('filters')
+  const audienceMembers = filter.isShared
+    ? circleMembers
+    : circleMembers.filter(member => member.userId === filter.createdBy)
   // Get condition labels for display
   const getConditionSummary = () => {
     if (!filter.conditions || filter.conditions.length === 0) {
@@ -156,13 +161,6 @@ const FilterCardContent = ({
             flexWrap: 'wrap',
           }}
         >
-          <Chip size='sm' variant='soft'>
-            {t(
-              filter.isShared
-                ? 'common:itemPrivacy.shared'
-                : 'common:itemPrivacy.private',
-            )}
-          </Chip>
           {filter.description && (
             <Typography
               level='body-xs'
@@ -241,7 +239,15 @@ const FilterCardContent = ({
           )}
         </Box>
       </Box>
-      <Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+        <ItemAudience
+          label={t(
+            filter.isShared
+              ? 'projects:visibility.chip.everyone'
+              : 'projects:visibility.chip.private',
+          )}
+          members={audienceMembers}
+        />
         {onToggleActions && (
           <IconButton
             color='neutral'
@@ -726,6 +732,7 @@ const FilterView = () => {
                   }
                 >
                   <FilterCardContent
+                    circleMembers={membersData?.res || []}
                     onToggleActions={
                       filter.createdBy === userProfile?.id
                         ? () => {

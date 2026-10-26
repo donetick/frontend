@@ -19,7 +19,6 @@ import EditIcon from '@mui/icons-material/Edit'
 import {
   Avatar,
   Box,
-  Chip,
   CircularProgress,
   Container,
   IconButton,
@@ -33,12 +32,13 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import EmptyState from '../../components/common/EmptyState'
+import ItemAudience from '../../components/common/ItemAudience'
 import PermissionDeniedModal from '../../components/common/PermissionDeniedModal'
 import SortAndFilterMenu from '../../components/common/SortAndFilterMenu'
 import SwipeListItem, {
   SWIPE_COMMIT_THRESHOLD,
 } from '../../components/common/SwipeListItem'
-import { useUserProfile } from '../../queries/UserQueries'
+import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors'
 import { DeleteLabel } from '../../utils/Fetcher'
 import { getSafeBottom, getSafeBottomStyles } from '../../utils/SafeAreaUtils'
@@ -47,10 +47,18 @@ import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import LabelModal from '../Modals/Inputs/LabelModal'
 import { useLabels } from './LabelQueries'
 
-const LabelCardContent = ({ currentUserId, label, onToggleActions }) => {
+const LabelCardContent = ({
+  circleMembers = [],
+  currentUserId,
+  label,
+  onToggleActions,
+}) => {
   const { t } = useTranslation('labels')
   // Check if current user owns this label
   const isOwnedByCurrentUser = label.created_by === currentUserId
+  const audienceMembers = label.isShared
+    ? circleMembers
+    : circleMembers.filter(member => member.userId === label.created_by)
 
   return (
     <Box
@@ -126,24 +134,16 @@ const LabelCardContent = ({ currentUserId, label, onToggleActions }) => {
         >
           {label.name}
         </Typography>
-
-        {/* Color Info */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-          <Chip
-            size='sm'
-            variant='soft'
-            color='neutral'
-            sx={{ fontSize: 9, height: 16, px: 0.5, fontWeight: 'md' }}
-          >
-            {t(
-              label.isShared
-                ? 'common:itemPrivacy.shared'
-                : 'common:itemPrivacy.private',
-            )}
-          </Chip>
-        </Box>
       </Box>
-      <Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+        <ItemAudience
+          label={t(
+            label.isShared
+              ? 'projects:visibility.chip.everyone'
+              : 'projects:visibility.chip.private',
+          )}
+          members={audienceMembers}
+        />
         {isOwnedByCurrentUser && onToggleActions && (
           <IconButton
             color='neutral'
@@ -169,6 +169,7 @@ const LabelView = () => {
   const { t } = useTranslation('labels')
   const { data: labels, isError, isLabelsLoading } = useLabels()
   const { data: userProfile } = useUserProfile()
+  const { data: membersData } = useCircleMembers()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
 
@@ -507,6 +508,7 @@ const LabelView = () => {
               }
             >
               <LabelCardContent
+                circleMembers={membersData?.res || []}
                 label={label}
                 currentUserId={userProfile?.id}
                 onToggleActions={() => {
