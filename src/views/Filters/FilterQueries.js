@@ -15,6 +15,34 @@ import {
 } from '../../utils/Fetcher'
 import { offlineDB } from '../../utils/OfflineDB'
 
+// The current API also returns business errors with a 500 status. Only these
+// exact messages are safe to surface from a server failure; database errors
+// and other internal details should use the operation's generic fallback.
+const FILTER_BUSINESS_ERRORS = new Set([
+  'Filter name already exists',
+  'filter not found',
+  'user does not have permission to update this filter',
+  'user does not have permission to delete this filter',
+])
+
+const filterErrorFromResponse = async (response, fallback) => {
+  try {
+    const body = await response.json()
+    const message = [body?.error?.message, body?.error, body?.message].find(
+      value => typeof value === 'string' && value.trim() !== '',
+    )
+    if (
+      message &&
+      (response.status < 500 || FILTER_BUSINESS_ERRORS.has(message))
+    ) {
+      return new Error(message)
+    }
+  } catch {
+    // Empty and non-JSON error responses still need an actionable message.
+  }
+  return new Error(fallback)
+}
+
 // Query hook for fetching all filters
 export const useFilters = () => {
   return useQuery({
@@ -137,8 +165,7 @@ export const useCreateFilter = () => {
           track('filter_created', {})
           return data.res || data
         }
-        const errorData = await response.json()
-        throw new Error(errorData.message || 'Failed to create filter')
+        throw await filterErrorFromResponse(response, 'Failed to create filter')
       } catch (error) {
         console.error('Error creating filter:', error)
         throw error
@@ -172,8 +199,7 @@ export const useUpdateFilter = () => {
           const data = await response.json()
           return data.res || data
         }
-        const errorData = await response.json()
-        throw new Error(errorData.message || 'Failed to update filter')
+        throw await filterErrorFromResponse(response, 'Failed to update filter')
       } catch (error) {
         console.error('Error updating filter:', error)
         throw error
@@ -211,8 +237,7 @@ export const useDeleteFilter = () => {
         if (response.ok) {
           return { id: filterId, deleted: true }
         }
-        const errorData = await response.json()
-        throw new Error(errorData.message || 'Failed to delete filter')
+        throw await filterErrorFromResponse(response, 'Failed to delete filter')
       } catch (error) {
         console.error('Error deleting filter:', error)
         throw error
@@ -246,8 +271,10 @@ export const useToggleFilterPin = () => {
           const data = await response.json()
           return data.res || data
         }
-        const errorData = await response.json()
-        throw new Error(errorData.message || 'Failed to toggle filter pin')
+        throw await filterErrorFromResponse(
+          response,
+          'Failed to toggle filter pin',
+        )
       } catch (error) {
         console.error('Error toggling filter pin:', error)
         throw error
