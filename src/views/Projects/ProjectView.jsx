@@ -33,6 +33,8 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import EmptyState from '../../components/common/EmptyState'
+import ItemAudience from '../../components/common/ItemAudience'
+import PermissionDeniedModal from '../../components/common/PermissionDeniedModal'
 import SortAndFilterMenu from '../../components/common/SortAndFilterMenu'
 import SwipeListItem, {
   SWIPE_COMMIT_THRESHOLD,
@@ -43,7 +45,6 @@ import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors'
 import { canCreateProject } from '../../utils/entitlements'
 import { DeleteProject } from '../../utils/Fetcher'
-import { resolvePhotoURL } from '../../utils/Helpers'
 import {
   getProjectAudienceIds,
   getProjectVisibility,
@@ -56,62 +57,6 @@ import ScrollHideFab from '../components/ScrollHideFab'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import ProjectModal from '../Modals/Inputs/ProjectModal'
 import { useProjects } from './ProjectQueries'
-
-const MAX_VISIBLE_MEMBER_AVATARS = 3
-
-// Overlapping avatar stack with a "+N" overflow badge, for showing who has
-// access to a project at a glance (the pattern used for group members).
-const ProjectMembersStack = ({ members = [] }) => {
-  if (members.length === 0) return null
-  const visible = members.slice(0, MAX_VISIBLE_MEMBER_AVATARS)
-  const overflow = members.length - visible.length
-
-  return (
-    <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0, ml: 1 }}>
-      {visible.map((member, index) => (
-        <Avatar
-          key={member.userId}
-          size='sm'
-          src={resolvePhotoURL(member.image)}
-          sx={{
-            width: 24,
-            height: 24,
-            fontSize: 11,
-            bgcolor: 'background.level2',
-            color: 'text.secondary',
-            border: '2px solid',
-            borderColor: 'background.surface',
-            ml: index === 0 ? 0 : -1,
-            zIndex: visible.length - index,
-          }}
-        >
-          {(member.displayName || member.username || '?')
-            .charAt(0)
-            .toUpperCase()}
-        </Avatar>
-      ))}
-      {overflow > 0 && (
-        <Avatar
-          size='sm'
-          sx={{
-            width: 24,
-            height: 24,
-            fontSize: 10,
-            fontWeight: 'lg',
-            bgcolor: 'neutral.softBg',
-            color: 'text.secondary',
-            border: '2px solid',
-            borderColor: 'background.surface',
-            ml: -1,
-            zIndex: 0,
-          }}
-        >
-          +{overflow}
-        </Avatar>
-      )}
-    </Box>
-  )
-}
 
 const ProjectCardContent = ({
   circleMembers = [],
@@ -294,33 +239,15 @@ const ProjectCardContent = ({
         </Box>
       </Box>
       <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'flex-end',
-            gap: 0.25,
-            mr: 0.5,
-          }}
-        >
-          <Typography
-            level='body-xs'
-            sx={{
-              fontSize: 9,
-              color: 'text.tertiary',
-              fontWeight: 'md',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {audienceLabel}
-          </Typography>
-          <ProjectMembersStack members={projectMembers} />
-        </Box>
-        {onToggleActions && (
+        <ItemAudience label={audienceLabel} members={projectMembers} />
+        {isOwnedByCurrentUser && onToggleActions && (
           <IconButton
             color='neutral'
             variant='plain'
             size='sm'
+            aria-label={t('common:permissionDenied.moreActions', {
+              name: project.name,
+            })}
             onClick={e => {
               e.stopPropagation()
               onToggleActions()
@@ -360,6 +287,7 @@ const ProjectView = () => {
   const queryClient = useQueryClient()
   const [confirmationModel, setConfirmationModel] = useState({})
   const [showMoreInfoId, setShowMoreInfoId] = useState(null)
+  const [permissionDeniedItem, setPermissionDeniedItem] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [sortBy, setSortBy] = useState(
     () => localStorage.getItem('projectsSortBy') || 'name',
@@ -696,62 +624,64 @@ const ProjectView = () => {
                 showMoreInfoId === project.id ? 'trailing' : null
               }
               trailingActions={
-                <TrailingActions>
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      boxShadow: 'inset 2px 0 4px rgba(0,0,0,0.06)',
-                      zIndex: 0,
-                    }}
-                  >
-                    <SwipeAction onClick={() => handleEditProject(project)}>
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          bgcolor: 'primary.500',
-                          color: '#fff',
-                          px: 3,
-                          height: '100%',
-                        }}
-                      >
-                        <EditIcon sx={{ fontSize: 20, color: 'white' }} />
-                        <Typography
-                          level='body-xs'
-                          sx={{ mt: 0.5, color: 'inherit' }}
-                        >
-                          {t('common:edit')}
-                        </Typography>
-                      </Box>
-                    </SwipeAction>
-                    <SwipeAction
-                      onClick={() => handleDeleteClicked(project.id)}
+                project.created_by === userProfile?.id ? (
+                  <TrailingActions>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        boxShadow: 'inset 2px 0 4px rgba(0,0,0,0.06)',
+                        zIndex: 0,
+                      }}
                     >
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          bgcolor: 'danger.500',
-                          color: '#fff',
-                          px: 3,
-                          height: '100%',
-                        }}
-                      >
-                        <DeleteIcon sx={{ fontSize: 20, color: 'white' }} />
-                        <Typography
-                          level='body-xs'
-                          sx={{ mt: 0.5, color: 'inherit' }}
+                      <SwipeAction onClick={() => handleEditProject(project)}>
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            bgcolor: 'primary.500',
+                            color: '#fff',
+                            px: 3,
+                            height: '100%',
+                          }}
                         >
-                          {t('common:delete')}
-                        </Typography>
-                      </Box>
-                    </SwipeAction>
-                  </Box>
-                </TrailingActions>
+                          <EditIcon sx={{ fontSize: 20, color: 'white' }} />
+                          <Typography
+                            level='body-xs'
+                            sx={{ mt: 0.5, color: 'inherit' }}
+                          >
+                            {t('common:edit')}
+                          </Typography>
+                        </Box>
+                      </SwipeAction>
+                      <SwipeAction
+                        onClick={() => handleDeleteClicked(project.id)}
+                      >
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            bgcolor: 'danger.500',
+                            color: '#fff',
+                            px: 3,
+                            height: '100%',
+                          }}
+                        >
+                          <DeleteIcon sx={{ fontSize: 20, color: 'white' }} />
+                          <Typography
+                            level='body-xs'
+                            sx={{ mt: 0.5, color: 'inherit' }}
+                          >
+                            {t('common:delete')}
+                          </Typography>
+                        </Box>
+                      </SwipeAction>
+                    </Box>
+                  </TrailingActions>
+                ) : null
               }
             >
               <ProjectCardContent
@@ -760,6 +690,11 @@ const ProjectView = () => {
                 currentUserId={userProfile?.id}
                 taskCounts={taskCounts}
                 onToggleActions={() => {
+                  if (project.created_by !== userProfile?.id) {
+                    setShowMoreInfoId(null)
+                    setPermissionDeniedItem(project)
+                    return
+                  }
                   if (showMoreInfoId === project.id) {
                     setShowMoreInfoId(null)
                   } else {
@@ -771,6 +706,13 @@ const ProjectView = () => {
           ))}
         </SwipeableList>
       </Box>
+
+      <PermissionDeniedModal
+        open={!!permissionDeniedItem}
+        onClose={() => setPermissionDeniedItem(null)}
+        resourceType='project'
+        resourceName={permissionDeniedItem?.name}
+      />
 
       {modalOpen && (
         <ProjectModal

@@ -1031,6 +1031,17 @@
     "pointsDescription_xp": "Award XP for completing this task"
   },
   "filterBuilder": {
+    "customDueDate": {
+      "label": "Custom",
+      "mode": "Range type",
+      "relative": "Relative to today",
+      "fixed": "Fixed dates",
+      "relativeHint": "Days from today. Use negative numbers for the past, e.g. -7 to 7 covers last week through next week.",
+      "fixedHint": "Both dates are included in the range.",
+      "start": "From",
+      "end": "To",
+      "invalid": "Enter a valid range: the start must not be after the end."
+    },
     "dueDateOption": {
       "isOverdue": "Overdue",
       "isDueToday": "Today",
@@ -1038,7 +1049,8 @@
       "isDueThisWeek": "This Week",
       "isDueThisMonth": "This Month",
       "hasNoDueDate": "No Due Date",
-      "hasDueDate": "Has Due Date"
+      "hasDueDate": "Has Due Date",
+      "custom": "Custom"
     },
     "status": {
       "0": "Active",
@@ -1063,7 +1075,6 @@
     "project": "Project",
     "filterFallback": "Filter",
     "notPrefix": "Not ",
-    "customDueDate": "Custom",
     "clear": "Clear",
     "points_xp": "XP"
   },

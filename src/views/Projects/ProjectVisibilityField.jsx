@@ -68,51 +68,53 @@ const ProjectVisibilityField = ({
       <RadioGroup
         value={visibility}
         onChange={e => onVisibilityChange(e.target.value)}
-        sx={{ gap: 1 }}
+        aria-label={t('visibility.label')}
+        orientation='horizontal'
+        sx={{ gap: 0.75, flexWrap: 'wrap' }}
       >
         {OPTIONS.map(({ icon: Icon, value }) => (
           <Sheet
             key={value}
             variant='outlined'
             sx={{
-              borderRadius: 'md',
-              p: 1.5,
+              borderRadius: 'xl',
+              px: 1.25,
+              py: 1,
+              minHeight: 40,
               display: 'flex',
-              gap: 1.5,
-              alignItems: 'flex-start',
+              gap: 0.75,
+              alignItems: 'center',
               borderColor:
                 visibility === value ? 'primary.outlinedBorder' : 'divider',
               bgcolor: visibility === value ? 'primary.softBg' : undefined,
             }}
           >
-            <Icon sx={{ mt: 0.25, color: 'text.secondary' }} />
+            <Icon
+              sx={{
+                fontSize: 18,
+                color: visibility === value ? 'primary.500' : 'text.secondary',
+              }}
+            />
             <Box sx={{ flex: 1, minWidth: 0 }}>
               <Radio
                 overlay
+                disableIcon
                 value={value}
                 disabled={disabled}
                 label={t(`visibility.${value}.title`)}
-                slotProps={{ label: { sx: { fontWeight: 'md' } } }}
-                sx={{
-                  flexDirection: 'row-reverse',
-                  justifyContent: 'space-between',
-                  width: '100%',
+                slotProps={{
+                  label: { sx: { fontWeight: 'md', fontSize: 'sm' } },
                 }}
               />
-              <Typography
-                level='body-xs'
-                sx={{ color: 'text.tertiary', mt: 0.25 }}
-              >
-                {value === PROJECT_VISIBILITY.CIRCLE
-                  ? t('visibility.circle.description', {
-                      names: everybody || '–',
-                    })
-                  : t(`visibility.${value}.description`)}
-              </Typography>
             </Box>
           </Sheet>
         ))}
       </RadioGroup>
+      <FormHelperText sx={{ mt: 1 }}>
+        {visibility === PROJECT_VISIBILITY.CIRCLE
+          ? t('visibility.circle.description', { names: everybody || '–' })
+          : t(`visibility.${visibility}.description`)}
+      </FormHelperText>
 
       {visibility === PROJECT_VISIBILITY.MEMBERS && (
         <Box sx={{ mt: 1.5 }}>

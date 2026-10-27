@@ -95,8 +95,9 @@ const AppModal = forwardRef(
           ref={ref}
           role={role}
           aria-modal='true'
+          aria-label={modalProps['aria-label']}
           aria-labelledby={titleId}
-          aria-describedby={descriptionId}
+          aria-describedby={descriptionId || modalProps['aria-describedby']}
           variant='outlined'
           sx={{
             display: 'flex',

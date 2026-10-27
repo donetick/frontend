@@ -54,9 +54,11 @@ import { useTranslation } from 'react-i18next'
 
 import AppModal from '../../../components/common/AppModal'
 import ActiveFilterChips from '../../../components/common/filter/ActiveFilterChips'
+import ItemPrivacyField from '../../../components/common/ItemPrivacyField'
 import KeyboardShortcutHint from '../../../components/common/KeyboardShortcutHint'
 import SortAndFilterMenu from '../../../components/common/SortAndFilterMenu'
 import { PAYWALL_REASON, usePaywall } from '../../../contexts/PaywallContext'
+import { useUserProfile } from '../../../queries/UserQueries'
 import { FILTER_COLORS } from '../../../utils/Colors'
 import { canCreateQuickFilter } from '../../../utils/entitlements'
 import Priorities from '../../../utils/Priorities'
@@ -247,6 +249,8 @@ const ChoreToolbar = ({
   const [filterSheetOpen, setFilterSheetOpen] = useState(false)
   const [displaySheetOpen, setDisplaySheetOpen] = useState(false)
   const [localSelections, setLocalSelections] = useState(defaultSelections())
+  const { data: userProfile } = useUserProfile()
+  const [saveFilterShared, setSaveFilterShared] = useState(false)
   const [savingFilter, setSavingFilter] = useState(false)
   const [saveFilterName, setSaveFilterName] = useState('')
   const [saveMenuOpen, setSaveMenuOpen] = useState(false)
@@ -287,7 +291,7 @@ const ChoreToolbar = ({
       const describeDueDate = op =>
         DUE_DATE_OPTIONS.some(o => o.value === op)
           ? t(`filterBuilder.dueDateOption.${op}`)
-          : t('filterBuilder.customDueDate')
+          : t('filterBuilder.customDueDate.label')
       const dueDateLabel =
         condition.operator === 'anyOf'
           ? (Array.isArray(condition.value) ? condition.value : [])
@@ -514,6 +518,7 @@ const ChoreToolbar = ({
     setSaveFilterName(
       editingSavedFilter ? `${editingSavedFilter.name} Copy` : '',
     )
+    setSaveFilterShared(editingSavedFilter?.isShared ?? false)
     setSavingFilter(true)
   }
 
@@ -535,6 +540,7 @@ const ChoreToolbar = ({
 
     saveFilter?.({
       name,
+      isShared: saveFilterShared,
       description: '',
       color,
       conditions,
@@ -552,7 +558,12 @@ const ChoreToolbar = ({
   }
 
   const handleUpdateFilter = () => {
-    if (!editingSavedFilter?.id || !updateFilter) return
+    if (
+      !editingSavedFilter?.id ||
+      !updateFilter ||
+      editingSavedFilter.createdBy !== userProfile?.id
+    )
+      return
 
     const conditions = selectionsToConditions(localSelections)
     if (conditions.length === 0) return
@@ -561,6 +572,8 @@ const ChoreToolbar = ({
       name: editingSavedFilter.name,
       description: editingSavedFilter.description || '',
       color: editingSavedFilter.color,
+      isShared: editingSavedFilter.isShared ?? false,
+      isPinned: editingSavedFilter.isPinned ?? false,
       conditions,
       operator: 'AND',
     })?.then?.(() => {
@@ -809,38 +822,44 @@ const ChoreToolbar = ({
         }
         footer={
           savingFilter ? (
-            <Box
-              sx={{
-                display: 'flex',
-                gap: 1,
-                width: '100%',
-                alignItems: 'center',
-              }}
-            >
-              <Input
-                size='sm'
-                placeholder={t('toolbar.filterNamePlaceholder')}
-                value={saveFilterName}
-                onChange={e => setSaveFilterName(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && handleSaveFilter()}
-                autoFocus
-                sx={{ flex: 1 }}
+            <Box sx={{ width: '100%' }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  gap: 1,
+                  width: '100%',
+                  alignItems: 'center',
+                }}
+              >
+                <Input
+                  size='sm'
+                  placeholder={t('toolbar.filterNamePlaceholder')}
+                  value={saveFilterName}
+                  onChange={e => setSaveFilterName(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleSaveFilter()}
+                  autoFocus
+                  sx={{ flex: 1 }}
+                />
+                <Button
+                  size='sm'
+                  onClick={handleSaveFilter}
+                  disabled={!saveFilterName.trim()}
+                >
+                  {t('common:save')}
+                </Button>
+                <Button
+                  size='sm'
+                  variant='plain'
+                  color='neutral'
+                  onClick={() => setSavingFilter(false)}
+                >
+                  {t('choreView.cancel')}
+                </Button>
+              </Box>
+              <ItemPrivacyField
+                isShared={saveFilterShared}
+                onChange={setSaveFilterShared}
               />
-              <Button
-                size='sm'
-                onClick={handleSaveFilter}
-                disabled={!saveFilterName.trim()}
-              >
-                {t('common:save')}
-              </Button>
-              <Button
-                size='sm'
-                variant='plain'
-                color='neutral'
-                onClick={() => setSavingFilter(false)}
-              >
-                {t('choreView.cancel')}
-              </Button>
             </Box>
           ) : (
             <Box
@@ -894,7 +913,10 @@ const ChoreToolbar = ({
                   <Menu placement='top-end'>
                     <MenuItem
                       onClick={handleUpdateFilter}
-                      disabled={!editingSavedFilter}
+                      disabled={
+                        !editingSavedFilter ||
+                        editingSavedFilter.createdBy !== userProfile?.id
+                      }
                     >
                       <Save sx={{ fontSize: 16, mr: 1 }} />
                       {t('toolbar.saveFilter')}

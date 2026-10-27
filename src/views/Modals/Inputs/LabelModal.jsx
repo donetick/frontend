@@ -1,13 +1,16 @@
-import { Box, FormControl, Input, Typography } from '@mui/joy'
+import { Check, PaletteOutlined } from '@mui/icons-material'
+import { Alert, Box, FormControl, FormLabel, Input } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import ItemPrivacyField from '../../../components/common/ItemPrivacyField'
 import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal.js'
 import { useNotification } from '../../../service/NotificationProvider.jsx'
 import LABEL_COLORS from '../../../utils/Colors.jsx'
 import { CreateLabel, UpdateLabel } from '../../../utils/Fetcher'
+import EditorSection from '../../ChoreEdit/EditorSection'
 import { useLabels } from '../../Labels/LabelQueries'
 
 function LabelModal({ isOpen, label, onClose }) {
@@ -16,6 +19,7 @@ function LabelModal({ isOpen, label, onClose }) {
 
   const [labelName, setLabelName] = useState('')
   const [color, setColor] = useState('')
+  const [isShared, setIsShared] = useState(false)
   const [error, setError] = useState('')
   const { data: userLabels = [] } = useLabels()
   const queryClient = useQueryClient()
@@ -23,6 +27,8 @@ function LabelModal({ isOpen, label, onClose }) {
 
   // Populate the form fields when editing
   useEffect(() => {
+    if (!isOpen) return
+    setIsShared(label?.isShared ?? false)
     if (label) {
       setLabelName(label.name)
       setColor(label.color)
@@ -31,7 +37,7 @@ function LabelModal({ isOpen, label, onClose }) {
       setColor('')
     }
     setError('')
-  }, [label])
+  }, [label, isOpen])
 
   // Validation logic
   const validateLabel = () => {
@@ -61,12 +67,17 @@ function LabelModal({ isOpen, label, onClose }) {
       id: label?.id,
       name: labelName,
       color,
+      isShared,
     })
-      .then(res => {
-        if (res?.error) {
-          setError(res.error)
+      .then(async res => {
+        if (!res.ok) {
+          const data = await res.json()
+          setError(data.error || t('modal.saveFailedMessage'))
         } else {
           queryClient.invalidateQueries({ queryKey: ['labels'] })
+          queryClient.invalidateQueries({ queryKey: ['chores'] })
+          queryClient.invalidateQueries({ queryKey: ['choreDetails'] })
+          queryClient.invalidateQueries({ queryKey: ['chore'] })
           onClose()
         }
       })
@@ -102,62 +113,112 @@ function LabelModal({ isOpen, label, onClose }) {
         />
       }
     >
-      <Box>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         <FormControl>
-          <Typography gutterBottom level='body-sm' alignSelf='start'>
-            {t('modal.name')}
-          </Typography>
+          <FormLabel htmlFor='labelName'>{t('modal.name')}</FormLabel>
           <Input
             fullWidth
             id='labelName'
             value={labelName}
-            onChange={e => setLabelName(e.target.value)}
+            onChange={e => {
+              setLabelName(e.target.value)
+              setError('')
+            }}
+            autoFocus
+            sx={{ minHeight: 48, borderRadius: 'md', fontSize: 'lg' }}
           />
         </FormControl>
 
-        <FormControl>
-          <Typography gutterBottom level='body-sm' alignSelf='start'>
-            {t('modal.color')}
-          </Typography>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-            {LABEL_COLORS.map(colorOption => (
-              <Box
-                component='button'
-                type='button'
-                key={colorOption.value}
-                aria-label={t('modal.colorAriaSelect', {
-                  color: colorOption.name,
-                })}
-                aria-pressed={color === colorOption.value}
-                title={colorOption.name}
-                onClick={() => setColor(colorOption.value)}
-                sx={{
-                  width: 40,
-                  height: 40,
-                  border: 0,
-                  p: 0,
-                  borderRadius: '50%',
-                  background: colorOption.value,
-                  cursor: 'pointer',
-                  outline:
-                    color === colorOption.value
-                      ? '3px solid var(--joy-palette-primary-500)'
-                      : '2px solid transparent',
-                  outlineOffset: '2px',
-                  transition: 'all 0.15s ease',
-                  flexShrink: 0,
-                  '&:hover': { transform: 'scale(1.2)' },
-                }}
-              />
-            ))}
-          </Box>
-        </FormControl>
-
         {error && (
-          <Typography color='warning' level='body-sm'>
+          <Alert color='danger' size='sm'>
             {error}
-          </Typography>
+          </Alert>
         )}
+        <Box
+          sx={{
+            border: '1px solid',
+            borderColor: 'divider',
+            borderRadius: 'lg',
+            overflow: 'hidden',
+          }}
+        >
+          <EditorSection
+            title={t('modal.color')}
+            icon={PaletteOutlined}
+            section='label-color'
+            collapsible
+            defaultOpen={!label}
+            error={!color && error}
+            summary={
+              color
+                ? t(
+                    `common:colors.${LABEL_COLORS.find(option => option.value === color)?.name}`,
+                    { defaultValue: color },
+                  )
+                : ''
+            }
+          >
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+              {LABEL_COLORS.map(colorOption => (
+                <Box
+                  component='button'
+                  type='button'
+                  key={colorOption.value}
+                  aria-label={t('modal.colorAriaSelect', {
+                    color: t(`common:colors.${colorOption.name}`),
+                  })}
+                  aria-pressed={color === colorOption.value}
+                  title={t(`common:colors.${colorOption.name}`)}
+                  onClick={() => {
+                    setColor(colorOption.value)
+                    setError('')
+                  }}
+                  sx={{
+                    width: 36,
+                    height: 36,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    '&:focus-visible': {
+                      outline: '3px solid',
+                      outlineColor: 'text.primary',
+                    },
+                    border: 0,
+                    p: 0,
+                    borderRadius: '50%',
+                    background: colorOption.value,
+                    cursor: 'pointer',
+                    outline:
+                      color === colorOption.value
+                        ? '3px solid var(--joy-palette-primary-500)'
+                        : '2px solid transparent',
+                    outlineOffset: '2px',
+                    transition: 'all 0.15s ease',
+                    flexShrink: 0,
+                    '&:hover': { transform: 'scale(1.2)' },
+                  }}
+                >
+                  {color === colorOption.value && (
+                    <Check
+                      sx={{
+                        fontSize: 20,
+                        color: 'white',
+                        filter: 'drop-shadow(0 1px 2px #000)',
+                      }}
+                    />
+                  )}
+                </Box>
+              ))}
+            </Box>
+          </EditorSection>
+          <Box sx={{ px: { xs: 2, sm: 3 }, py: 0.5 }}>
+            <ItemPrivacyField
+              isShared={isShared}
+              onChange={setIsShared}
+              kind='label'
+            />
+          </Box>
+        </Box>
       </Box>
     </ResponsiveModal>
   )

@@ -9,15 +9,16 @@ import {
   Stars,
   TaskAlt,
 } from '@mui/icons-material'
-import { Avatar, Box, Chip, Divider, Typography } from '@mui/joy'
+import { Avatar, Box, Button, Chip } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
 
 import NumberInput from '../../../components/common/NumberInput'
 import Priorities from '../../../utils/Priorities'
 import { ProjectAccessIcon } from '../../Projects/ProjectVisibilityField'
+import CustomDueDateFields from './CustomDueDateFields'
+import FilterConditionSection from './FilterConditionSection'
 
-// `labelKey` resolves against `chores:filterBuilder.dueDateOption.*` — these
-// are also read by ChoreToolbarPrototype, which translates them the same way.
+// Also used by the toolbar to translate due-date options.
 export const DUE_DATE_OPTIONS = [
   { value: 'isOverdue', color: 'danger' },
   { value: 'isDueToday', color: 'warning' },
@@ -50,7 +51,7 @@ export const defaultSelections = () => ({
   priority: { operator: 'is', values: [] },
   label: { operator: 'is', values: [] },
   project: { operator: 'is', values: [] },
-  dueDate: { operators: [] },
+  dueDate: { operators: [], custom: { mode: 'relative', start: 0, end: 14 } },
   points: { operator: 'greaterThan', value: 0, active: false },
 })
 
@@ -60,13 +61,18 @@ export const conditionsToSelections = conditions => {
   conditions.forEach(c => {
     if (c.type === 'dueDate') {
       // Filters saved before multi-select carry a single operator.
+      const entries =
+        c.operator === 'anyOf'
+          ? (Array.isArray(c.value) ? c.value : [c.value]).filter(Boolean)
+          : [{ operator: c.operator, value: c.value }]
       sel.dueDate = {
-        operators:
-          c.operator === 'anyOf'
-            ? (Array.isArray(c.value) ? c.value : [c.value]).filter(Boolean)
-            : c.operator
-              ? [c.operator]
-              : [],
+        ...sel.dueDate,
+        operators: entries
+          .map(entry => (typeof entry === 'string' ? entry : entry.operator))
+          .filter(Boolean),
+        custom:
+          entries.find(entry => entry?.operator === 'custom')?.value ??
+          sel.dueDate.custom,
       }
     } else if (c.type === 'points') {
       sel.points = { operator: c.operator, value: c.value ?? 0, active: true }
@@ -97,14 +103,17 @@ export const selectionsToConditions = selections => {
       }
     },
   )
-  const dueDateOperators = selections.dueDate.operators || []
+  const dueDateOperators = (selections.dueDate.operators || []).map(operator =>
+    operator === 'custom'
+      ? { operator, value: selections.dueDate.custom }
+      : operator,
+  )
   if (dueDateOperators.length === 1) {
-    // Stay on the single-operator shape whenever we can, so filters remain
-    // readable by anything that predates `anyOf`.
+    // Preserve compatibility with filters predating `anyOf`.
     conditions.push({
       type: 'dueDate',
-      operator: dueDateOperators[0],
-      value: null,
+      operator: dueDateOperators[0].operator ?? dueDateOperators[0],
+      value: dueDateOperators[0].value ?? null,
     })
   } else if (dueDateOperators.length > 1) {
     conditions.push({
@@ -123,65 +132,8 @@ export const selectionsToConditions = selections => {
   return conditions
 }
 
-const SectionHeader = ({ children, icon, label }) => (
-  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-    <Box
-      sx={{
-        color: 'text.secondary',
-        display: 'flex',
-        alignItems: 'center',
-        '& svg': { fontSize: 18 },
-      }}
-    >
-      {icon}
-    </Box>
-    <Typography level='title-sm' sx={{ fontWeight: 600 }}>
-      {label}
-    </Typography>
-    {children}
-  </Box>
-)
-
-const IncludeExcludeToggle = ({ labelKeys, onChange, value }) => {
-  const { t } = useTranslation('chores')
-  const [includeKey, excludeKey] = labelKeys ?? ['include', 'exclude']
-  return (
-    <Box sx={{ display: 'flex', gap: 0.5, ml: 'auto' }}>
-      {[
-        { op: 'is', labelKey: includeKey },
-        { op: 'isNot', labelKey: excludeKey },
-      ].map(o => (
-        <Chip
-          key={o.op}
-          size='sm'
-          variant={value === o.op ? 'solid' : 'soft'}
-          color={
-            value === o.op
-              ? o.op === 'isNot'
-                ? 'danger'
-                : 'primary'
-              : 'neutral'
-          }
-          onClick={() => onChange(o.op)}
-          sx={{
-            cursor: 'pointer',
-            userSelect: 'none',
-            transition: 'all 0.15s ease',
-          }}
-        >
-          {t(`filterBuilder.${o.labelKey}`)}
-        </Chip>
-      ))}
-    </Box>
-  )
-}
-
-/**
- * Reusable filter conditions UI used by both the filter sheet in ChoreToolbar
- * and the AdvancedFilterBuilder save modal.
- *
- * `onSelectionsChange` must accept either a new selections object or a
- * functional updater `prev => next` (same contract as React's setState setter).
+/** Shared by the toolbar filter sheet and saved-filter editor.
+ * onSelectionsChange follows React's setState contract, including updaters.
  */
 const FilterBuilderContent = ({
   labels = [],
@@ -193,395 +145,310 @@ const FilterBuilderContent = ({
   const { t } = useTranslation('chores')
   const toggleValue = (type, value) =>
     onSelectionsChange(prev => {
-      const cur = prev[type].values || []
-      const next = cur.includes(value)
-        ? cur.filter(v => v !== value)
-        : [...cur, value]
-      return { ...prev, [type]: { ...prev[type], values: next } }
+      const current = prev[type].values || []
+      const values = current.includes(value)
+        ? current.filter(v => v !== value)
+        : [...current, value]
+      return { ...prev, [type]: { ...prev[type], values } }
     })
 
-  const setOperator = (type, op) =>
+  const setOperator = (type, operator) =>
     onSelectionsChange(prev => ({
       ...prev,
-      [type]: { ...prev[type], operator: op },
+      [type]: { ...prev[type], operator },
     }))
 
-  const toggleDueDate = op =>
+  const personOptions = members.map(member => ({
+    value: member.userId,
+    label: member.displayName || member.username,
+    startDecorator: (
+      <Avatar
+        src={member.image}
+        alt={member.displayName}
+        sx={{ '--Avatar-size': '20px' }}
+      />
+    ),
+  }))
+  const sections = [
+    {
+      type: 'assignee',
+      icon: Person,
+      label: t('filterBuilder.assignee'),
+      visible: members.length > 0,
+      options: [
+        {
+          value: 'available_for_me',
+          label: t('toolbar.availableToMe'),
+          startDecorator: <HowToReg sx={{ fontSize: 16 }} />,
+          color: 'success',
+        },
+        ...personOptions,
+      ],
+    },
+    {
+      type: 'createdBy',
+      icon: Person,
+      label: t('filterBuilder.createdBy'),
+      visible: members.length > 0,
+      options: personOptions,
+    },
+    {
+      type: 'status',
+      icon: TaskAlt,
+      label: t('filterBuilder.statusHeading'),
+      options: CHORE_STATUSES.map(status => ({
+        value: status.value,
+        label: t(`filterBuilder.status.${status.value}`),
+      })),
+    },
+    {
+      type: 'priority',
+      icon: PriorityHigh,
+      label: t('filterBuilder.priority'),
+      options: Priorities.map(priority => ({
+        value: priority.value,
+        label: priority.name,
+        color: priority.color,
+        startDecorator: priority.icon,
+      })),
+    },
+    {
+      type: 'dueDate',
+      icon: CalendarMonth,
+      label: t('filterBuilder.dueDate'),
+      options: [...DUE_DATE_OPTIONS, { value: 'custom' }].map(option => ({
+        ...option,
+        label: t(`filterBuilder.dueDateOption.${option.value}`),
+      })),
+    },
+    {
+      type: 'label',
+      icon: Label,
+      label: t('filterBuilder.labels'),
+      visible: labels.length > 0,
+      operatorLabels: ['has', 'doesntHave'],
+      options: labels.map(label => ({
+        value: label.id,
+        label: label.name,
+        startDecorator: (
+          <Box
+            sx={{
+              width: 10,
+              height: 10,
+              borderRadius: '50%',
+              bgcolor: label.color || '#90a4ae',
+              flexShrink: 0,
+            }}
+          />
+        ),
+      })),
+    },
+    {
+      type: 'project',
+      icon: FolderOpen,
+      label: t('filterBuilder.projects'),
+      visible: projects.length > 0,
+      options: [
+        { value: 'default', label: t('filterBuilder.defaultProject') },
+        ...projects
+          .filter(project => project.id !== 'default')
+          .map(project => ({
+            value: project.id,
+            label: project.name,
+            startDecorator: (
+              <ProjectAccessIcon project={project} sx={{ fontSize: 14 }} />
+            ),
+          })),
+      ],
+    },
+  ]
+
+  const toggleDueDate = operator =>
     onSelectionsChange(prev => {
-      const cur = prev.dueDate.operators || []
+      const current = prev.dueDate.operators || []
       return {
         ...prev,
         dueDate: {
-          operators: cur.includes(op)
-            ? cur.filter(o => o !== op)
-            : [...cur, op],
+          ...prev.dueDate,
+          operators: current.includes(operator)
+            ? current.filter(value => value !== operator)
+            : [...current, operator],
         },
       }
     })
 
-  const setPointsOperator = op =>
-    onSelectionsChange(prev => ({
-      ...prev,
-      points: { ...prev.points, operator: op, active: true },
-    }))
-
-  const setPointsValue = val =>
-    onSelectionsChange(prev => ({
-      ...prev,
-      points: { ...prev.points, value: val, active: val > 0 },
-    }))
-
-  const chipRow = (type, options, getChipProps) => {
-    const selected = selections[type].values || []
-    return (
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-        {options.map(opt => {
-          const isSelected = selected.includes(opt.value)
-          const extra = getChipProps ? getChipProps(opt, isSelected) : {}
-          return (
-            <Chip
-              key={opt.value}
-              variant={isSelected ? 'solid' : 'soft'}
-              color={isSelected ? (extra.color ?? 'primary') : 'neutral'}
-              startDecorator={
-                isSelected ? (
-                  <Check sx={{ fontSize: 14 }} />
-                ) : (
-                  (extra.startDecorator ?? null)
-                )
-              }
-              onClick={() => toggleValue(type, opt.value)}
-              sx={{
-                cursor: 'pointer',
-                userSelect: 'none',
-                transition: 'all 0.15s ease',
-              }}
-            >
-              {opt.label}
-            </Chip>
-          )
-        })}
-      </Box>
-    )
-  }
-
-  const personChipRow = (type, { includeAvailableForMe = false } = {}) => {
-    const selected = selections[type].values || []
-    const isAvailableForMeSelected = selected.includes('available_for_me')
-    return (
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-        {includeAvailableForMe && (
-          <Chip
-            variant={isAvailableForMeSelected ? 'solid' : 'soft'}
-            color={isAvailableForMeSelected ? 'success' : 'neutral'}
-            startDecorator={
-              isAvailableForMeSelected ? (
-                <Check sx={{ fontSize: 14 }} />
-              ) : (
-                <HowToReg sx={{ fontSize: 16 }} />
-              )
-            }
-            onClick={() => toggleValue(type, 'available_for_me')}
-            sx={{
-              cursor: 'pointer',
-              userSelect: 'none',
-              transition: 'all 0.15s ease',
-            }}
-          >
-            {t('toolbar.availableToMe')}
-          </Chip>
-        )}
-        {members.map(m => {
-          const isSelected = selected.includes(m.userId)
-          return (
-            <Chip
-              key={m.userId}
-              variant={isSelected ? 'solid' : 'soft'}
-              color={isSelected ? 'primary' : 'neutral'}
-              startDecorator={
-                isSelected ? (
-                  <Check sx={{ fontSize: 14 }} />
-                ) : (
-                  <Avatar
-                    src={m.image}
-                    alt={m.displayName}
-                    sx={{ '--Avatar-size': '20px' }}
-                  />
-                )
-              }
-              onClick={() => toggleValue(type, m.userId)}
-              sx={{
-                cursor: 'pointer',
-                userSelect: 'none',
-                transition: 'all 0.15s ease',
-              }}
-            >
-              {m.displayName || m.username}
-            </Chip>
-          )
-        })}
-      </Box>
-    )
-  }
-
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-      {/* Assignee */}
-      {members.length > 0 && (
-        <>
-          <SectionHeader icon={<Person />} label={t('filterBuilder.assignee')}>
-            <IncludeExcludeToggle
-              value={selections.assignee.operator}
-              onChange={op => setOperator('assignee', op)}
-            />
-          </SectionHeader>
-          {personChipRow('assignee', { includeAvailableForMe: true })}
-          <Divider sx={{ my: 2.5 }} />
-        </>
-      )}
-
-      {/* Created By */}
-      {members.length > 0 && (
-        <>
-          <SectionHeader icon={<Person />} label={t('filterBuilder.createdBy')}>
-            <IncludeExcludeToggle
-              value={selections.createdBy.operator}
-              onChange={op => setOperator('createdBy', op)}
-            />
-          </SectionHeader>
-          {personChipRow('createdBy')}
-          <Divider sx={{ my: 2.5 }} />
-        </>
-      )}
-
-      {/* Status */}
-      <SectionHeader
-        icon={<TaskAlt />}
-        label={t('filterBuilder.statusHeading')}
-      >
-        <IncludeExcludeToggle
-          value={selections.status.operator}
-          onChange={op => setOperator('status', op)}
-        />
-      </SectionHeader>
-      {chipRow(
-        'status',
-        CHORE_STATUSES.map(st => ({
-          value: st.value,
-          label: t(`filterBuilder.status.${st.value}`),
-        })),
-      )}
-      <Divider sx={{ my: 2.5 }} />
-
-      {/* Priority */}
-      <SectionHeader
-        icon={<PriorityHigh />}
-        label={t('filterBuilder.priority')}
-      >
-        <IncludeExcludeToggle
-          value={selections.priority.operator}
-          onChange={op => setOperator('priority', op)}
-        />
-      </SectionHeader>
-      {chipRow(
-        'priority',
-        Priorities.map(p => ({ value: p.value, label: p.name })),
-        (opt, isSelected) => ({
-          color: isSelected
-            ? Priorities.find(p => p.value === opt.value)?.color || 'primary'
-            : 'neutral',
-          startDecorator: !isSelected
-            ? Priorities.find(p => p.value === opt.value)?.icon
-            : null,
-        }),
-      )}
-      <Divider sx={{ my: 2.5 }} />
-
-      {/* Due Date */}
-      <SectionHeader
-        icon={<CalendarMonth />}
-        label={t('filterBuilder.dueDate')}
-      >
-        {/* Due-date windows overlap, so picking several has to mean "any of"
-            — the opposite of every other section here. Say so once it can
-            actually be misread. */}
-        {(selections.dueDate.operators || []).length > 1 && (
-          <Chip size='sm' variant='soft' color='primary' sx={{ ml: 'auto' }}>
-            {t('filterBuilder.anyOf')}
-          </Chip>
-        )}
-      </SectionHeader>
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-        {DUE_DATE_OPTIONS.map(opt => {
-          const isSelected = (selections.dueDate.operators || []).includes(
-            opt.value,
-          )
+    <Box sx={{ minWidth: 0 }}>
+      {sections
+        .filter(section => section.visible !== false)
+        .map(section => {
+          const { options, type } = section
+          const isDueDate = type === 'dueDate'
+          const selection = selections[type]
+          const selected =
+            (isDueDate ? selection.operators : selection.values) || []
+          const summary = selected
+            .map(
+              value =>
+                options.find(option => String(option.value) === String(value))
+                  ?.label ?? String(value),
+            )
+            .join(', ')
           return (
-            <Chip
-              key={opt.value}
-              variant={isSelected ? 'solid' : 'soft'}
-              color={isSelected ? (opt.color ?? 'primary') : 'neutral'}
-              startDecorator={
-                isSelected ? <Check sx={{ fontSize: 14 }} /> : null
+            <FilterConditionSection
+              key={type}
+              type={type}
+              icon={section.icon}
+              label={section.label}
+              selection={selection}
+              summary={
+                isDueDate && selected.length > 1
+                  ? `${t('filterBuilder.anyOf')} · ${summary}`
+                  : summary
               }
-              onClick={() => toggleDueDate(opt.value)}
-              sx={{
-                cursor: 'pointer',
-                userSelect: 'none',
-                transition: 'all 0.15s ease',
-              }}
+              operatorLabels={section.operatorLabels}
+              onOperatorChange={
+                isDueDate ? undefined : operator => setOperator(type, operator)
+              }
             >
-              {t(`filterBuilder.dueDateOption.${opt.value}`)}
-            </Chip>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                {options.map(option => {
+                  const isSelected = selected.includes(option.value)
+                  return (
+                    <Chip
+                      key={option.value}
+                      variant={isSelected ? 'solid' : 'soft'}
+                      color={
+                        isSelected ? (option.color ?? 'primary') : 'neutral'
+                      }
+                      startDecorator={
+                        isSelected ? (
+                          <Check sx={{ fontSize: 14 }} />
+                        ) : (
+                          option.startDecorator
+                        )
+                      }
+                      onClick={() =>
+                        isDueDate
+                          ? toggleDueDate(option.value)
+                          : toggleValue(type, option.value)
+                      }
+                      slotProps={{ action: { 'aria-pressed': isSelected } }}
+                      sx={{ userSelect: 'none', transition: 'all 0.15s ease' }}
+                    >
+                      {option.label}
+                    </Chip>
+                  )
+                })}
+              </Box>
+              {isDueDate && selected.includes('custom') && (
+                <CustomDueDateFields
+                  value={selection.custom}
+                  onChange={custom =>
+                    onSelectionsChange(prev => ({
+                      ...prev,
+                      dueDate: { ...prev.dueDate, custom },
+                    }))
+                  }
+                />
+              )}
+              {selected.length > 0 && (
+                <Button
+                  size='sm'
+                  variant='plain'
+                  color='neutral'
+                  sx={{ mt: 1.5 }}
+                  onClick={() =>
+                    onSelectionsChange(prev => ({
+                      ...prev,
+                      [type]: isDueDate
+                        ? { ...prev[type], operators: [] }
+                        : { ...prev[type], values: [] },
+                    }))
+                  }
+                >
+                  {t('filterBuilder.clear')}
+                </Button>
+              )}
+            </FilterConditionSection>
           )
         })}
-      </Box>
-      <Divider sx={{ my: 2.5 }} />
-
-      {/* Labels */}
-      {labels.length > 0 && (
-        <>
-          <SectionHeader icon={<Label />} label={t('filterBuilder.labels')}>
-            <IncludeExcludeToggle
-              value={selections.label.operator}
-              onChange={op => setOperator('label', op)}
-              labelKeys={['has', 'doesntHave']}
-            />
-          </SectionHeader>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-            {labels.map(lbl => {
-              const isSelected = selections.label.values.includes(lbl.id)
-              return (
-                <Chip
-                  key={lbl.id}
-                  variant={isSelected ? 'solid' : 'soft'}
-                  color='neutral'
-                  startDecorator={
-                    <Box
-                      sx={{
-                        width: 10,
-                        height: 10,
-                        borderRadius: '50%',
-                        bgcolor: lbl.color || '#90a4ae',
-                        flexShrink: 0,
-                      }}
-                    />
-                  }
-                  endDecorator={
-                    isSelected ? <Check sx={{ fontSize: 12 }} /> : null
-                  }
-                  onClick={() => toggleValue('label', lbl.id)}
-                  sx={{
-                    cursor: 'pointer',
-                    userSelect: 'none',
-                    transition: 'all 0.15s ease',
-                    ...(isSelected && {
-                      outline: '2px solid',
-                      outlineColor: 'primary.400',
-                    }),
-                  }}
-                >
-                  {lbl.name}
-                </Chip>
-              )
-            })}
-          </Box>
-          <Divider sx={{ my: 2.5 }} />
-        </>
-      )}
-
-      {/* Projects */}
-      {projects.length > 0 && (
-        <>
-          <SectionHeader
-            icon={<FolderOpen />}
-            label={t('filterBuilder.projects')}
-          >
-            <IncludeExcludeToggle
-              value={selections.project.operator}
-              onChange={op => setOperator('project', op)}
-            />
-          </SectionHeader>
-          {chipRow('project', [
-            { value: 'default', label: t('filterBuilder.defaultProject') },
-            ...projects
-              .filter(p => p.id !== 'default')
-              .map(p => ({
-                value: p.id,
-                label: (
-                  <Box
-                    sx={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: 0.5,
-                    }}
-                  >
-                    {p.name}
-                    <ProjectAccessIcon project={p} sx={{ fontSize: 12 }} />
-                  </Box>
-                ),
-              })),
-          ])}
-          <Divider sx={{ my: 2.5 }} />
-        </>
-      )}
-
-      {/* Points */}
-      <SectionHeader icon={<Stars />} label={t('filterBuilder.points')} />
-      <Box
-        sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}
+      <FilterConditionSection
+        type='points'
+        icon={Stars}
+        label={t('filterBuilder.points')}
+        selection={selections.points}
+        summary={
+          selections.points.active
+            ? `${POINTS_OPERATORS.find(operator => operator.value === selections.points.operator)?.label ?? selections.points.operator} ${selections.points.value}`
+            : ''
+        }
       >
-        {POINTS_OPERATORS.map(op => (
-          <Chip
-            key={op.value}
-            size='sm'
-            variant={
-              selections.points.operator === op.value &&
+        <Box
+          sx={{
+            display: 'flex',
+            gap: 1,
+            alignItems: 'center',
+            flexWrap: 'wrap',
+          }}
+        >
+          {POINTS_OPERATORS.map(operator => {
+            const selected =
+              selections.points.operator === operator.value &&
               selections.points.active
-                ? 'solid'
-                : 'soft'
-            }
-            color={
-              selections.points.operator === op.value &&
-              selections.points.active
-                ? 'primary'
-                : 'neutral'
-            }
-            onClick={() => setPointsOperator(op.value)}
-            sx={{
-              cursor: 'pointer',
-              userSelect: 'none',
-              fontFamily: 'monospace',
-              fontWeight: 600,
-            }}
-          >
-            {op.label}
-          </Chip>
-        ))}
-        <NumberInput
-          size='sm'
-          value={selections.points.value}
-          min={0}
-          onValueChange={setPointsValue}
-          sx={{ width: 80 }}
-        />
-        {selections.points.active && (
-          <Chip
+            return (
+              <Chip
+                key={operator.value}
+                size='sm'
+                variant={selected ? 'solid' : 'soft'}
+                color={selected ? 'primary' : 'neutral'}
+                onClick={() =>
+                  onSelectionsChange(prev => ({
+                    ...prev,
+                    points: {
+                      ...prev.points,
+                      operator: operator.value,
+                      active: true,
+                    },
+                  }))
+                }
+                slotProps={{ action: { 'aria-pressed': selected } }}
+                sx={{ fontFamily: 'monospace', fontWeight: 600 }}
+              >
+                {operator.label}
+              </Chip>
+            )
+          })}
+          <NumberInput
             size='sm'
-            variant='soft'
-            color='danger'
-            onClick={() =>
+            aria-label={t('filterBuilder.points')}
+            value={selections.points.value}
+            min={0}
+            onValueChange={value =>
               onSelectionsChange(prev => ({
                 ...prev,
-                points: { ...prev.points, active: false, value: 0 },
+                points: { ...prev.points, value, active: true },
               }))
             }
-            sx={{ cursor: 'pointer' }}
-          >
-            {t('filterBuilder.clear')}
-          </Chip>
-        )}
-      </Box>
+            sx={{ width: 80 }}
+          />
+          {selections.points.active && (
+            <Chip
+              size='sm'
+              variant='soft'
+              color='danger'
+              onClick={() =>
+                onSelectionsChange(prev => ({
+                  ...prev,
+                  points: { ...prev.points, active: false, value: 0 },
+                }))
+              }
+            >
+              {t('filterBuilder.clear')}
+            </Chip>
+          )}
+        </Box>
+      </FilterConditionSection>
     </Box>
   )
 }

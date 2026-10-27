@@ -1014,7 +1014,9 @@
     "project": "مشروع",
     "filterFallback": "تصفية",
     "notPrefix": "ليس ",
-    "customDueDate": "مخصص",
+    "customDueDate": {
+      "label": "مخصص"
+    },
     "clear": "مسح"
   },
   "empty": {

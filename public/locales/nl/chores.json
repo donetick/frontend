@@ -1021,7 +1021,9 @@
     "project": "Project",
     "filterFallback": "Filter",
     "notPrefix": "Niet ",
-    "customDueDate": "Aangepast",
+    "customDueDate": {
+      "label": "Aangepast"
+    },
     "clear": "Wissen"
   },
   "empty": {

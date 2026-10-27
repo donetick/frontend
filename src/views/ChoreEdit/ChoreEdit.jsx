@@ -67,6 +67,7 @@ import DurationInput from '../../components/common/DurationInput'
 import EmptyState from '../../components/common/EmptyState'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import NumberInput from '../../components/common/NumberInput'
+import PermissionDeniedModal from '../../components/common/PermissionDeniedModal'
 import NotificationTemplate from '../../components/NotificationTemplate.jsx'
 import { usePageShortcutScope } from '../../contexts/KeyboardShortcutScopeContext'
 import { usePaywall } from '../../contexts/PaywallContext'
@@ -82,6 +83,7 @@ import {
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
 import { useXPTranslation as useTranslation } from '../../queries/XPQueries'
 import { useNotification } from '../../service/NotificationProvider'
+import { canEditChore } from '../../utils/ChoreAccess'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
 import { sanitizeRemindersForPlan } from '../../utils/entitlements'
 import {
@@ -244,6 +246,13 @@ const ChoreEdit = () => {
   } = useChore(choreId)
   const { data: membersData, isLoading: isMemberDataLoading } =
     useCircleMembers()
+  const isEditingExistingChore =
+    !!choreId && searchParams.get('clone') !== 'true'
+  const hasEditPermission = canEditChore(
+    choreData?.res,
+    userProfile?.id,
+    membersData?.res || [],
+  )
   const { showError, showSuccess } = useNotification()
   const { isNativeScanner, scanDocument } = useDocumentScanner()
 
@@ -319,7 +328,7 @@ const ChoreEdit = () => {
   const dirtyGuard = useRef(false)
   const hasInteracted = useRef(false)
   const isDirty = savedSnapshot !== null && snapshot !== savedSnapshot
-  dirtyGuard.current = isDirty
+  dirtyGuard.current = isDirty && (!isEditingExistingChore || hasEditPermission)
   const formLoading =
     (isChoreLoading && choreId) ||
     isUserLabelsLoading ||
@@ -609,6 +618,7 @@ const ChoreEdit = () => {
   // menu pick performs the save right away instead of only changing the
   // default (state updates wouldn't be visible to this call anyway).
   const HandleSaveChore = (shouldCreateAnother = createAnother) => {
+    if (isEditingExistingChore && !hasEditPermission) return
     if (updateChoreMutation.isPending || createChoreMutation.isPending) return
     setAttemptToSave(true)
     if (!HandleValidateChore()) {
@@ -1105,6 +1115,17 @@ const ChoreEdit = () => {
           primaryAction={{ label: t('archived.backToTasks'), to: '/chores' }}
         />
       </Container>
+    )
+  }
+  if (isEditingExistingChore && !hasEditPermission) {
+    return (
+      <PermissionDeniedModal
+        open
+        onClose={() => Navigate(`/chores/${choreId}`, { replace: true })}
+        resourceType='task'
+        resourceName={choreData?.res?.name}
+        title={t('common:permissionDenied.taskTitle')}
+      />
     )
   }
   return (
