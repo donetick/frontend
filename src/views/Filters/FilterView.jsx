@@ -43,6 +43,7 @@ import SwipeListItem, {
 import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
 import { useChores } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
+import { useNotification } from '../../service/NotificationProvider'
 import { canCreateQuickFilter } from '../../utils/entitlements'
 import { getFilterCount, getFilterOverdueCount } from '../../utils/FilterEngine'
 import { getSafeBottom, getSafeBottomStyles } from '../../utils/SafeAreaUtils'
@@ -268,6 +269,7 @@ const FilterCardContent = ({
 
 const FilterView = () => {
   const { t } = useTranslation('filters')
+  const { showError } = useNotification()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const { data: userProfile } = useUserProfile()
@@ -299,6 +301,10 @@ const FilterView = () => {
   )
   const [pinnedFilter, setPinnedFilter] = useState('all')
   const searchInputRef = useRef(null)
+  const savePendingRef = useRef(false)
+  const deletePendingRef = useRef(false)
+  const editorSessionRef = useRef(0)
+  const confirmationSessionRef = useRef(0)
 
   useEffect(() => {
     localStorage.setItem('filtersSortBy', sortBy)
@@ -426,6 +432,7 @@ const FilterView = () => {
       showPaywall(PAYWALL_REASON.QUICK_FILTER_LIMIT)
       return
     }
+    editorSessionRef.current += 1
     setEditingFilter(null)
     setShowAdvancedFilterBuilder(true)
   }, [filtersData.length, isPlus, showPaywall])
@@ -445,11 +452,13 @@ const FilterView = () => {
   }, [searchParams, setSearchParams, handleAddFilter])
 
   const handleEditFilter = filter => {
+    editorSessionRef.current += 1
     setEditingFilter(filter)
     setShowAdvancedFilterBuilder(true)
   }
 
   const handleDeleteClicked = id => {
+    const session = ++confirmationSessionRef.current
     const filter = savedFilters.find(f => f.id === id)
     setConfirmationModel({
       isOpen: true,
@@ -459,49 +468,69 @@ const FilterView = () => {
       color: 'danger',
       cancelText: t('common:cancel'),
       onClose: confirmed => {
+        if (confirmationSessionRef.current !== session) return
         if (confirmed === true) {
-          handleDeleteFilter(id)
+          handleDeleteFilter(id, session)
+        } else {
+          confirmationSessionRef.current += 1
+          setConfirmationModel({})
         }
-        setConfirmationModel({})
       },
     })
   }
 
-  const handleDeleteFilter = id => {
+  const handleDeleteFilter = (id, session) => {
+    if (deletePendingRef.current) return
+    deletePendingRef.current = true
     deleteFilterMutation.mutate(id, {
       onSuccess: () => {
+        if (confirmationSessionRef.current === session) {
+          setConfirmationModel({})
+        }
         // if it's the selected filter, we might want to clear it
         if (localStorage.getItem('selectedChoreFilter') === id) {
           localStorage.removeItem('selectedChoreFilter')
         }
       },
+      onError: error => showError(error.message),
+      onSettled: () => {
+        deletePendingRef.current = false
+      },
     })
   }
 
   const handlePinFilter = id => {
-    togglePinMutation.mutate(id)
+    togglePinMutation.mutate(id, {
+      onError: error => showError(error.message),
+    })
   }
 
   const handleSaveFilter = filterData => {
+    // A ref also guards two clicks before the pending state can re-render.
+    if (savePendingRef.current) return
+    savePendingRef.current = true
+    const session = editorSessionRef.current
+    const callbacks = {
+      onSuccess: () => {
+        // A canceled save must not close a subsequently opened editor.
+        if (editorSessionRef.current !== session) return
+        setShowAdvancedFilterBuilder(false)
+        setEditingFilter(null)
+      },
+      onError: error => showError(error.message),
+      onSettled: () => {
+        savePendingRef.current = false
+      },
+    }
     if (editingFilter) {
       // Update existing filter
       updateFilterMutation.mutate(
         { filterId: editingFilter.id, filterData },
-        {
-          onSuccess: () => {
-            setShowAdvancedFilterBuilder(false)
-            setEditingFilter(null)
-          },
-        },
+        callbacks,
       )
     } else {
       // Save new filter
-      createFilterMutation.mutate(filterData, {
-        onSuccess: () => {
-          setShowAdvancedFilterBuilder(false)
-          setEditingFilter(null)
-        },
-      })
+      createFilterMutation.mutate(filterData, callbacks)
     }
   }
 
@@ -757,6 +786,7 @@ const FilterView = () => {
         <AdvancedFilterBuilder
           isOpen={showAdvancedFilterBuilder}
           onClose={() => {
+            editorSessionRef.current += 1
             setShowAdvancedFilterBuilder(false)
             setEditingFilter(null)
           }}

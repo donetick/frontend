@@ -121,7 +121,6 @@ const AdvancedFilterBuilder = ({
       operator: 'AND',
       ...(editingFilter ? { id: editingFilter.id } : {}),
     })
-    onClose()
   }
 
   return (
