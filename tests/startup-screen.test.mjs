@@ -175,3 +175,9 @@ test('native launch screen waits for the web startup screen', () => {
   )
   assert.match(html, /classList\.add\('startup-booting'\)/)
 })
+
+test('startup is fully drawn on its first frame', () => {
+  // The native launch screen hands off to it directly; a fade-in would show
+  // a blank page first.
+  assert.doesNotMatch(startupStyle(), /startup-enter|opacity: 0;\s*transform/)
+})
