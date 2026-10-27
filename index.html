@@ -30,6 +30,13 @@
         color: var(--startup-text);
         font-family: system-ui, sans-serif;
       }
+      /* Never let the bare page show white while booting. */
+      :root.startup-booting {
+        background: var(--startup-skin-bg, #fbfcfe);
+      }
+      :root.startup-booting[data-startup-mode='dark'] {
+        background: var(--startup-skin-bg, #101216);
+      }
       /* The boot overlay sits above #root until the app has a page to show. */
       #startup {
         z-index: 2147483000;
@@ -285,6 +292,7 @@
               : 'light'
         }
         root.setAttribute('data-startup-mode', mode)
+        root.classList.add('startup-booting')
         try {
           var skin = JSON.parse(localStorage.getItem('donetick-startup-theme'))
           var colors = skin && skin[mode]
@@ -368,6 +376,26 @@
         </div>
       </div>
     </div>
+    <!--
+      Native apps keep the launch screen up (capacitor.config.ts sets
+      launchAutoHide: false). Hide it once the screen above has painted, without
+      waiting for the app bundle, so launch screen -> startup screen has no
+      blank WebView frame between them. src/main.jsx repeats this as a fallback.
+    -->
+    <script>
+      ;(function () {
+        var splash =
+          window.Capacitor &&
+          window.Capacitor.Plugins &&
+          window.Capacitor.Plugins.SplashScreen
+        if (!splash) return
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            splash.hide({ fadeOutDuration: 200 }).catch(function () {})
+          })
+        })
+      })()
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

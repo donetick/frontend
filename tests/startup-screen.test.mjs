@@ -124,8 +124,14 @@ test('the overlay hides once, after the last hold settles', async () => {
     classList: { add: name => classes.add(name) },
     remove: () => (removed += 1),
   }
+  const rootClasses = new Set(['startup-booting'])
   globalThis.window = {}
-  globalThis.document = { getElementById: () => overlay }
+  globalThis.document = {
+    documentElement: {
+      classList: { remove: name => rootClasses.delete(name) },
+    },
+    getElementById: () => overlay,
+  }
 
   try {
     const { holdStartupOverlay } =
@@ -143,6 +149,7 @@ test('the overlay hides once, after the last hold settles', async () => {
     assert.equal(classes.size, 0)
     mock.timers.tick(1)
     assert.ok(classes.has('startup-screen--leaving'))
+    assert.ok(!rootClasses.has('startup-booting'))
     mock.timers.tick(200)
     assert.equal(removed, 1)
 
@@ -155,4 +162,16 @@ test('the overlay hides once, after the last hold settles', async () => {
     delete globalThis.window
     delete globalThis.document
   }
+})
+
+test('native launch screen waits for the web startup screen', () => {
+  const config = read('../capacitor.config.ts')
+  assert.match(config, /SplashScreen: \{[^}]*launchAutoHide: false/)
+  assert.doesNotMatch(config, /SplashScreen: \{[^}]*backgroundColor/)
+  // Hidden from an inline script after the overlay markup, not from the bundle.
+  const body = html.slice(html.indexOf('id="startup"'))
+  assert.ok(
+    body.indexOf('SplashScreen') < body.indexOf('<script type="module"'),
+  )
+  assert.match(html, /classList\.add\('startup-booting'\)/)
 })

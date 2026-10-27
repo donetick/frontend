@@ -15,6 +15,14 @@ const config: CapacitorConfig = {
     StatusBar: {
       overlaysWebView: false,
     },
+    // Keep the native launch screen up until index.html has painted its
+    // startup screen (it calls SplashScreen.hide()), so the empty WebView never
+    // flashes between the two. No backgroundColor: it would override the
+    // launch screen's light/dark images.
+    SplashScreen: {
+      launchAutoHide: false,
+      launchFadeOutDuration: 200,
+    },
     PushNotifications: {
       presentationOptions: ['badge', 'sound', 'alert'],
     },

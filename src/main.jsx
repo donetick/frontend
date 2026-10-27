@@ -1,6 +1,7 @@
 import './i18n/config'
 import './index.css'
 
+import { SplashScreen } from '@capacitor/splash-screen'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 
@@ -18,6 +19,10 @@ const isMarketingSite =
 export const Site = React.lazy(() =>
   isMarketingSite ? import('./MarketingApp.jsx') : import('./Application.jsx'),
 )
+
+// index.html already asked the native launch screen to hide; this covers the
+// case where its inline script couldn't reach the plugin. Hiding is idempotent.
+SplashScreen.hide({ fadeOutDuration: 200 }).catch(() => {})
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

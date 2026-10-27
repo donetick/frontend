@@ -17,6 +17,8 @@ export const hideStartupOverlay = () => {
   if (hidden) return
   hidden = true
   clearTimeout(settleTimer)
+  // The app paints its own background from here on.
+  document.documentElement.classList.remove('startup-booting')
 
   const overlay = document.getElementById('startup')
   if (!overlay) return
