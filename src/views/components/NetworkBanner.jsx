@@ -4,23 +4,22 @@ import { useEffect, useState } from 'react'
 
 import { networkManager } from '../../hooks/NetworkManager'
 
+// Brief blips, and the status settling while the app starts, stay silent.
+const OFFLINE_BANNER_DELAY_MS = 1500
+const BANNER_VISIBLE_MS = 5000
+
 const NetworkBanner = () => {
   const [isOnline, setIsOnline] = useState(networkManager.isOnline)
   const [offlineReason, setOfflineReason] = useState(
     networkManager.offlineReason,
   )
-  const [isBannerVisible, setIsBannerVisible] = useState(
-    !networkManager.isOnline,
-  )
+  const [isBannerVisible, setIsBannerVisible] = useState(false)
 
   useEffect(() => {
     const handleNetworkChange = isOnline => {
       setIsOnline(isOnline)
       setOfflineReason(networkManager.offlineReason)
-
-      if (!isOnline) {
-        setIsBannerVisible(true)
-      }
+      if (isOnline) setIsBannerVisible(false)
     }
 
     networkManager.registerNetworkListener(handleNetworkChange)
@@ -28,16 +27,24 @@ const NetworkBanner = () => {
   }, [])
 
   useEffect(() => {
-    if (isOnline || !isBannerVisible) {
-      return
-    }
+    if (isOnline) return
 
-    const timerId = setTimeout(() => {
-      setIsBannerVisible(false)
-    }, 5000)
-
+    const timerId = setTimeout(
+      () => setIsBannerVisible(true),
+      OFFLINE_BANNER_DELAY_MS,
+    )
     return () => clearTimeout(timerId)
-  }, [isOnline, isBannerVisible])
+  }, [isOnline])
+
+  useEffect(() => {
+    if (!isBannerVisible) return
+
+    const timerId = setTimeout(
+      () => setIsBannerVisible(false),
+      BANNER_VISIBLE_MS,
+    )
+    return () => clearTimeout(timerId)
+  }, [isBannerVisible])
 
   const message =
     offlineReason === 'server'

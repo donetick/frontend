@@ -1,5 +1,6 @@
 import { Navigate } from 'react-router-dom'
 
+import StartupScreen from '../../components/StartupScreen'
 import { getDefaultViewPath } from '../../utils/DefaultViewConfig'
 
 /**
@@ -7,6 +8,12 @@ import { getDefaultViewPath } from '../../utils/DefaultViewConfig'
  * picked as their default (Home or the task list). Both keep their own URL, so
  * a link to either one always lands where it says it does.
  */
-const DefaultViewRoute = () => <Navigate to={getDefaultViewPath()} replace />
+const DefaultViewRoute = () => (
+  <>
+    {/* Holds the startup screen through the redirect's empty frame. */}
+    <StartupScreen />
+    <Navigate to={getDefaultViewPath()} replace />
+  </>
+)
 
 export default DefaultViewRoute

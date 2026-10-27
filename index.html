@@ -13,12 +13,13 @@
     <!-- Inline so startup is visible before JavaScript and app CSS load. -->
     <style>
       .startup-screen {
-        --startup-bg: #fbfcfe;
+        --startup-bg: var(--startup-skin-bg, #fbfcfe);
         --startup-surface: #ffffff;
         --startup-text: #20252b;
         --startup-muted: #747b87;
-        --startup-accent: #0891b2;
-        --startup-soft: #cffafe;
+        --startup-accent: var(--startup-skin-accent, #0891b2);
+        --startup-soft: var(--startup-skin-soft, #cffafe);
+        --startup-halo: var(--startup-skin-halo, #a5f3fc);
         --startup-border: #e9eaf0;
         position: fixed;
         inset: 0;
@@ -29,9 +30,26 @@
         color: var(--startup-text);
         font-family: system-ui, sans-serif;
       }
+      /* The boot overlay sits above #root until the app has a page to show. */
+      #startup {
+        z-index: 2147483000;
+        transition: opacity 200ms ease-out;
+      }
+      #startup.startup-screen--leaving {
+        opacity: 0;
+        pointer-events: none;
+      }
       .startup-screen__content {
+        position: relative;
         padding: 32px 24px;
         text-align: center;
+      }
+      /* Slow/offline details hang below so the visual never shifts. */
+      .startup-screen__details {
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 0;
+        right: 0;
       }
       .startup-screen__visual {
         position: relative;
@@ -44,7 +62,11 @@
         position: absolute;
         inset: 12px 30px;
         border-radius: 50%;
-        background: radial-gradient(ellipse, #a5f3fc 0%, transparent 70%);
+        background: radial-gradient(
+          ellipse,
+          var(--startup-halo) 0%,
+          transparent 70%
+        );
         filter: blur(16px);
         animation: startup-breathe 4s ease-in-out infinite;
       }
@@ -218,23 +240,22 @@
           transform: translateY(-4px);
         }
       }
-      @media (prefers-color-scheme: dark) {
-        .startup-screen {
-          --startup-bg: #101216;
-          --startup-surface: #1b1e25;
-          --startup-text: #f0f1f5;
-          --startup-muted: #9ca3b1;
-          --startup-accent: #67e8f9;
-          --startup-soft: #164e63;
-          --startup-border: #2b2f39;
-        }
-        .startup-screen__halo {
-          background: radial-gradient(ellipse, #155e75 0%, transparent 70%);
-        }
-        .startup-screen__card--front .startup-screen__check {
-          background: #203c36;
-          color: #8ed7bd;
-        }
+      /* Set before first paint by the script below, from the saved theme mode. */
+      :root[data-startup-mode='dark'] .startup-screen {
+        --startup-bg: var(--startup-skin-bg, #101216);
+        --startup-surface: #1b1e25;
+        --startup-text: #f0f1f5;
+        --startup-muted: #9ca3b1;
+        --startup-accent: var(--startup-skin-accent, #67e8f9);
+        --startup-soft: var(--startup-skin-soft, #164e63);
+        --startup-halo: var(--startup-skin-halo, #155e75);
+        --startup-border: #2b2f39;
+      }
+      :root[data-startup-mode='dark']
+        .startup-screen__card--front
+        .startup-screen__check {
+        background: #203c36;
+        color: #8ed7bd;
       }
       @media (prefers-reduced-motion: reduce) {
         .startup-screen .startup-screen__content,
@@ -243,6 +264,37 @@
         }
       }
     </style>
+
+    <!--
+      Match the startup screen to the app's theme before first paint, so the
+      hand-off doesn't flip light/dark or change the skin's colours. Keys must
+      stay in sync with useStickyState('themeMode') and src/utils/StartupTheme.js.
+    -->
+    <script>
+      ;(function () {
+        var root = document.documentElement
+        var mode = null
+        try {
+          mode = JSON.parse(localStorage.getItem('themeMode'))
+        } catch (e) {}
+        if (mode !== 'light' && mode !== 'dark') {
+          mode =
+            window.matchMedia &&
+            window.matchMedia('(prefers-color-scheme: dark)').matches
+              ? 'dark'
+              : 'light'
+        }
+        root.setAttribute('data-startup-mode', mode)
+        try {
+          var skin = JSON.parse(localStorage.getItem('donetick-startup-theme'))
+          var colors = skin && skin[mode]
+          if (!colors) return
+          for (var name in colors) {
+            root.style.setProperty('--startup-skin-' + name, colors[name])
+          }
+        } catch (e) {}
+      })()
+    </script>
 
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
@@ -274,41 +326,45 @@
     </script>
   </head>
   <body>
-    <div id="root">
-      <!-- React replaces this with the matching Suspense fallback on mount. -->
-      <div class="startup-screen" role="status" aria-label="Loading Donetick">
-        <div class="startup-screen__content">
-          <div class="startup-screen__visual" aria-hidden="true">
-            <div class="startup-screen__halo"></div>
-            <div class="startup-screen__card startup-screen__card--back">
-              <span class="startup-screen__check">✓</span>
-              <span class="startup-screen__lines"
-                ><span></span><span></span
-              ></span>
-            </div>
-            <div class="startup-screen__mascot">
-              <img src="/src/assets/logo.svg" width="88" height="88" alt="" />
-            </div>
-            <div class="startup-screen__card startup-screen__card--front">
-              <span class="startup-screen__check">✓</span>
-              <span class="startup-screen__lines"
-                ><span></span><span></span
-              ></span>
-            </div>
-            <span
-              class="startup-screen__spark startup-screen__spark--one"
-            ></span>
-            <span
-              class="startup-screen__spark startup-screen__spark--two"
+    <div id="root"></div>
+    <!--
+      Outside #root so React never replaces it: it stays put through bundle,
+      translation and first data loading, then src/utils/StartupOverlay.js
+      fades it out once. Markup matches src/components/StartupScreen.jsx.
+    -->
+    <div
+      id="startup"
+      class="startup-screen"
+      role="status"
+      aria-label="Loading Donetick"
+    >
+      <div class="startup-screen__content">
+        <div class="startup-screen__visual" aria-hidden="true">
+          <div class="startup-screen__halo"></div>
+          <div class="startup-screen__card startup-screen__card--back">
+            <span class="startup-screen__check">✓</span>
+            <span class="startup-screen__lines"
+              ><span></span><span></span
             ></span>
           </div>
-          <div class="startup-screen__copy">
-            <div class="startup-screen__name">Done<span>tick</span></div>
-            <div class="startup-screen__caption">Getting things ready</div>
+          <div class="startup-screen__mascot">
+            <img src="/src/assets/logo.svg" width="88" height="88" alt="" />
           </div>
-          <div class="startup-screen__dots" aria-hidden="true">
-            <span></span><span></span><span></span>
+          <div class="startup-screen__card startup-screen__card--front">
+            <span class="startup-screen__check">✓</span>
+            <span class="startup-screen__lines"
+              ><span></span><span></span
+            ></span>
           </div>
+          <span class="startup-screen__spark startup-screen__spark--one"></span>
+          <span class="startup-screen__spark startup-screen__spark--two"></span>
+        </div>
+        <div class="startup-screen__copy">
+          <div class="startup-screen__name">Done<span>tick</span></div>
+          <div class="startup-screen__caption">Getting things ready</div>
+        </div>
+        <div class="startup-screen__dots" aria-hidden="true">
+          <span></span><span></span><span></span>
         </div>
       </div>
     </div>

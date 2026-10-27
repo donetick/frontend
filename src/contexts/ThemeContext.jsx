@@ -18,6 +18,7 @@ import {
   feedbackDecoratorStyles,
   feedbackSurfaceStyles,
 } from '@/utils/feedbackTheme'
+import { saveStartupTheme } from '@/utils/StartupTheme'
 import { tintNeutralPalette } from '@/utils/themePalette'
 
 import { useLocalization } from './LocalizationContext'
@@ -361,6 +362,10 @@ const ThemeContext = ({ children }) => {
     window.addEventListener('storage', syncSkin)
     return () => window.removeEventListener('storage', syncSkin)
   }, [])
+
+  // index.html paints the startup screen before React loads; give it this
+  // skin's colours so the next launch doesn't change background on hand-off.
+  useEffect(() => saveStartupTheme(skin), [skin])
 
   const direction = isRTL ? 'rtl' : 'ltr'
   const cache = byDirection[direction].cache

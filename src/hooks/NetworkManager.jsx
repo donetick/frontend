@@ -32,6 +32,8 @@ class NetworkManager {
       this.offlineReason = 'device'
       this.offlineSince = Date.now()
     }
+    // Listeners read the optimistic default until now; give them the real one.
+    this.notifyConnectionStatus()
 
     Network.addListener('networkStatusChange', status => {
       if (this.deviceOnline !== status.connected) {

@@ -72,14 +72,14 @@ test('standard snackbars use a single theme accent while preserving status icons
   assert.doesNotMatch(provider, /color=\{config.color\}/)
 })
 
-test('both loaders follow the primary accent, not success green or hardcoded cyan', () => {
+test('the loader follows the skin accent, not success green or hardcoded cyan', () => {
   const readSource = path =>
     readFileSync(new URL(path, import.meta.url), 'utf8')
   const loader = readSource('../src/views/components/Loading.jsx')
-  const overlay = readSource('../src/components/animations/LoadingScreen.jsx')
+  const startupTheme = readSource('../src/utils/StartupTheme.js')
+  assert.match(loader, /<StartupScreen>/)
   assert.match(loader, /color='primary'/)
   assert.doesNotMatch(loader, /color='success'|@mui\/material/)
-  assert.match(overlay, /theme\.vars\.palette\.background\.body/)
-  assert.match(overlay, /primary\.plainColor/)
-  assert.doesNotMatch(overlay, /#06b6d4|rgba\(255, 255, 255/)
+  assert.match(startupTheme, /COLORS\[preset\.accent\]/)
+  assert.doesNotMatch(startupTheme, /#06b6d4/)
 })

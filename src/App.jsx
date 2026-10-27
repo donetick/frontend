@@ -17,6 +17,7 @@ import {
 import useAnalyticsIdentity from './analytics/useAnalyticsIdentity'
 import { registerCapacitorListeners } from './CapacitorListener'
 import PageTransition from './components/animations/PageTransition'
+import StartupScreen from './components/StartupScreen'
 import { ImpersonateUserProvider } from './contexts/ImpersonateUserContext'
 import { KeyboardShortcutScopeProvider } from './contexts/KeyboardShortcutScopeContext'
 import { NavBarTitleProvider } from './contexts/NavBarTitleContext'
@@ -149,7 +150,8 @@ const AppContent = () => {
   // Initialize status bar with theme-aware configuration
   useStatusBar()
 
-  if (isRedirectingToOnboarding) return null
+  // Keep the startup screen up rather than flashing a blank frame.
+  if (isRedirectingToOnboarding) return <StartupScreen />
 
   return (
     <div>
