@@ -59,17 +59,7 @@ PODS:
   - CapgoCapacitorSocialLogin (8.3.39):
     - Alamofire (~> 5.10.2)
     - Capacitor
-    - FBSDKCoreKit (~> 18.0)
-    - FBSDKLoginKit (~> 18.0)
     - GoogleSignIn (~> 9.0.0)
-  - FBAEMKit (18.1.1):
-    - FBSDKCoreKit_Basics (= 18.1.1)
-  - FBSDKCoreKit (18.1.1):
-    - FBAEMKit (= 18.1.1)
-    - FBSDKCoreKit_Basics (= 18.1.1)
-  - FBSDKCoreKit_Basics (18.1.1)
-  - FBSDKLoginKit (18.1.1):
-    - FBSDKCoreKit (= 18.1.1)
   - FirebaseCore (12.15.0):
     - FirebaseCoreInternal (~> 12.15.0)
     - GoogleUtilities/Environment (~> 8.1)
@@ -195,10 +185,6 @@ SPEC REPOS:
     - Alamofire
     - AppAuth
     - AppCheckCore
-    - FBAEMKit
-    - FBSDKCoreKit
-    - FBSDKCoreKit_Basics
-    - FBSDKLoginKit
     - FirebaseCore
     - FirebaseCoreInternal
     - FirebaseInstallations
@@ -299,11 +285,7 @@ SPEC CHECKSUMS:
   CapawesomeCapacitorBadge: 3fe2737ac75914766cedc07e3eefa46acabd3b38
   CapgoCapacitorDocumentScanner: 262bb84b73707f9e2e59071ca58013e3f9acf942
   CapgoCapacitorNfc: 8ea158143c441e1cf6d231a971e375511558d027
-  CapgoCapacitorSocialLogin: 377be56ea91e9920f420ad3dc24f4662cae138f5
-  FBAEMKit: fbb0a50e13109400d0615e7630a0db26ec6b8206
-  FBSDKCoreKit: 0063014b3b1f7e975e70b60232b0cf8003839746
-  FBSDKCoreKit_Basics: f4a1e0f38769eb71abaf6395b85e015318fcda49
-  FBSDKLoginKit: 0e6d0df30ae0a5b33f33d9050ca10ca21e0da234
+  CapgoCapacitorSocialLogin: 5ea6b14b8e9b1bd74533e580d4cf0e2b85d80793
   FirebaseCore: 2e86a4ea1684d4381707069e4a6d89ac808e901e
   FirebaseCoreInternal: 6ab6a02c94446c026d2cf35cf5383842ebaa4992
   FirebaseInstallations: eb29ccbf64eaedf86fd5b2ccc7fabde567660b52

@@ -10,6 +10,29 @@
 
     <title>Donetick</title>
 
+    <!-- Resolves the user's saved theme (mirrors MUI Joy's useColorScheme,
+    which persists 'light' | 'dark' | 'system' to localStorage['joy-mode'])
+    before first paint, so the startup screen below doesn't flash the OS
+    theme when it differs from the user's explicit in-app choice. -->
+    <script>
+      ;(function () {
+        var stored
+        try {
+          stored = window.localStorage.getItem('joy-mode')
+        } catch (e) {
+          stored = null
+        }
+        var resolved =
+          stored === 'light' || stored === 'dark'
+            ? stored
+            : window.matchMedia &&
+                window.matchMedia('(prefers-color-scheme: dark)').matches
+              ? 'dark'
+              : 'light'
+        document.documentElement.setAttribute('data-startup-theme', resolved)
+      })()
+    </script>
+
     <!-- Inline so startup is visible before JavaScript and app CSS load. -->
     <style>
       .startup-screen {
@@ -218,23 +241,23 @@
           transform: translateY(-4px);
         }
       }
-      @media (prefers-color-scheme: dark) {
-        .startup-screen {
-          --startup-bg: #101216;
-          --startup-surface: #1b1e25;
-          --startup-text: #f0f1f5;
-          --startup-muted: #9ca3b1;
-          --startup-accent: #67e8f9;
-          --startup-soft: #164e63;
-          --startup-border: #2b2f39;
-        }
-        .startup-screen__halo {
-          background: radial-gradient(ellipse, #155e75 0%, transparent 70%);
-        }
-        .startup-screen__card--front .startup-screen__check {
-          background: #203c36;
-          color: #8ed7bd;
-        }
+      [data-startup-theme='dark'] .startup-screen {
+        --startup-bg: #101216;
+        --startup-surface: #1b1e25;
+        --startup-text: #f0f1f5;
+        --startup-muted: #9ca3b1;
+        --startup-accent: #67e8f9;
+        --startup-soft: #164e63;
+        --startup-border: #2b2f39;
+      }
+      [data-startup-theme='dark'] .startup-screen__halo {
+        background: radial-gradient(ellipse, #155e75 0%, transparent 70%);
+      }
+      [data-startup-theme='dark']
+        .startup-screen__card--front
+        .startup-screen__check {
+        background: #203c36;
+        color: #8ed7bd;
       }
       @media (prefers-reduced-motion: reduce) {
         .startup-screen .startup-screen__content,

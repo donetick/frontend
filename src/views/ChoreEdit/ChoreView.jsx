@@ -43,6 +43,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import EmptyState from '../../components/common/EmptyState'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useLocalization } from '../../contexts/LocalizationContext'
+import { useThemeSkin } from '../../contexts/ThemeSkinContext'
 import { useDescriptionHtml } from '../../hooks/useDescriptionHtml'
 import { usePendingCommands } from '../../hooks/usePendingCommands'
 import {
@@ -131,6 +132,8 @@ const getNFCUrl = choreId =>
 const ChoreView = () => {
   const { t } = useTranslation('chores')
   const { fmt } = useLocalization()
+  const { skin } = useThemeSkin()
+  const completionColor = skin === 'default' ? 'success' : 'primary'
   const [chore, setChore] = useState({})
   const navigate = useNavigate()
   const [performers, setPerformers] = useState([])
@@ -1443,7 +1446,7 @@ const ChoreView = () => {
                       fullWidth
                       size='lg'
                       onClick={handleApproveChore}
-                      color='primary'
+                      color={completionColor}
                       startDecorator={<ThumbUp />}
                       sx={{
                         flex: 1,
@@ -1485,7 +1488,7 @@ const ChoreView = () => {
                     disabled={
                       notInCompletionWindow(chore) || chore.isActive === false
                     }
-                    color='primary'
+                    color={completionColor}
                     startDecorator={<Check />}
                     sx={{
                       flex: 4,
