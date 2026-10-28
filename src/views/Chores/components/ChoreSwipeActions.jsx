@@ -17,10 +17,8 @@ import {
 import { Box, Typography } from '@mui/joy'
 import PropTypes from 'prop-types'
 
+import { notInCompletionWindow } from '../../../utils/Chores'
 import { hapticMedium } from '../../../utils/Haptics'
-
-const canApproveReject = (chore, userProfile) =>
-  userProfile?.role === 1 || chore.createdBy === userProfile?.id
 
 // The plain ChoreCard floats its due-date/frequency chips above the card body, so
 // the actions have to drop down to align with the card itself.
@@ -116,19 +114,24 @@ export const getChoreLeadingActions = ({
   chore,
   handleChoreAction,
   isMultiSelectMode = false,
+  permissions = {},
   showActions = true,
   t,
-  userProfile,
   usesCompactCard = true,
 }) => {
-  if (isMultiSelectMode || !showActions) return null
+  if (isMultiSelectMode || !showActions || chore.isActive === false) return null
+  if (
+    chore.status !== 3 &&
+    (!permissions.complete || notInCompletionWindow(chore))
+  )
+    return null
 
   const offsetTop = !usesCompactCard
 
   // Awaiting approval: only reviewers get an action, and there is no useful
   // "start" for a task that is already done.
   if (chore.status === 3) {
-    if (!canApproveReject(chore, userProfile)) return null
+    if (!permissions.approve) return null
     return (
       <LeadingActions>
         <SwipeAction
@@ -203,9 +206,9 @@ export const getChoreTrailingActions = ({
   handleChoreAction,
   isMultiSelectMode = false,
   navigate,
+  permissions = {},
   showActions = true,
   t,
-  userProfile,
   usesCompactCard = true,
 }) => {
   if (isMultiSelectMode || !showActions) return null
@@ -213,7 +216,7 @@ export const getChoreTrailingActions = ({
   const offsetTop = !usesCompactCard
   const actions = []
 
-  if (chore.status === 3 && canApproveReject(chore, userProfile)) {
+  if (chore.status === 3 && permissions.approve) {
     actions.push(
       <SwipeAction
         key='reject'
@@ -232,53 +235,54 @@ export const getChoreTrailingActions = ({
     )
   }
 
-  actions.push(
-    <SwipeAction
-      key='schedule'
-      onClick={() => {
-        hapticMedium()
-        handleChoreAction('changeDueDate', chore)
-      }}
-    >
-      <SwipeActionTile
-        bgcolor='warning.500'
-        icon={<Schedule sx={{ color: 'white' }} />}
-        label={t('list.schedule')}
-        offsetTop={offsetTop}
-      />
-    </SwipeAction>,
-    <SwipeAction
-      key='edit'
-      onClick={() => {
-        hapticMedium()
-        navigate(`/chores/${chore.id}/edit`)
-      }}
-    >
-      <SwipeActionTile
-        bgcolor='primary.solidBg'
-        color='primary.solidColor'
-        icon={<Edit />}
-        label={t('common:edit')}
-        offsetTop={offsetTop}
-      />
-    </SwipeAction>,
-    <SwipeAction
-      key='delete'
-      onClick={() => {
-        hapticMedium()
-        handleChoreAction('delete', chore)
-      }}
-    >
-      <SwipeActionTile
-        bgcolor='danger.500'
-        icon={<Delete sx={{ color: 'white' }} />}
-        label={t('common:delete')}
-        offsetTop={offsetTop}
-      />
-    </SwipeAction>,
-  )
+  if (permissions.edit)
+    actions.push(
+      <SwipeAction
+        key='schedule'
+        onClick={() => {
+          hapticMedium()
+          handleChoreAction('changeDueDate', chore)
+        }}
+      >
+        <SwipeActionTile
+          bgcolor='warning.500'
+          icon={<Schedule sx={{ color: 'white' }} />}
+          label={t('list.schedule')}
+          offsetTop={offsetTop}
+        />
+      </SwipeAction>,
+      <SwipeAction
+        key='edit'
+        onClick={() => {
+          hapticMedium()
+          navigate(`/chores/${chore.id}/edit`)
+        }}
+      >
+        <SwipeActionTile
+          bgcolor='primary.solidBg'
+          color='primary.solidColor'
+          icon={<Edit />}
+          label={t('common:edit')}
+          offsetTop={offsetTop}
+        />
+      </SwipeAction>,
+      <SwipeAction
+        key='delete'
+        onClick={() => {
+          hapticMedium()
+          handleChoreAction('delete', chore)
+        }}
+      >
+        <SwipeActionTile
+          bgcolor='danger.500'
+          icon={<Delete sx={{ color: 'white' }} />}
+          label={t('common:delete')}
+          offsetTop={offsetTop}
+        />
+      </SwipeAction>,
+    )
 
-  return <TrailingActions>{actions}</TrailingActions>
+  return actions.length ? <TrailingActions>{actions}</TrailingActions> : null
 }
 
 /**
@@ -291,9 +295,10 @@ export const getArchivedLeadingActions = ({
   chore,
   handleChoreAction,
   isMultiSelectMode = false,
+  permissions = {},
   t,
 }) => {
-  if (isMultiSelectMode) return null
+  if (isMultiSelectMode || !permissions.archive) return null
 
   return (
     <LeadingActions>
@@ -318,9 +323,10 @@ export const getArchivedTrailingActions = ({
   chore,
   handleChoreAction,
   isMultiSelectMode = false,
+  permissions = {},
   t,
 }) => {
-  if (isMultiSelectMode) return null
+  if (isMultiSelectMode || !permissions.edit) return null
 
   return (
     <TrailingActions>

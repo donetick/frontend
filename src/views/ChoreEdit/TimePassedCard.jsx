@@ -13,7 +13,12 @@ import { useNavigate } from 'react-router-dom'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useThemeSkin } from '../../contexts/ThemeSkinContext'
 
-const TimePassedCard = ({ chore, handleAction, onShowDetails }) => {
+const TimePassedCard = ({
+  chore,
+  disabled = false,
+  handleAction,
+  onShowDetails,
+}) => {
   const { t } = useTranslation('timer')
   const navigate = useNavigate()
   const { fmt } = useLocalization()
@@ -163,6 +168,7 @@ const TimePassedCard = ({ chore, handleAction, onShowDetails }) => {
             variant='soft'
             color='warning'
             size='md'
+            disabled={disabled}
             startDecorator={<Pause sx={{ fontSize: 14 }} />}
             onClick={() => {
               handleAction('pause')
@@ -175,6 +181,7 @@ const TimePassedCard = ({ chore, handleAction, onShowDetails }) => {
             variant='solid'
             color={completionColor}
             size='md'
+            disabled={disabled}
             startDecorator={<PlayArrow sx={{ fontSize: 14 }} />}
             onClick={() => {
               handleAction('resume')

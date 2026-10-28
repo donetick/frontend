@@ -144,10 +144,12 @@ const TimerSplitButton = ({
           <RestartAlt sx={{ mr: 1 }} />
           Restart timer
         </MenuItem> */}
-        <MenuItem onClick={handleClearAllTime} color='danger'>
-          <DeleteSweep sx={{ mr: 1 }} />
-          {t('clearAndReset')}
-        </MenuItem>
+        {onClearAllTime && (
+          <MenuItem onClick={handleClearAllTime} color='danger'>
+            <DeleteSweep sx={{ mr: 1 }} />
+            {t('clearAndReset')}
+          </MenuItem>
+        )}
       </Menu>
     </Box>
   )

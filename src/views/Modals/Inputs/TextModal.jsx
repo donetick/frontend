@@ -7,6 +7,7 @@ import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
 function TextModal({
   cancelText,
+  closeOnSave = true,
   current,
   isOpen,
   okText,
@@ -20,7 +21,7 @@ function TextModal({
 
   const handleSave = () => {
     onSave(text)
-    onClose()
+    if (closeOnSave) onClose()
   }
 
   return (

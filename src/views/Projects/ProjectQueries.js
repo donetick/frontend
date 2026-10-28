@@ -171,8 +171,7 @@ export const useDeleteProject = () => {
         throw new Error('Failed to delete project')
       } catch (error) {
         console.error('Error deleting project:', error)
-        // For development, simulate successful deletion
-        return { id: projectId, deleted: true }
+        throw error
       }
     },
     onSuccess: ({ id: deletedProjectId }) => {

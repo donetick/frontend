@@ -14,11 +14,10 @@ import {
 import { Box, Checkbox, Chip, IconButton, Typography } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
 
-import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useThemeSkin } from '../../contexts/ThemeSkinContext'
+import { useChorePermissions } from '../../hooks/useChorePermissions'
 import { usePendingCommands } from '../../hooks/usePendingCommands'
-import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
 import {
   getDueDateChipColor,
   getDueDateChipText,
@@ -77,33 +76,24 @@ const CompactChoreCard = ({
   viewOnly,
 }) => {
   const { t } = useTranslation('chores')
+  const permissions = useChorePermissions(chore)
   const { skin } = useThemeSkin()
   const completionColor = skin === 'default' ? 'success' : 'primary'
 
-  const { data: userProfile } = useUserProfile()
   const { timeFormat } = useLocalization()
-  const { data: circleMembersData } = useCircleMembers()
   const { data: pendingCmds } = usePendingCommands(chore.id)
 
-  const { impersonatedUser } = useImpersonateUser()
-
-  // Check if the current user can approve/reject (admin, manager, or task owner)
-  const canApproveReject = () => {
-    if (!circleMembersData?.res || !chore) return false
-
-    const currentUser = circleMembersData.res.find(
-      member => member.userId === (impersonatedUser?.userId || userProfile?.id),
-    )
-
-    // User can approve/reject if they are:
-    // 1. Admin or manager of the circle
-    // 2. Owner/creator of the task
-    return (
-      currentUser?.role === 'admin' ||
-      currentUser?.role === 'manager' ||
-      chore.createdBy === (impersonatedUser?.userId || userProfile?.id)
-    )
-  }
+  const canApproveReject = () => permissions.approve
+  const restriction =
+    chore.status === 3
+      ? !permissions.approve && 'permissions.approval'
+      : chore.isActive === false
+        ? 'permissions.archived'
+        : !permissions.complete
+          ? 'permissions.complete'
+          : notInCompletionWindow(chore)
+            ? 'permissions.window'
+            : null
 
   // Utility functions
 
@@ -339,7 +329,11 @@ const CompactChoreCard = ({
                     onAction('start', chore)
                   }
                 }}
-                disabled={notInCompletionWindow(chore)}
+                disabled={
+                  !permissions.complete ||
+                  chore.isActive === false ||
+                  notInCompletionWindow(chore)
+                }
                 sx={{
                   width: 32,
                   height: 32,
@@ -426,6 +420,11 @@ const CompactChoreCard = ({
           flexDirection: 'column',
         }}
       >
+        {showActions && !isMultiSelectMode && !viewOnly && restriction && (
+          <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
+            {t(restriction)}
+          </Typography>
+        )}
         {/* Line 1: Name + Due Date */}
         <Box
           sx={{

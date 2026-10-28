@@ -25,11 +25,10 @@ import {
 } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
 
-import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useThemeSkin } from '../../contexts/ThemeSkinContext'
+import { useChorePermissions } from '../../hooks/useChorePermissions'
 import { usePendingCommands } from '../../hooks/usePendingCommands'
-import { useUserProfile } from '../../queries/UserQueries.jsx'
 import {
   getDueDateChipColor,
   getDueDateChipText,
@@ -78,31 +77,23 @@ const ChoreCard = ({
   viewOnly,
 }) => {
   const { t } = useTranslation('chores')
+  const permissions = useChorePermissions(chore)
   const { skin } = useThemeSkin()
   const completionColor = skin === 'default' ? 'success' : 'primary'
-  const { data: userProfile } = useUserProfile({ enabled: !viewOnly })
   const { timeFormat } = useLocalization()
   const { data: pendingCmds } = usePendingCommands(chore.id)
 
-  const { impersonatedUser } = useImpersonateUser()
-
-  // Check if the current user can approve/reject (admin, manager, or task owner)
-  const canApproveReject = () => {
-    if (!performers || !chore) return false
-
-    const currentUser = performers.find(
-      member => member.userId === (impersonatedUser?.userId || userProfile?.id),
-    )
-
-    // User can approve/reject if they are:
-    // 1. Admin or manager of the circle
-    // 2. Owner/creator of the task
-    return (
-      currentUser?.role === 'admin' ||
-      currentUser?.role === 'manager' ||
-      chore.createdBy === (impersonatedUser?.userId || userProfile?.id)
-    )
-  }
+  const canApproveReject = () => permissions.approve
+  const restriction =
+    chore.status === 3
+      ? !permissions.approve && 'permissions.approval'
+      : chore.isActive === false
+        ? 'permissions.archived'
+        : !permissions.complete
+          ? 'permissions.complete'
+          : notInCompletionWindow(chore)
+            ? 'permissions.window'
+            : null
 
   const getFrequencyIcon = chore => {
     if (['once', 'no_repeat'].includes(chore.frequencyType)) {
@@ -561,7 +552,11 @@ const ChoreCard = ({
                             break
                         }
                       }}
-                      disabled={notInCompletionWindow(chore)}
+                      disabled={
+                        !permissions.complete ||
+                        chore.isActive === false ||
+                        notInCompletionWindow(chore)
+                      }
                       sx={{
                         borderRadius: '50%',
                         width: 50,
@@ -627,6 +622,11 @@ const ChoreCard = ({
               )}
             </Grid>
           </Grid>
+          {showActions && !isMultiSelectMode && !viewOnly && restriction && (
+            <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
+              {t(restriction)}
+            </Typography>
+          )}
         </Card>
       </Box>
     </Box>

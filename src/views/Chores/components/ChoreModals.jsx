@@ -1,6 +1,7 @@
 import { Capacitor } from '@capacitor/core'
 import { useTranslation } from 'react-i18next'
 
+import { useChorePermissions } from '../../../hooks/useChorePermissions'
 import DueDatePickerModal, {
   combineDueDate,
   splitDueDate,
@@ -28,6 +29,7 @@ const ChoreModals = ({
   onNudge,
 }) => {
   const { t } = useTranslation('chores')
+  const permissions = useChorePermissions(modalChore)
   return (
     <>
       {activeModal === 'changeDueDate' && modalChore && (
@@ -46,6 +48,7 @@ const ChoreModals = ({
 
       {activeModal === 'completeWithPastDate' && modalChore && (
         <DateModal
+          closeOnSave={false}
           isOpen={true}
           key={'completedInPast' + modalChore.id}
           current={modalChore.nextDueDate}
@@ -58,7 +61,11 @@ const ChoreModals = ({
       {activeModal === 'changeAssignee' && modalChore && (
         <AssigneeModal
           isOpen={true}
-          members={membersData?.res || []}
+          members={(membersData?.res || []).filter(
+            member =>
+              permissions.edit ||
+              modalChore.assignees?.some(a => a.userId === member.userId),
+          )}
           assignedTo={modalChore.assignedTo}
           title={t('modals.delegate')}
           onClose={onClose}
@@ -68,6 +75,7 @@ const ChoreModals = ({
 
       {activeModal === 'completeWithNote' && modalChore && (
         <TextModal
+          closeOnSave={false}
           isOpen={true}
           title={t('modals.addNote')}
           onClose={onClose}

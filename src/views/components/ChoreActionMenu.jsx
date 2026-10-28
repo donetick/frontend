@@ -46,6 +46,8 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
 import AppModal from '../../components/common/AppModal'
+import { useChorePermissions } from '../../hooks/useChorePermissions'
+import { notInCompletionWindow } from '../../utils/Chores'
 import LABEL_COLORS, {
   getTextColorFromBackgroundColor,
 } from '../../utils/Colors'
@@ -127,6 +129,21 @@ const ChoreActionMenu = ({
   variant = 'soft',
 }) => {
   const { t } = useTranslation('chores')
+  const permissions = useChorePermissions(chore)
+  const unavailable = [
+    ...(!permissions.edit
+      ? ['edit', 'schedule', 'priority', 'moveToProject']
+      : []),
+    ...(!permissions.edit ? ['delete'] : []),
+    ...(!permissions.archive ? ['archive'] : []),
+    ...(!permissions.delegate ? ['delegate'] : []),
+    ...(!permissions.complete ||
+    (chore && notInCompletionWindow(chore)) ||
+    chore?.isActive === false ||
+    chore?.status === 3
+      ? ['completeNote', 'completePast']
+      : []),
+  ]
   const isControlled = controlledAnchorEl !== undefined
   const [uncontrolledAnchorEl, setUncontrolledAnchorEl] = React.useState(null)
   const anchorEl = isControlled ? controlledAnchorEl : uncontrolledAnchorEl
@@ -524,7 +541,10 @@ const ChoreActionMenu = ({
     },
   ]
     .filter(Boolean)
-    .filter(item => !hiddenActions.includes(item.key))
+    .filter(
+      item =>
+        !hiddenActions.includes(item.key) && !unavailable.includes(item.key),
+    )
 
   const visibleActionItems = collapseDividers(actionItems)
 

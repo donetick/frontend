@@ -5,11 +5,10 @@ import {
   PlayArrow,
   ThumbUp,
 } from '@mui/icons-material'
-import { Checkbox, IconButton } from '@mui/joy'
+import { Box, Checkbox, IconButton, Typography } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
 
-import { useImpersonateUser } from '../../../contexts/ImpersonateUserContext'
-import { useCircleMembers, useUserProfile } from '../../../queries/UserQueries'
+import { useChorePermissions } from '../../../hooks/useChorePermissions'
 import { notInCompletionWindow } from '../../../utils/Chores'
 
 // Keep action permissions and state transitions separate from card layout.
@@ -21,15 +20,8 @@ export default function ProjectTaskAction({
   onSelectionToggle,
 }) {
   const { t } = useTranslation('chores')
-  const { data: userProfile } = useUserProfile()
-  const { data: members } = useCircleMembers()
-  const { impersonatedUser } = useImpersonateUser()
-  const userId = impersonatedUser?.userId || userProfile?.id
-  const member = members?.res?.find(item => item.userId === userId)
-  const canApprove =
-    member?.role === 'admin' ||
-    member?.role === 'manager' ||
-    (userId !== null && userId !== undefined && chore.createdBy === userId)
+  const permissions = useChorePermissions(chore)
+  const canApprove = permissions.approve
   const pending = chore.status === 3
   const action = pending
     ? 'approve'
@@ -60,41 +52,66 @@ export default function ProjectTaskAction({
     )
   }
 
+  const reason =
+    pending && !canApprove
+      ? t('permissions.approval')
+      : !permissions.complete
+        ? t('permissions.complete')
+        : chore.isActive === false
+          ? t('permissions.archived')
+          : notInCompletionWindow(chore)
+            ? t('permissions.window')
+            : null
+
   return (
-    <IconButton
-      aria-label={`${label}: ${chore.name}`}
-      title={label}
-      variant='plain'
-      size='sm'
-      color={pending ? 'primary' : action === 'pause' ? 'warning' : 'neutral'}
-      disabled={pending ? !canApprove : Boolean(notInCompletionWindow(chore))}
-      onClick={event => {
-        event.stopPropagation()
-        onAction?.(action, chore)
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        maxWidth: 160,
       }}
-      sx={{ minWidth: 44, minHeight: 44, borderRadius: 'md' }}
     >
-      {pending ? (
-        canApprove ? (
-          <ThumbUp sx={{ fontSize: 18 }} />
+      <IconButton
+        aria-label={`${label}: ${chore.name}`}
+        title={label}
+        variant='plain'
+        size='sm'
+        color={pending ? 'primary' : action === 'pause' ? 'warning' : 'neutral'}
+        disabled={Boolean(reason)}
+        onClick={event => {
+          event.stopPropagation()
+          onAction?.(action, chore)
+        }}
+        sx={{ minWidth: 44, minHeight: 44, borderRadius: 'md' }}
+      >
+        {pending ? (
+          canApprove ? (
+            <ThumbUp sx={{ fontSize: 18 }} />
+          ) : (
+            <HourglassEmpty sx={{ fontSize: 18 }} />
+          )
+        ) : action === 'complete' ? (
+          <Check
+            sx={{
+              fontSize: 18,
+              border: '1.5px solid',
+              borderColor: 'neutral.outlinedBorder',
+              borderRadius: '50%',
+              p: '2px',
+            }}
+          />
+        ) : action === 'pause' ? (
+          <Pause sx={{ fontSize: 18 }} />
         ) : (
-          <HourglassEmpty sx={{ fontSize: 18 }} />
-        )
-      ) : action === 'complete' ? (
-        <Check
-          sx={{
-            fontSize: 18,
-            border: '1.5px solid',
-            borderColor: 'neutral.outlinedBorder',
-            borderRadius: '50%',
-            p: '2px',
-          }}
-        />
-      ) : action === 'pause' ? (
-        <Pause sx={{ fontSize: 18 }} />
-      ) : (
-        <PlayArrow sx={{ fontSize: 18 }} />
+          <PlayArrow sx={{ fontSize: 18 }} />
+        )}
+      </IconButton>
+      {reason && (
+        <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
+          {reason}
+        </Typography>
       )}
-    </IconButton>
+    </Box>
   )
 }

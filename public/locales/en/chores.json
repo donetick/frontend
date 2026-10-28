@@ -1,5 +1,15 @@
 {
   "title": "Chores",
+  "permissions": {
+    "complete": "You’re not eligible to complete or start this task. Ask the task owner to add you as an assignee.",
+    "subtasks": "These subtasks are read-only because you’re not eligible to complete this task.",
+    "approval": "Awaiting approval from a circle admin or manager.",
+    "archive": "Only the task owner can restore this task.",
+    "archived": "Restore this task before working on it.",
+    "window": "This task is not yet available to complete.",
+    "failed": "This action could not be completed. Please refresh and try again.",
+    "editTime": "Only the task owner or an eligible assignee can edit time records."
+  },
   "tasksForDate": "Tasks for {{date}}",
   "createSuggestion": "Create \"{{value}}\"",
   "myChores": "My Chores",

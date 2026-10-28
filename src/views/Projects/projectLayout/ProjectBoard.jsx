@@ -55,9 +55,11 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
 import { networkManager } from '../../../hooks/NetworkManager'
+import { useChorePermissions } from '../../../hooks/useChorePermissions'
 import useLongPress from '../../../hooks/useLongPress'
 import { useCreateChore } from '../../../queries/ChoreQueries'
 import { useUserProfile } from '../../../queries/UserQueries'
+import { useNotification } from '../../../service/NotificationProvider'
 import { CompleteSubTask } from '../../../utils/Fetcher'
 import ChoreActionMenu from '../../components/ChoreActionMenu'
 import { buildChorePayload } from '../../components/VoiceToTask/parseVoiceTask'
@@ -245,6 +247,8 @@ const TaskCard = memo(function TaskCard({
   subtasksExpanded = false,
 }) {
   const { t } = useTranslation('chores')
+  const permissions = useChorePermissions(chore)
+  const { showError } = useNotification()
   const [subtasks, setSubtasks] = useState(chore.subTasks || [])
   const navigate = useNavigate()
   const { cancel: cancelLongPress, handlers: longPressHandlers } = useLongPress(
@@ -264,6 +268,7 @@ const TaskCard = memo(function TaskCard({
   }, [cancelLongPress, isDragging])
 
   const toggleSubtask = async subtask => {
+    if (!permissions.complete || chore.isActive === false) return
     const previous = subtasks
     const completedAt = subtask.completedAt ? null : new Date().toISOString()
     setSubtasks(current =>
@@ -277,9 +282,10 @@ const TaskCard = memo(function TaskCard({
         Number(chore.id),
         completedAt,
       )
-      if (!response?.ok) setSubtasks(previous)
-    } catch {
+      if (!response?.ok) throw new Error(t('permissions.failed'))
+    } catch (error) {
       setSubtasks(previous)
+      showError({ message: error.message })
     }
   }
 
@@ -430,6 +436,7 @@ const TaskCard = memo(function TaskCard({
             >
               <Checkbox
                 checked={Boolean(subtask.completedAt)}
+                disabled={!permissions.complete || chore.isActive === false}
                 size='sm'
                 onChange={() => toggleSubtask(subtask)}
               />

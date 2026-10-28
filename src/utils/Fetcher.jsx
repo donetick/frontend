@@ -17,6 +17,24 @@ const Fetch = async (endpoint, options = {}) => {
   }
 }
 
+// Action callers must not mistake an HTTP rejection for a successful mutation.
+const ActionFetch = async (endpoint, options) => {
+  const response = await Fetch(endpoint, options)
+  if (!response?.ok) {
+    let message = 'Unable to perform this action. Please try again.'
+    try {
+      const data = await response.clone().json()
+      message = data.error || data.message || message
+    } catch {
+      /* Some endpoints return an empty error body. */
+    }
+    const error = new Error(message)
+    error.status = response?.status
+    throw error
+  }
+  return response
+}
+
 const HEADERS = () => {
   return apiClient.getHeaders()
 }
@@ -119,13 +137,13 @@ const GetArchivedChores = () => {
   })
 }
 const ArchiveChore = id => {
-  return Fetch(`/chores/${id}/archive`, {
+  return ActionFetch(`/chores/${id}/archive`, {
     method: 'PUT',
     headers: HEADERS(),
   })
 }
 const UnArchiveChore = id => {
-  return Fetch(`/chores/${id}/unarchive`, {
+  return ActionFetch(`/chores/${id}/unarchive`, {
     method: 'PUT',
     headers: HEADERS(),
   })
@@ -162,7 +180,7 @@ const MarkChoreComplete = (id, body, completedDate, performer) => {
     }
   }
 
-  return Fetch(markChoreURL, {
+  return ActionFetch(markChoreURL, {
     method: 'POST',
     headers: HEADERS(),
     body: JSON.stringify(body),
@@ -179,14 +197,14 @@ const MarkChoreComplete = (id, body, completedDate, performer) => {
 }
 
 const StartChore = id => {
-  return Fetch(`/chores/${id}/start`, {
+  return ActionFetch(`/chores/${id}/start`, {
     method: 'PUT',
     headers: HEADERS(),
   })
 }
 
 const PauseChore = id => {
-  return Fetch(`/chores/${id}/pause`, {
+  return ActionFetch(`/chores/${id}/pause`, {
     method: 'PUT',
     headers: HEADERS(),
   })
@@ -194,7 +212,7 @@ const PauseChore = id => {
 
 const CompleteSubTask = (id, choreId, completedAt) => {
   var markChoreURL = `/chores/${choreId}/subtask`
-  return Fetch(markChoreURL, {
+  return ActionFetch(markChoreURL, {
     method: 'PUT',
     headers: HEADERS(),
     body: JSON.stringify({ completedAt, id, choreId }),
@@ -202,7 +220,7 @@ const CompleteSubTask = (id, choreId, completedAt) => {
 }
 
 const SkipChore = id => {
-  return Fetch(`/chores/${id}/skip`, {
+  return ActionFetch(`/chores/${id}/skip`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -212,7 +230,7 @@ const SkipChore = id => {
 }
 
 const ApproveChore = id => {
-  return Fetch(`/chores/${id}/approve`, {
+  return ActionFetch(`/chores/${id}/approve`, {
     method: 'POST',
     headers: HEADERS(),
     body: JSON.stringify({}),
@@ -220,7 +238,7 @@ const ApproveChore = id => {
 }
 
 const RejectChore = id => {
-  return Fetch(`/chores/${id}/reject`, {
+  return ActionFetch(`/chores/${id}/reject`, {
     method: 'POST',
     headers: HEADERS(),
     body: JSON.stringify({}),
@@ -228,7 +246,7 @@ const RejectChore = id => {
 }
 
 const UndoChoreAction = id => {
-  return Fetch(`/chores/${id}/undo`, {
+  return ActionFetch(`/chores/${id}/undo`, {
     method: 'POST',
     headers: HEADERS(),
     body: JSON.stringify({}),
@@ -834,7 +852,7 @@ const GetChoreTimer = choreId => {
 }
 
 const UpdateTimeSession = (choreId, sessionId, sessionData) => {
-  return Fetch(`/chores/${choreId}/timer/${sessionId}`, {
+  return ActionFetch(`/chores/${choreId}/timer/${sessionId}`, {
     method: 'PUT',
     headers: HEADERS(),
     body: JSON.stringify(sessionData),
@@ -842,21 +860,21 @@ const UpdateTimeSession = (choreId, sessionId, sessionData) => {
 }
 
 const DeleteTimeSession = (choreId, sessionId) => {
-  return Fetch(`/chores/${choreId}/timer/${sessionId}`, {
+  return ActionFetch(`/chores/${choreId}/timer/${sessionId}`, {
     method: 'DELETE',
     headers: HEADERS(),
   })
 }
 
 const ResetChoreTimer = choreId => {
-  return Fetch(`/chores/${choreId}/timer/reset`, {
+  return ActionFetch(`/chores/${choreId}/timer/reset`, {
     method: 'PUT',
     headers: HEADERS(),
   })
 }
 
 const ClearChoreTimer = choreId => {
-  return Fetch(`/chores/${choreId}/timer`, {
+  return ActionFetch(`/chores/${choreId}/timer`, {
     method: 'DELETE',
     headers: HEADERS(),
   })
@@ -1072,7 +1090,7 @@ const UpdateProject = (id, project) => {
 }
 
 const DeleteProject = id => {
-  return Fetch(`/projects/${id}`, {
+  return ActionFetch(`/projects/${id}`, {
     method: 'DELETE',
     headers: HEADERS(),
   })

@@ -17,7 +17,6 @@ import {
   Person,
   PlayArrow,
 } from '@mui/icons-material'
-import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import {
   Alert,
@@ -45,6 +44,8 @@ import SwipeListItem, {
   SWIPE_COMMIT_THRESHOLD,
 } from '../../components/common/SwipeListItem'
 import { useLocalization } from '../../contexts/LocalizationContext'
+import { useChorePermissions } from '../../hooks/useChorePermissions'
+import { useChoreDetails } from '../../queries/ChoreQueries'
 import {
   useChoreTimer,
   usePauseChore,
@@ -53,6 +54,7 @@ import {
 } from '../../queries/TimeQueries'
 import { useCircleMembers } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
+import { notInCompletionWindow } from '../../utils/Chores'
 import { commandQueue, CommandType } from '../../utils/CommandQueue'
 import { resolvePhotoURL } from '../../utils/Helpers'
 import { isOfflineFeatureEnabled } from '../../utils/OfflineFeatureToggle'
@@ -68,8 +70,10 @@ const isNetworkError = err =>
   err.message === 'Failed to fetch'
 
 const TimerDetails = () => {
-  const { t } = useTranslation('timer')
+  const { t } = useTranslation(['timer', 'chores'])
   const { choreId } = useParams()
+  const { data: choreData } = useChoreDetails(choreId)
+  const permissions = useChorePermissions(choreData?.res)
   const { fmt } = useLocalization()
   const [timerData, setTimerData] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -135,7 +139,7 @@ const TimerDetails = () => {
   }
 
   const startEditingSession = () => {
-    if (timerData) {
+    if (timerData && permissions.editTime) {
       setEditingSessions(prev => ({
         ...prev,
         [timerData.id]: {
@@ -390,17 +394,20 @@ const TimerDetails = () => {
     startEditingSession()
   }
 
-  const handleDeleteSession = sessionIndex => {
-    // For now, just show an alert since we'd need to implement session deletion API
-    showError({
-      title: t('toast.deleteSessionTitle'),
-      message: `Session #${sessionIndex + 1} deletion would be implemented here`,
-    })
-  }
-
   if (loading || isCircleMembersLoading) {
     return <LoadingComponent />
   }
+
+  const timerRestriction =
+    choreData?.res?.isActive === false
+      ? 'chores:permissions.archived'
+      : !permissions.complete
+        ? 'chores:permissions.complete'
+        : !isTimerRunning() &&
+            choreData?.res &&
+            notInCompletionWindow(choreData.res)
+          ? 'chores:permissions.window'
+          : null
 
   return (
     <Container maxWidth='lg' sx={{ py: 2 }}>
@@ -924,6 +931,14 @@ const TimerDetails = () => {
             </Box>
           </Card>
 
+          {!permissions.editTime && (
+            <Typography level='body-sm'>
+              {t('chores:permissions.editTime')}
+            </Typography>
+          )}
+          {timerRestriction && (
+            <Typography level='body-sm'>{t(timerRestriction)}</Typography>
+          )}
           {/* Session Breakdown */}
           <Box sx={{ mt: 2 }}>
             <Box
@@ -935,7 +950,7 @@ const TimerDetails = () => {
               }}
             >
               <Typography level='h4'>{t('sessionBreakdown')}</Typography>
-              {!editingSessions[timerData.id] && (
+              {permissions.editTime && !editingSessions[timerData.id] && (
                 <Button
                   variant='outlined'
                   color='primary'
@@ -1015,71 +1030,48 @@ const TimerDetails = () => {
                                   : null
                               }
                               trailingActions={
-                                <TrailingActions>
-                                  <Box
-                                    sx={{
-                                      display: 'flex',
-                                      boxShadow:
-                                        'inset 2px 0 4px rgba(0,0,0,0.06)',
-                                      zIndex: 0,
-                                    }}
-                                  >
-                                    <SwipeAction
-                                      onClick={() => handleEditSession()}
+                                permissions.editTime ? (
+                                  <TrailingActions>
+                                    <Box
+                                      sx={{
+                                        display: 'flex',
+                                        boxShadow:
+                                          'inset 2px 0 4px rgba(0,0,0,0.06)',
+                                        zIndex: 0,
+                                      }}
                                     >
-                                      <Box
-                                        sx={{
-                                          display: 'flex',
-                                          flexDirection: 'column',
-                                          alignItems: 'center',
-                                          justifyContent: 'center',
-                                          bgcolor: 'primary.500',
-                                          color: '#fff',
-                                          px: 3,
-                                          height: '100%',
-                                        }}
+                                      <SwipeAction
+                                        onClick={() => handleEditSession()}
                                       >
-                                        <EditIcon
-                                          sx={{ fontSize: 20, color: 'white' }}
-                                        />
-                                        <Typography
-                                          level='body-xs'
-                                          sx={{ mt: 0.5, color: 'inherit' }}
+                                        <Box
+                                          sx={{
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            bgcolor: 'primary.500',
+                                            color: '#fff',
+                                            px: 3,
+                                            height: '100%',
+                                          }}
                                         >
-                                          {t('common:edit')}
-                                        </Typography>
-                                      </Box>
-                                    </SwipeAction>
-                                    <SwipeAction
-                                      onClick={() =>
-                                        handleDeleteSession(pauseIndex)
-                                      }
-                                    >
-                                      <Box
-                                        sx={{
-                                          display: 'flex',
-                                          flexDirection: 'column',
-                                          alignItems: 'center',
-                                          justifyContent: 'center',
-                                          bgcolor: 'danger.500',
-                                          color: '#fff',
-                                          px: 3,
-                                          height: '100%',
-                                        }}
-                                      >
-                                        <DeleteIcon
-                                          sx={{ fontSize: 20, color: 'white' }}
-                                        />
-                                        <Typography
-                                          level='body-xs'
-                                          sx={{ mt: 0.5, color: 'inherit' }}
-                                        >
-                                          {t('common:delete')}
-                                        </Typography>
-                                      </Box>
-                                    </SwipeAction>
-                                  </Box>
-                                </TrailingActions>
+                                          <EditIcon
+                                            sx={{
+                                              fontSize: 20,
+                                              color: 'white',
+                                            }}
+                                          />
+                                          <Typography
+                                            level='body-xs'
+                                            sx={{ mt: 0.5, color: 'inherit' }}
+                                          >
+                                            {t('common:edit')}
+                                          </Typography>
+                                        </Box>
+                                      </SwipeAction>
+                                    </Box>
+                                  </TrailingActions>
+                                ) : null
                               }
                             >
                               {/* Session Card Content */}
@@ -1424,7 +1416,9 @@ const TimerDetails = () => {
             variant='solid'
             onClick={isTimerRunning() ? handlePauseTimer : handleStartTimer}
             loading={timerActionLoading}
-            disabled={loading}
+            disabled={
+              loading || timerActionLoading || Boolean(timerRestriction)
+            }
             sx={{
               width: 56,
               height: 56,

@@ -42,6 +42,7 @@ import SwipeListItem, {
 import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
 import { useChores } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
+import { useNotification } from '../../service/NotificationProvider'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors'
 import { canCreateProject } from '../../utils/entitlements'
 import { DeleteProject } from '../../utils/Fetcher'
@@ -265,6 +266,7 @@ const ProjectView = () => {
   const { t } = useTranslation('projects')
   const { data: projects, isError, isProjectsLoading } = useProjects()
   const { data: userProfile } = useUserProfile()
+  const { showError } = useNotification()
   const { isPlus, showPaywall } = usePaywall()
   const { data: chores = { res: [] } } = useChores(false) // false to exclude archived
   const { data: projectsData = [], isLoading: projectsLoading } = useProjects()
@@ -401,20 +403,24 @@ const ProjectView = () => {
   }
 
   const handleDeleteProject = id => {
-    DeleteProject(id).then(() => {
-      const updatedProjects = userProjects.filter(project => project.id !== id)
-      setUserProjects(updatedProjects)
-      queryClient.invalidateQueries({ queryKey: ['projects'] })
+    DeleteProject(id)
+      .then(() => {
+        const updatedProjects = userProjects.filter(
+          project => project.id !== id,
+        )
+        setUserProjects(updatedProjects)
+        queryClient.invalidateQueries({ queryKey: ['projects'] })
 
-      // If the deleted project was the active project, clear it
-      const saved = localStorage.getItem('selectedProject')
-      if (saved) {
-        const savedProject = JSON.parse(saved)
-        if (savedProject && savedProject.id === id) {
-          setSelectedProjectWithCache(null)
+        // If the deleted project was the active project, clear it
+        const saved = localStorage.getItem('selectedProject')
+        if (saved) {
+          const savedProject = JSON.parse(saved)
+          if (savedProject && savedProject.id === id) {
+            setSelectedProjectWithCache(null)
+          }
         }
-      }
-    })
+      })
+      .catch(error => showError({ message: error.message }))
   }
 
   const handleSaveProject = () => {
