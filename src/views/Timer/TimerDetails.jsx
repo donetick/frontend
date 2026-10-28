@@ -2,7 +2,6 @@ import '@meauxt/react-swipeable-list/dist/styles.css'
 
 import {
   SwipeableList,
-  SwipeAction,
   TrailingActions,
   Type as ListType,
 } from '@meauxt/react-swipeable-list'
@@ -40,6 +39,7 @@ import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 
 import EmptyState from '../../components/common/EmptyState'
+import SwipeActionButton from '../../components/common/SwipeActionButton'
 import SwipeListItem, {
   SWIPE_COMMIT_THRESHOLD,
 } from '../../components/common/SwipeListItem'
@@ -1030,48 +1030,18 @@ const TimerDetails = () => {
                                   : null
                               }
                               trailingActions={
-                                permissions.editTime ? (
-                                  <TrailingActions>
-                                    <Box
-                                      sx={{
-                                        display: 'flex',
-                                        boxShadow:
-                                          'inset 2px 0 4px rgba(0,0,0,0.06)',
-                                        zIndex: 0,
-                                      }}
-                                    >
-                                      <SwipeAction
-                                        onClick={() => handleEditSession()}
-                                      >
-                                        <Box
-                                          sx={{
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            bgcolor: 'primary.500',
-                                            color: '#fff',
-                                            px: 3,
-                                            height: '100%',
-                                          }}
-                                        >
-                                          <EditIcon
-                                            sx={{
-                                              fontSize: 20,
-                                              color: 'white',
-                                            }}
-                                          />
-                                          <Typography
-                                            level='body-xs'
-                                            sx={{ mt: 0.5, color: 'inherit' }}
-                                          >
-                                            {t('common:edit')}
-                                          </Typography>
-                                        </Box>
-                                      </SwipeAction>
-                                    </Box>
-                                  </TrailingActions>
-                                ) : null
+                                <TrailingActions>
+                                  <SwipeActionButton
+                                    disabled={!permissions.editTime}
+                                    reason={t(
+                                      'chores:swipeRestrictions.editTime',
+                                    )}
+                                    minWidth={136}
+                                    onClick={() => handleEditSession()}
+                                    icon={<EditIcon />}
+                                    label={t('common:edit')}
+                                  />
+                                </TrailingActions>
                               }
                             >
                               {/* Session Card Content */}
@@ -1208,6 +1178,8 @@ const TimerDetails = () => {
                                 </Box>
 
                                 <IconButton
+                                  aria-label={t('chores:swipeActionsLabel')}
+                                  aria-expanded={showMoreInfoId === pauseIndex}
                                   color='neutral'
                                   variant='plain'
                                   size='sm'

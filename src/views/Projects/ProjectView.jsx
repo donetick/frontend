@@ -2,7 +2,6 @@ import '@meauxt/react-swipeable-list/dist/styles.css'
 
 import {
   SwipeableList,
-  SwipeAction,
   TrailingActions,
   Type as ListType,
 } from '@meauxt/react-swipeable-list'
@@ -34,8 +33,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import EmptyState from '../../components/common/EmptyState'
 import ItemAudience from '../../components/common/ItemAudience'
-import PermissionDeniedModal from '../../components/common/PermissionDeniedModal'
 import SortAndFilterMenu from '../../components/common/SortAndFilterMenu'
+import SwipeActionButton from '../../components/common/SwipeActionButton'
 import SwipeListItem, {
   SWIPE_COMMIT_THRESHOLD,
 } from '../../components/common/SwipeListItem'
@@ -67,7 +66,7 @@ const ProjectCardContent = ({
   project,
   taskCounts = {},
 }) => {
-  const { t } = useTranslation('projects')
+  const { t } = useTranslation(['projects', 'chores'])
   // Check if current user owns this project
   const isOwnedByCurrentUser = project.created_by === currentUserId
   const isDefaultProject = project.id === 'default'
@@ -241,7 +240,7 @@ const ProjectCardContent = ({
       </Box>
       <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
         <ItemAudience label={audienceLabel} members={projectMembers} />
-        {isOwnedByCurrentUser && onToggleActions && (
+        {onToggleActions && (
           <IconButton
             color='neutral'
             variant='plain'
@@ -263,7 +262,7 @@ const ProjectCardContent = ({
 }
 
 const ProjectView = () => {
-  const { t } = useTranslation('projects')
+  const { t } = useTranslation(['projects', 'chores'])
   const { data: projects, isError, isProjectsLoading } = useProjects()
   const { data: userProfile } = useUserProfile()
   const { showError } = useNotification()
@@ -289,7 +288,6 @@ const ProjectView = () => {
   const queryClient = useQueryClient()
   const [confirmationModel, setConfirmationModel] = useState({})
   const [showMoreInfoId, setShowMoreInfoId] = useState(null)
-  const [permissionDeniedItem, setPermissionDeniedItem] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [sortBy, setSortBy] = useState(
     () => localStorage.getItem('projectsSortBy') || 'name',
@@ -630,64 +628,24 @@ const ProjectView = () => {
                 showMoreInfoId === project.id ? 'trailing' : null
               }
               trailingActions={
-                project.created_by === userProfile?.id ? (
-                  <TrailingActions>
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        boxShadow: 'inset 2px 0 4px rgba(0,0,0,0.06)',
-                        zIndex: 0,
-                      }}
-                    >
-                      <SwipeAction onClick={() => handleEditProject(project)}>
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            bgcolor: 'primary.500',
-                            color: '#fff',
-                            px: 3,
-                            height: '100%',
-                          }}
-                        >
-                          <EditIcon sx={{ fontSize: 20, color: 'white' }} />
-                          <Typography
-                            level='body-xs'
-                            sx={{ mt: 0.5, color: 'inherit' }}
-                          >
-                            {t('common:edit')}
-                          </Typography>
-                        </Box>
-                      </SwipeAction>
-                      <SwipeAction
-                        onClick={() => handleDeleteClicked(project.id)}
-                      >
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            bgcolor: 'danger.500',
-                            color: '#fff',
-                            px: 3,
-                            height: '100%',
-                          }}
-                        >
-                          <DeleteIcon sx={{ fontSize: 20, color: 'white' }} />
-                          <Typography
-                            level='body-xs'
-                            sx={{ mt: 0.5, color: 'inherit' }}
-                          >
-                            {t('common:delete')}
-                          </Typography>
-                        </Box>
-                      </SwipeAction>
-                    </Box>
-                  </TrailingActions>
-                ) : null
+                <TrailingActions>
+                  <SwipeActionButton
+                    disabled={project.created_by !== userProfile?.id}
+                    reason={t('chores:swipeRestrictions.creator')}
+                    onClick={() => handleEditProject(project)}
+                    icon={<EditIcon />}
+                    label={t('common:edit')}
+                  />
+                  <SwipeActionButton
+                    disabled={project.created_by !== userProfile?.id}
+                    reason={t('chores:swipeRestrictions.creator')}
+                    onClick={() => handleDeleteClicked(project.id)}
+                    bgcolor='danger.500'
+                    color='#fff'
+                    icon={<DeleteIcon />}
+                    label={t('common:delete')}
+                  />
+                </TrailingActions>
               }
             >
               <ProjectCardContent
@@ -696,11 +654,6 @@ const ProjectView = () => {
                 currentUserId={userProfile?.id}
                 taskCounts={taskCounts}
                 onToggleActions={() => {
-                  if (project.created_by !== userProfile?.id) {
-                    setShowMoreInfoId(null)
-                    setPermissionDeniedItem(project)
-                    return
-                  }
                   if (showMoreInfoId === project.id) {
                     setShowMoreInfoId(null)
                   } else {
@@ -712,13 +665,6 @@ const ProjectView = () => {
           ))}
         </SwipeableList>
       </Box>
-
-      <PermissionDeniedModal
-        open={!!permissionDeniedItem}
-        onClose={() => setPermissionDeniedItem(null)}
-        resourceType='project'
-        resourceName={permissionDeniedItem?.name}
-      />
 
       {modalOpen && (
         <ProjectModal

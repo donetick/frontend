@@ -2,7 +2,6 @@ import '@meauxt/react-swipeable-list/dist/styles.css'
 
 import {
   SwipeableList,
-  SwipeAction,
   TrailingActions,
   Type as ListType,
 } from '@meauxt/react-swipeable-list'
@@ -54,6 +53,7 @@ import EmptyState from '../../components/common/EmptyState'
 import FilterBar from '../../components/common/FilterBar'
 import PermissionDeniedModal from '../../components/common/PermissionDeniedModal'
 import SortAndFilterMenu from '../../components/common/SortAndFilterMenu'
+import SwipeActionButton from '../../components/common/SwipeActionButton'
 import SwipeListItem, {
   SWIPE_COMMIT_THRESHOLD,
 } from '../../components/common/SwipeListItem'
@@ -88,7 +88,7 @@ import NoteViewerModal from '../Modals/Inputs/NoteViewerModal'
 import HistoryCard from './HistoryCard'
 
 const ChoreHistory = () => {
-  const { t } = useTranslation('history')
+  const { t } = useTranslation(['history', 'chores'])
   const [userHistory, setUserHistory] = useState([])
   const [historyInfo, setHistoryInfo] = useState([])
   const { choreId } = useParams()
@@ -711,79 +711,30 @@ const ChoreHistory = () => {
                     : null
                 }
                 trailingActions={
-                  canEditHistory(historyEntry) ||
-                  canDeleteHistory(historyEntry) ? (
-                    <TrailingActions>
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          boxShadow: 'inset 2px 0 4px rgba(0,0,0,0.06)',
-                          zIndex: 0,
-                        }}
-                      >
-                        {canEditHistory(historyEntry) && (
-                          <SwipeAction onClick={() => handleEdit(historyEntry)}>
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                bgcolor: 'primary.500',
-                                color: '#fff',
-                                px: 3,
-                                height: '100%',
-                                width: '100%',
-                              }}
-                            >
-                              <EditIcon sx={{ fontSize: 20, color: 'white' }} />
-                              <Typography
-                                level='body-xs'
-                                sx={{ mt: 0.5, color: 'inherit' }}
-                              >
-                                {t('common:edit')}
-                              </Typography>
-                            </Box>
-                          </SwipeAction>
-                        )}
-                        {canDeleteHistory(historyEntry) && (
-                          <SwipeAction
-                            onClick={() => handleDelete(historyEntry)}
-                          >
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                bgcolor: 'danger.500',
-                                color: '#fff',
-                                px: 3,
-                                height: '100%',
-                              }}
-                            >
-                              <DeleteIcon
-                                sx={{ fontSize: 20, color: 'white' }}
-                              />
-                              <Typography
-                                level='body-xs'
-                                sx={{ mt: 0.5, color: 'inherit' }}
-                              >
-                                {t('common:delete')}
-                              </Typography>
-                            </Box>
-                          </SwipeAction>
-                        )}
-                      </Box>
-                    </TrailingActions>
-                  ) : null
+                  <TrailingActions>
+                    <SwipeActionButton
+                      disabled={!canEditHistory(historyEntry)}
+                      reason={t('chores:swipeRestrictions.historyEdit')}
+                      minWidth={136}
+                      onClick={() => handleEdit(historyEntry)}
+                      icon={<EditIcon />}
+                      label={t('common:edit')}
+                    />
+                    <SwipeActionButton
+                      disabled={!canDeleteHistory(historyEntry)}
+                      reason={t('chores:swipeRestrictions.historyDelete')}
+                      minWidth={136}
+                      onClick={() => handleDelete(historyEntry)}
+                      bgcolor='danger.500'
+                      color='#fff'
+                      icon={<DeleteIcon />}
+                      label={t('common:delete')}
+                    />
+                  </TrailingActions>
                 }
               >
                 <HistoryCard
-                  canManage={
-                    canEditHistory(historyEntry) ||
-                    canDeleteHistory(historyEntry)
-                  }
+                  actionsOpen={showMoreInfoId === (historyEntry.id || index)}
                   historyEntry={historyEntry}
                   performers={performers}
                   allHistory={choreHistory}
@@ -812,13 +763,6 @@ const ChoreHistory = () => {
                     })
                   }}
                   onToggleActions={() => {
-                    if (
-                      !canEditHistory(historyEntry) &&
-                      !canDeleteHistory(historyEntry)
-                    ) {
-                      denyHistoryAction('manage')
-                      return
-                    }
                     const id = historyEntry.id || index
                     if (showMoreInfoId === id) {
                       setShowMoreInfoId(null)
