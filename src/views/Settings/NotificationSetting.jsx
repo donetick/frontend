@@ -7,6 +7,7 @@ import {
   AccessTimeRounded,
   Android,
   Apple,
+  ExpandMoreRounded,
   NotificationsNoneRounded,
   SendRounded,
   SmartphoneRounded,
@@ -27,7 +28,7 @@ import {
   Typography,
 } from '@mui/joy'
 import PropTypes from 'prop-types'
-import { useEffect, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import {
@@ -71,14 +72,39 @@ const profiles = {
   quiet: 'profileQuiet',
   custom: 'profileCustom',
 }
-const events = {
-  pre_due: 'eventPreDue',
-  due: 'eventDue',
-  overdue_followup: 'eventOverdueFollowup',
-  escalation: 'eventEscalation',
-  daily_digest: 'eventDailyDigest',
-  weekly_digest: 'eventWeeklyDigest',
-}
+// Adding an event type means adding it to the group it belongs to, and nowhere
+// else: the toggle list, the `events` label map and the profile summary line
+// are all derived from this.
+const eventGroups = [
+  {
+    label: 'taskReminders',
+    events: [
+      ['on_assignment', 'eventOnAssignment'],
+      ['pre_due', 'eventPreDue'],
+      ['due', 'eventDue'],
+      // Only ever gates after-due reminders the user added to a task directly
+      // (the backend has no standalone recurring overdue job) -- any priority.
+      ['overdue_followup', 'eventOverdueFollowup'],
+    ],
+  },
+  {
+    label: 'approvals',
+    events: [
+      ['on_pending_approval', 'eventOnPendingApproval'],
+      ['on_redemption_request', 'eventOnRedemptionRequest'],
+    ],
+  },
+  {
+    label: 'summaries',
+    events: [
+      ['daily_digest', 'eventDailyDigest'],
+      ['weekly_digest', 'eventWeeklyDigest'],
+    ],
+  },
+]
+const events = Object.fromEntries(eventGroups.flatMap(group => group.events))
+// The send-hour only means something while one of these is on.
+const digestEvents = ['daily_digest', 'weekly_digest']
 
 const ToggleRow = ({ checked, description, disabled, onChange, title }) => (
   <Box sx={rowSx}>
@@ -111,6 +137,7 @@ const SectionHeading = ({ description, icon, title }) => (
     <Box sx={{ color: 'text.tertiary', display: 'flex', pt: 0.25 }}>{icon}</Box>
     <Box>
       <Typography
+        component='h3'
         level='title-md'
         sx={{ fontWeight: 650, letterSpacing: '-0.01em' }}
       >
@@ -128,13 +155,44 @@ SectionHeading.propTypes = {
   title: PropTypes.string.isRequired,
 }
 
+const groupLabelSx = {
+  fontWeight: 650,
+  letterSpacing: '0.06em',
+  textTransform: 'uppercase',
+}
+
+// A labelled run of toggles. The label is what ties the rows together, so it is
+// wired to the group for screen readers instead of being visual-only.
+const EventGroup = ({ children, label }) => {
+  const labelId = useId()
+  return (
+    <Box role='group' aria-labelledby={labelId}>
+      <Box sx={{ px: { xs: 2, sm: 2.5 }, pt: 2 }}>
+        <Typography
+          id={labelId}
+          level='body-xs'
+          textColor='text.tertiary'
+          sx={groupLabelSx}
+        >
+          {label}
+        </Typography>
+      </Box>
+      {children}
+    </Box>
+  )
+}
+EventGroup.propTypes = {
+  children: PropTypes.node.isRequired,
+  label: PropTypes.string.isRequired,
+}
+
 const readPreference = async key => {
   const { value } = await Preferences.get({ key })
   return value ? JSON.parse(value) : {}
 }
 
 const NotificationSetting = () => {
-  const { t } = useTranslation('settings')
+  const { i18n, t } = useTranslation('settings')
   const { fmt } = useLocalization()
   const { showError, showSuccess, showWarning } = useNotification()
   const { data: deviceTokens, refetch: refetchDevices } = useDeviceTokens()
@@ -150,13 +208,14 @@ const NotificationSetting = () => {
       return false
     }
   })
-  const [local, setLocal] = useState({ granted: false, dueNotification: true })
+  const [local, setLocal] = useState({ granted: false })
   const [push, setPush] = useState(false)
   const [currentDevice, setCurrentDevice] = useState(null)
   const [savingPreference, setSavingPreference] = useState(false)
   const [deviceBusy, setDeviceBusy] = useState(false)
   const [removingDevice, setRemovingDevice] = useState(null)
   const [testing, setTesting] = useState(false)
+  const [fineTuneToggled, setFineTuneToggled] = useState(null)
 
   useEffect(() => {
     readPreference('notificationPreferences')
@@ -207,6 +266,43 @@ const NotificationSetting = () => {
       window.removeEventListener('deviceTokenRegistrationFailed', failed)
     }
   }, [refetchDevices, showSuccess, showWarning, t])
+
+  const profile = notificationPreference?.profile ?? 'balanced'
+  const effective = notificationPreference?.effective
+  const overrideCount = Object.keys(
+    notificationPreference?.overrides ?? {},
+  ).length
+  // Custom *is* the per-event set, so the toggles are the whole point of it and
+  // the disclosure starts open there. Derived rather than an effect so an
+  // explicit open/close still wins afterwards.
+  const fineTuneOpen = fineTuneToggled ?? profile === 'custom'
+
+  const digestOn = digestEvents.some(eventType => effective?.[eventType])
+  // The hour is stored as a plain 0-23 local hour; render it through the user's
+  // own 12h/24h preference rather than hardcoding "HH:00".
+  const digestHourLabel = hour => fmt.time(new Date(2000, 0, 1, hour))
+  // Profiles differ in ways a single helper line can't convey, so say what the
+  // current mix actually turns on instead of describing the concept.
+  const enabledSummary = () => {
+    if (!effective) return t('notifications.profileSummaryLoading')
+    const enabled = Object.keys(events)
+      .filter(eventType => effective[eventType])
+      .map(eventType => t(`notifications.${events[eventType]}Short`))
+    if (enabled.length === 0) return t('notifications.profileSummaryMuted')
+    const list =
+      typeof Intl.ListFormat === 'function'
+        ? new Intl.ListFormat(i18n.language, {
+            style: 'long',
+            type: 'conjunction',
+          }).format(enabled)
+        : enabled.join(', ')
+    return digestOn
+      ? t('notifications.profileSummaryWithDigest', {
+          list,
+          time: digestHourLabel(notificationPreference.digestHour ?? 8),
+        })
+      : t('notifications.profileSummary', { list })
+  }
 
   const updateLocal = async changes => {
     const next = { ...local, ...changes }
@@ -308,7 +404,7 @@ const NotificationSetting = () => {
     setSavingPreference(true)
     try {
       const response = await UpdateNotificationPreferences({
-        profile: notificationPreference?.profile ?? 'balanced',
+        profile,
         overrides: notificationPreference?.overrides ?? {},
         digestHour: notificationPreference?.digestHour ?? 8,
         ...changes,
@@ -321,6 +417,22 @@ const NotificationSetting = () => {
       setSavingPreference(false)
     }
   }
+
+  const changeProfile = next => {
+    if (!next || next === profile) return
+    // Custom has no defaults of its own: the server resolves it from overrides
+    // alone, so posting it bare would mute every event type in one tap. Seed it
+    // with the mix currently in effect so "Custom" means "start from here".
+    savePreference(
+      next === 'custom'
+        ? { profile: next, overrides: { ...effective } }
+        : { profile: next, overrides: {} },
+    )
+  }
+
+  // Overrides are stored sparsely against the profile's defaults, so clearing
+  // them is what puts the user back on the profile they picked.
+  const resetToProfile = () => savePreference({ overrides: {} })
 
   const removeDevice = async device => {
     setRemovingDevice(device.deviceId)
@@ -347,13 +459,13 @@ const NotificationSetting = () => {
       key={eventType}
       title={t(`notifications.${events[eventType]}Title`)}
       description={t(`notifications.${events[eventType]}Label`)}
-      checked={Boolean(notificationPreference?.effective?.[eventType])}
+      checked={Boolean(effective?.[eventType])}
       disabled={savingPreference || !notificationPreference}
       onChange={() =>
         savePreference({
           overrides: {
             ...notificationPreference?.overrides,
-            [eventType]: !notificationPreference?.effective?.[eventType],
+            [eventType]: !effective?.[eventType],
           },
         })
       }
@@ -380,17 +492,15 @@ const NotificationSetting = () => {
             title={t('notifications.preferenceSection')}
             description={t('notifications.preferenceSectionDescription')}
           />
-          <Sheet sx={{ ...surfaceSx, mb: 2 }}>
+          <Sheet sx={surfaceSx}>
             <Box sx={{ p: { xs: 2, sm: 2.5 }, bgcolor: 'primary.softBg' }}>
               <FormControl
                 disabled={savingPreference || !notificationPreference}
               >
                 <FormLabel>{t('notifications.profileLabel')}</FormLabel>
                 <Select
-                  value={notificationPreference?.profile ?? 'balanced'}
-                  onChange={(_, profile) =>
-                    profile && savePreference({ profile })
-                  }
+                  value={profile}
+                  onChange={(_, next) => changeProfile(next)}
                   sx={{ bgcolor: 'background.surface', mt: 0.5 }}
                 >
                   {Object.entries(profiles).map(([value, label]) => (
@@ -399,87 +509,139 @@ const NotificationSetting = () => {
                     </Option>
                   ))}
                 </Select>
-                <FormHelperText sx={{ mt: 1 }}>
-                  {t('notifications.profileHelper')}
+                <FormHelperText sx={{ mt: 1, display: 'block' }}>
+                  {enabledSummary()}
                 </FormHelperText>
               </FormControl>
-            </Box>
-            <Box sx={{ px: { xs: 2, sm: 2.5 }, pt: 2 }}>
-              <Typography
-                level='body-xs'
-                textColor='text.tertiary'
-                sx={{
-                  fontWeight: 650,
-                  letterSpacing: '0.06em',
-                  textTransform: 'uppercase',
-                }}
-              >
-                {t('notifications.taskReminders')}
-              </Typography>
-            </Box>
-            {['pre_due', 'due', 'overdue_followup', 'escalation'].map(
-              (eventType, index) => (
-                <Box key={eventType}>
-                  {index > 0 && <Divider sx={{ mx: { xs: 2, sm: 2.5 } }} />}
-                  {renderEvent(eventType)}
-                </Box>
-              ),
-            )}
-          </Sheet>
-          <Sheet sx={surfaceSx}>
-            <Box sx={{ px: { xs: 2, sm: 2.5 }, pt: 2 }}>
-              <Typography
-                level='body-xs'
-                textColor='text.tertiary'
-                sx={{
-                  fontWeight: 650,
-                  letterSpacing: '0.06em',
-                  textTransform: 'uppercase',
-                }}
-              >
-                {t('notifications.summaries')}
-              </Typography>
-            </Box>
-            {renderEvent('daily_digest')}
-            <Divider sx={{ mx: { xs: 2, sm: 2.5 } }} />
-            {renderEvent('weekly_digest')}
-            <Divider />
-            <Box
-              sx={{ ...rowSx, bgcolor: 'background.level1', flexWrap: 'wrap' }}
-            >
-              <Box sx={{ display: 'flex', gap: 1.25, flex: '1 1 220px' }}>
-                <AccessTimeRounded
-                  sx={{ fontSize: 20, color: 'text.tertiary', mt: 0.25 }}
-                />
-                <Box>
-                  <Typography level='title-sm' id='digest-time-label'>
-                    {t('notifications.digestHourLabel')}
-                  </Typography>
-                  <Typography
-                    level='body-sm'
-                    textColor='text.secondary'
-                    sx={{ mt: 0.5 }}
+              {/* Overrides live alongside the profile rather than switching it
+                  to Custom, so without this the select keeps reading
+                  "Balanced" over a mix the user edited themselves. */}
+              {overrideCount > 0 && profile !== 'custom' && (
+                <Box
+                  sx={{
+                    alignItems: 'center',
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: 1,
+                    mt: 1.5,
+                  }}
+                >
+                  <Chip size='sm' variant='soft' color='primary'>
+                    {t('notifications.profileCustomized', {
+                      count: overrideCount,
+                    })}
+                  </Chip>
+                  <Button
+                    size='sm'
+                    variant='plain'
+                    disabled={savingPreference}
+                    onClick={resetToProfile}
                   >
-                    {t('notifications.digestHourHelper')}
-                  </Typography>
+                    {t('notifications.resetToProfile', {
+                      profile: t(`notifications.${profiles[profile]}`),
+                    })}
+                  </Button>
                 </Box>
-              </Box>
-              <Select
-                aria-labelledby='digest-time-label'
-                value={notificationPreference?.digestHour ?? 8}
-                disabled={savingPreference || !notificationPreference}
-                onChange={(_, hour) =>
-                  hour !== null && savePreference({ digestHour: Number(hour) })
-                }
-                sx={{ minWidth: 112 }}
-              >
-                {Array.from({ length: 24 }, (_, hour) => (
-                  <Option key={hour} value={hour}>
-                    {String(hour).padStart(2, '0')}:00
-                  </Option>
-                ))}
-              </Select>
+              )}
             </Box>
+            <Divider />
+            {/* Nine toggles is the rare case, not the default one: the profile
+                above is the answer for most people. */}
+            <Button
+              variant='plain'
+              color='neutral'
+              onClick={() => setFineTuneToggled(!fineTuneOpen)}
+              aria-expanded={fineTuneOpen}
+              aria-controls='notification-fine-tune'
+              endDecorator={
+                <ExpandMoreRounded
+                  sx={{
+                    transform: fineTuneOpen ? 'rotate(180deg)' : 'none',
+                    transition: 'transform 180ms cubic-bezier(0.22,1,0.36,1)',
+                    '@media (prefers-reduced-motion: reduce)': {
+                      transition: 'none',
+                    },
+                  }}
+                />
+              }
+              sx={{
+                borderRadius: 0,
+                justifyContent: 'space-between',
+                px: { xs: 2, sm: 2.5 },
+                py: 1.75,
+                width: '100%',
+              }}
+            >
+              {t('notifications.fineTune')}
+            </Button>
+            {fineTuneOpen && (
+              <Box id='notification-fine-tune'>
+                {eventGroups.map(group => (
+                  <Box key={group.label}>
+                    <Divider />
+                    {/* Approvals only ever fire for admins and managers, but
+                        the preference is per-user and roles change, so the
+                        toggles don't appear and disappear with a role. */}
+                    <EventGroup label={t(`notifications.${group.label}`)}>
+                      {group.events.map(([eventType], index) => (
+                        <Box key={eventType}>
+                          {index > 0 && (
+                            <Divider sx={{ mx: { xs: 2, sm: 2.5 } }} />
+                          )}
+                          {renderEvent(eventType)}
+                        </Box>
+                      ))}
+                    </EventGroup>
+                  </Box>
+                ))}
+              </Box>
+            )}
+            {digestOn && (
+              <>
+                <Divider />
+                <Box
+                  sx={{
+                    ...rowSx,
+                    bgcolor: 'background.level1',
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <Box sx={{ display: 'flex', gap: 1.25, flex: '1 1 220px' }}>
+                    <AccessTimeRounded
+                      sx={{ fontSize: 20, color: 'text.tertiary', mt: 0.25 }}
+                    />
+                    <Box>
+                      <Typography level='title-sm' id='digest-time-label'>
+                        {t('notifications.digestHourLabel')}
+                      </Typography>
+                      <Typography
+                        level='body-sm'
+                        textColor='text.secondary'
+                        sx={{ mt: 0.5 }}
+                      >
+                        {t('notifications.digestHourHelper')}
+                      </Typography>
+                    </Box>
+                  </Box>
+                  <Select
+                    aria-labelledby='digest-time-label'
+                    value={notificationPreference?.digestHour ?? 8}
+                    disabled={savingPreference || !notificationPreference}
+                    onChange={(_, hour) =>
+                      hour !== null &&
+                      savePreference({ digestHour: Number(hour) })
+                    }
+                    sx={{ minWidth: 112 }}
+                  >
+                    {Array.from({ length: 24 }, (_, hour) => (
+                      <Option key={hour} value={hour}>
+                        {digestHourLabel(hour)}
+                      </Option>
+                    ))}
+                  </Select>
+                </Box>
+              </>
+            )}
           </Sheet>
         </Box>
 
@@ -501,36 +663,6 @@ const NotificationSetting = () => {
               disabled={!native || deviceBusy}
               onChange={toggleLocal}
             />
-            {local.granted && native && (
-              <Box
-                sx={{
-                  mx: { xs: 2, sm: 2.5 },
-                  mb: 2,
-                  borderRadius: 'lg',
-                  bgcolor: 'background.level1',
-                }}
-              >
-                {[
-                  ['dueNotification', 'due'],
-                  ['preDueNotification', 'preDue'],
-                  ['naggingNotification', 'overdue'],
-                ].map(([property, label]) => (
-                  <ToggleRow
-                    key={property}
-                    title={t(`notifications.${label}Title`)}
-                    description={t(`notifications.${label}Label`)}
-                    checked={Boolean(local[property])}
-                    onChange={() =>
-                      updateLocal({ [property]: !local[property] }).catch(() =>
-                        showError({
-                          message: t('notifications.preferenceUpdateFailed'),
-                        }),
-                      )
-                    }
-                  />
-                ))}
-              </Box>
-            )}
             <Box sx={{ px: { xs: 2, sm: 2.5 }, pb: 2.5 }}>
               <Button
                 variant='outlined'

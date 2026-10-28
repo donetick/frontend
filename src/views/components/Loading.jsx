@@ -1,10 +1,12 @@
-import { Box, Button, CircularProgress, Container, Typography } from '@mui/joy'
+import { Button } from '@mui/joy'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import logo from '../../assets/logo.svg'
 import { networkManager } from '../../hooks/NetworkManager'
-import Logo from '../../Logo'
 
+// Mirrors StartupScreen's markup/CSS classes (defined in index.html) so the
+// handoff from the pre-JS startup screen to this component feels seamless.
 const LoadingComponent = () => {
   const { t } = useTranslation('common')
   const [message, setMessage] = useState(t('loading'))
@@ -30,45 +32,61 @@ const LoadingComponent = () => {
   }, [])
 
   return (
-    <Container className='flex h-full items-center justify-center'>
-      <Box
-        className='flex flex-col items-center justify-center'
-        sx={{
-          minHeight: '80vh',
-        }}
-      >
-        <CircularProgress
-          color='primary'
-          determinate={!isOnline}
-          sx={{ '--CircularProgress-size': '200px' }}
-        >
-          <Logo />
-        </CircularProgress>
-        <Box
-          className='flex items-center gap-2'
-          sx={{
-            fontWeight: 700,
-            fontSize: 24,
-            mt: 2,
-          }}
-        >
-          {message}
-        </Box>
-        <Typography level='h2' fontWeight={500} textAlign={'center'}>
-          {subMessage}
-        </Typography>
-        <Button
-          variant='outlined'
-          color='primary'
-          sx={{ mt: 4 }}
-          onClick={() => {
-            window.location.href = '/' // navigate back to the home page
-          }}
-        >
-          {t('navigateBack')}
-        </Button>
-      </Box>
-    </Container>
+    <div className='startup-screen' role='status' aria-label={message}>
+      <div className='startup-screen__content'>
+        <div className='startup-screen__visual' aria-hidden='true'>
+          <div className='startup-screen__halo' />
+          <div className='startup-screen__card startup-screen__card--back'>
+            <span className='startup-screen__check'>✓</span>
+            <span className='startup-screen__lines'>
+              <span />
+              <span />
+            </span>
+          </div>
+          <div className='startup-screen__mascot'>
+            <img src={logo} width='88' height='88' alt='' />
+          </div>
+          <div className='startup-screen__card startup-screen__card--front'>
+            <span className='startup-screen__check'>✓</span>
+            <span className='startup-screen__lines'>
+              <span />
+              <span />
+            </span>
+          </div>
+          <span className='startup-screen__spark startup-screen__spark--one' />
+          <span className='startup-screen__spark startup-screen__spark--two' />
+        </div>
+        <div className='startup-screen__copy'>
+          <div className='startup-screen__name'>
+            Done<span>tick</span>
+          </div>
+          <div className='startup-screen__caption'>{subMessage || message}</div>
+        </div>
+        <div className='startup-screen__dots' aria-hidden='true'>
+          <span />
+          <span />
+          <span />
+        </div>
+        <div style={{ height: 68 }}>
+          <Button
+            variant='outlined'
+            color='primary'
+            onClick={() => {
+              window.location.href = '/' // navigate back to the home page
+            }}
+            sx={{
+              mt: 2,
+              opacity: subMessage ? 1 : 0,
+              transform: subMessage ? 'translateY(0)' : 'translateY(-6px)',
+              pointerEvents: subMessage ? 'auto' : 'none',
+              transition: 'opacity 400ms ease, transform 400ms ease',
+            }}
+          >
+            {t('navigateBack')}
+          </Button>
+        </div>
+      </div>
+    </div>
   )
 }
 
