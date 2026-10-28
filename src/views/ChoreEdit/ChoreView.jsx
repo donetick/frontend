@@ -7,7 +7,6 @@ import {
   Checklist,
   Edit,
   History,
-  HourglassEmpty,
   MoreVert,
   OpenInFull,
   OpenInNew,
@@ -92,6 +91,7 @@ import {
 import { offlineDB } from '../../utils/OfflineDB'
 import { getSafeBottomPadding } from '../../utils/SafeAreaUtils.js'
 import ChoreActionMenu from '../components/ChoreActionMenu'
+import ChoreStatusChip from '../components/ChoreStatusChip'
 import DueDatePickerModal, {
   combineDueDate,
   splitDueDate,
@@ -1452,7 +1452,7 @@ const ChoreView = () => {
               }}
             >
               {chore.status === 3 ? (
-                // Pending approval: Show approve/reject for admins/managers/owners, grayed out button for others
+                // Approval is a status for non-reviewers, not an unavailable completion action.
                 canApproveReject() ? (
                   <>
                     <Button
@@ -1481,15 +1481,15 @@ const ChoreView = () => {
                     </Button>
                   </>
                 ) : (
-                  <Button
-                    fullWidth
-                    size='lg'
-                    disabled={true}
-                    color='neutral'
-                    startDecorator={<HourglassEmpty />}
-                  >
-                    <Box>{t('permissions.approval')}</Box>
-                  </Button>
+                  <Box sx={{ textAlign: 'center' }}>
+                    <ChoreStatusChip chore={chore} />
+                    <Typography
+                      level='body-sm'
+                      sx={{ mt: 1, color: 'text.secondary' }}
+                    >
+                      {t('permissions.approval')}
+                    </Typography>
+                  </Box>
                 )
               ) : (
                 // Normal completion flow
@@ -1498,6 +1498,13 @@ const ChoreView = () => {
                     fullWidth
                     size='lg'
                     onClick={handleTaskCompletion}
+                    aria-describedby={
+                      !permissions.complete
+                        ? 'task-completion-permission'
+                        : notInCompletionWindow(chore)
+                          ? 'task-completion-availability'
+                          : undefined
+                    }
                     disabled={
                       !permissions.complete ||
                       notInCompletionWindow(chore) ||
@@ -1532,24 +1539,27 @@ const ChoreView = () => {
             {!permissions.complete &&
               chore.status !== ChoreStatus.PENDING_APPROVAL && (
                 <Typography
+                  id='task-completion-permission'
                   level='body-sm'
                   sx={{ color: 'text.secondary', textAlign: 'center' }}
                 >
                   {t('permissions.complete')}
                 </Typography>
               )}
-            {notInCompletionWindow(chore) && (
-              <Typography
-                level='body-sm'
-                sx={{ color: 'warning.plainColor', textAlign: 'center', mb: 1 }}
-              >
-                {t('choreView.availableToCompleteStarting', {
-                  date: moment(chore.nextDueDate)
-                    .subtract(chore.completionWindow, 'hours')
-                    .format('MM/DD/YYYY hh:mm A'),
-                })}
-              </Typography>
-            )}
+            {chore.status !== ChoreStatus.PENDING_APPROVAL &&
+              notInCompletionWindow(chore) && (
+                <Typography
+                  id='task-completion-availability'
+                  level='body-sm'
+                  sx={{ color: 'text.secondary', textAlign: 'center', mb: 1 }}
+                >
+                  {t('choreView.availableToCompleteStarting', {
+                    date: moment(chore.nextDueDate)
+                      .subtract(chore.completionWindow, 'hours')
+                      .format('MM/DD/YYYY hh:mm A'),
+                  })}
+                </Typography>
+              )}
             {/* Timer Button - Show split button when timer is active, regular button otherwise */}
             {[ChoreStatus.ACTIVE, ChoreStatus.PAUSED].includes(chore.status) ? (
               <TimerSplitButton
@@ -1586,6 +1596,13 @@ const ChoreView = () => {
                 }}
                 variant='soft'
                 color='primary'
+                aria-describedby={
+                  !permissions.complete
+                    ? 'task-completion-permission'
+                    : notInCompletionWindow(chore)
+                      ? 'task-completion-availability'
+                      : undefined
+                }
                 disabled={
                   !permissions.complete ||
                   notInCompletionWindow(chore) ||

@@ -46,6 +46,7 @@ import Priorities from '../../utils/Priorities'
 import ChoreActionMenu, {
   ChoreActionMenuTrigger,
 } from '../components/ChoreActionMenu'
+import ChoreStatusChip from '../components/ChoreStatusChip'
 import PendingBadge from '../components/PendingBadge'
 
 // Hoisted so emotion isn't re-serializing an identical object for every row
@@ -84,16 +85,6 @@ const ChoreCard = ({
   const { data: pendingCmds } = usePendingCommands(chore.id)
 
   const canApproveReject = () => permissions.approve
-  const restriction =
-    chore.status === 3
-      ? !permissions.approve && 'permissions.approval'
-      : chore.isActive === false
-        ? 'permissions.archived'
-        : !permissions.complete
-          ? 'permissions.complete'
-          : notInCompletionWindow(chore)
-            ? 'permissions.window'
-            : null
 
   const getFrequencyIcon = chore => {
     if (['once', 'no_repeat'].includes(chore.frequencyType)) {
@@ -317,6 +308,7 @@ const ChoreCard = ({
                       </Chip>
                     </Box>
                   )}
+                  <ChoreStatusChip chore={chore} />
                   <Box key={`${chore.id}-labels`}>
                     {chore.priority > 0 && (
                       <Chip
@@ -456,10 +448,12 @@ const ChoreCard = ({
                 >
                   {/* <ButtonGroup> */}
                   {chore.status === 3 ? (
-                    // Pending approval: Show approve/reject for admins/managers/owners, grayed out for others
+                    // Only reviewers get approval actions; the chip communicates status.
                     canApproveReject() ? (
                       <Box sx={{ display: 'flex', gap: 0.5 }}>
                         <IconButton
+                          aria-label={`${t('choreView.approve')}: ${chore.name}`}
+                          title={t('choreView.approve')}
                           variant='soft'
                           color={completionColor}
                           onClick={e => {
@@ -489,6 +483,8 @@ const ChoreCard = ({
                           <ThumbUp sx={{ fontSize: 18 }} />
                         </IconButton>
                         <IconButton
+                          aria-label={`${t('choreView.reject')}: ${chore.name}`}
+                          title={t('choreView.reject')}
                           variant='soft'
                           color='danger'
                           onClick={e => {
@@ -515,25 +511,14 @@ const ChoreCard = ({
                         </IconButton>
                       </Box>
                     ) : (
-                      <IconButton
-                        variant='soft'
-                        color='neutral'
-                        disabled={true}
-                        sx={{
-                          borderRadius: '50%',
-                          width: 50,
-                          minWidth: 50,
-                          height: 50,
-                          flexShrink: 0,
-                          zIndex: 1,
-                          opacity: 0.5,
-                        }}
-                      >
-                        <HourglassEmpty />
-                      </IconButton>
+                      <HourglassEmpty
+                        aria-hidden='true'
+                        sx={{ m: 1.5, color: 'text.tertiary' }}
+                      />
                     )
                   ) : (
                     <IconButton
+                      aria-label={`${t(chore.status === 0 ? 'completeChore' : chore.status === 1 ? 'choreView.pauseTimer' : 'choreView.start')}: ${chore.name}`}
                       variant={chore.status === 0 ? 'solid' : 'soft'}
                       color={chore.status === 0 ? completionColor : 'warning'}
                       onClick={e => {
@@ -622,11 +607,6 @@ const ChoreCard = ({
               )}
             </Grid>
           </Grid>
-          {showActions && !isMultiSelectMode && !viewOnly && restriction && (
-            <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
-              {t(restriction)}
-            </Typography>
-          )}
         </Card>
       </Box>
     </Box>

@@ -1,9 +1,13 @@
 {
   "title": "Chores",
+  "taskStatus": {
+    "awaitingApproval": "Awaiting approval",
+    "availableAt": "Available {{date}}"
+  },
   "permissions": {
-    "complete": "You’re not eligible to complete or start this task. Ask the task owner to add you as an assignee.",
+    "complete": "You’re not eligible to complete this task or use its timer.",
     "subtasks": "These subtasks are read-only because you’re not eligible to complete this task.",
-    "approval": "Awaiting approval from a circle admin or manager.",
+    "approval": "A circle admin or manager must approve this completion.",
     "archive": "Only the task owner can restore this task.",
     "archived": "Restore this task before working on it.",
     "window": "This task is not yet available to complete.",

@@ -28,6 +28,7 @@ import {
   splitTextAtFirstHttpUrl,
 } from '../../../utils/ExternalLinks'
 import { ChoreActionMenuTrigger } from '../../components/ChoreActionMenu'
+import ChoreStatusChip from '../../components/ChoreStatusChip'
 import PendingBadge from '../../components/PendingBadge'
 
 // The board and Home use cards. Project lists deliberately have their own
@@ -49,15 +50,11 @@ const ProjectTaskRow = memo(function ProjectTaskRow({
   const { data: pendingCommands } = usePendingCommands(chore.id)
   const canApprove = permissions.approve
   const isPendingApproval = chore.status === 3
-  const restriction = isPendingApproval
-    ? !canApprove && 'permissions.approval'
-    : chore.isActive === false
-      ? 'permissions.archived'
-      : !permissions.complete
-        ? 'permissions.complete'
-        : notInCompletionWindow(chore)
-          ? 'permissions.window'
-          : null
+  const actionDisabled =
+    chore.isActive === false ||
+    (isPendingApproval
+      ? !canApprove
+      : !permissions.complete || Boolean(notInCompletionWindow(chore)))
   const action = isPendingApproval
     ? 'approve'
     : chore.status === 1
@@ -106,7 +103,7 @@ const ProjectTaskRow = memo(function ProjectTaskRow({
         {isMultiSelectMode || chore.status === 0 ? (
           <Checkbox
             checked={isMultiSelectMode ? isSelected : false}
-            disabled={!isMultiSelectMode && Boolean(restriction)}
+            disabled={!isMultiSelectMode && actionDisabled}
             onChange={() => {
               if (isMultiSelectMode) onSelectionToggle?.()
               else onAction?.('complete', chore)
@@ -138,13 +135,18 @@ const ProjectTaskRow = memo(function ProjectTaskRow({
               },
             }}
           />
+        ) : isPendingApproval && !canApprove ? (
+          <HourglassEmpty
+            aria-hidden='true'
+            sx={{ fontSize: 17, color: 'text.tertiary' }}
+          />
         ) : (
           <IconButton
             aria-label={`${actionLabel}: ${chore.name}`}
             title={actionLabel}
             size='sm'
             variant='plain'
-            disabled={Boolean(restriction)}
+            disabled={actionDisabled}
             onClick={() => onAction?.(action, chore)}
             sx={{
               color: isPendingApproval
@@ -153,11 +155,7 @@ const ProjectTaskRow = memo(function ProjectTaskRow({
             }}
           >
             {isPendingApproval ? (
-              canApprove ? (
-                <ThumbUp sx={{ fontSize: 17 }} />
-              ) : (
-                <HourglassEmpty sx={{ fontSize: 17 }} />
-              )
+              <ThumbUp sx={{ fontSize: 17 }} />
             ) : chore.status === 1 ? (
               <Pause sx={{ fontSize: 18 }} />
             ) : (
@@ -199,11 +197,7 @@ const ProjectTaskRow = memo(function ProjectTaskRow({
           {url ? getUrlHostname(url) : ''}
           {after}
         </Typography>
-        {!isMultiSelectMode && restriction && (
-          <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
-            {t(restriction)}
-          </Typography>
-        )}
+        <ChoreStatusChip chore={chore} />
       </Box>
 
       {(chore._pending || pendingCommands?.length > 0) && (
