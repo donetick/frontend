@@ -313,27 +313,9 @@ const NotificationSetting = () => {
     setLocal(next)
   }
 
-  const toggleLocal = async () => {
-    setDeviceBusy(true)
-    try {
-      if (!local.granted) {
-        const permission = await LocalNotifications.requestPermissions()
-        if (permission.display !== 'granted') {
-          showWarning({
-            title: t('notifications.permissionDeniedTitle'),
-            message: t('notifications.permissionDeniedMessage'),
-          })
-          return
-        }
-      }
-      await updateLocal({ granted: !local.granted })
-    } catch {
-      showError({ message: t('notifications.preferenceUpdateFailed') })
-    } finally {
-      setDeviceBusy(false)
-    }
-  }
-
+  // Resolves to whether this device ended up opted in, so the combined switch
+  // can tell "the user declined push" apart from "push broke" — a refusal is
+  // the user's answer and must not read as a failure.
   const enablePush = async () => {
     if (
       (deviceTokens?.length ?? 0) >= 5 &&
@@ -343,7 +325,7 @@ const NotificationSetting = () => {
         title: t('notifications.deviceLimitTitle'),
         message: t('notifications.deviceLimitMessage'),
       })
-      return
+      return false
     }
     const permission = await PushNotifications.requestPermissions()
     if (permission.receive !== 'granted') {
@@ -351,7 +333,7 @@ const NotificationSetting = () => {
         title: t('notifications.permissionRequiredTitle'),
         message: t('notifications.permissionRequiredMessage'),
       })
-      return
+      return false
     }
     // force: explicit opt-in must reach the server even if a stale local
     // registration record still matches the current token.
@@ -361,6 +343,25 @@ const NotificationSetting = () => {
       value: JSON.stringify({ granted: true }),
     })
     setPush(true)
+    return true
+  }
+
+  const disablePush = async () => {
+    // Stop server delivery to this device as well as saving the local preference.
+    if (deviceTokens?.some(device => device.deviceId === currentDevice?.id)) {
+      // unregisterPushNotifications also halts the native registration
+      // state machine, not just the server row — a direct
+      // UnregisterDeviceToken call here left the retry/registration
+      // listeners live and the device re-registered itself shortly after.
+      const removed = await unregisterPushNotifications()
+      if (!removed) throw new Error('Unable to unregister device')
+      await refetchDevices()
+    }
+    await Preferences.set({
+      key: 'pushNotificationPreferences',
+      value: JSON.stringify({ granted: false }),
+    })
+    setPush(false)
   }
 
   const changePush = async (enabled = !push) => {
@@ -369,23 +370,7 @@ const NotificationSetting = () => {
       if (enabled) {
         await enablePush()
       } else {
-        // Stop server delivery to this device as well as saving the local preference.
-        if (
-          deviceTokens?.some(device => device.deviceId === currentDevice?.id)
-        ) {
-          // unregisterPushNotifications also halts the native registration
-          // state machine, not just the server row — a direct
-          // UnregisterDeviceToken call here left the retry/registration
-          // listeners live and the device re-registered itself shortly after.
-          const removed = await unregisterPushNotifications()
-          if (!removed) throw new Error('Unable to unregister device')
-          await refetchDevices()
-        }
-        await Preferences.set({
-          key: 'pushNotificationPreferences',
-          value: JSON.stringify({ granted: false }),
-        })
-        setPush(false)
+        await disablePush()
       }
     } catch {
       showError({
@@ -395,6 +380,47 @@ const NotificationSetting = () => {
             : 'notifications.unregisterFailed',
         ),
       })
+    } finally {
+      setDeviceBusy(false)
+    }
+  }
+
+  // One switch for both transports: on-device reminders and (on the official
+  // instance) push are the same promise to a user — "tell me about my tasks" —
+  // and two toggles only ever asked them to understand our delivery plumbing.
+  // The local grant is the master, so push failing or being declined leaves
+  // reminders working rather than silently rolling the whole switch back.
+  const toggleNotifications = async () => {
+    setDeviceBusy(true)
+    try {
+      if (local.granted) {
+        if (official) await disablePush()
+        await updateLocal({ granted: false })
+        return
+      }
+      const permission = await LocalNotifications.requestPermissions()
+      if (permission.display !== 'granted') {
+        showWarning({
+          title: t('notifications.permissionDeniedTitle'),
+          message: t('notifications.permissionDeniedMessage'),
+        })
+        return
+      }
+      // optOut clears the launch-time snackbar too: having answered here is
+      // answering the same question it asks.
+      await updateLocal({ granted: true, optOut: false })
+      if (official) {
+        try {
+          await enablePush()
+        } catch {
+          showWarning({
+            title: t('notifications.registrationFailedTitle'),
+            message: t('notifications.pushOnlyFailed'),
+          })
+        }
+      }
+    } catch {
+      showError({ message: t('notifications.preferenceUpdateFailed') })
     } finally {
       setDeviceBusy(false)
     }
@@ -485,6 +511,68 @@ const NotificationSetting = () => {
         >
           {t('notifications.description')}
         </Typography>
+
+        {/* The gate comes before the detail: tuning a profile above a switch
+            that is off is how a user ends up with carefully chosen silence.
+            It stays its own card because it is the only device-scoped control
+            here — the preferences below are account-wide and still govern
+            Telegram, Pushover and webhooks with this device switched off. */}
+        <Box component='section' sx={{ mb: 3.5 }}>
+          <SectionHeading
+            icon={<NotificationsNoneRounded />}
+            title={t('notifications.deliveryTitle')}
+            description={t('notifications.deliveryDescription')}
+          />
+          <Sheet sx={surfaceSx}>
+            <ToggleRow
+              title={t('notifications.enableLabel')}
+              description={t(
+                !native
+                  ? 'notifications.mobileOnly'
+                  : official
+                    ? 'notifications.enableHelper'
+                    : 'notifications.enableHelperLocal',
+              )}
+              checked={Boolean(local.granted)}
+              disabled={!native || deviceBusy}
+              onChange={toggleNotifications}
+            />
+            <Box sx={{ px: { xs: 2, sm: 2.5 }, pb: 2.5 }}>
+              <Button
+                variant='outlined'
+                color='neutral'
+                size='sm'
+                startDecorator={<SendRounded />}
+                disabled={!native || !local.granted}
+                loading={testing}
+                onClick={async () => {
+                  setTesting(true)
+                  try {
+                    await LocalNotifications.schedule({
+                      notifications: [
+                        {
+                          title: t('notifications.testNotification'),
+                          body: t('notifications.testNotificationBody'),
+                          id: 1,
+                          schedule: { at: new Date(Date.now() + 2000) },
+                        },
+                      ],
+                    })
+                  } catch {
+                    showError({ message: t('notifications.testFailed') })
+                  } finally {
+                    setTesting(false)
+                  }
+                }}
+              >
+                {t('notifications.testNotification')}
+              </Button>
+            </Box>
+            {/* No push toggle: the master switch above owns it. When it is on
+                but this device isn't reachable, the registered-devices section
+                below is the one place that says so and offers the fix. */}
+          </Sheet>
+        </Box>
 
         <Box component='section' sx={{ mb: 3.5 }}>
           <SectionHeading
@@ -640,74 +728,6 @@ const NotificationSetting = () => {
                     ))}
                   </Select>
                 </Box>
-              </>
-            )}
-          </Sheet>
-        </Box>
-
-        <Box component='section' sx={{ mb: 3.5 }}>
-          <SectionHeading
-            icon={<NotificationsNoneRounded />}
-            title={t('notifications.deliveryTitle')}
-            description={t('notifications.deliveryDescription')}
-          />
-          <Sheet sx={surfaceSx}>
-            <ToggleRow
-              title={t('notifications.deviceLabel')}
-              description={t(
-                native
-                  ? 'notifications.deviceHelper'
-                  : 'notifications.mobileOnly',
-              )}
-              checked={Boolean(local.granted)}
-              disabled={!native || deviceBusy}
-              onChange={toggleLocal}
-            />
-            <Box sx={{ px: { xs: 2, sm: 2.5 }, pb: 2.5 }}>
-              <Button
-                variant='outlined'
-                color='neutral'
-                size='sm'
-                startDecorator={<SendRounded />}
-                disabled={!native || !local.granted}
-                loading={testing}
-                onClick={async () => {
-                  setTesting(true)
-                  try {
-                    await LocalNotifications.schedule({
-                      notifications: [
-                        {
-                          title: t('notifications.testNotification'),
-                          body: t('notifications.testNotificationBody'),
-                          id: 1,
-                          schedule: { at: new Date(Date.now() + 2000) },
-                        },
-                      ],
-                    })
-                  } catch {
-                    showError({ message: t('notifications.testFailed') })
-                  } finally {
-                    setTesting(false)
-                  }
-                }}
-              >
-                {t('notifications.testNotification')}
-              </Button>
-            </Box>
-            {official && (
-              <>
-                <Divider />
-                <ToggleRow
-                  title={t('notifications.pushLabel')}
-                  description={t(
-                    native
-                      ? 'notifications.pushHelper'
-                      : 'notifications.mobileOnly',
-                  )}
-                  checked={push}
-                  disabled={!native || deviceBusy}
-                  onChange={() => changePush()}
-                />
               </>
             )}
           </Sheet>
