@@ -11,11 +11,14 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
 import { useLocalization } from '../../contexts/LocalizationContext'
+import { useThemeSkin } from '../../contexts/ThemeSkinContext'
 
 const TimePassedCard = ({ chore, handleAction, onShowDetails }) => {
   const { t } = useTranslation('timer')
   const navigate = useNavigate()
   const { fmt } = useLocalization()
+  const { skin } = useThemeSkin()
+  const completionColor = skin === 'default' ? 'success' : 'primary'
   const [time, setTime] = useState(0)
   const [shouldAnimate, setShouldAnimate] = useState(false)
   const [prevStatus, setPrevStatus] = useState(null) // Initialize as null
@@ -170,7 +173,7 @@ const TimePassedCard = ({ chore, handleAction, onShowDetails }) => {
         ) : (
           <Chip
             variant='solid'
-            color='primary'
+            color={completionColor}
             size='md'
             startDecorator={<PlayArrow sx={{ fontSize: 14 }} />}
             onClick={() => {

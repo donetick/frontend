@@ -39,6 +39,7 @@ import { useTranslation } from 'react-i18next'
 
 import AppModal from '../../../components/common/AppModal'
 import KeyboardShortcutHint from '../../../components/common/KeyboardShortcutHint'
+import { useThemeSkin } from '../../../contexts/ThemeSkinContext'
 import LABEL_COLORS, {
   getTextColorFromBackgroundColor,
 } from '../../../utils/Colors'
@@ -295,6 +296,8 @@ const MultiSelectToolbar = ({
   showKeyboardShortcuts,
 }) => {
   const { t } = useTranslation('chores')
+  const { skin } = useThemeSkin()
+  const completionColor = skin === 'default' ? 'success' : 'primary'
   // Same phone-only condition ChoreActionMenu and AddTaskModal use: tablets and
   // desktops keep the menu, only phones get the sheet.
   const isSmallScreen = useMediaQuery('(max-width:600px)')
@@ -701,7 +704,7 @@ const MultiSelectToolbar = ({
               <Button
                 size='sm'
                 variant='solid'
-                color='primary'
+                color={completionColor}
                 onClick={onComplete}
                 startDecorator={<Done />}
                 endDecorator={shortcut('Enter')}
