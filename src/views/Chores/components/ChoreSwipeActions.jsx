@@ -22,7 +22,7 @@ import { hapticMedium } from '../../../utils/Haptics'
 const canApproveReject = (chore, userProfile) =>
   userProfile?.role === 1 || chore.createdBy === userProfile?.id
 
-// The plain ChoreCard floats its priority/label chips above the card body, so
+// The plain ChoreCard floats its due-date/frequency chips above the card body, so
 // the actions have to drop down to align with the card itself.
 const PLAIN_CARD_OFFSET = '28px'
 
@@ -53,7 +53,9 @@ const SwipeActionTile = ({
     sx={{
       display: 'flex',
       minWidth: 76,
-      height: '100%',
+      // The top margin must come out of the height so tall-card actions stay
+      // centered within the card body instead of overflowing below it.
+      height: offsetTop ? `calc(100% - ${PLAIN_CARD_OFFSET})` : '100%',
       ...(offsetTop && { mt: PLAIN_CARD_OFFSET }),
     }}
   >
@@ -70,7 +72,11 @@ const SwipeActionTile = ({
         px: 2,
       }}
     >
-      <Box sx={{ display: 'flex', '& svg': { fontSize: 22 } }}>{icon}</Box>
+      <Box
+        sx={{ display: 'flex', '& svg': { fontSize: 22, color: 'inherit' } }}
+      >
+        {icon}
+      </Box>
       <Typography
         level='body-xs'
         sx={{
