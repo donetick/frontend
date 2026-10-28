@@ -1,10 +1,6 @@
 import '@meauxt/react-swipeable-list/dist/styles.css'
 
-import {
-  SwipeableList,
-  TrailingActions,
-  Type as ListType,
-} from '@meauxt/react-swipeable-list'
+import { SwipeableList, Type as ListType } from '@meauxt/react-swipeable-list'
 import {
   Add,
   Close,
@@ -34,6 +30,7 @@ import EmptyState from '../../components/common/EmptyState'
 import ItemAudience from '../../components/common/ItemAudience'
 import SortAndFilterMenu from '../../components/common/SortAndFilterMenu'
 import SwipeActionButton from '../../components/common/SwipeActionButton'
+import { TrailingSwipeActions as TrailingActions } from '../../components/common/SwipeActionTray'
 import SwipeListItem, {
   SWIPE_COMMIT_THRESHOLD,
 } from '../../components/common/SwipeListItem'
@@ -448,14 +445,12 @@ const LabelView = () => {
                 <TrailingActions>
                   <SwipeActionButton
                     disabled={label.created_by !== userProfile?.id}
-                    reason={t('chores:swipeRestrictions.creator')}
                     onClick={() => handleEditLabel(label)}
                     icon={<EditIcon />}
                     label={t('common:edit')}
                   />
                   <SwipeActionButton
                     disabled={label.created_by !== userProfile?.id}
-                    reason={t('chores:swipeRestrictions.creator')}
                     onClick={() => handleDeleteClicked(label.id)}
                     bgcolor='danger.500'
                     color='#fff'

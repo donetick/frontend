@@ -1,10 +1,6 @@
 import '@meauxt/react-swipeable-list/dist/styles.css'
 
-import {
-  SwipeableList,
-  TrailingActions,
-  Type as ListType,
-} from '@meauxt/react-swipeable-list'
+import { SwipeableList, Type as ListType } from '@meauxt/react-swipeable-list'
 import {
   AccessTime,
   Add,
@@ -40,6 +36,7 @@ import { useParams } from 'react-router-dom'
 
 import EmptyState from '../../components/common/EmptyState'
 import SwipeActionButton from '../../components/common/SwipeActionButton'
+import { TrailingSwipeActions as TrailingActions } from '../../components/common/SwipeActionTray'
 import SwipeListItem, {
   SWIPE_COMMIT_THRESHOLD,
 } from '../../components/common/SwipeListItem'
@@ -1033,10 +1030,6 @@ const TimerDetails = () => {
                                 <TrailingActions>
                                   <SwipeActionButton
                                     disabled={!permissions.editTime}
-                                    reason={t(
-                                      'chores:swipeRestrictions.editTime',
-                                    )}
-                                    minWidth={136}
                                     onClick={() => handleEditSession()}
                                     icon={<EditIcon />}
                                     label={t('common:edit')}

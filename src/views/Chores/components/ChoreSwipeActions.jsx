@@ -1,4 +1,3 @@
-import { LeadingActions, TrailingActions } from '@meauxt/react-swipeable-list'
 import {
   Check,
   Delete,
@@ -12,6 +11,10 @@ import {
 } from '@mui/icons-material'
 
 import SwipeActionButton from '../../../components/common/SwipeActionButton'
+import {
+  LeadingSwipeActions as LeadingActions,
+  TrailingSwipeActions as TrailingActions,
+} from '../../../components/common/SwipeActionTray'
 import { notInCompletionWindow } from '../../../utils/Chores'
 import { hapticMedium } from '../../../utils/Haptics'
 
@@ -38,7 +41,6 @@ export const getChoreLeadingActions = ({
       <LeadingActions>
         <SwipeActionButton
           disabled={!permissions.approve}
-          reason={t('swipeRestrictions.approval')}
           onClick={act('approve')}
           bgcolor='primary.solidBg'
           color='primary.solidColor'
@@ -55,11 +57,6 @@ export const getChoreLeadingActions = ({
     <LeadingActions>
       <SwipeActionButton
         disabled={!permissions.complete || unavailable}
-        reason={t(
-          !permissions.complete
-            ? 'swipeRestrictions.complete'
-            : 'swipeRestrictions.window',
-        )}
         onClick={act(isInProgress ? 'complete' : 'start')}
         bgcolor='primary.solidBg'
         color='primary.solidColor'
@@ -69,7 +66,6 @@ export const getChoreLeadingActions = ({
       />
       <SwipeActionButton
         disabled={unavailable}
-        reason={t('swipeRestrictions.window')}
         onClick={act('skip')}
         bgcolor='warning.500'
         color='#fff'
@@ -103,7 +99,6 @@ export const getChoreTrailingActions = ({
       <SwipeActionButton
         key='reject'
         disabled={!permissions.approve}
-        reason={t('swipeRestrictions.approval')}
         onClick={act('reject')}
         bgcolor='danger.600'
         color='#fff'
@@ -119,7 +114,6 @@ export const getChoreTrailingActions = ({
       <SwipeActionButton
         key='schedule'
         disabled={!permissions.edit}
-        reason={t('swipeRestrictions.edit')}
         onClick={act('changeDueDate')}
         bgcolor='warning.500'
         color='#fff'
@@ -132,7 +126,6 @@ export const getChoreTrailingActions = ({
     <SwipeActionButton
       key='edit'
       disabled={!permissions.edit}
-      reason={t('swipeRestrictions.edit')}
       onClick={() => {
         hapticMedium()
         navigate(`/chores/${chore.id}/edit`)
@@ -146,7 +139,6 @@ export const getChoreTrailingActions = ({
     <SwipeActionButton
       key='delete'
       disabled={!permissions.edit}
-      reason={t('swipeRestrictions.edit')}
       onClick={act('delete')}
       bgcolor='danger.500'
       color='#fff'
@@ -171,7 +163,6 @@ export const getArchivedLeadingActions = ({
     <LeadingActions>
       <SwipeActionButton
         disabled={!permissions.archive}
-        reason={t('swipeRestrictions.restore')}
         onClick={() => {
           hapticMedium()
           handleChoreAction('restore', chore)
@@ -197,7 +188,6 @@ export const getArchivedTrailingActions = ({
     <TrailingActions>
       <SwipeActionButton
         disabled={!permissions.edit}
-        reason={t('swipeRestrictions.edit')}
         onClick={() => {
           hapticMedium()
           handleChoreAction('delete', chore)

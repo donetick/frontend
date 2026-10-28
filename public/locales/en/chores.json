@@ -5,17 +5,7 @@
     "availableAt": "Available {{date}}"
   },
   "swipeActionsLabel": "Show actions",
-  "swipeRestrictions": {
-    "complete": "Eligible assignees only",
-    "approval": "Admins or managers only",
-    "window": "Not available yet",
-    "edit": "Task owner or admin only",
-    "restore": "Task owner only",
-    "creator": "Creator only",
-    "historyEdit": "Assignee, completer, admin or manager only",
-    "historyDelete": "Task owner, assignee, completer or admin only",
-    "editTime": "Task owner or eligible assignee only"
-  },
+  "swipeViewOnly": "View only",
   "permissions": {
     "complete": "You’re not eligible to complete this task or use its timer.",
     "subtasks": "These subtasks are read-only because you’re not eligible to complete this task.",

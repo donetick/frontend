@@ -1,10 +1,6 @@
 import '@meauxt/react-swipeable-list/dist/styles.css'
 
-import {
-  SwipeableList,
-  TrailingActions,
-  Type as ListType,
-} from '@meauxt/react-swipeable-list'
+import { SwipeableList, Type as ListType } from '@meauxt/react-swipeable-list'
 import {
   Add,
   Close,
@@ -37,6 +33,7 @@ import EmptyState from '../../components/common/EmptyState'
 import ItemAudience from '../../components/common/ItemAudience'
 import SortAndFilterMenu from '../../components/common/SortAndFilterMenu'
 import SwipeActionButton from '../../components/common/SwipeActionButton'
+import { TrailingSwipeActions as TrailingActions } from '../../components/common/SwipeActionTray'
 import SwipeListItem, {
   SWIPE_COMMIT_THRESHOLD,
 } from '../../components/common/SwipeListItem'
@@ -642,7 +639,6 @@ const FilterView = () => {
                     <TrailingActions>
                       <SwipeActionButton
                         disabled={filter.createdBy !== userProfile?.id}
-                        reason={t('chores:swipeRestrictions.creator')}
                         onClick={() => handlePinFilter(filter.id)}
                         bgcolor='warning.500'
                         color='#fff'
@@ -651,14 +647,12 @@ const FilterView = () => {
                       />
                       <SwipeActionButton
                         disabled={filter.createdBy !== userProfile?.id}
-                        reason={t('chores:swipeRestrictions.creator')}
                         onClick={() => handleEditFilter(filter)}
                         icon={<EditIcon />}
                         label={t('common:edit')}
                       />
                       <SwipeActionButton
                         disabled={filter.createdBy !== userProfile?.id}
-                        reason={t('chores:swipeRestrictions.creator')}
                         onClick={() => handleDeleteClicked(filter.id)}
                         bgcolor='danger.500'
                         color='#fff'

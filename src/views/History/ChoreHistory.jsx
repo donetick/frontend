@@ -1,10 +1,6 @@
 import '@meauxt/react-swipeable-list/dist/styles.css'
 
-import {
-  SwipeableList,
-  TrailingActions,
-  Type as ListType,
-} from '@meauxt/react-swipeable-list'
+import { SwipeableList, Type as ListType } from '@meauxt/react-swipeable-list'
 import {
   Analytics,
   CalendarMonth,
@@ -54,6 +50,7 @@ import FilterBar from '../../components/common/FilterBar'
 import PermissionDeniedModal from '../../components/common/PermissionDeniedModal'
 import SortAndFilterMenu from '../../components/common/SortAndFilterMenu'
 import SwipeActionButton from '../../components/common/SwipeActionButton'
+import { TrailingSwipeActions as TrailingActions } from '../../components/common/SwipeActionTray'
 import SwipeListItem, {
   SWIPE_COMMIT_THRESHOLD,
 } from '../../components/common/SwipeListItem'
@@ -714,16 +711,12 @@ const ChoreHistory = () => {
                   <TrailingActions>
                     <SwipeActionButton
                       disabled={!canEditHistory(historyEntry)}
-                      reason={t('chores:swipeRestrictions.historyEdit')}
-                      minWidth={136}
                       onClick={() => handleEdit(historyEntry)}
                       icon={<EditIcon />}
                       label={t('common:edit')}
                     />
                     <SwipeActionButton
                       disabled={!canDeleteHistory(historyEntry)}
-                      reason={t('chores:swipeRestrictions.historyDelete')}
-                      minWidth={136}
                       onClick={() => handleDelete(historyEntry)}
                       bgcolor='danger.500'
                       color='#fff'
