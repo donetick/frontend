@@ -1027,7 +1027,9 @@ const TimerDetails = () => {
                                   : null
                               }
                               trailingActions={
-                                <TrailingActions>
+                                <TrailingActions
+                                  description={t('chores:permissions.editTime')}
+                                >
                                   <SwipeActionButton
                                     disabled={!permissions.editTime}
                                     onClick={() => handleEditSession()}

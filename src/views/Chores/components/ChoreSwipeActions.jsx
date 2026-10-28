@@ -38,7 +38,10 @@ export const getChoreLeadingActions = ({
 
   if (chore.status === 3)
     return (
-      <LeadingActions>
+      <LeadingActions
+        resourceName={chore.name}
+        description={t('permissions.approval')}
+      >
         <SwipeActionButton
           disabled={!permissions.approve}
           onClick={act('approve')}
@@ -54,7 +57,18 @@ export const getChoreLeadingActions = ({
   const unavailable = Boolean(notInCompletionWindow(chore))
   const isInProgress = chore.status === 1
   return (
-    <LeadingActions>
+    <LeadingActions
+      resourceName={chore.name}
+      description={t(
+        !permissions.complete ? 'permissions.complete' : 'permissions.window',
+      )}
+      restrictionLabel={
+        permissions.complete && unavailable ? t('swipeUnavailable') : undefined
+      }
+      title={
+        permissions.complete && unavailable ? t('swipeUnavailable') : undefined
+      }
+    >
       <SwipeActionButton
         disabled={!permissions.complete || unavailable}
         onClick={act(isInProgress ? 'complete' : 'start')}
@@ -147,7 +161,15 @@ export const getChoreTrailingActions = ({
       offsetTop={offsetTop}
     />,
   )
-  return <TrailingActions>{actions}</TrailingActions>
+  return (
+    <TrailingActions
+      resourceType='task'
+      resourceName={chore.name}
+      description={chore.status === 3 ? t('swipeReviewPermission') : undefined}
+    >
+      {actions}
+    </TrailingActions>
+  )
 }
 
 // Only restore/delete apply to archived tasks. Never show start/skip/edit here.
@@ -160,7 +182,10 @@ export const getArchivedLeadingActions = ({
 }) => {
   if (isMultiSelectMode) return null
   return (
-    <LeadingActions>
+    <LeadingActions
+      resourceName={chore.name}
+      description={t('permissions.archive')}
+    >
       <SwipeActionButton
         disabled={!permissions.archive}
         onClick={() => {
@@ -185,7 +210,7 @@ export const getArchivedTrailingActions = ({
 }) => {
   if (isMultiSelectMode) return null
   return (
-    <TrailingActions>
+    <TrailingActions resourceType='task' resourceName={chore.name}>
       <SwipeActionButton
         disabled={!permissions.edit}
         onClick={() => {

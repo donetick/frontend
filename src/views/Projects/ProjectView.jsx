@@ -625,7 +625,10 @@ const ProjectView = () => {
                 showMoreInfoId === project.id ? 'trailing' : null
               }
               trailingActions={
-                <TrailingActions>
+                <TrailingActions
+                  resourceType='project'
+                  resourceName={project.name}
+                >
                   <SwipeActionButton
                     disabled={project.created_by !== userProfile?.id}
                     onClick={() => handleEditProject(project)}

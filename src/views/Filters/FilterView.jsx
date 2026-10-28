@@ -636,7 +636,7 @@ const FilterView = () => {
                   }
                   key={filter.id}
                   trailingActions={
-                    <TrailingActions>
+                    <TrailingActions resourceName={filter.name}>
                       <SwipeActionButton
                         disabled={filter.createdBy !== userProfile?.id}
                         onClick={() => handlePinFilter(filter.id)}

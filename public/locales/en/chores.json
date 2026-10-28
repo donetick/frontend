@@ -5,7 +5,11 @@
     "availableAt": "Available {{date}}"
   },
   "swipeActionsLabel": "Show actions",
-  "swipeViewOnly": "View only",
+  "swipeNoPermission": "No Permission",
+  "swipePermissionTitle": "You don’t have permission for these actions",
+  "swipeUnavailable": "Not available yet",
+  "swipeHistoryPermission": "Only the recorded assignee, the person who completed the task, or a circle admin or manager can edit this entry. Deletion is limited to the task owner, recorded assignee, person who completed the task, or a circle admin.",
+  "swipeReviewPermission": "Only circle admins and managers can approve or reject this completion. Only the task owner or a circle admin can edit or delete the task.",
   "permissions": {
     "complete": "You’re not eligible to complete this task or use its timer.",
     "subtasks": "These subtasks are read-only because you’re not eligible to complete this task.",

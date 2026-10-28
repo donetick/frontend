@@ -442,7 +442,7 @@ const LabelView = () => {
               onClick={() => navigate(`/labels/${label.id}`)}
               swipeActionOpen={showMoreInfoId === label.id ? 'trailing' : null}
               trailingActions={
-                <TrailingActions>
+                <TrailingActions resourceType='label' resourceName={label.name}>
                   <SwipeActionButton
                     disabled={label.created_by !== userProfile?.id}
                     onClick={() => handleEditLabel(label)}

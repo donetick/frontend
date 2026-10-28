@@ -708,7 +708,9 @@ const ChoreHistory = () => {
                     : null
                 }
                 trailingActions={
-                  <TrailingActions>
+                  <TrailingActions
+                    description={t('chores:swipeHistoryPermission')}
+                  >
                     <SwipeActionButton
                       disabled={!canEditHistory(historyEntry)}
                       onClick={() => handleEdit(historyEntry)}
