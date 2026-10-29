@@ -65,7 +65,7 @@ const canScheduleNotification = async () => {
   const notificationPreferences = await getNotificationPreferences()
   console.log('Notification preferences:', notificationPreferences)
 
-  if (notificationPreferences['granted'] === false) {
+  if (!notificationPreferences || notificationPreferences.granted === false) {
     return false
   }
   return true
@@ -259,9 +259,9 @@ const scheduleChoreNotification = async (
     notifications.splice(MAX_LOCAL_NOTIFICATIONS)
   }
 
-  LocalNotifications.schedule({
-    notifications,
-  })
+  if (notifications.length > 0) {
+    await LocalNotifications.schedule({ notifications })
+  }
   return notifications
 }
 

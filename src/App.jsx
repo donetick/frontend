@@ -24,6 +24,7 @@ import { PaywallProvider } from './contexts/PaywallContext'
 import SSEProvider from './contexts/SSEContext'
 import useAppBadgeSync from './hooks/useAppBadgeSync'
 import { AuthProvider } from './hooks/useAuth.jsx'
+import useLocalNotificationSync from './hooks/useLocalNotificationSync'
 import useOnboardingGate from './hooks/useOnboardingGate'
 import useStatusBar from './hooks/useStatusBar'
 import { useSyncOnReconnect } from './hooks/useSyncOnReconnect'
@@ -136,6 +137,7 @@ const AppContent = () => {
   useSyncOnReconnect()
   useAnalyticsIdentity()
   useAppBadgeSync()
+  useLocalNotificationSync()
 
   // Every route renders through this Outlet, so one listener here gives crash
   // reports the trail that led to the failure.
