@@ -386,13 +386,12 @@ export const validateFilter = (filter, context = {}) => {
     const { type, value } = condition
 
     // Check assignee references
-    if (
-      type === 'assignee' &&
-      !['me', 'others', 'anyone', 'available_for_me'].includes(value)
-    ) {
+    if (type === 'assignee') {
       const userIds = Array.isArray(value) ? value : [value]
       const invalidUsers = userIds.filter(
-        id => !members.some(m => m.id === id || m.userId === id),
+        id =>
+          !['me', 'others', 'anyone', 'available_for_me'].includes(id) &&
+          !members.some(m => m.id === id || m.userId === id),
       )
       if (invalidUsers.length > 0) {
         issues.push(`Condition ${index + 1}: User(s) no longer exist`)
