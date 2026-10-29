@@ -10,39 +10,103 @@
 
     <title>Donetick</title>
 
-    <!-- Resolves the user's saved theme (mirrors MUI Joy's useColorScheme,
-    which persists 'light' | 'dark' | 'system' to localStorage['joy-mode'])
-    before first paint, so the startup screen below doesn't flash the OS
-    theme when it differs from the user's explicit in-app choice. -->
+    <!-- Resolves the user's saved mode (mirrors MUI Joy's useColorScheme, which
+    persists 'light' | 'dark' | 'system' to localStorage['joy-mode']) and skin
+    (localStorage['donetick-theme-skin']) before first paint, so the startup
+    screen below doesn't flash the OS theme or the default cyan accent when the
+    user has chosen otherwise in-app.
+
+    STARTUP_TOKENS mirrors src/constants/startupTheme.js, which the React
+    startup screens apply through the same custom properties. Keep both copies
+    in sync; tests/startup-screen.test.mjs asserts they match. -->
     <script>
       ;(function () {
-        var stored
-        try {
-          stored = window.localStorage.getItem('joy-mode')
-        } catch (e) {
-          stored = null
+        // prettier-ignore
+        var STARTUP_TOKENS = {
+          default: {
+            light: ['#fbfcfe', '#ffffff', '#0891b2', '#cffafe', '#a5f3fc', '#e9eaf0'],
+            dark: ['#101216', '#1b1e25', '#67e8f9', '#164e63', '#155e75', '#2b2f39'],
+          },
+          forest: {
+            light: ['#f4f8f4', '#f4faf6', '#059669', '#d1fae5', '#a7f3d0', '#e7e5e4'],
+            dark: ['#101914', '#18251e', '#6ee7b7', '#064e3b', '#065f46', '#292524'],
+          },
+          lavender: {
+            light: ['#f7f5fc', '#faf7ff', '#7c3aed', '#ede9fe', '#ddd6fe', '#e2e8f0'],
+            dark: ['#171321', '#211c2e', '#c4b5fd', '#4c1d95', '#5b21b6', '#1e293b'],
+          },
+          sand: {
+            light: ['#faf6ef', '#fffaf3', '#d97706', '#fef3c7', '#fde68a', '#e7e5e4'],
+            dark: ['#1c1813', '#292219', '#fcd34d', '#78350f', '#92400e', '#292524'],
+          },
+          ocean: {
+            light: ['#f0f6fc', '#f5faff', '#2563eb', '#dbeafe', '#bfdbfe', '#e2e8f0'],
+            dark: ['#101923', '#192838', '#93c5fd', '#1e3a8a', '#1e40af', '#1e293b'],
+          },
+          rose: {
+            light: ['#fff3f6', '#fff7fa', '#e11d48', '#ffe4e6', '#fecdd3', '#e4e4e7'],
+            dark: ['#211419', '#301e26', '#fda4af', '#881337', '#9f1239', '#27272a'],
+          },
+          sunset: {
+            light: ['#fff4ec', '#fff8f2', '#ea580c', '#ffedd5', '#fed7aa', '#e7e5e4'],
+            dark: ['#231710', '#332319', '#fdba74', '#7c2d12', '#9a3412', '#292524'],
+          },
+          bubblegum: {
+            light: ['#fff0f8', '#fff5fb', '#db2777', '#fce7f3', '#fbcfe8', '#e4e4e7'],
+            dark: ['#100b10', '#1c121a', '#f9a8d4', '#831843', '#9d174d', '#27272a'],
+          },
+          mint: {
+            light: ['#f0faf7', '#f5fcf9', '#0d9488', '#ccfbf1', '#99f6e4', '#e2e8f0'],
+            dark: ['#101d1b', '#192d29', '#5eead4', '#134e4a', '#115e59', '#1e293b'],
+          },
+          graphite: {
+            light: ['#f4f4f5', '#fafafa', '#52525b', '#e4e4e7', '#d4d4d8', '#e4e4e7'],
+            dark: ['#141416', '#222225', '#d4d4d8', '#27272a', '#3f3f46', '#27272a'],
+          },
         }
-        var resolved =
+        var NAMES = ['bg', 'surface', 'accent', 'soft', 'halo', 'border']
+        var read = function (key) {
+          try {
+            return window.localStorage.getItem(key)
+          } catch (e) {
+            return null
+          }
+        }
+        var stored = read('joy-mode')
+        var mode =
           stored === 'light' || stored === 'dark'
             ? stored
             : window.matchMedia &&
                 window.matchMedia('(prefers-color-scheme: dark)').matches
               ? 'dark'
               : 'light'
-        document.documentElement.setAttribute('data-startup-theme', resolved)
+        var root = document.documentElement
+        root.setAttribute('data-startup-theme', mode)
+        var skin = read('donetick-theme-skin')
+        var tokens = (STARTUP_TOKENS[skin] || STARTUP_TOKENS.default)[mode]
+        for (var i = 0; i < NAMES.length; i++) {
+          root.style.setProperty('--startup-' + NAMES[i], tokens[i])
+        }
       })()
     </script>
 
     <!-- Inline so startup is visible before JavaScript and app CSS load. -->
     <style>
-      .startup-screen {
+      /* Declared on :root, not .startup-screen, so the skin's values — set as
+         inline styles on :root by the script above — take precedence. These are
+         the fallback for a failed/blocked localStorage read. */
+      :root {
         --startup-bg: #fbfcfe;
         --startup-surface: #ffffff;
         --startup-text: #20252b;
         --startup-muted: #747b87;
         --startup-accent: #0891b2;
         --startup-soft: #cffafe;
+        --startup-halo: #a5f3fc;
         --startup-border: #e9eaf0;
+        --startup-shadow: #1a202c2e;
+      }
+      .startup-screen {
         position: fixed;
         inset: 0;
         display: grid;
@@ -67,7 +131,11 @@
         position: absolute;
         inset: 12px 30px;
         border-radius: 50%;
-        background: radial-gradient(ellipse, #a5f3fc 0%, transparent 70%);
+        background: radial-gradient(
+          ellipse,
+          var(--startup-halo) 0%,
+          transparent 70%
+        );
         filter: blur(16px);
         animation: startup-breathe 4s ease-in-out infinite;
       }
@@ -81,7 +149,7 @@
         border-radius: 36px;
         background: var(--startup-surface);
         border: 1px solid var(--startup-border);
-        box-shadow: 0 16px 48px -16px #155e7530;
+        box-shadow: 0 16px 48px -16px var(--startup-shadow);
         transform: rotate(-6deg);
         animation: startup-float 5s ease-in-out infinite;
       }
@@ -101,7 +169,7 @@
         border: 1px solid var(--startup-border);
         border-radius: 18px;
         background: var(--startup-surface);
-        box-shadow: 0 8px 24px -12px #155e7530;
+        box-shadow: 0 8px 24px -12px var(--startup-shadow);
       }
       .startup-screen__card--back {
         top: 22px;
@@ -241,17 +309,16 @@
           transform: translateY(-4px);
         }
       }
-      [data-startup-theme='dark'] .startup-screen {
+      :root[data-startup-theme='dark'] {
         --startup-bg: #101216;
         --startup-surface: #1b1e25;
         --startup-text: #f0f1f5;
         --startup-muted: #9ca3b1;
         --startup-accent: #67e8f9;
         --startup-soft: #164e63;
+        --startup-halo: #155e75;
         --startup-border: #2b2f39;
-      }
-      [data-startup-theme='dark'] .startup-screen__halo {
-        background: radial-gradient(ellipse, #155e75 0%, transparent 70%);
+        --startup-shadow: #00000066;
       }
       [data-startup-theme='dark']
         .startup-screen__card--front
