@@ -49,6 +49,7 @@ import ModalActions from '../../components/common/ModalActions'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useUserProfile } from '../../queries/UserQueries'
+import { useNotification } from '../../service/NotificationProvider'
 import { CompleteSubTask } from '../../utils/Fetcher'
 
 // Keep deep trees usable on narrow screens. The hierarchy remains unlimited,
@@ -96,6 +97,7 @@ function SortableItem({
   onKeyDown,
   onToggleExpand,
   performers,
+  readOnly,
   setTasks,
   task,
 }) {
@@ -186,6 +188,7 @@ function SortableItem({
           {!editMode && (
             <Checkbox
               checked={!!task.completedAt}
+              disabled={readOnly}
               onChange={() => handleToggle(task.id)}
             />
           )}
@@ -267,7 +270,7 @@ function SortableItem({
                 cursor: 'pointer',
                 minWidth: 0,
               }}
-              onClick={() => handleToggle(task.id)}
+              onClick={() => !readOnly && handleToggle(task.id)}
             >
               <Typography
                 sx={{
@@ -404,6 +407,7 @@ function SortableItem({
               task={childTask}
               allTasks={allTasks}
               setTasks={setTasks}
+              readOnly={readOnly}
               level={level + 1}
               editMode={editMode}
               expandedIds={expandedIds}
@@ -429,11 +433,14 @@ const SubTasks = ({
   choreId = 0,
   editMode = true,
   performers,
+  readOnly = false,
   setTasks,
   shouldFocus = false,
   tasks = [],
 }) => {
   const { t } = useTranslation('chores')
+  const { showError } = useNotification()
+  const [isUpdating, setIsUpdating] = useState(false)
   const [newTask, setNewTask] = useState('')
   const [expandedIds, setExpandedIds] = useState(new Set())
   const [editor, setEditor] = useState(null)
@@ -474,7 +481,8 @@ const SubTasks = ({
     }),
   )
 
-  const handleToggle = taskId => {
+  const handleToggle = async taskId => {
+    if (readOnly || isUpdating) return
     const updatedTask = tasks.find(task => task.id === taskId)
     const newCompletedAt = updatedTask.completedAt
       ? null
@@ -507,11 +515,15 @@ const SubTasks = ({
       completeChildren(taskId)
     }
 
-    CompleteSubTask(taskId, Number(choreId), newCompletedAt).then(res => {
-      if (res.status !== 200) console.log('Error updating task')
-    })
-
-    setTasks(updatedTasks)
+    setIsUpdating(true)
+    try {
+      await CompleteSubTask(taskId, Number(choreId), newCompletedAt)
+      setTasks(updatedTasks)
+    } catch (error) {
+      showError({ message: error.message || t('permissions.failed') })
+    } finally {
+      setIsUpdating(false)
+    }
   }
 
   const handleDelete = useCallback(
@@ -943,6 +955,7 @@ const SubTasks = ({
                 task={task}
                 allTasks={tasks}
                 setTasks={setTasks}
+                readOnly={readOnly || isUpdating}
                 level={0}
                 editMode={editMode}
                 expandedIds={expandedIds}

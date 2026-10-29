@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import { useRef } from 'react'
 
 import { hapticLight } from '../../utils/Haptics'
+import { canCommitSwipe } from '../../utils/SwipeActions'
 
 // The point past which releasing commits the full-swipe action. Exported so
 // the lists that own the gesture and the haptic that announces it can't drift
@@ -19,13 +20,14 @@ const COMMIT_PROGRESS = SWIPE_COMMIT_THRESHOLD * 100
  */
 const SwipeListItem = ({ children, ...listItemProps }) => {
   const committedRef = useRef(false)
+  const fullSwipe = canCommitSwipe(listItemProps)
 
   const handleSwipeStart = () => {
     committedRef.current = false
   }
 
   const handleSwipeProgress = progress => {
-    const committed = progress >= COMMIT_PROGRESS
+    const committed = fullSwipe && progress >= COMMIT_PROGRESS
     if (committed !== committedRef.current) {
       committedRef.current = committed
       if (committed) hapticLight()
@@ -35,6 +37,7 @@ const SwipeListItem = ({ children, ...listItemProps }) => {
   return (
     <SwipeableListItem
       {...listItemProps}
+      fullSwipe={fullSwipe}
       onSwipeStart={handleSwipeStart}
       onSwipeProgress={handleSwipeProgress}
     >

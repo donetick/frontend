@@ -1,16 +1,10 @@
-import {
-  Check,
-  HourglassEmpty,
-  Pause,
-  PlayArrow,
-  ThumbUp,
-} from '@mui/icons-material'
+import { Check, Pause, PlayArrow, ThumbUp } from '@mui/icons-material'
 import { Checkbox, IconButton } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
 
-import { useImpersonateUser } from '../../../contexts/ImpersonateUserContext'
-import { useCircleMembers, useUserProfile } from '../../../queries/UserQueries'
+import { useChorePermissions } from '../../../hooks/useChorePermissions'
 import { notInCompletionWindow } from '../../../utils/Chores'
+import ChoreStatusChip from '../../components/ChoreStatusChip'
 
 // Keep action permissions and state transitions separate from card layout.
 export default function ProjectTaskAction({
@@ -21,15 +15,7 @@ export default function ProjectTaskAction({
   onSelectionToggle,
 }) {
   const { t } = useTranslation('chores')
-  const { data: userProfile } = useUserProfile()
-  const { data: members } = useCircleMembers()
-  const { impersonatedUser } = useImpersonateUser()
-  const userId = impersonatedUser?.userId || userProfile?.id
-  const member = members?.res?.find(item => item.userId === userId)
-  const canApprove =
-    member?.role === 'admin' ||
-    member?.role === 'manager' ||
-    (userId !== null && userId !== undefined && chore.createdBy === userId)
+  const permissions = useChorePermissions(chore)
   const pending = chore.status === 3
   const action = pending
     ? 'approve'
@@ -39,7 +25,7 @@ export default function ProjectTaskAction({
         ? 'pause'
         : 'start'
   const label = pending
-    ? t(canApprove ? 'choreView.approve' : 'choreView.pendingApproval')
+    ? t('choreView.approve')
     : action === 'complete'
       ? t('completeChore')
       : t(action === 'pause' ? 'choreView.pauseTimer' : 'choreView.start')
@@ -60,6 +46,8 @@ export default function ProjectTaskAction({
     )
   }
 
+  if (pending && !permissions.approve) return <ChoreStatusChip chore={chore} />
+
   return (
     <IconButton
       aria-label={`${label}: ${chore.name}`}
@@ -67,7 +55,12 @@ export default function ProjectTaskAction({
       variant='plain'
       size='sm'
       color={pending ? 'primary' : action === 'pause' ? 'warning' : 'neutral'}
-      disabled={pending ? !canApprove : Boolean(notInCompletionWindow(chore))}
+      disabled={
+        chore.isActive === false ||
+        (pending
+          ? !permissions.approve
+          : !permissions.complete || Boolean(notInCompletionWindow(chore)))
+      }
       onClick={event => {
         event.stopPropagation()
         onAction?.(action, chore)
@@ -75,11 +68,7 @@ export default function ProjectTaskAction({
       sx={{ minWidth: 44, minHeight: 44, borderRadius: 'md' }}
     >
       {pending ? (
-        canApprove ? (
-          <ThumbUp sx={{ fontSize: 18 }} />
-        ) : (
-          <HourglassEmpty sx={{ fontSize: 18 }} />
-        )
+        <ThumbUp sx={{ fontSize: 18 }} />
       ) : action === 'complete' ? (
         <Check
           sx={{

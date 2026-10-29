@@ -2,6 +2,7 @@ import {
   Archive,
   ArrowBack,
   Cancel,
+  Check,
   ChevronRight,
   CopyAll,
   Delete,
@@ -15,8 +16,12 @@ import {
   Nfc,
   NoteAdd,
   Notifications,
+  Pause,
+  PlayArrow,
   RecordVoiceOver,
   SwitchAccessShortcut,
+  ThumbDown,
+  ThumbUp,
   Today,
   Unarchive,
   Update,
@@ -46,6 +51,8 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
 import AppModal from '../../components/common/AppModal'
+import { useChorePermissions } from '../../hooks/useChorePermissions'
+import { notInCompletionWindow } from '../../utils/Chores'
 import LABEL_COLORS, {
   getTextColorFromBackgroundColor,
 } from '../../utils/Colors'
@@ -127,6 +134,35 @@ const ChoreActionMenu = ({
   variant = 'soft',
 }) => {
   const { t } = useTranslation('chores')
+  const permissions = useChorePermissions(chore)
+  const completionUnavailable =
+    !permissions.complete ||
+    (chore && notInCompletionWindow(chore)) ||
+    chore?.isActive === false ||
+    chore?.status === 3
+  const unavailable = [
+    ...(!onAction || completionUnavailable
+      ? ['complete', 'start', 'pause']
+      : []),
+    ...(chore?.status === 1 ? ['start'] : ['pause']),
+    ...(!onAction || !permissions.approve || chore?.status !== 3
+      ? ['approve', 'reject']
+      : []),
+    ...(chore?.isActive === false ? ['approve'] : []),
+    ...(!onAction ||
+    chore?.isActive === false ||
+    chore?.status === 3 ||
+    (chore && notInCompletionWindow(chore))
+      ? ['skip']
+      : []),
+    ...(!permissions.edit
+      ? ['edit', 'schedule', 'priority', 'moveToProject', 'moveToSection']
+      : []),
+    ...(!permissions.edit ? ['delete'] : []),
+    ...(!permissions.archive ? ['archive'] : []),
+    ...(!permissions.delegate ? ['delegate'] : []),
+    ...(completionUnavailable ? ['completeNote', 'completePast'] : []),
+  ]
   const isControlled = controlledAnchorEl !== undefined
   const [uncontrolledAnchorEl, setUncontrolledAnchorEl] = React.useState(null)
   const anchorEl = isControlled ? controlledAnchorEl : uncontrolledAnchorEl
@@ -397,6 +433,24 @@ const ChoreActionMenu = ({
       onClick: handleEdit,
     },
     { key: 'divider-primary', type: 'divider' },
+    ...[
+      { key: 'complete', icon: <Check />, label: t('list.complete') },
+      { key: 'start', icon: <PlayArrow />, label: t('choreView.start') },
+      { key: 'pause', icon: <Pause />, label: t('choreView.pauseTimer') },
+      { key: 'approve', icon: <ThumbUp />, label: t('choreView.approve') },
+      {
+        key: 'reject',
+        icon: <ThumbDown />,
+        label: t('list.reject'),
+        color: 'danger',
+      },
+    ].map(item => ({
+      ...item,
+      onClick: () => {
+        onAction?.(item.key, chore)
+        handleMenuClose()
+      },
+    })),
     {
       key: 'completeNote',
       icon: <NoteAdd />,
@@ -524,7 +578,10 @@ const ChoreActionMenu = ({
     },
   ]
     .filter(Boolean)
-    .filter(item => !hiddenActions.includes(item.key))
+    .filter(
+      item =>
+        !hiddenActions.includes(item.key) && !unavailable.includes(item.key),
+    )
 
   const visibleActionItems = collapseDividers(actionItems)
 

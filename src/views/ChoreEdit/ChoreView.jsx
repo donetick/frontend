@@ -7,7 +7,6 @@ import {
   Checklist,
   Edit,
   History,
-  HourglassEmpty,
   MoreVert,
   OpenInFull,
   OpenInNew,
@@ -44,6 +43,7 @@ import EmptyState from '../../components/common/EmptyState'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useThemeSkin } from '../../contexts/ThemeSkinContext'
+import { useChorePermissions } from '../../hooks/useChorePermissions'
 import { useDescriptionHtml } from '../../hooks/useDescriptionHtml'
 import { usePendingCommands } from '../../hooks/usePendingCommands'
 import {
@@ -91,6 +91,7 @@ import {
 import { offlineDB } from '../../utils/OfflineDB'
 import { getSafeBottomPadding } from '../../utils/SafeAreaUtils.js'
 import ChoreActionMenu from '../components/ChoreActionMenu'
+import ChoreStatusChip from '../components/ChoreStatusChip'
 import DueDatePickerModal, {
   combineDueDate,
   splitDueDate,
@@ -135,6 +136,7 @@ const ChoreView = () => {
   const { skin } = useThemeSkin()
   const completionColor = skin === 'default' ? 'success' : 'primary'
   const [chore, setChore] = useState({})
+  const permissions = useChorePermissions(chore)
   const navigate = useNavigate()
   const [performers, setPerformers] = useState([])
   const [infoCards, setInfoCards] = useState([])
@@ -274,14 +276,17 @@ const ChoreView = () => {
     }
   }, [chore, performers, completionCount, t])
   const handleUpdatePriority = priority => {
-    UpdateChorePriority(choreId, priority.value).then(response => {
-      if (response.ok) {
-        response.json().then(() => {
-          setChore(prev => ({ ...prev, priority: priority.value }))
-          queryClient.invalidateQueries({ queryKey: ['chores'] })
-        })
-      }
-    })
+    UpdateChorePriority(choreId, priority.value)
+      .then(response => {
+        if (!response.ok) throw new Error(t('permissions.failed'))
+        if (response.ok) {
+          response.json().then(() => {
+            setChore(prev => ({ ...prev, priority: priority.value }))
+            queryClient.invalidateQueries({ queryKey: ['chores'] })
+          })
+        }
+      })
+      .catch(error => showError({ message: error.message }))
   }
   const handleTaskCompletion = async () => {
     try {
@@ -519,6 +524,7 @@ const ChoreView = () => {
       onClose: confirmed => {
         if (confirmed) {
           resetChoreTimer.mutate(choreId, {
+            onError: error => showError({ message: error.message }),
             onSuccess: data => {
               const newChore = {
                 ...chore,
@@ -546,6 +552,7 @@ const ChoreView = () => {
             deleteTimeSession.mutate(
               { choreId, sessionId: choreTimer.res.id },
               {
+                onError: error => showError({ message: error.message }),
                 onSuccess: data => {
                   const newChore = {
                     ...chore,
@@ -562,27 +569,18 @@ const ChoreView = () => {
     })
   }
 
-  const handleApproveChore = () => {
-    ApproveChore(choreId).then(response => {
-      if (response.ok) {
-        response.json().then(data => {
-          setChore(data.res)
-          queryClient.invalidateQueries({ queryKey: ['chores'] })
-        })
-      }
-    })
+  const reviewChore = async action => {
+    try {
+      const response = await action(choreId)
+      const data = await response.json()
+      setChore(data.res)
+      queryClient.invalidateQueries({ queryKey: ['chores'] })
+    } catch (error) {
+      showError({ message: error.message })
+    }
   }
-
-  const handleRejectChore = () => {
-    RejectChore(choreId).then(response => {
-      if (response.ok) {
-        response.json().then(data => {
-          setChore(data.res)
-          queryClient.invalidateQueries({ queryKey: ['chores'] })
-        })
-      }
-    })
-  }
+  const handleApproveChore = () => reviewChore(ApproveChore)
+  const handleRejectChore = () => reviewChore(RejectChore)
 
   const handleUnarchiveChore = async () => {
     try {
@@ -668,6 +666,7 @@ const ChoreView = () => {
         if (!confirmed) return
         try {
           const response = await DeleteChore(choreId)
+          if (!response.ok) throw new Error(t('permissions.failed'))
           if (response.ok) {
             queryClient.invalidateQueries({ queryKey: ['chores'] })
             showSuccess({
@@ -689,6 +688,7 @@ const ChoreView = () => {
   const handleDueDateChange = async newDate => {
     try {
       const response = await UpdateDueDate(choreId, newDate)
+      if (!response.ok) throw new Error(t('permissions.failed'))
       if (response.ok) {
         setChore(prev => ({ ...prev, nextDueDate: newDate }))
         queryClient.invalidateQueries({ queryKey: ['chores'] })
@@ -705,6 +705,7 @@ const ChoreView = () => {
     const projectId = project?.id ?? null
     try {
       const response = await SaveChore({ ...chore, projectId })
+      if (!response.ok) throw new Error(t('permissions.failed'))
       if (response.ok) {
         setChore(prev => ({ ...prev, projectId }))
         queryClient.invalidateQueries({ queryKey: ['chores'] })
@@ -780,6 +781,21 @@ const ChoreView = () => {
   // navigate on their own or come in through the dedicated callbacks.
   const handleMenuAction = (type, _chore, extraData) => {
     switch (type) {
+      case 'complete':
+        handleTaskCompletion()
+        break
+      case 'start':
+        handleChoreStart()
+        break
+      case 'pause':
+        handleChorePause()
+        break
+      case 'approve':
+        handleApproveChore()
+        break
+      case 'reject':
+        handleRejectChore()
+        break
       case 'skip':
         confirmSkipTask()
         break
@@ -803,23 +819,7 @@ const ChoreView = () => {
     }
   }
 
-  // Check if the current user can approve/reject (admin, manager, or task owner)
-  const canApproveReject = () => {
-    if (!circleMembersData?.res || !chore) return false
-
-    const currentUser = circleMembersData.res.find(
-      member => member.userId === (impersonatedUser?.userId || userProfile?.id),
-    )
-
-    // User can approve/reject if they are:
-    // 1. Admin or manager of the circle
-    // 2. Owner/creator of the task
-    return (
-      currentUser?.role === 'admin' ||
-      currentUser?.role === 'manager' ||
-      chore.createdBy === (impersonatedUser?.userId || userProfile?.id)
-    )
-  }
+  const canApproveReject = () => permissions.approve
 
   if (isChoreLoading || isCircleMembersLoading) {
     // while loading the chore or circle members, return a loading state
@@ -970,6 +970,12 @@ const ChoreView = () => {
           {[ChoreStatus.ACTIVE, ChoreStatus.PAUSED].includes(chore.status) && (
             <Grid xs={12}>
               <TimePassedCard
+                disabled={
+                  !permissions.complete ||
+                  chore.isActive === false ||
+                  (chore.status === ChoreStatus.PAUSED &&
+                    notInCompletionWindow(chore))
+                }
                 chore={chore}
                 handleAction={action => {
                   if (action === 'pause') {
@@ -1077,25 +1083,27 @@ const ChoreView = () => {
             <History />
             {t('choreView.history')}
           </Button>
-          <Button
-            size='sm'
-            color='neutral'
-            variant='plain'
-            fullWidth
-            sx={{
-              // top right of the card:
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              p: 1,
-            }}
-            onClick={() => {
-              navigate(`/chores/${choreId}/edit`)
-            }}
-          >
-            <Edit />
-            {t('choreView.edit')}
-          </Button>
+          {permissions.edit && (
+            <Button
+              size='sm'
+              color='neutral'
+              variant='plain'
+              fullWidth
+              sx={{
+                // top right of the card:
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                p: 1,
+              }}
+              onClick={() => {
+                navigate(`/chores/${choreId}/edit`)
+              }}
+            >
+              <Edit />
+              {t('choreView.edit')}
+            </Button>
+          )}
           <ChoreActionMenu
             chore={chore}
             hiddenActions={['view']}
@@ -1280,7 +1288,13 @@ const ChoreView = () => {
                 // maxHeight: '100px',
               }}
             >
+              {!permissions.complete && (
+                <Typography level='body-sm'>
+                  {t('permissions.subtasks')}
+                </Typography>
+              )}
               <SubTasks
+                readOnly={!permissions.complete || chore.isActive === false}
                 editMode={false}
                 performers={performers}
                 tasks={chore.subTasks}
@@ -1314,7 +1328,11 @@ const ChoreView = () => {
           <Checkbox
             checked={note !== null}
             size='lg'
-            disabled={chore.isActive === false}
+            disabled={
+              !permissions.complete ||
+              chore.isActive === false ||
+              chore.status === ChoreStatus.PENDING_APPROVAL
+            }
             onChange={e => {
               if (e.target.checked) {
                 setNote('')
@@ -1355,7 +1373,11 @@ const ChoreView = () => {
           <Checkbox
             checked={completedDate !== null}
             size='lg'
-            disabled={chore.isActive === false}
+            disabled={
+              !permissions.complete ||
+              chore.isActive === false ||
+              chore.status === ChoreStatus.PENDING_APPROVAL
+            }
             onChange={e => {
               if (e.target.checked) {
                 setCompletedDate(
@@ -1411,11 +1433,17 @@ const ChoreView = () => {
               fullWidth
               size='lg'
               onClick={handleUnarchiveChore}
+              disabled={!permissions.archive}
               color='primary'
               startDecorator={<Unarchive />}
             >
               {t('choreView.unarchive')}
             </Button>
+            {!permissions.archive && (
+              <Typography level='body-sm'>
+                {t('permissions.archive')}
+              </Typography>
+            )}
           </Box>
         ) : (
           // Active chore - show all normal actions
@@ -1439,7 +1467,7 @@ const ChoreView = () => {
               }}
             >
               {chore.status === 3 ? (
-                // Pending approval: Show approve/reject for admins/managers/owners, grayed out button for others
+                // Approval is a status for non-reviewers, not an unavailable completion action.
                 canApproveReject() ? (
                   <>
                     <Button
@@ -1468,15 +1496,15 @@ const ChoreView = () => {
                     </Button>
                   </>
                 ) : (
-                  <Button
-                    fullWidth
-                    size='lg'
-                    disabled={true}
-                    color='neutral'
-                    startDecorator={<HourglassEmpty />}
-                  >
-                    <Box>{t('choreView.pendingApproval')}</Box>
-                  </Button>
+                  <Box sx={{ textAlign: 'center' }}>
+                    <ChoreStatusChip chore={chore} />
+                    <Typography
+                      level='body-sm'
+                      sx={{ mt: 1, color: 'text.secondary' }}
+                    >
+                      {t('permissions.approval')}
+                    </Typography>
+                  </Box>
                 )
               ) : (
                 // Normal completion flow
@@ -1485,8 +1513,17 @@ const ChoreView = () => {
                     fullWidth
                     size='lg'
                     onClick={handleTaskCompletion}
+                    aria-describedby={
+                      !permissions.complete
+                        ? 'task-completion-permission'
+                        : notInCompletionWindow(chore)
+                          ? 'task-completion-availability'
+                          : undefined
+                    }
                     disabled={
-                      notInCompletionWindow(chore) || chore.isActive === false
+                      !permissions.complete ||
+                      notInCompletionWindow(chore) ||
+                      chore.isActive === false
                     }
                     color={completionColor}
                     startDecorator={<Check />}
@@ -1514,22 +1551,35 @@ const ChoreView = () => {
                 </>
               )}
             </Box>
-            {notInCompletionWindow(chore) && (
-              <Typography
-                level='body-sm'
-                sx={{ color: 'warning.plainColor', textAlign: 'center', mb: 1 }}
-              >
-                {t('choreView.availableToCompleteStarting', {
-                  date: moment(chore.nextDueDate)
-                    .subtract(chore.completionWindow, 'hours')
-                    .format('MM/DD/YYYY hh:mm A'),
-                })}
-              </Typography>
-            )}
+            {!permissions.complete &&
+              chore.status !== ChoreStatus.PENDING_APPROVAL && (
+                <Typography
+                  id='task-completion-permission'
+                  level='body-sm'
+                  sx={{ color: 'text.secondary', textAlign: 'center' }}
+                >
+                  {t('permissions.complete')}
+                </Typography>
+              )}
+            {chore.status !== ChoreStatus.PENDING_APPROVAL &&
+              notInCompletionWindow(chore) && (
+                <Typography
+                  id='task-completion-availability'
+                  level='body-sm'
+                  sx={{ color: 'text.secondary', textAlign: 'center', mb: 1 }}
+                >
+                  {t('choreView.availableToCompleteStarting', {
+                    date: moment(chore.nextDueDate)
+                      .subtract(chore.completionWindow, 'hours')
+                      .format('MM/DD/YYYY hh:mm A'),
+                  })}
+                </Typography>
+              )}
             {/* Timer Button - Show split button when timer is active, regular button otherwise */}
             {[ChoreStatus.ACTIVE, ChoreStatus.PAUSED].includes(chore.status) ? (
               <TimerSplitButton
                 disabled={
+                  !permissions.complete ||
                   (chore.status === ChoreStatus.PAUSED &&
                     notInCompletionWindow(chore)) ||
                   chore.isActive === false
@@ -1543,8 +1593,12 @@ const ChoreView = () => {
                   }
                 }}
                 onShowDetails={() => navigate(`/chores/${choreId}/timer`)}
-                onResetTimer={handleResetTimer}
-                onClearAllTime={handleClearAllTime}
+                onResetTimer={
+                  permissions.complete ? handleResetTimer : undefined
+                }
+                onClearAllTime={
+                  permissions.editTime ? handleClearAllTime : undefined
+                }
                 fullWidth
               />
             ) : chore.status === ChoreStatus.PENDING_APPROVAL ? (
@@ -1557,8 +1611,17 @@ const ChoreView = () => {
                 }}
                 variant='soft'
                 color='primary'
+                aria-describedby={
+                  !permissions.complete
+                    ? 'task-completion-permission'
+                    : notInCompletionWindow(chore)
+                      ? 'task-completion-availability'
+                      : undefined
+                }
                 disabled={
-                  notInCompletionWindow(chore) || chore.isActive === false
+                  !permissions.complete ||
+                  notInCompletionWindow(chore) ||
+                  chore.isActive === false
                 }
                 startDecorator={<PlayArrow />}
                 sx={{
@@ -1593,7 +1656,11 @@ const ChoreView = () => {
         {activeModal === 'changeAssignee' && (
           <AssigneeModal
             isOpen={true}
-            members={performers}
+            members={performers.filter(
+              member =>
+                permissions.edit ||
+                chore.assignees?.some(a => a.userId === member.userId),
+            )}
             assignedTo={chore.assignedTo}
             title={t('choreView.delegateToSomeoneElse')}
             onClose={() => setActiveModal(null)}

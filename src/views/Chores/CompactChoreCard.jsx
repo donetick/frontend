@@ -14,11 +14,10 @@ import {
 import { Box, Checkbox, Chip, IconButton, Typography } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
 
-import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useThemeSkin } from '../../contexts/ThemeSkinContext'
+import { useChorePermissions } from '../../hooks/useChorePermissions'
 import { usePendingCommands } from '../../hooks/usePendingCommands'
-import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
 import {
   getDueDateChipColor,
   getDueDateChipText,
@@ -38,6 +37,7 @@ import {
 import ChoreActionMenu, {
   ChoreActionMenuTrigger,
 } from '../components/ChoreActionMenu'
+import ChoreStatusChip from '../components/ChoreStatusChip'
 import PendingBadge from '../components/PendingBadge'
 
 // Hoisted so emotion isn't re-serializing an identical object for every row
@@ -77,33 +77,14 @@ const CompactChoreCard = ({
   viewOnly,
 }) => {
   const { t } = useTranslation('chores')
+  const permissions = useChorePermissions(chore)
   const { skin } = useThemeSkin()
   const completionColor = skin === 'default' ? 'success' : 'primary'
 
-  const { data: userProfile } = useUserProfile()
   const { timeFormat } = useLocalization()
-  const { data: circleMembersData } = useCircleMembers()
   const { data: pendingCmds } = usePendingCommands(chore.id)
 
-  const { impersonatedUser } = useImpersonateUser()
-
-  // Check if the current user can approve/reject (admin, manager, or task owner)
-  const canApproveReject = () => {
-    if (!circleMembersData?.res || !chore) return false
-
-    const currentUser = circleMembersData.res.find(
-      member => member.userId === (impersonatedUser?.userId || userProfile?.id),
-    )
-
-    // User can approve/reject if they are:
-    // 1. Admin or manager of the circle
-    // 2. Owner/creator of the task
-    return (
-      currentUser?.role === 'admin' ||
-      currentUser?.role === 'manager' ||
-      chore.createdBy === (impersonatedUser?.userId || userProfile?.id)
-    )
-  }
+  const canApproveReject = () => permissions.approve
 
   // Utility functions
 
@@ -258,10 +239,12 @@ const CompactChoreCard = ({
             }}
           >
             {chore.status === 3 ? (
-              // Pending approval: Show approve/reject for admins/managers/owners, grayed out for others
+              // Reviewers get an action; everyone else sees a status, not a disabled button.
               canApproveReject() ? (
                 <Box sx={{ display: 'flex', gap: 0.25 }}>
                   <IconButton
+                    aria-label={`${t('choreView.approve')}: ${chore.name}`}
+                    title={t('choreView.approve')}
                     variant='soft'
                     color={completionColor}
                     size='sm'
@@ -309,23 +292,14 @@ const CompactChoreCard = ({
                     </IconButton> */}
                 </Box>
               ) : (
-                <IconButton
-                  variant='soft'
-                  color='neutral'
-                  size='sm'
-                  disabled={true}
-                  sx={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: '50%',
-                    opacity: 0.5,
-                  }}
-                >
-                  <HourglassEmpty sx={{ fontSize: 16 }} />
-                </IconButton>
+                <HourglassEmpty
+                  aria-hidden='true'
+                  sx={{ fontSize: 18, color: 'text.tertiary' }}
+                />
               )
             ) : (
               <IconButton
+                aria-label={`${t(chore.status === 0 ? 'completeChore' : chore.status === 1 ? 'choreView.pauseTimer' : 'choreView.start')}: ${chore.name}`}
                 variant='soft'
                 color={chore.status === 0 ? completionColor : 'warning'}
                 size='sm'
@@ -339,7 +313,11 @@ const CompactChoreCard = ({
                     onAction('start', chore)
                   }
                 }}
-                disabled={notInCompletionWindow(chore)}
+                disabled={
+                  !permissions.complete ||
+                  chore.isActive === false ||
+                  notInCompletionWindow(chore)
+                }
                 sx={{
                   width: 32,
                   height: 32,
@@ -503,6 +481,7 @@ const CompactChoreCard = ({
           )}
         </Box>
 
+        <ChoreStatusChip chore={chore} />
         {/* Line 2: Metadata */}
         <Box
           sx={{
