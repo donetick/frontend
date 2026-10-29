@@ -3,7 +3,6 @@ import {
   Check,
   Group,
   HourglassEmpty,
-  OpenInNew,
   Pause,
   PlayArrow,
   Repeat,
@@ -25,6 +24,7 @@ import {
 } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
 
+import ExternalLinkChip from '../../components/common/ExternalLinkChip'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useThemeSkin } from '../../contexts/ThemeSkinContext'
 import { useChorePermissions } from '../../hooks/useChorePermissions'
@@ -37,10 +37,8 @@ import {
 import { notInCompletionWindow } from '../../utils/Chores.jsx'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
 import {
-  getFirstHttpUrl,
-  getUrlHostname,
-  openExternalUrl,
-  splitTextAtFirstHttpUrl,
+  getFirstLink,
+  splitTextAtFirstLink,
 } from '../../utils/ExternalLinks.js'
 import Priorities from '../../utils/Priorities'
 import ChoreActionMenu, {
@@ -107,12 +105,13 @@ const ChoreCard = ({
   }
   const displayName = getName(chore.name)
   const {
-    after: titleAfterUrl,
-    before: titleBeforeUrl,
-    url: titleUrl,
-  } = splitTextAtFirstHttpUrl(displayName)
-  const descriptionUrl = getFirstHttpUrl(chore.description)
-  const showDescriptionUrl = descriptionUrl && descriptionUrl !== titleUrl
+    after: titleAfterLink,
+    before: titleBeforeLink,
+    link: titleLink,
+  } = splitTextAtFirstLink(displayName)
+  const descriptionLink = getFirstLink(chore.description)
+  const showDescriptionLink =
+    descriptionLink && descriptionLink.href !== titleLink?.href
 
   return (
     <Box
@@ -251,34 +250,13 @@ const ChoreCard = ({
                 </Avatar>
                 <Box display='flex' flexDirection='column'>
                   <Typography level='title-md'>
-                    {titleBeforeUrl}
-                    {titleUrl && (
-                      <Chip
-                        component='span'
-                        variant='soft'
-                        color='primary'
-                        size='sm'
-                        startDecorator={<OpenInNew sx={{ fontSize: 14 }} />}
-                        onClick={event => {
-                          event.stopPropagation()
-                          openExternalUrl(titleUrl)
-                        }}
-                        sx={{
-                          mx: 0.4,
-                          maxWidth: 180,
-                          cursor: 'pointer',
-                          verticalAlign: 'middle',
-                          '& .MuiChip-label': {
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                          },
-                        }}
-                        title={titleUrl}
-                      >
-                        {getUrlHostname(titleUrl)}
-                      </Chip>
-                    )}
-                    {titleAfterUrl}
+                    {titleBeforeLink}
+                    <ExternalLinkChip
+                      link={titleLink}
+                      component='span'
+                      sx={{ mx: 0.4, verticalAlign: 'middle' }}
+                    />
+                    {titleAfterLink}
                   </Typography>
                   {chore.assignedTo && (
                     <Box display='flex' alignItems='center' gap={0.5}>
@@ -351,31 +329,18 @@ const ChoreCard = ({
                         {chore.points}
                       </Chip>
                     )}
-                    {showDescriptionUrl && (
-                      <Chip
-                        variant='soft'
-                        color='primary'
-                        startDecorator={<OpenInNew sx={{ fontSize: 16 }} />}
-                        onClick={event => {
-                          event.stopPropagation()
-                          openExternalUrl(descriptionUrl)
-                        }}
+                    {showDescriptionLink && (
+                      <ExternalLinkChip
+                        link={descriptionLink}
+                        size='md'
+                        iconSize={16}
                         sx={{
                           position: 'relative',
                           mr: 0.5,
                           top: 2,
                           zIndex: 1,
-                          maxWidth: 180,
-                          cursor: 'pointer',
-                          '& .MuiChip-label': {
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                          },
                         }}
-                        title={descriptionUrl}
-                      >
-                        {getUrlHostname(descriptionUrl)}
-                      </Chip>
+                      />
                     )}
                     {chore.labelsV2?.map((l, index) => {
                       return (

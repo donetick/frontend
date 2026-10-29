@@ -1,7 +1,6 @@
 import {
   CalendarTodayOutlined,
   Checklist,
-  OpenInNew,
   PersonOutline,
   Repeat,
 } from '@mui/icons-material'
@@ -9,6 +8,7 @@ import { Box, IconButton, Typography } from '@mui/joy'
 import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { LinkTypeIcon } from '../../../components/common/ExternalLinkChip'
 import { useLocalization } from '../../../contexts/LocalizationContext'
 import { usePendingCommands } from '../../../hooks/usePendingCommands'
 import {
@@ -17,10 +17,9 @@ import {
   getRecurrentChipText,
 } from '../../../utils/ChoreCardHelpers'
 import {
-  getFirstHttpUrl,
-  getUrlHostname,
-  openExternalUrl,
-  splitTextAtFirstHttpUrl,
+  getFirstLink,
+  openExternalLink,
+  splitTextAtFirstLink,
 } from '../../../utils/ExternalLinks'
 import { ChoreActionMenuTrigger } from '../../components/ChoreActionMenu'
 import ChoreStatusChip from '../../components/ChoreStatusChip'
@@ -53,9 +52,13 @@ const ProjectBoardCard = memo(function ProjectBoardCard({
   const assigneeName =
     assignee?.displayName ||
     (chore.assignedTo === null ? t('assignee.anyone') : null)
-  const { after, before, url } = splitTextAtFirstHttpUrl(chore.name)
+  const { after, before, link } = splitTextAtFirstLink(chore.name)
   const links = [
-    ...new Set([url, getFirstHttpUrl(chore.description)].filter(Boolean)),
+    ...new Map(
+      [link, getFirstLink(chore.description)]
+        .filter(Boolean)
+        .map(item => [item.href, item]),
+    ).values(),
   ]
   const subtasks = chore.subTasks || []
   const recurrent =
@@ -106,7 +109,7 @@ const ProjectBoardCard = memo(function ProjectBoardCard({
           }}
         >
           {before}
-          {url ? getUrlHostname(url) : ''}
+          {link?.label || ''}
           {after}
         </Typography>
         {!isMultiSelectMode && (
@@ -211,21 +214,21 @@ const ProjectBoardCard = memo(function ProjectBoardCard({
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
           {!isMultiSelectMode &&
-            links.map(link => (
+            links.map(item => (
               <IconButton
-                key={link}
+                key={item.href}
                 className='project-task-secondary-action'
-                aria-label={link}
-                title={link}
+                aria-label={item.label}
+                title={item.label}
                 variant='plain'
                 size='sm'
                 onClick={event => {
                   event.stopPropagation()
-                  openExternalUrl(link)
+                  openExternalLink(item)
                 }}
                 sx={{ color: 'text.tertiary', minWidth: 44, minHeight: 44 }}
               >
-                <OpenInNew sx={{ fontSize: 15 }} />
+                <LinkTypeIcon type={item.type} sx={{ fontSize: 15 }} />
               </IconButton>
             ))}
         </Box>

@@ -9,7 +9,6 @@ import {
   History,
   MoreVert,
   OpenInFull,
-  OpenInNew,
   PeopleAlt,
   Person,
   PlayArrow,
@@ -40,6 +39,7 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import EmptyState from '../../components/common/EmptyState'
+import ExternalLinkChip from '../../components/common/ExternalLinkChip'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useThemeSkin } from '../../contexts/ThemeSkinContext'
@@ -67,10 +67,8 @@ import {
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
 import { commandQueue, CommandType } from '../../utils/CommandQueue'
 import {
-  getFirstHttpUrl,
-  getUrlHostname,
-  openExternalUrl,
-  splitTextAtFirstHttpUrl,
+  getFirstLink,
+  splitTextAtFirstLink,
 } from '../../utils/ExternalLinks.js'
 import {
   ApproveChore,
@@ -162,15 +160,15 @@ const ChoreView = () => {
   const descriptionHtml = useDescriptionHtml(chore?.description || '', {
     choreId: chore?.id,
   })
-  const { after: titleAfterUrl, before: titleBeforeUrl } =
-    splitTextAtFirstHttpUrl(chore.name)
-  const displayName = `${titleBeforeUrl}${titleAfterUrl}`.trim()
-  const externalUrls = [
-    ...new Set(
-      [getFirstHttpUrl(chore.name), getFirstHttpUrl(chore.description)].filter(
-        Boolean,
-      ),
-    ),
+  const { after: titleAfterLink, before: titleBeforeLink } =
+    splitTextAtFirstLink(chore.name)
+  const displayName = `${titleBeforeLink}${titleAfterLink}`.trim()
+  const externalLinks = [
+    ...new Map(
+      [getFirstLink(chore.name), getFirstLink(chore.description)]
+        .filter(Boolean)
+        .map(item => [item.href, item]),
+    ).values(),
   ]
   const notesHtml = useDescriptionHtml(chore?.notes || '', {
     choreId: chore?.id,
@@ -898,27 +896,17 @@ const ChoreView = () => {
               ? `${t('choreView.due')} ${fmt.dateTime(chore.nextDueDate)}`
               : t('choreView.na')}
           </Chip>
-          {externalUrls.map(url => (
-            <Chip
-              key={url}
-              startDecorator={<OpenInNew />}
+          {externalLinks.map(item => (
+            <ExternalLinkChip
+              key={item.href}
+              link={item}
               size='md'
-              variant='soft'
-              color='primary'
-              onClick={() => openExternalUrl(url)}
-              title={url}
+              iconSize='inherit'
               sx={{
-                cursor: 'pointer',
                 maxWidth: '100%',
-                '& .MuiChip-label': {
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                },
+                '& .MuiChip-label': { whiteSpace: 'nowrap' },
               }}
-            >
-              {getUrlHostname(url)}
-            </Chip>
+            />
           ))}
         </Box>
         <Box
