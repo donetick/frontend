@@ -5,6 +5,8 @@ import vm from 'node:vm'
 
 import { transformSync } from '@swc/core'
 
+import { loadChorePermissions } from './helpers/chore-permissions.mjs'
+
 // Exercise the row's real render and handlers with lightweight hook/component
 // stubs, without needing the application providers or a browser.
 const source = readFileSync(
@@ -30,6 +32,7 @@ function render(overrides = {}, options = {}) {
   const selections = []
   const navigations = []
   const menus = []
+  const filters = []
   const modules = {
     react: { memo: component => component },
     'react/jsx-runtime': { jsx: element, jsxs: element },
@@ -37,21 +40,13 @@ function render(overrides = {}, options = {}) {
     '@mui/icons-material': components,
     'react-i18next': { useTranslation: () => ({ t: key => key }) },
     'react-router-dom': { useNavigate: () => path => navigations.push(path) },
-    '../../../contexts/ImpersonateUserContext': {
-      useImpersonateUser: () => ({
-        impersonatedUser: options.impersonatedUser,
-      }),
-    },
     '../../../contexts/LocalizationContext': {
       useLocalization: () => ({ timeFormat: 'HH:mm' }),
     },
     '../../../hooks/usePendingCommands': {
       usePendingCommands: () => ({ data: options.pendingCommands || [] }),
     },
-    '../../../queries/UserQueries': {
-      useUserProfile: () => ({ data: { id: 5 } }),
-      useCircleMembers: () => ({ data: { res: options.members || [] } }),
-    },
+    '../../../hooks/useChorePermissions': loadChorePermissions(options),
     '../../../utils/ChoreCardHelpers': {
       getDueDateChipColor: () => 'danger',
       getDueDateChipText: () => 'Yesterday',
@@ -68,6 +63,10 @@ function render(overrides = {}, options = {}) {
     '../../components/ChoreActionMenu': {
       ChoreActionMenuTrigger: 'MenuTrigger',
     },
+    '../../components/ChoreStatusChip': {
+      default: 'ChoreStatusChip',
+      __esModule: true,
+    },
     '../../components/PendingBadge': {
       default: 'PendingBadge',
       __esModule: true,
@@ -82,12 +81,21 @@ function render(overrides = {}, options = {}) {
     },
   })
   const props = {
-    chore: { id: 9, name: 'A very long task', status: 0, priority: 1 },
     performers: [],
     onAction: (action, chore) => actions.push([action, chore.id]),
     onSelectionToggle: () => selections.push(true),
     onOpenActionMenu: (anchor, chore) => menus.push([anchor, chore.id]),
+    onChipClick: filter => filters.push(filter),
     ...overrides,
+    chore: {
+      id: 9,
+      name: 'A very long task',
+      status: 0,
+      priority: 1,
+      circleId: 1,
+      assignedTo: 5,
+      ...overrides.chore,
+    },
   }
   return {
     tree: exports.default(props),
@@ -95,6 +103,7 @@ function render(overrides = {}, options = {}) {
     selections,
     navigations,
     menus,
+    filters,
   }
 }
 
@@ -115,6 +124,7 @@ test('completion is an unchecked outlined checkbox with a priority tint', () => 
   assert.equal(checkbox.type, 'Checkbox')
   assert.equal(checkbox.props.variant, 'outlined')
   assert.equal(checkbox.props.checked, false)
+  assert.equal(checkbox.props.disabled, false)
   assert.equal(
     checkbox.props.sx['& .MuiCheckbox-checkbox'].borderColor,
     '#d32f2f',
@@ -123,6 +133,14 @@ test('completion is an unchecked outlined checkbox with a priority tint', () => 
   assert.deepEqual(row.actions, [['complete', 9]])
   assert.equal(
     control(render({}, { outsideWindow: true })).props.disabled,
+    true,
+  )
+  assert.equal(
+    control(render({ chore: { isActive: false } })).props.disabled,
+    true,
+  )
+  assert.equal(
+    control(render({ chore: { assignedTo: 8 } })).props.disabled,
     true,
   )
 })
@@ -146,21 +164,66 @@ test('start, pause and approval retain their existing task actions', () => {
     [2, 'start'],
     [3, 'approve'],
   ]) {
-    const row = render({ chore: { id: 9, name: 'Task', status, createdBy: 5 } })
+    const row = render(
+      { chore: { id: 9, name: 'Task', status, createdBy: 5 } },
+      status === 3
+        ? { members: [{ userId: 5, circleId: 1, role: 'manager' }] }
+        : {},
+    )
     const button = control(row)
     assert.equal(button.props.disabled, false)
     button.props.onClick()
     assert.deepEqual(row.actions, [[action, 9]])
   }
   const pending = { chore: { id: 9, name: 'Task', status: 3, createdBy: 8 } }
-  assert.equal(control(render(pending)).props.disabled, true)
+  for (const options of [
+    {},
+    { userId: 8 },
+    { members: [{ userId: 5, circleId: 2, role: 'admin' }] },
+    {
+      impersonatedUser: { userId: 8 },
+      members: [{ userId: 5, circleId: 1, role: 'admin' }],
+    },
+  ]) {
+    const row = render(pending, options)
+    assert.equal(control(row), undefined)
+    assert.ok(find(row.tree, node => node.type === 'HourglassEmpty'))
+    assert.ok(find(row.tree, node => node.type === 'ChoreStatusChip'))
+    assert.deepEqual(row.actions, [])
+  }
+  for (const role of ['admin', 'manager']) {
+    assert.equal(
+      control(render(pending, { members: [{ userId: 5, circleId: 1, role }] }))
+        .props.disabled,
+      false,
+    )
+  }
+  const impersonated = render(pending, {
+    impersonatedUser: { userId: 8 },
+    members: [{ userId: 8, circleId: 1, role: 'manager' }],
+  })
+  control(impersonated).props.onClick()
+  assert.deepEqual(impersonated.actions, [['approve', 9]])
+})
+
+test('restricted project visibility bounds task completion and approval', () => {
+  const chore = {
+    projectId: 10,
+    project: { id: 10, visibility: 'members', created_by: 8, memberIds: [] },
+  }
+  const options = { members: [{ userId: 5, circleId: 1, role: 'admin' }] }
+  assert.equal(control(render({ chore }, options)).props.disabled, true)
   assert.equal(
-    control(render(pending, { members: [{ userId: 5, role: 'admin' }] })).props
-      .disabled,
+    control(render({ chore: { ...chore, status: 3 } }, options)),
+    undefined,
+  )
+  const visible = { ...chore, project: { ...chore.project, memberIds: [5] } }
+  assert.equal(
+    control(render({ chore: visible }, options)).props.disabled,
     false,
   )
   assert.equal(
-    control(render(pending, { impersonatedUser: { userId: 8 } })).props
+    control(render({ chore: { ...visible, status: 3 } }, options)).props
       .disabled,
     false,
   )
@@ -185,13 +248,15 @@ test('title supports keyboard navigation and menu uses the shared owner', () => 
   assert.deepEqual(row.menus, [['anchor', 9]])
 })
 
-test('due date is plain text and offline changes keep their indicator', () => {
+test('due date is plain text, labels filter and offline changes keep their indicator', () => {
+  const label = { id: 1, name: 'Kitchen' }
   const row = render({
     chore: {
       id: 9,
       name: 'Task',
       status: 0,
       nextDueDate: '2026-01-01',
+      labelsV2: [label],
       _pending: true,
     },
   })
@@ -200,4 +265,8 @@ test('due date is plain text and offline changes keep their indicator', () => {
   assert.equal(due.props.dateTime, '2026-01-01')
   assert.equal(due.props.sx.color, 'danger.plainColor')
   assert.ok(find(row.tree, node => node.type === 'PendingBadge'))
+  find(row.tree, node => node.props?.title === 'Kitchen').props.onClick({
+    stopPropagation() {},
+  })
+  assert.equal(row.filters[0].label, label)
 })
