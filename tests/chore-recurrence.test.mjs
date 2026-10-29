@@ -1,3 +1,5 @@
+import 'moment/locale/es.js'
+
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
@@ -7,7 +9,6 @@ import vm from 'node:vm'
 
 import { transformSync } from '@swc/core'
 import moment from 'moment'
-import 'moment/locale/es.js'
 
 import * as weekdayUtils from '../src/utils/WeekdayUtils.js'
 
