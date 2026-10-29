@@ -1,12 +1,13 @@
 import createCache from '@emotion/cache'
 import { CacheProvider } from '@emotion/react'
 import { CssBaseline } from '@mui/joy'
-import { CssVarsProvider, extendTheme } from '@mui/joy/styles'
+import { CssVarsProvider, extendTheme, useColorScheme } from '@mui/joy/styles'
 import PropType from 'prop-types'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { prefixer } from 'stylis'
 import rtlPlugin from 'stylis-plugin-rtl'
 
+import { applyStartupTheme } from '@/constants/startupTheme'
 import { COLORS, THEME_BACKGROUND } from '@/constants/theme'
 import {
   readThemeSkin,
@@ -339,6 +340,24 @@ const getSkinTheme = (skin, direction) => {
   return skinThemes.get(key)
 }
 
+// index.html resolves the startup colors once, before JavaScript. This keeps
+// them current for the rest of the session, so the Suspense fallback shown on a
+// later route transition matches the skin and mode the user has since picked.
+// It must live inside CssVarsProvider to read useColorScheme.
+const StartupThemeSync = ({ skin }) => {
+  const { mode, systemMode } = useColorScheme()
+  useEffect(() => {
+    const resolved = mode === 'system' ? systemMode : mode
+    // Both are undefined until Joy hydrates; index.html's value holds till then.
+    if (resolved) applyStartupTheme(skin, resolved)
+  }, [skin, mode, systemMode])
+  return null
+}
+
+StartupThemeSync.propTypes = {
+  skin: PropType.string.isRequired,
+}
+
 const ThemeContext = ({ children }) => {
   const { isRTL } = useLocalization()
   const [skin, setSkinState] = useState(() => readThemeSkin())
@@ -372,6 +391,7 @@ const ThemeContext = ({ children }) => {
       <CacheProvider value={cache}>
         <CssVarsProvider theme={theme}>
           <CssBaseline />
+          <StartupThemeSync skin={skin} />
           {children}
         </CssVarsProvider>
       </CacheProvider>

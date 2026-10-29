@@ -5,6 +5,7 @@ import { useRef } from 'react'
 
 import { useLongPress } from '../../../hooks/useLongPress'
 import { hapticLight } from '../../../utils/Haptics'
+import { canCommitSwipe } from '../../../utils/SwipeActions'
 
 // The point past which releasing commits the full-swipe action. Exported so
 // the lists that own the gesture and the haptic that announces it can't drift
@@ -35,6 +36,11 @@ const ChoreSwipeableItem = ({
   // Crossing the commit threshold is the one moment during the drag that
   // changes what releasing will do, so it's the moment that earns a tick.
   const committedRef = useRef(false)
+  const fullSwipe = canCommitSwipe({
+    ...listProps,
+    leadingActions,
+    trailingActions,
+  })
 
   // The swipe list owns the gesture the moment it recognizes a drag — a hold
   // that turned into a swipe must not also open multi-select.
@@ -45,7 +51,7 @@ const ChoreSwipeableItem = ({
 
   const handleSwipeProgress = progress => {
     cancelLongPress()
-    const committed = progress >= COMMIT_PROGRESS
+    const committed = fullSwipe && progress >= COMMIT_PROGRESS
     if (committed !== committedRef.current) {
       committedRef.current = committed
       if (committed) hapticLight()
@@ -55,6 +61,7 @@ const ChoreSwipeableItem = ({
   return (
     <SwipeableListItem
       {...listProps}
+      fullSwipe={fullSwipe}
       leadingActions={leadingActions}
       trailingActions={trailingActions}
       onClick={onClick}

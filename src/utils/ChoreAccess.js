@@ -1,3 +1,47 @@
+import { getProjectAudienceIds, isRestrictedProject } from './ProjectAccess.js'
+
+// Mirrors dt-core's CanComplete, CanEdit, CanDelegate and reviewer rules.
+export const getChorePermissions = (chore, userId, members = []) => {
+  const member = members.find(
+    m => m.userId === userId && m.circleId === chore?.circleId,
+  )
+  const owner = Boolean(userId && chore?.createdBy === userId)
+  const admin = member?.role === 'admin'
+  const reviewer = admin || member?.role === 'manager'
+  const project =
+    !chore?.projectId || chore.projectId === chore?.project?.id
+      ? chore?.project
+      : null
+  const restricted = project && isRestrictedProject(project)
+  const canViewProject =
+    !restricted || getProjectAudienceIds(project).includes(userId)
+  const unassigned =
+    chore?.assignStrategy === 'no_assignee' && !chore?.assignedTo
+  const assigned =
+    chore?.assignedTo === userId ||
+    chore?.assignees?.some(a => a.userId === userId)
+  const complete = Boolean(
+    userId &&
+    chore &&
+    canViewProject &&
+    (unassigned
+      ? restricted || (chore.isPrivate ? owner : Boolean(member))
+      : assigned || (chore.isPrivate ? owner : reviewer)),
+  )
+  return {
+    complete,
+    approve: Boolean(userId && reviewer && canViewProject),
+    edit: Boolean(userId && (owner || admin) && canViewProject),
+    archive: Boolean(owner && canViewProject),
+    delegate: Boolean(member && member.isActive !== false && canViewProject),
+    editTime: Boolean(
+      userId &&
+      canViewProject &&
+      (owner || chore?.assignees?.some(a => a.userId === userId)),
+    ),
+  }
+}
+
 // Mirrors ModifyHistory authorization in dt-core/internal/chore/handler.go.
 // Task ownership alone does not grant permission to edit a history entry.
 export const canEditChoreHistory = (

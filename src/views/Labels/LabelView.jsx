@@ -1,11 +1,6 @@
 import '@meauxt/react-swipeable-list/dist/styles.css'
 
-import {
-  SwipeableList,
-  SwipeAction,
-  TrailingActions,
-  Type as ListType,
-} from '@meauxt/react-swipeable-list'
+import { SwipeableList, Type as ListType } from '@meauxt/react-swipeable-list'
 import {
   Add,
   Close,
@@ -33,8 +28,9 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import EmptyState from '../../components/common/EmptyState'
 import ItemAudience from '../../components/common/ItemAudience'
-import PermissionDeniedModal from '../../components/common/PermissionDeniedModal'
 import SortAndFilterMenu from '../../components/common/SortAndFilterMenu'
+import SwipeActionButton from '../../components/common/SwipeActionButton'
+import { TrailingSwipeActions as TrailingActions } from '../../components/common/SwipeActionTray'
 import SwipeListItem, {
   SWIPE_COMMIT_THRESHOLD,
 } from '../../components/common/SwipeListItem'
@@ -53,7 +49,7 @@ const LabelCardContent = ({
   label,
   onToggleActions,
 }) => {
-  const { t } = useTranslation('labels')
+  const { t } = useTranslation(['labels', 'chores'])
   // Check if current user owns this label
   const isOwnedByCurrentUser = label.created_by === currentUserId
   const audienceMembers = label.isShared
@@ -144,7 +140,7 @@ const LabelCardContent = ({
           )}
           members={audienceMembers}
         />
-        {isOwnedByCurrentUser && onToggleActions && (
+        {onToggleActions && (
           <IconButton
             color='neutral'
             variant='plain'
@@ -166,7 +162,7 @@ const LabelCardContent = ({
 }
 
 const LabelView = () => {
-  const { t } = useTranslation('labels')
+  const { t } = useTranslation(['labels', 'chores'])
   const { data: labels, isError, isLabelsLoading } = useLabels()
   const { data: userProfile } = useUserProfile()
   const { data: membersData } = useCircleMembers()
@@ -180,7 +176,6 @@ const LabelView = () => {
   const queryClient = useQueryClient()
   const [confirmationModel, setConfirmationModel] = useState({})
   const [showMoreInfoId, setShowMoreInfoId] = useState(null)
-  const [permissionDeniedItem, setPermissionDeniedItem] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [sortBy, setSortBy] = useState(
     () => localStorage.getItem('labelsSortBy') || 'name',
@@ -447,64 +442,22 @@ const LabelView = () => {
               onClick={() => navigate(`/labels/${label.id}`)}
               swipeActionOpen={showMoreInfoId === label.id ? 'trailing' : null}
               trailingActions={
-                label.created_by === userProfile?.id ? (
-                  <TrailingActions>
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        boxShadow: 'inset 2px 0 4px rgba(0,0,0,0.06)',
-                        zIndex: 0,
-                      }}
-                    >
-                      <SwipeAction onClick={() => handleEditLabel(label)}>
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            bgcolor: 'primary.500',
-                            color: '#fff',
-                            px: 3,
-                            height: '100%',
-                          }}
-                        >
-                          <EditIcon sx={{ fontSize: 20, color: 'white' }} />
-                          <Typography
-                            level='body-xs'
-                            sx={{ mt: 0.5, color: 'inherit' }}
-                          >
-                            {t('common:edit')}
-                          </Typography>
-                        </Box>
-                      </SwipeAction>
-                      <SwipeAction
-                        onClick={() => handleDeleteClicked(label.id)}
-                      >
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            bgcolor: 'danger.500',
-                            color: '#fff',
-                            px: 3,
-                            height: '100%',
-                          }}
-                        >
-                          <DeleteIcon sx={{ fontSize: 20, color: 'white' }} />
-                          <Typography
-                            level='body-xs'
-                            sx={{ mt: 0.5, color: 'inherit' }}
-                          >
-                            {t('common:delete')}
-                          </Typography>
-                        </Box>
-                      </SwipeAction>
-                    </Box>
-                  </TrailingActions>
-                ) : null
+                <TrailingActions resourceType='label' resourceName={label.name}>
+                  <SwipeActionButton
+                    disabled={label.created_by !== userProfile?.id}
+                    onClick={() => handleEditLabel(label)}
+                    icon={<EditIcon />}
+                    label={t('common:edit')}
+                  />
+                  <SwipeActionButton
+                    disabled={label.created_by !== userProfile?.id}
+                    onClick={() => handleDeleteClicked(label.id)}
+                    bgcolor='danger.500'
+                    color='#fff'
+                    icon={<DeleteIcon />}
+                    label={t('common:delete')}
+                  />
+                </TrailingActions>
               }
             >
               <LabelCardContent
@@ -512,11 +465,6 @@ const LabelView = () => {
                 label={label}
                 currentUserId={userProfile?.id}
                 onToggleActions={() => {
-                  if (label.created_by !== userProfile?.id) {
-                    setShowMoreInfoId(null)
-                    setPermissionDeniedItem(label)
-                    return
-                  }
                   setShowMoreInfoId(
                     showMoreInfoId === label.id ? null : label.id,
                   )
@@ -526,13 +474,6 @@ const LabelView = () => {
           ))}
         </SwipeableList>
       </Box>
-
-      <PermissionDeniedModal
-        open={!!permissionDeniedItem}
-        onClose={() => setPermissionDeniedItem(null)}
-        resourceType='label'
-        resourceName={permissionDeniedItem?.name}
-      />
 
       {modalOpen && (
         <LabelModal

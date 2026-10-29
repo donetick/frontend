@@ -5,9 +5,57 @@ import murmurhash from 'murmurhash'
 
 const MAX_LOCAL_NOTIFICATIONS = 64
 
+// Where the server-resolved `effective` event map is mirrored so the scheduler
+// can honour it on a cold start, before (or without) a successful fetch.
+const EVENT_PREFERENCES_KEY = 'notificationEventPreferences'
+
+// Reminder templates are offsets from the due date, so the sign is the event
+// type the backend would have used for the same reminder. Keeping the mapping
+// here means the settings toggles govern the on-device reminders too, rather
+// than only the push copy of them.
+const eventTypeForTemplate = template => {
+  const value = Number(template?.value) || 0
+  if (value < 0) return 'pre_due'
+  if (value > 0) return 'overdue_followup'
+  return 'due'
+}
+
+// Fails open: a missing or malformed mirror means "schedule everything",
+// which is the behavior before this preference existed. Dropping reminders
+// because a cache was cold is far worse than firing one the user muted.
+const isEventEnabled = (eventPreferences, eventType) => {
+  if (!eventPreferences) return true
+  const enabled = eventPreferences[eventType]
+  return enabled === undefined ? true : Boolean(enabled)
+}
+
 const getNotificationPreferences = async () => {
   const ret = await Preferences.get({ key: 'notificationPreferences' })
   return JSON.parse(ret.value)
+}
+
+const readEventPreferences = async () => {
+  try {
+    const { value } = await Preferences.get({ key: EVENT_PREFERENCES_KEY })
+    return value ? JSON.parse(value) : null
+  } catch (error) {
+    console.error('Error reading notification event preferences:', error)
+    return null
+  }
+}
+
+// Called from the preferences query so every screen that loads them refreshes
+// the mirror, not just the settings page.
+const cacheEventPreferences = async effective => {
+  if (!effective || typeof effective !== 'object') return
+  try {
+    await Preferences.set({
+      key: EVENT_PREFERENCES_KEY,
+      value: JSON.stringify(effective),
+    })
+  } catch (error) {
+    console.error('Error caching notification event preferences:', error)
+  }
 }
 
 const canScheduleNotification = async () => {
@@ -71,8 +119,12 @@ const scheduleNotificationFromTemplate = (
   userProfile,
   allPerformers,
   notifications,
+  eventPreferences,
 ) => {
   for (const template of chore.notificationMetadata?.templates || []) {
+    if (!isEventEnabled(eventPreferences, eventTypeForTemplate(template))) {
+      continue
+    }
     // convert the template to time:
     const dueDate = new Date(chore.nextDueDate)
     const now = new Date()
@@ -164,8 +216,12 @@ const scheduleChoreNotification = async (
   chores,
   userProfile,
   allPerformers,
+  effective,
 ) => {
   await cancelPendingNotifications()
+  // Prefer the freshly fetched map; fall back to the mirror so an offline
+  // launch still respects the last known answer.
+  const eventPreferences = effective ?? (await readEventPreferences())
   const notifications = []
 
   for (let i = 0; i < chores.length; i++) {
@@ -184,6 +240,7 @@ const scheduleChoreNotification = async (
         userProfile,
         allPerformers,
         notifications,
+        eventPreferences,
       )
     } catch (error) {
       console.error(
@@ -208,4 +265,9 @@ const scheduleChoreNotification = async (
   return notifications
 }
 
-export { canScheduleNotification, scheduleChoreNotification }
+export {
+  cacheEventPreferences,
+  canScheduleNotification,
+  eventTypeForTemplate,
+  scheduleChoreNotification,
+}

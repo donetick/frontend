@@ -35,7 +35,11 @@ import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useNavBarTitle } from '../../contexts/NavBarTitleContext'
 import { useFilter } from '../../hooks/useFilter'
 import { useChores } from '../../queries/ChoreQueries'
-import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
+import {
+  useCircleMembers,
+  useNotificationPreferences,
+  useUserProfile,
+} from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { consumePendingShare } from '../../service/ShareTargetService'
 import {
@@ -156,6 +160,9 @@ const MyChores = () => {
     isError: membersError,
     isLoading: membersLoading,
   } = useCircleMembers()
+  // Only read to gate which reminders get scheduled locally — loading it here
+  // also keeps the scheduler's mirror fresh for users who never open settings.
+  const { data: notificationPreference } = useNotificationPreferences()
 
   const [chores, setChores] = useState([])
   const [addTaskModalOpen, setAddTaskModalOpen] = useState(false)
@@ -590,6 +597,7 @@ const MyChores = () => {
             choresData.res,
             userProfile,
             membersData.res,
+            notificationPreference?.effective,
           )
         }
       }
@@ -605,6 +613,8 @@ const MyChores = () => {
     processedChores, // Added to ensure local state syncs when query data updates
     userProfile,
     impersonatedUser?.userId,
+    // Toggling an event in settings has to reschedule, not wait for a relaunch.
+    notificationPreference?.effective,
   ])
 
   useEffect(() => {

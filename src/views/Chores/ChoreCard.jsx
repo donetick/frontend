@@ -25,11 +25,10 @@ import {
 } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
 
-import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useThemeSkin } from '../../contexts/ThemeSkinContext'
+import { useChorePermissions } from '../../hooks/useChorePermissions'
 import { usePendingCommands } from '../../hooks/usePendingCommands'
-import { useUserProfile } from '../../queries/UserQueries.jsx'
 import {
   getDueDateChipColor,
   getDueDateChipText,
@@ -47,6 +46,7 @@ import Priorities from '../../utils/Priorities'
 import ChoreActionMenu, {
   ChoreActionMenuTrigger,
 } from '../components/ChoreActionMenu'
+import ChoreStatusChip from '../components/ChoreStatusChip'
 import PendingBadge from '../components/PendingBadge'
 
 // Hoisted so emotion isn't re-serializing an identical object for every row
@@ -78,31 +78,13 @@ const ChoreCard = ({
   viewOnly,
 }) => {
   const { t } = useTranslation('chores')
+  const permissions = useChorePermissions(chore)
   const { skin } = useThemeSkin()
   const completionColor = skin === 'default' ? 'success' : 'primary'
-  const { data: userProfile } = useUserProfile({ enabled: !viewOnly })
   const { timeFormat } = useLocalization()
   const { data: pendingCmds } = usePendingCommands(chore.id)
 
-  const { impersonatedUser } = useImpersonateUser()
-
-  // Check if the current user can approve/reject (admin, manager, or task owner)
-  const canApproveReject = () => {
-    if (!performers || !chore) return false
-
-    const currentUser = performers.find(
-      member => member.userId === (impersonatedUser?.userId || userProfile?.id),
-    )
-
-    // User can approve/reject if they are:
-    // 1. Admin or manager of the circle
-    // 2. Owner/creator of the task
-    return (
-      currentUser?.role === 'admin' ||
-      currentUser?.role === 'manager' ||
-      chore.createdBy === (impersonatedUser?.userId || userProfile?.id)
-    )
-  }
+  const canApproveReject = () => permissions.approve
 
   const getFrequencyIcon = chore => {
     if (['once', 'no_repeat'].includes(chore.frequencyType)) {
@@ -326,6 +308,7 @@ const ChoreCard = ({
                       </Chip>
                     </Box>
                   )}
+                  <ChoreStatusChip chore={chore} />
                   <Box key={`${chore.id}-labels`}>
                     {chore.priority > 0 && (
                       <Chip
@@ -465,10 +448,12 @@ const ChoreCard = ({
                 >
                   {/* <ButtonGroup> */}
                   {chore.status === 3 ? (
-                    // Pending approval: Show approve/reject for admins/managers/owners, grayed out for others
+                    // Only reviewers get approval actions; the chip communicates status.
                     canApproveReject() ? (
                       <Box sx={{ display: 'flex', gap: 0.5 }}>
                         <IconButton
+                          aria-label={`${t('choreView.approve')}: ${chore.name}`}
+                          title={t('choreView.approve')}
                           variant='soft'
                           color={completionColor}
                           onClick={e => {
@@ -498,6 +483,8 @@ const ChoreCard = ({
                           <ThumbUp sx={{ fontSize: 18 }} />
                         </IconButton>
                         <IconButton
+                          aria-label={`${t('choreView.reject')}: ${chore.name}`}
+                          title={t('choreView.reject')}
                           variant='soft'
                           color='danger'
                           onClick={e => {
@@ -524,25 +511,14 @@ const ChoreCard = ({
                         </IconButton>
                       </Box>
                     ) : (
-                      <IconButton
-                        variant='soft'
-                        color='neutral'
-                        disabled={true}
-                        sx={{
-                          borderRadius: '50%',
-                          width: 50,
-                          minWidth: 50,
-                          height: 50,
-                          flexShrink: 0,
-                          zIndex: 1,
-                          opacity: 0.5,
-                        }}
-                      >
-                        <HourglassEmpty />
-                      </IconButton>
+                      <HourglassEmpty
+                        aria-hidden='true'
+                        sx={{ m: 1.5, color: 'text.tertiary' }}
+                      />
                     )
                   ) : (
                     <IconButton
+                      aria-label={`${t(chore.status === 0 ? 'completeChore' : chore.status === 1 ? 'choreView.pauseTimer' : 'choreView.start')}: ${chore.name}`}
                       variant={chore.status === 0 ? 'solid' : 'soft'}
                       color={chore.status === 0 ? completionColor : 'warning'}
                       onClick={e => {
@@ -561,7 +537,11 @@ const ChoreCard = ({
                             break
                         }
                       }}
-                      disabled={notInCompletionWindow(chore)}
+                      disabled={
+                        !permissions.complete ||
+                        chore.isActive === false ||
+                        notInCompletionWindow(chore)
+                      }
                       sx={{
                         borderRadius: '50%',
                         width: 50,

@@ -6,6 +6,8 @@ import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
+import { useImpersonateUser } from '../../../contexts/ImpersonateUserContext'
+import { getChorePermissions } from '../../../utils/ChoreAccess'
 import CompactChoreCard from '../../Chores/CompactChoreCard'
 import ChoreSwipeableItem, {
   SWIPE_COMMIT_THRESHOLD,
@@ -23,6 +25,13 @@ import {
  * actions, which come from the same shared helper the task list uses.
  */
 const HomeChoreList = ({ chores, onAction, performers, userProfile }) => {
+  const { impersonatedUser } = useImpersonateUser()
+  const permissionsFor = chore =>
+    getChorePermissions(
+      chore,
+      impersonatedUser?.userId || userProfile?.id,
+      performers || [],
+    )
   const navigate = useNavigate()
   const { t } = useTranslation('chores')
 
@@ -44,14 +53,14 @@ const HomeChoreList = ({ chores, onAction, performers, userProfile }) => {
               chore,
               handleChoreAction: onAction,
               t,
-              userProfile,
+              permissions: permissionsFor(chore),
             })}
             trailingActions={getChoreTrailingActions({
               chore,
               handleChoreAction: onAction,
               navigate,
               t,
-              userProfile,
+              permissions: permissionsFor(chore),
             })}
             onClick={() => navigate(`/chores/${chore.id}`)}
           >

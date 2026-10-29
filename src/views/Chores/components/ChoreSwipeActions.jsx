@@ -1,9 +1,4 @@
 import {
-  LeadingActions,
-  SwipeAction,
-  TrailingActions,
-} from '@meauxt/react-swipeable-list'
-import {
   Check,
   Delete,
   Edit,
@@ -14,296 +9,194 @@ import {
   ThumbUp,
   Unarchive,
 } from '@mui/icons-material'
-import { Box, Typography } from '@mui/joy'
-import PropTypes from 'prop-types'
 
+import SwipeActionButton from '../../../components/common/SwipeActionButton'
+import {
+  LeadingSwipeActions as LeadingActions,
+  TrailingSwipeActions as TrailingActions,
+} from '../../../components/common/SwipeActionTray'
+import { notInCompletionWindow } from '../../../utils/Chores'
 import { hapticMedium } from '../../../utils/Haptics'
 
-const canApproveReject = (chore, userProfile) =>
-  userProfile?.role === 1 || chore.createdBy === userProfile?.id
-
-// The plain ChoreCard floats its priority/label chips above the card body, so
-// the actions have to drop down to align with the card itself.
-const PLAIN_CARD_OFFSET = '28px'
-
-/**
- * One swipe action tile.
- *
- * Solid fills, not `softBg`. The swipe tray is the most committal gesture in
- * the app and needs to read as a set of buttons the moment it peeks out from
- * under the row; the soft tints are near-white in light mode and near-black on
- * our pure-black dark body, which made the whole tray look disabled. Solid
- * fills also sidestep dark mode entirely — only `primary` is overridden for
- * the dark scheme, so success/warning/danger `softBg` fall back to Joy's
- * defaults there and drift away from the palette.
- */
-const SwipeActionTile = ({
-  bgcolor,
-  color = '#fff',
-  icon,
-  label,
-  offsetTop,
-}) => (
-  // Two boxes on purpose. The library styles `.swipe-action > *` with
-  // `flex: 1` and a `justify-content` of flex-start/flex-end depending on the
-  // side — written for a row-direction child. On a column tile that would
-  // shunt the icon and label to the top or bottom edge, so the outer box stays
-  // a row and absorbs those rules, and the inner one owns the column layout.
-  <Box
-    sx={{
-      display: 'flex',
-      minWidth: 76,
-      height: '100%',
-      ...(offsetTop && { mt: PLAIN_CARD_OFFSET }),
-    }}
-  >
-    <Box
-      sx={{
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 0.5,
-        bgcolor,
-        color,
-        px: 2,
-      }}
-    >
-      <Box sx={{ display: 'flex', '& svg': { fontSize: 22 } }}>{icon}</Box>
-      <Typography
-        level='body-xs'
-        sx={{
-          color: 'inherit',
-          fontWeight: 600,
-          lineHeight: 1,
-          whiteSpace: 'nowrap',
-        }}
-      >
-        {label}
-      </Typography>
-    </Box>
-  </Box>
-)
-
-SwipeActionTile.propTypes = {
-  bgcolor: PropTypes.string.isRequired,
-  color: PropTypes.string,
-  icon: PropTypes.node.isRequired,
-  label: PropTypes.node,
-  offsetTop: PropTypes.bool,
-}
-
-// Amber at 500 is too light to carry white text; everything else clears 4.5:1
-// against white.
-
-/**
- * Leading (swipe-right) actions: complete/start (or approve on a row
- * awaiting review), then skip.
- *
- * Unlike TrailingActions, LeadingActions tags its *first* child as the
- * `fullSwipe` target, not its last — so complete/start/approve goes first to
- * stay a one-flick gesture with no aiming. Skip sits behind it, reachable
- * with a longer swipe or a tap once revealed.
- */
+// Restricted actions remain in the tray. The row wrappers detect disabled
+// declarations and turn off full-swipe commits (including the commit haptic).
 export const getChoreLeadingActions = ({
   chore,
   handleChoreAction,
   isMultiSelectMode = false,
+  permissions = {},
   showActions = true,
   t,
-  userProfile,
   usesCompactCard = true,
 }) => {
-  if (isMultiSelectMode || !showActions) return null
-
+  if (isMultiSelectMode || !showActions || chore.isActive === false) return null
   const offsetTop = !usesCompactCard
-
-  // Awaiting approval: only reviewers get an action, and there is no useful
-  // "start" for a task that is already done.
-  if (chore.status === 3) {
-    if (!canApproveReject(chore, userProfile)) return null
-    return (
-      <LeadingActions>
-        <SwipeAction
-          onClick={() => {
-            hapticMedium()
-            handleChoreAction('approve', chore)
-          }}
-        >
-          <SwipeActionTile
-            bgcolor='primary.solidBg'
-            color='primary.solidColor'
-            icon={<ThumbUp />}
-            label={t('choreView.approve')}
-            offsetTop={offsetTop}
-          />
-        </SwipeAction>
-      </LeadingActions>
-    )
+  const act = action => () => {
+    hapticMedium()
+    handleChoreAction(action, chore)
   }
 
-  const isInProgress = chore.status === 1
-
-  return (
-    <LeadingActions>
-      <SwipeAction
-        onClick={() => {
-          hapticMedium()
-          handleChoreAction(isInProgress ? 'complete' : 'start', chore)
-        }}
+  if (chore.status === 3)
+    return (
+      <LeadingActions
+        resourceName={chore.name}
+        description={t('permissions.approval')}
       >
-        <SwipeActionTile
+        <SwipeActionButton
+          disabled={!permissions.approve}
+          onClick={act('approve')}
           bgcolor='primary.solidBg'
           color='primary.solidColor'
-          icon={isInProgress ? <Check /> : <PlayArrow />}
-          label={isInProgress ? t('list.complete') : t('choreView.start')}
+          icon={<ThumbUp />}
+          label={t('choreView.approve')}
           offsetTop={offsetTop}
         />
-      </SwipeAction>
-      <SwipeAction
-        onClick={() => {
-          hapticMedium()
-          handleChoreAction('skip', chore)
-        }}
-      >
-        <SwipeActionTile
-          bgcolor='warning.500'
-          icon={<SkipNext sx={{ color: 'white' }} />}
-          label={t('choreView.skip')}
-          offsetTop={offsetTop}
-        />
-      </SwipeAction>
+      </LeadingActions>
+    )
+
+  const unavailable = Boolean(notInCompletionWindow(chore))
+  const isInProgress = chore.status === 1
+  return (
+    <LeadingActions
+      resourceName={chore.name}
+      description={t(
+        !permissions.complete ? 'permissions.complete' : 'permissions.window',
+      )}
+      restrictionLabel={
+        permissions.complete && unavailable ? t('swipeUnavailable') : undefined
+      }
+      title={
+        permissions.complete && unavailable ? t('swipeUnavailable') : undefined
+      }
+    >
+      <SwipeActionButton
+        disabled={!permissions.complete || unavailable}
+        onClick={act(isInProgress ? 'complete' : 'start')}
+        bgcolor='primary.solidBg'
+        color='primary.solidColor'
+        icon={isInProgress ? <Check /> : <PlayArrow />}
+        label={isInProgress ? t('list.complete') : t('choreView.start')}
+        offsetTop={offsetTop}
+      />
+      <SwipeActionButton
+        disabled={unavailable}
+        onClick={act('skip')}
+        bgcolor='warning.500'
+        color='#fff'
+        icon={<SkipNext />}
+        label={t('choreView.skip')}
+        offsetTop={offsetTop}
+      />
     </LeadingActions>
   )
 }
 
-/**
- * Trailing (swipe-left) actions: reschedule, edit and delete — capped at three
- * so the row stays legible behind them. Apple's guidance is a hard three, and
- * past that the labels are what break first.
- *
- * Nudge is deliberately not here; it is rare, it duplicated Schedule's amber,
- * and it already lives in the overflow menu on every row.
- *
- * Each SwipeAction must be a *direct* child of TrailingActions: the component
- * clones its children to tag the last one as the full-swipe action, so a
- * wrapping Box would both swallow that tag and receive `main`/`trailing` as
- * DOM attributes. Delete is intentionally last (and therefore the full-swipe
- * target) — it opens a confirmation modal rather than deleting outright.
- */
 export const getChoreTrailingActions = ({
   chore,
   handleChoreAction,
   isMultiSelectMode = false,
   navigate,
+  permissions = {},
   showActions = true,
   t,
-  userProfile,
   usesCompactCard = true,
 }) => {
   if (isMultiSelectMode || !showActions) return null
-
   const offsetTop = !usesCompactCard
-  const actions = []
-
-  if (chore.status === 3 && canApproveReject(chore, userProfile)) {
-    actions.push(
-      <SwipeAction
-        key='reject'
-        onClick={() => {
-          hapticMedium()
-          handleChoreAction('reject', chore)
-        }}
-      >
-        <SwipeActionTile
-          bgcolor='danger.600'
-          icon={<ThumbDown sx={{ color: 'white' }} />}
-          label={t('list.reject')}
-          offsetTop={offsetTop}
-        />
-      </SwipeAction>,
-    )
+  const act = action => () => {
+    hapticMedium()
+    handleChoreAction(action, chore)
   }
-
-  actions.push(
-    <SwipeAction
-      key='schedule'
-      onClick={() => {
-        hapticMedium()
-        handleChoreAction('changeDueDate', chore)
-      }}
-    >
-      <SwipeActionTile
+  const actions = []
+  if (chore.status === 3)
+    actions.push(
+      <SwipeActionButton
+        key='reject'
+        disabled={!permissions.approve}
+        onClick={act('reject')}
+        bgcolor='danger.600'
+        color='#fff'
+        icon={<ThumbDown />}
+        label={t('list.reject')}
+        offsetTop={offsetTop}
+      />,
+    )
+  // Keep the tray to three actions; rescheduling a completion awaiting
+  // review stays in the overflow menu instead of competing with Reject.
+  if (chore.status !== 3)
+    actions.push(
+      <SwipeActionButton
+        key='schedule'
+        disabled={!permissions.edit}
+        onClick={act('changeDueDate')}
         bgcolor='warning.500'
-        icon={<Schedule sx={{ color: 'white' }} />}
+        color='#fff'
+        icon={<Schedule />}
         label={t('list.schedule')}
         offsetTop={offsetTop}
-      />
-    </SwipeAction>,
-    <SwipeAction
+      />,
+    )
+  actions.push(
+    <SwipeActionButton
       key='edit'
+      disabled={!permissions.edit}
       onClick={() => {
         hapticMedium()
         navigate(`/chores/${chore.id}/edit`)
       }}
-    >
-      <SwipeActionTile
-        bgcolor='primary.solidBg'
-        color='primary.solidColor'
-        icon={<Edit />}
-        label={t('common:edit')}
-        offsetTop={offsetTop}
-      />
-    </SwipeAction>,
-    <SwipeAction
+      bgcolor='primary.solidBg'
+      color='primary.solidColor'
+      icon={<Edit />}
+      label={t('common:edit')}
+      offsetTop={offsetTop}
+    />,
+    <SwipeActionButton
       key='delete'
-      onClick={() => {
-        hapticMedium()
-        handleChoreAction('delete', chore)
-      }}
-    >
-      <SwipeActionTile
-        bgcolor='danger.500'
-        icon={<Delete sx={{ color: 'white' }} />}
-        label={t('common:delete')}
-        offsetTop={offsetTop}
-      />
-    </SwipeAction>,
+      disabled={!permissions.edit}
+      onClick={act('delete')}
+      bgcolor='danger.500'
+      color='#fff'
+      icon={<Delete />}
+      label={t('common:delete')}
+      offsetTop={offsetTop}
+    />,
   )
-
-  return <TrailingActions>{actions}</TrailingActions>
+  return (
+    <TrailingActions
+      resourceType='task'
+      resourceName={chore.name}
+      description={chore.status === 3 ? t('swipeReviewPermission') : undefined}
+    >
+      {actions}
+    </TrailingActions>
+  )
 }
 
-/**
- * Archived-row swipe actions: restore (leading) and delete (trailing).
- * Nothing else from the active-task set (complete, skip, schedule, edit)
- * applies once a task is archived, so this is a separate, much smaller pair
- * rather than a branch inside the functions above.
- */
+// Only restore/delete apply to archived tasks. Never show start/skip/edit here.
 export const getArchivedLeadingActions = ({
   chore,
   handleChoreAction,
   isMultiSelectMode = false,
+  permissions = {},
   t,
 }) => {
   if (isMultiSelectMode) return null
-
   return (
-    <LeadingActions>
-      <SwipeAction
+    <LeadingActions
+      resourceName={chore.name}
+      description={t('permissions.archive')}
+    >
+      <SwipeActionButton
+        disabled={!permissions.archive}
         onClick={() => {
           hapticMedium()
           handleChoreAction('restore', chore)
         }}
-      >
-        <SwipeActionTile
-          bgcolor='primary.solidBg'
-          color='primary.solidColor'
-          icon={<Unarchive />}
-          label={t('archived.restore')}
-        />
-      </SwipeAction>
+        bgcolor='primary.solidBg'
+        color='primary.solidColor'
+        icon={<Unarchive />}
+        label={t('archived.restore')}
+      />
     </LeadingActions>
   )
 }
@@ -312,24 +205,23 @@ export const getArchivedTrailingActions = ({
   chore,
   handleChoreAction,
   isMultiSelectMode = false,
+  permissions = {},
   t,
 }) => {
   if (isMultiSelectMode) return null
-
   return (
-    <TrailingActions>
-      <SwipeAction
+    <TrailingActions resourceType='task' resourceName={chore.name}>
+      <SwipeActionButton
+        disabled={!permissions.edit}
         onClick={() => {
           hapticMedium()
           handleChoreAction('delete', chore)
         }}
-      >
-        <SwipeActionTile
-          bgcolor='danger.500'
-          icon={<Delete sx={{ color: 'white' }} />}
-          label={t('archived.delete')}
-        />
-      </SwipeAction>
+        bgcolor='danger.500'
+        color='#fff'
+        icon={<Delete />}
+        label={t('archived.delete')}
+      />
     </TrailingActions>
   )
 }

@@ -23,6 +23,7 @@ import {
   splitTextAtFirstHttpUrl,
 } from '../../../utils/ExternalLinks'
 import { ChoreActionMenuTrigger } from '../../components/ChoreActionMenu'
+import ChoreStatusChip from '../../components/ChoreStatusChip'
 import PendingBadge from '../../components/PendingBadge'
 import ProjectTaskAction from './ProjectTaskAction'
 
@@ -149,22 +150,13 @@ const ProjectBoardCard = memo(function ProjectBoardCard({
             py: 0.5,
           }}
         >
-          {chore.status > 0 && (
-            <Typography
-              level='body-xs'
-              sx={{
-                color:
-                  chore.status === 3
-                    ? 'primary.plainColor'
-                    : 'warning.plainColor',
-              }}
-            >
+          <ChoreStatusChip chore={chore} />
+          {(chore.status === 1 || chore.status === 2) && (
+            <Typography level='body-xs' sx={{ color: 'warning.plainColor' }}>
               {t(
-                chore.status === 3
-                  ? 'choreView.pendingApproval'
-                  : chore.status === 1
-                    ? 'choreView.timer.active'
-                    : 'choreView.timer.paused',
+                chore.status === 1
+                  ? 'choreView.timer.active'
+                  : 'choreView.timer.paused',
               )}
             </Typography>
           )}

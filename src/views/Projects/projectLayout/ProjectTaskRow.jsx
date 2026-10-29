@@ -11,10 +11,9 @@ import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
-import { useImpersonateUser } from '../../../contexts/ImpersonateUserContext'
 import { useLocalization } from '../../../contexts/LocalizationContext'
+import { useChorePermissions } from '../../../hooks/useChorePermissions'
 import { usePendingCommands } from '../../../hooks/usePendingCommands'
-import { useCircleMembers, useUserProfile } from '../../../queries/UserQueries'
 import {
   getDueDateChipColor,
   getDueDateChipText,
@@ -29,6 +28,7 @@ import {
   splitTextAtFirstHttpUrl,
 } from '../../../utils/ExternalLinks'
 import { ChoreActionMenuTrigger } from '../../components/ChoreActionMenu'
+import ChoreStatusChip from '../../components/ChoreStatusChip'
 import PendingBadge from '../../components/PendingBadge'
 
 // The board and Home use cards. Project lists deliberately have their own
@@ -46,17 +46,15 @@ const ProjectTaskRow = memo(function ProjectTaskRow({
   const { t } = useTranslation('chores')
   const navigate = useNavigate()
   const { timeFormat } = useLocalization()
-  const { data: userProfile } = useUserProfile()
-  const { data: members } = useCircleMembers()
-  const { impersonatedUser } = useImpersonateUser()
+  const permissions = useChorePermissions(chore)
   const { data: pendingCommands } = usePendingCommands(chore.id)
-  const userId = impersonatedUser?.userId || userProfile?.id
-  const currentMember = members?.res?.find(member => member.userId === userId)
-  const canApprove =
-    currentMember?.role === 'admin' ||
-    currentMember?.role === 'manager' ||
-    (userId != null && chore.createdBy === userId)
+  const canApprove = permissions.approve
   const isPendingApproval = chore.status === 3
+  const actionDisabled =
+    chore.isActive === false ||
+    (isPendingApproval
+      ? !canApprove
+      : !permissions.complete || Boolean(notInCompletionWindow(chore)))
   const action = isPendingApproval
     ? 'approve'
     : chore.status === 1
@@ -105,9 +103,7 @@ const ProjectTaskRow = memo(function ProjectTaskRow({
         {isMultiSelectMode || chore.status === 0 ? (
           <Checkbox
             checked={isMultiSelectMode ? isSelected : false}
-            disabled={
-              !isMultiSelectMode && Boolean(notInCompletionWindow(chore))
-            }
+            disabled={!isMultiSelectMode && actionDisabled}
             onChange={() => {
               if (isMultiSelectMode) onSelectionToggle?.()
               else onAction?.('complete', chore)
@@ -139,17 +135,18 @@ const ProjectTaskRow = memo(function ProjectTaskRow({
               },
             }}
           />
+        ) : isPendingApproval && !canApprove ? (
+          <HourglassEmpty
+            aria-hidden='true'
+            sx={{ fontSize: 17, color: 'text.tertiary' }}
+          />
         ) : (
           <IconButton
             aria-label={`${actionLabel}: ${chore.name}`}
             title={actionLabel}
             size='sm'
             variant='plain'
-            disabled={
-              isPendingApproval
-                ? !canApprove
-                : Boolean(notInCompletionWindow(chore))
-            }
+            disabled={actionDisabled}
             onClick={() => onAction?.(action, chore)}
             sx={{
               color: isPendingApproval
@@ -158,11 +155,7 @@ const ProjectTaskRow = memo(function ProjectTaskRow({
             }}
           >
             {isPendingApproval ? (
-              canApprove ? (
-                <ThumbUp sx={{ fontSize: 17 }} />
-              ) : (
-                <HourglassEmpty sx={{ fontSize: 17 }} />
-              )
+              <ThumbUp sx={{ fontSize: 17 }} />
             ) : chore.status === 1 ? (
               <Pause sx={{ fontSize: 18 }} />
             ) : (
@@ -172,37 +165,40 @@ const ProjectTaskRow = memo(function ProjectTaskRow({
         )}
       </Box>
 
-      <Typography
-        component='span'
-        role='link'
-        tabIndex={0}
-        title={chore.name}
-        level='body-sm'
-        noWrap
-        onKeyDown={event => {
-          if (event.key !== 'Enter' && event.key !== ' ') return
-          event.preventDefault()
-          event.stopPropagation()
-          if (isMultiSelectMode) onSelectionToggle?.()
-          else navigate(`/chores/${chore.id}`)
-        }}
-        sx={{
-          flex: 1,
-          minWidth: 0,
-          fontWeight: 450,
-          color: 'text.primary',
-          lineHeight: 1.5,
-          '&:focus-visible': {
-            outline: '2px solid',
-            outlineColor: 'primary.400',
-            outlineOffset: 2,
-          },
-        }}
-      >
-        {before}
-        {url ? getUrlHostname(url) : ''}
-        {after}
-      </Typography>
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Typography
+          component='span'
+          role='link'
+          tabIndex={0}
+          title={chore.name}
+          level='body-sm'
+          noWrap
+          onKeyDown={event => {
+            if (event.key !== 'Enter' && event.key !== ' ') return
+            event.preventDefault()
+            event.stopPropagation()
+            if (isMultiSelectMode) onSelectionToggle?.()
+            else navigate(`/chores/${chore.id}`)
+          }}
+          sx={{
+            flex: 1,
+            minWidth: 0,
+            fontWeight: 450,
+            color: 'text.primary',
+            lineHeight: 1.5,
+            '&:focus-visible': {
+              outline: '2px solid',
+              outlineColor: 'primary.400',
+              outlineOffset: 2,
+            },
+          }}
+        >
+          {before}
+          {url ? getUrlHostname(url) : ''}
+          {after}
+        </Typography>
+        <ChoreStatusChip chore={chore} />
+      </Box>
 
       {(chore._pending || pendingCommands?.length > 0) && (
         <PendingBadge commands={pendingCommands} size='xs' />
