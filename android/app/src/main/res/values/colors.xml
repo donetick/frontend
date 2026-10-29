@@ -10,4 +10,8 @@
     <color name="widget_warning">#B26A00</color>
     <color name="widget_ring_neutral">#B8C0C9</color>
     <color name="widget_divider">#EDF1F5</color>
+
+    <!-- --startup-bg from index.html's startup screen. Keep in sync so the
+         splash and the first webview frame share one background. -->
+    <color name="startup_bg">#FBFCFE</color>
 </resources>
