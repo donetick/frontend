@@ -781,6 +781,21 @@ const ChoreView = () => {
   // navigate on their own or come in through the dedicated callbacks.
   const handleMenuAction = (type, _chore, extraData) => {
     switch (type) {
+      case 'complete':
+        handleTaskCompletion()
+        break
+      case 'start':
+        handleChoreStart()
+        break
+      case 'pause':
+        handleChorePause()
+        break
+      case 'approve':
+        handleApproveChore()
+        break
+      case 'reject':
+        handleRejectChore()
+        break
       case 'skip':
         confirmSkipTask()
         break

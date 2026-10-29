@@ -2,6 +2,7 @@ import {
   Archive,
   ArrowBack,
   Cancel,
+  Check,
   ChevronRight,
   CopyAll,
   Delete,
@@ -15,8 +16,12 @@ import {
   Nfc,
   NoteAdd,
   Notifications,
+  Pause,
+  PlayArrow,
   RecordVoiceOver,
   SwitchAccessShortcut,
+  ThumbDown,
+  ThumbUp,
   Today,
   Unarchive,
   Update,
@@ -130,19 +135,33 @@ const ChoreActionMenu = ({
 }) => {
   const { t } = useTranslation('chores')
   const permissions = useChorePermissions(chore)
+  const completionUnavailable =
+    !permissions.complete ||
+    (chore && notInCompletionWindow(chore)) ||
+    chore?.isActive === false ||
+    chore?.status === 3
   const unavailable = [
+    ...(!onAction || completionUnavailable
+      ? ['complete', 'start', 'pause']
+      : []),
+    ...(chore?.status === 1 ? ['start'] : ['pause']),
+    ...(!onAction || !permissions.approve || chore?.status !== 3
+      ? ['approve', 'reject']
+      : []),
+    ...(chore?.isActive === false ? ['approve'] : []),
+    ...(!onAction ||
+    chore?.isActive === false ||
+    chore?.status === 3 ||
+    (chore && notInCompletionWindow(chore))
+      ? ['skip']
+      : []),
     ...(!permissions.edit
-      ? ['edit', 'schedule', 'priority', 'moveToProject']
+      ? ['edit', 'schedule', 'priority', 'moveToProject', 'moveToSection']
       : []),
     ...(!permissions.edit ? ['delete'] : []),
     ...(!permissions.archive ? ['archive'] : []),
     ...(!permissions.delegate ? ['delegate'] : []),
-    ...(!permissions.complete ||
-    (chore && notInCompletionWindow(chore)) ||
-    chore?.isActive === false ||
-    chore?.status === 3
-      ? ['completeNote', 'completePast']
-      : []),
+    ...(completionUnavailable ? ['completeNote', 'completePast'] : []),
   ]
   const isControlled = controlledAnchorEl !== undefined
   const [uncontrolledAnchorEl, setUncontrolledAnchorEl] = React.useState(null)
@@ -414,6 +433,24 @@ const ChoreActionMenu = ({
       onClick: handleEdit,
     },
     { key: 'divider-primary', type: 'divider' },
+    ...[
+      { key: 'complete', icon: <Check />, label: t('list.complete') },
+      { key: 'start', icon: <PlayArrow />, label: t('choreView.start') },
+      { key: 'pause', icon: <Pause />, label: t('choreView.pauseTimer') },
+      { key: 'approve', icon: <ThumbUp />, label: t('choreView.approve') },
+      {
+        key: 'reject',
+        icon: <ThumbDown />,
+        label: t('list.reject'),
+        color: 'danger',
+      },
+    ].map(item => ({
+      ...item,
+      onClick: () => {
+        onAction?.(item.key, chore)
+        handleMenuClose()
+      },
+    })),
     {
       key: 'completeNote',
       icon: <NoteAdd />,
