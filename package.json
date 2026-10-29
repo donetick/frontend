@@ -38,6 +38,7 @@
     "ios": "npm run build && npx cap sync ios",
     "android:dev": "npx cap run android --live-reload",
     "cap": "npm run build && npx cap sync",
+    "splash": "node scripts/splash/render-splash.mjs",
     "bump": "node bump-version.js patch",
     "bump:minor": "node bump-version.js minor",
     "bump:major": "node bump-version.js major",
