@@ -1,13 +1,13 @@
 {
-  "redeem": "Punkte einlösen",
+  "redeem": "Punkte abziehen",
   "redeemModal": {
-    "redeemButton": "Einlösen",
+    "redeemButton": "Abziehen",
     "pointsAvailable": "{{count}} Punkte verfügbar",
-    "pointsToRedeem": "Einzulösende Punkte",
+    "pointsToRedeem": "Abzuziehende Punkte",
     "placeholder": "Punkte eingeben...",
     "cannotExceed": "Darf die verfügbaren Punkte nicht überschreiten",
     "quickAdd": "Schnellauswahl:",
-    "aboutToRedeem": "Du bist dabei, Punkte einzulösen:",
+    "aboutToRedeem": "Es werden abgezogen:",
     "amount": "{{count}} Punkte",
     "remaining": "Verbleibend: {{count}} Punkte"
   },
