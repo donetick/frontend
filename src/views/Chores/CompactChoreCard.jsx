@@ -3,7 +3,6 @@ import {
   Check,
   DragIndicator,
   HourglassEmpty,
-  OpenInNew,
   Pause,
   PlayArrow,
   Repeat,
@@ -14,6 +13,7 @@ import {
 import { Box, Checkbox, Chip, IconButton, Typography } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
 
+import ExternalLinkChip from '../../components/common/ExternalLinkChip'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useThemeSkin } from '../../contexts/ThemeSkinContext'
 import { useChorePermissions } from '../../hooks/useChorePermissions'
@@ -29,10 +29,8 @@ import {
   getTextColorFromBackgroundColor,
 } from '../../utils/Colors.jsx'
 import {
-  getFirstHttpUrl,
-  getUrlHostname,
-  openExternalUrl,
-  splitTextAtFirstHttpUrl,
+  getFirstLink,
+  splitTextAtFirstLink,
 } from '../../utils/ExternalLinks.js'
 import ChoreActionMenu, {
   ChoreActionMenuTrigger,
@@ -127,12 +125,13 @@ const CompactChoreCard = ({
     return parts.join(' • ')
   }
   const {
-    after: titleAfterUrl,
-    before: titleBeforeUrl,
-    url: titleUrl,
-  } = splitTextAtFirstHttpUrl(chore.name)
-  const descriptionUrl = getFirstHttpUrl(chore.description)
-  const showDescriptionUrl = descriptionUrl && descriptionUrl !== titleUrl
+    after: titleAfterLink,
+    before: titleBeforeLink,
+    link: titleLink,
+  } = splitTextAtFirstLink(chore.name)
+  const descriptionLink = getFirstLink(chore.description)
+  const showDescriptionLink =
+    descriptionLink && descriptionLink.href !== titleLink?.href
   const showLeadingSlot = showActions || isMultiSelectMode || isDragging
   const showTrailingSlot = showActions && !isMultiSelectMode
   const visibleLabels = chore.labelsV2?.slice(0, 2) ?? []
@@ -429,35 +428,19 @@ const CompactChoreCard = ({
               wordBreak: 'break-word',
             }}
           >
-            {titleBeforeUrl}
-            {titleUrl && (
-              <Chip
-                component='span'
-                variant='soft'
-                color='primary'
-                size='sm'
-                startDecorator={<OpenInNew sx={{ fontSize: 12 }} />}
-                onClick={event => {
-                  event.stopPropagation()
-                  openExternalUrl(titleUrl)
-                }}
-                sx={{
-                  mx: 0.35,
-                  height: 20,
-                  maxWidth: 140,
-                  cursor: 'pointer',
-                  verticalAlign: 'middle',
-                  '& .MuiChip-label': {
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                  },
-                }}
-                title={titleUrl}
-              >
-                {getUrlHostname(titleUrl)}
-              </Chip>
-            )}
-            {titleAfterUrl}
+            {titleBeforeLink}
+            <ExternalLinkChip
+              link={titleLink}
+              component='span'
+              iconSize={12}
+              sx={{
+                mx: 0.35,
+                height: 20,
+                maxWidth: 140,
+                verticalAlign: 'middle',
+              }}
+            />
+            {titleAfterLink}
           </Typography>
           {(chore._pending || (pendingCmds && pendingCmds.length > 0)) && (
             <PendingBadge commands={pendingCmds} size='xs' sx={{ mr: -0.5 }} />
@@ -508,30 +491,12 @@ const CompactChoreCard = ({
             {formatMetadata()}
           </Typography>
 
-          {showDescriptionUrl && (
-            <Chip
-              variant='soft'
-              color='primary'
-              size='sm'
-              startDecorator={<OpenInNew sx={{ fontSize: 13 }} />}
-              onClick={event => {
-                event.stopPropagation()
-                openExternalUrl(descriptionUrl)
-              }}
-              sx={{
-                ml: 0.5,
-                maxWidth: 140,
-                cursor: 'pointer',
-                flexShrink: 0,
-                '& .MuiChip-label': {
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                },
-              }}
-              title={descriptionUrl}
-            >
-              {getUrlHostname(descriptionUrl)}
-            </Chip>
+          {showDescriptionLink && (
+            <ExternalLinkChip
+              link={descriptionLink}
+              iconSize={13}
+              sx={{ ml: 0.5, maxWidth: 140, flexShrink: 0 }}
+            />
           )}
 
           {/* Labels - show only a couple and summarize the rest with +N */}

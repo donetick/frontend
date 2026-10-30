@@ -1,6 +1,5 @@
 import {
   HourglassEmpty,
-  OpenInNew,
   Pause,
   PlayArrow,
   Repeat,
@@ -11,6 +10,7 @@ import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
+import { LinkTypeIcon } from '../../../components/common/ExternalLinkChip'
 import { useLocalization } from '../../../contexts/LocalizationContext'
 import { useChorePermissions } from '../../../hooks/useChorePermissions'
 import { usePendingCommands } from '../../../hooks/usePendingCommands'
@@ -22,10 +22,9 @@ import {
 import { notInCompletionWindow } from '../../../utils/Chores'
 import { getPriorityColor } from '../../../utils/Colors'
 import {
-  getFirstHttpUrl,
-  getUrlHostname,
-  openExternalUrl,
-  splitTextAtFirstHttpUrl,
+  getFirstLink,
+  openExternalLink,
+  splitTextAtFirstLink,
 } from '../../../utils/ExternalLinks'
 import { ChoreActionMenuTrigger } from '../../components/ChoreActionMenu'
 import ChoreStatusChip from '../../components/ChoreStatusChip'
@@ -72,9 +71,13 @@ const ProjectTaskRow = memo(function ProjectTaskRow({
   const extraLabels = Math.max(0, (chore.labelsV2?.length || 0) - 1)
   const recurrent =
     chore.frequencyType && !['once', 'no_repeat'].includes(chore.frequencyType)
-  const { after, before, url } = splitTextAtFirstHttpUrl(chore.name)
+  const { after, before, link: nameLink } = splitTextAtFirstLink(chore.name)
   const links = [
-    ...new Set([url, getFirstHttpUrl(chore.description)].filter(Boolean)),
+    ...new Map(
+      [nameLink, getFirstLink(chore.description)]
+        .filter(Boolean)
+        .map(item => [item.href, item]),
+    ).values(),
   ]
   const dueColor = getDueDateChipColor(chore.nextDueDate, chore)
 
@@ -194,7 +197,7 @@ const ProjectTaskRow = memo(function ProjectTaskRow({
           }}
         >
           {before}
-          {url ? getUrlHostname(url) : ''}
+          {nameLink?.label || ''}
           {after}
         </Typography>
         <ChoreStatusChip chore={chore} />
@@ -278,17 +281,17 @@ const ProjectTaskRow = memo(function ProjectTaskRow({
       </Box>
 
       {!isMultiSelectMode &&
-        links.map(link => (
+        links.map(item => (
           <IconButton
-            key={link}
+            key={item.href}
             className='project-task-secondary-action'
             size='sm'
             variant='plain'
-            aria-label={link}
-            title={link}
+            aria-label={item.label}
+            title={item.label}
             onClick={event => {
               event.stopPropagation()
-              openExternalUrl(link)
+              openExternalLink(item)
             }}
             sx={{
               color: 'text.tertiary',
@@ -296,7 +299,7 @@ const ProjectTaskRow = memo(function ProjectTaskRow({
               '--IconButton-size': '28px',
             }}
           >
-            <OpenInNew sx={{ fontSize: 14 }} />
+            <LinkTypeIcon type={item.type} sx={{ fontSize: 14 }} />
           </IconButton>
         ))}
 

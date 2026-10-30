@@ -124,11 +124,12 @@ export const useDeviceTokens = () => {
   }
 }
 
-export const useNotificationPreferences = () => {
+export const useNotificationPreferences = ({ enabled = true } = {}) => {
   const queryClient = useQueryClient()
 
   const { data, error, isLoading } = useQuery({
     queryKey: ['notificationPreferences'],
+    enabled,
     queryFn: async () => {
       if (!isTokenValid()) {
         return null

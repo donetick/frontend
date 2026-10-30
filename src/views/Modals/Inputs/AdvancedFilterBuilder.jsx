@@ -127,8 +127,8 @@ const AdvancedFilterBuilder = ({
   return (
     <AppModal
       open={isOpen}
-      isMobile
       onClose={onClose}
+      size='lg'
       maxHeight='92vh'
       title={
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
