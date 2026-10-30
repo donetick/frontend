@@ -1,5 +1,6 @@
 import { Email, OpenInNew, Phone } from '@mui/icons-material'
 import { Chip } from '@mui/joy'
+
 import { LINK_TYPES, openExternalLink } from '../../utils/ExternalLinks'
 
 const ICONS = {
@@ -20,8 +21,8 @@ export const LinkTypeIcon = ({ type, ...props }) => {
  * the dialer and mail client on native.
  */
 const ExternalLinkChip = ({
-  link,
   iconSize = 14,
+  link,
   size = 'sm',
   sx,
   variant = 'soft',
