@@ -7,6 +7,8 @@ import vm from 'node:vm'
 
 import { parseSync } from '@swc/core'
 
+import { sanitizeRemindersForPlan } from '../src/utils/entitlements.js'
+
 // Exercise the real editor callbacks without mounting the entire application.
 function sourceFile(name) {
   const source = readFileSync(
@@ -49,42 +51,153 @@ const attribute = (element, name) =>
 const evaluate = (file, node, context) =>
   vm.runInNewContext(`(${file.text(node)})`, context)
 const editor = sourceFile('ChoreEdit.jsx')
-const groupCheckbox = find(
+const reminderEditor = find(
   editor.ast,
   node =>
     node.type === 'JSXElement' &&
-    node.opening.name.value === 'Checkbox' &&
-    attribute(node, 'label')?.value?.expression?.arguments?.[0]?.expression
-      ?.value === 'choreEdit.specificGroup',
+    node.opening.name.value === 'NotificationTemplate',
 )
-assert.ok(groupCheckbox)
-const callback = attribute(groupCheckbox, 'onClick').value.expression
-for (const plus of [false, true]) {
+assert.ok(reminderEditor)
+assert.equal(
+  attribute(reminderEditor, 'minNotifications').value.expression.value,
+  0,
+)
+const editorContext = {
+  notificationMetadata: {
+    templates: [{ value: 0, unit: 'm' }],
+    retained: true,
+  },
+  setNotificationMetadata: value => {
+    editorContext.updated = value
+  },
+}
+const updateReminders = evaluate(
+  editor,
+  attribute(reminderEditor, 'onChange').value.expression,
+  editorContext,
+)
+updateReminders({ notifications: editorContext.notificationMetadata.templates })
+assert.equal(editorContext.updated, undefined)
+updateReminders({ notifications: [] })
+assert.deepEqual(JSON.parse(JSON.stringify(editorContext.updated)), {
+  templates: [],
+  retained: true,
+})
+
+// The old group-channel checkbox is commented out. Exercise the active reminder
+// editor's actual callbacks and entitlement sanitizer instead of that dead UI.
+const reminders = sourceFile('../../components/NotificationTemplate.jsx')
+const variable = name => {
+  const declaration = find(
+    reminders.ast,
+    node => node.type === 'VariableDeclarator' && node.id.value === name,
+  )
+  assert.ok(declaration, `active reminder editor defines ${name}`)
+  return declaration.init
+}
+const reminderFixture = (isPlus, initial = []) => {
   const context = {
-    notificationMetadata: { circleGroup: false },
-    userProfile: { plus },
-    isPlusAccount: profile => profile.plus,
-    PAYWALL_REASON: { REMINDER_CHANNELS: 'reminder-channels' },
+    isPlus,
+    isPlanKnown: true,
+    maxNotifications: 5,
+    notifications: initial,
+    notificationsRef: { current: initial },
+    sanitizeRemindersForPlan,
+    PAYWALL_REASON: { ADVANCED_REMINDERS: 'advanced-reminders' },
+    t: key => key,
     showPaywall: reason => {
       context.paywall = reason
     },
-    setNotificationMetadata: value => {
-      context.updated = value
+    setNotifications: value => {
+      context.notifications =
+        typeof value === 'function' ? value(context.notifications) : value
+    },
+    setError: value => {
+      context.error = value
+    },
+    setShowSaveDefault: value => {
+      context.showSaveDefault = value
+    },
+    setDraftValues: update => {
+      context.drafts = update(context.drafts || {})
     },
   }
-  evaluate(editor, callback, context)()
-  if (plus) assert.equal(context.updated.circleGroup, true)
-  else {
-    assert.equal(context.paywall, 'reminder-channels')
-    assert.equal(context.updated, undefined)
+  context.requirePlus = evaluate(
+    reminders,
+    variable('requirePlus').arguments[0].expression,
+    context,
+  )
+  for (const name of [
+    'commitNotifications',
+    'isDuplicate',
+    'getSmartSuggestion',
+    'addSmartNotification',
+    'removeNotification',
+  ]) {
+    context[name] = evaluate(reminders, variable(name), context)
   }
-  // Removing an existing group channel remains possible after Plus expires.
-  context.notificationMetadata = { circleGroup: true, circleGroupID: -123 }
-  context.paywall = undefined
-  evaluate(editor, callback, context)()
-  assert.equal(context.updated.circleGroup, false)
-  assert.equal(context.updated.circleGroupID, undefined)
+  return context
+}
+for (const plus of [false, true]) {
+  for (const [kind, value] of [
+    ['reminder', -1],
+    ['followup', 1],
+  ]) {
+    const context = reminderFixture(plus)
+    context.addSmartNotification(kind)
+    if (plus) {
+      assert.equal(context.notificationsRef.current[0].value, value)
+      assert.equal(context.notificationsRef.current[0].unit, 'd')
+      assert.equal(context.paywall, undefined)
+    } else {
+      assert.equal(context.paywall, 'advanced-reminders')
+      assert.equal(context.notificationsRef.current.length, 0)
+    }
+  }
+  const context = reminderFixture(plus)
+  context.addSmartNotification('due')
+  assert.equal(context.notificationsRef.current.length, 1)
+  assert.equal(context.notificationsRef.current[0].value, 0)
   assert.equal(context.paywall, undefined)
+  context.addSmartNotification('due')
+  assert.equal(context.notificationsRef.current.length, 1)
+  assert.equal(context.error, 'notificationTemplate.errOneDue')
+}
+const expired = reminderFixture(false, [{ value: -1, unit: 'd' }])
+expired.removeNotification(0)
+assert.equal(expired.notificationsRef.current.length, 0)
+assert.equal(expired.paywall, undefined)
+
+const sanitizeEffect = find(
+  reminders.ast,
+  node =>
+    node.type === 'CallExpression' &&
+    node.callee.value === 'useEffect' &&
+    reminders
+      .text(node.arguments[0].expression)
+      .includes('sanitizeRemindersForPlan'),
+)
+assert.ok(sanitizeEffect)
+for (const plus of [false, true]) {
+  const initial = [
+    { value: -1, unit: 'd' },
+    { value: 0, unit: 'm' },
+  ]
+  const context = reminderFixture(plus, initial)
+  context.isPlanKnown = false
+  const sanitize = evaluate(
+    reminders,
+    sanitizeEffect.arguments[0].expression,
+    context,
+  )
+  sanitize()
+  assert.equal(context.notifications, initial)
+  context.isPlanKnown = true
+  sanitize()
+  assert.deepEqual(
+    JSON.parse(JSON.stringify(context.notifications)),
+    plus ? initial : [{ value: 0, unit: 'm' }],
+  )
 }
 
 const repeat = sourceFile('RepeatSection.jsx')
