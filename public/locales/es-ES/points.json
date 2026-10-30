@@ -5,14 +5,14 @@
       "title": "Disponibles"
     },
     "period": {
-      "allTime": "Todo el tiempo",
+      "allTime": "Histórico",
       "last6Months": "Últimos 6 meses",
       "lastDays_one": "Último {{count}} día",
       "lastDays_other": "Últimos {{count}} días",
-      "title": "Puntos del Período"
+      "title": "Puntos del periodo"
     },
     "redeemed": {
-      "subtext": "Usados anteriormente",
+      "subtext": "Canjeados hasta ahora",
       "title": "Canjeados"
     },
     "total": {
@@ -21,10 +21,10 @@
     }
   },
   "filter": {
-    "analysisTitle": "Filtro y Análisis",
+    "analysisTitle": "Filtros y análisis",
     "showFor": "Mostrar puntos de:",
-    "timePeriod": "Período de tiempo:",
-    "title": "Filtrar Puntos"
+    "timePeriod": "Periodo de tiempo:",
+    "title": "Filtrar puntos"
   },
   "leaderboard": {
     "available": "{{count}} disponibles",
@@ -32,38 +32,38 @@
     "modeTasks": "Tareas",
     "points_one": "{{count}} punto",
     "points_other": "{{count}} puntos",
-    "subtitlePoints": "Clasificación basada en puntos ganados durante el período seleccionado",
-    "subtitleTasks": "Clasificación basada en tareas completadas durante el período seleccionado",
-    "tasksAndAvg": "{{tasks}} tareas • {{avg}} prom. por tarea",
-    "titlePoints": "Clasificación de Puntos",
-    "titleTasks": "Clasificación de Tareas",
+    "subtitlePoints": "Clasificación por puntos ganados en el periodo seleccionado",
+    "subtitleTasks": "Clasificación por tareas completadas en el periodo seleccionado",
+    "tasksAndAvg": "{{tasks}} tareas • {{avg}} de media por tarea",
+    "titlePoints": "Clasificación por puntos",
+    "titleTasks": "Clasificación por tareas",
     "you": "Tú"
   },
-  "redeem": "Canjear Puntos",
+  "redeem": "Canjear puntos",
   "redeemModal": {
-    "aboutToRedeem": "Estás a punto de canjear",
+    "aboutToRedeem": "Vas a canjear",
     "amount": "{{count}} puntos",
-    "cannotExceed": "No puede exceder los puntos disponibles",
-    "placeholder": "Introduce puntos...",
+    "cannotExceed": "No puedes superar los puntos disponibles",
+    "placeholder": "Introduce los puntos...",
     "pointsAvailable": "{{count}} puntos disponibles",
-    "pointsToRedeem": "Puntos a Canjear",
+    "pointsToRedeem": "Puntos que quieres canjear",
     "quickAdd": "Añadir rápido:",
     "redeemButton": "Canjear",
-    "remaining": "Restantes: {{count}} puntos"
+    "remaining": "Te quedarán: {{count}} puntos"
   },
   "summary": {
-    "allTime": "Todo el Tiempo",
-    "last6Months": "Últimos 6 Meses",
-    "lastDays_one": "Último {{count}} Día",
-    "lastDays_other": "Últimos {{count}} Días",
+    "allTime": "Todo el tiempo",
+    "last6Months": "Últimos 6 meses",
+    "lastDays_one": "Último {{count}} día",
+    "lastDays_other": "Últimos {{count}} días",
     "overThe": "durante",
     "showingFor": "Mostrando puntos de",
-    "unknownUser": "Usuario Desconocido"
+    "unknownUser": "Usuario desconocido"
   },
   "tabs": {
-    "allTime": "Todo el tiempo",
-    "days7": "7 Días",
-    "months6": "6 Meses",
+    "allTime": "Todo",
+    "days7": "7 días",
+    "months6": "6 meses",
     "short6m": "6M",
     "short7d": "7D",
     "shortAll": "Todo",
@@ -71,6 +71,6 @@
     "days30": "30 días"
   },
   "trend": {
-    "title": "Tendencia de Puntos"
+    "title": "Evolución de puntos"
   }
 }
