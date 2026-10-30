@@ -29,6 +29,7 @@ import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
 import Logo from '../../Logo'
 import { useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
+import { copyText } from '../../utils/Clipboard'
 import {
   AcceptCircleMemberRequest,
   CancelSubscription,
@@ -258,8 +259,8 @@ const Settings = () => {
           />
           <Button
             variant='soft'
-            onClick={() => {
-              navigator.clipboard.writeText(userCircles[0]?.invite_code)
+            onClick={async () => {
+              if (!(await copyText(userCircles[0]?.invite_code))) return
               showNotification({
                 type: 'success',
                 message: t('circleSettings.codeCopied'),
@@ -271,13 +272,16 @@ const Settings = () => {
           <Button
             variant='soft'
             sx={{ ml: 1 }}
-            onClick={() => {
-              navigator.clipboard.writeText(
-                window.location.protocol +
-                  '//' +
-                  window.location.host +
-                  `/circle/join?code=${userCircles[0]?.invite_code}`,
+            onClick={async () => {
+              if (
+                !(await copyText(
+                  window.location.protocol +
+                    '//' +
+                    window.location.host +
+                    `/circle/join?code=${userCircles[0]?.invite_code}`,
+                ))
               )
+                return
               showNotification({
                 type: 'success',
                 message: t('circleSettings.linkCopied'),

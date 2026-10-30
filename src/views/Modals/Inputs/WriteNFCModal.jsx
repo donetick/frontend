@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next'
 import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { startNativeNFCWrite } from '../../../service/NFCWriter'
+import { copyText } from '../../../utils/Clipboard'
 
 const pulseKeyframes = `
   @keyframes nfc-pulse {
@@ -140,8 +141,8 @@ function WriteNFCModal({ config }) {
     setNfcStatus('idle')
   }
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(getURL())
+  const handleCopy = async () => {
+    if (!(await copyText(getURL()))) return
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }

@@ -32,6 +32,7 @@ import { useLocalization } from '../../contexts/LocalizationContext'
 import { useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { apiClient } from '../../utils/ApiClient'
+import { copyText } from '../../utils/Clipboard'
 import {
   AcceptCircleMemberRequest,
   DeclineCircleMemberRequest,
@@ -211,7 +212,7 @@ const CircleSettings = () => {
 
   const copyInviteCode = async () => {
     if (!inviteCode) return
-    await navigator.clipboard.writeText(inviteCode)
+    if (!(await copyText(inviteCode))) return
     showNotification({
       type: 'success',
       message: t('circleSettings.codeCopied'),
@@ -229,7 +230,7 @@ const CircleSettings = () => {
       })
     } catch (error) {
       if (error?.message?.toLowerCase().includes('cancel')) return
-      await navigator.clipboard.writeText(inviteLink)
+      if (!(await copyText(inviteLink))) return
       showNotification({
         type: 'success',
         message: t('circleSettings.linkCopied'),
