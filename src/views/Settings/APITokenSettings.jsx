@@ -17,6 +17,7 @@ import { useLocalization } from '../../contexts/LocalizationContext'
 import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
 import { useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
+import { copyText } from '../../utils/Clipboard'
 import {
   CreateLongLiveToken,
   DeleteLongLiveToken,
@@ -110,8 +111,8 @@ const APITokenSettings = () => {
                 <IconButton
                   variant='outlined'
                   color='primary'
-                  onClick={() => {
-                    navigator.clipboard.writeText(newToken.token)
+                  onClick={async () => {
+                    if (!(await copyText(newToken.token))) return
                     showNotification({
                       type: 'success',
                       message: t('apiTokens.tokenCopied'),
