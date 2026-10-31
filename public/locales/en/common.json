@@ -34,6 +34,7 @@
   "success": "Success",
   "warning": "Warning",
   "colors": {
+    "Default": "Default",
     "Salmon": "Salmon",
     "Teal": "Teal",
     "Sky Blue": "Sky Blue",
