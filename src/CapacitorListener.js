@@ -488,17 +488,35 @@ const addPushListeners = () => {
   })
 
   PushNotifications.addListener('pushNotificationActionPerformed', fcmEvent => {
-    if (fcmEvent.actionId === 'tap') {
-      if (
-        fcmEvent.notification.data.type === 'chore_due' ||
-        fcmEvent.notification.data.type === 'nudge'
-      ) {
-        navigateToChore(fcmEvent.notification.data.choreId, {
-          isColdStart: true,
-        })
-      } else {
-        routerNavigate('/chores')
-      }
+    if (fcmEvent.actionId !== 'tap') return
+    const data = fcmEvent.notification.data || {}
+    const type = data.type
+
+    if (type === 'chore_due' || type === 'on_assignment' || type === 'nudge') {
+      navigateToChore(data.choreId, {
+        isColdStart: true,
+      })
+    } else if (type === 'chore_pending_approval') {
+      // The approval dispatcher sends chore_id (snake case), unlike the
+      // planner's choreId — accept either so a payload change can't silently
+      // drop the tap back to the chores list.
+      navigateToChore(data.chore_id ?? data.choreId, { isColdStart: true })
+    } else if (type === 'reward_redemption_request') {
+      // Approver tapped "<name> requested to redeem <reward>": the pending
+      // requests tab is where they can approve or decline it.
+      routerNavigate('/points?tab=requests', { seedHome: true })
+    } else if (type === 'circle_join_request') {
+      // Admin tapped "<name> wants to join your Circle": land on circle
+      // settings with the pending-requests section focused so the accept /
+      // decline buttons are the first thing they see.
+      routerNavigate('/settings/circle?focus=requests', { seedHome: true })
+    } else if (
+      type === 'circle_join_approved' ||
+      type === 'circle_join_declined'
+    ) {
+      routerNavigate('/settings/circle', { seedHome: true })
+    } else {
+      routerNavigate('/chores')
     }
   })
 }

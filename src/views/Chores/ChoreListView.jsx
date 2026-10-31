@@ -5,6 +5,8 @@ import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
+import { useImpersonateUser } from '../../contexts/ImpersonateUserContext'
+import { getChorePermissions } from '../../utils/ChoreAccess'
 import ChoreActionMenu from '../components/ChoreActionMenu'
 import ArchivedChoreCard from './ArchivedChoreCard'
 import ChoreCard from './ChoreCard'
@@ -35,6 +37,7 @@ const ChoreListView = ({
   userProfile,
   viewMode,
 }) => {
+  const { impersonatedUser } = useImpersonateUser()
   const navigate = useNavigate()
   const { t } = useTranslation('chores')
 
@@ -89,7 +92,11 @@ const ChoreListView = ({
     showActions,
     t,
     usesCompactCard,
-    userProfile,
+    permissions: getChorePermissions(
+      chore,
+      impersonatedUser?.userId || userProfile?.id,
+      membersData?.res || [],
+    ),
   })
 
   // fullSwipe makes the leading action (complete/start) a single flick with no

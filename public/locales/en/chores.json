@@ -1,5 +1,25 @@
 {
   "title": "Chores",
+  "taskStatus": {
+    "awaitingApproval": "Awaiting approval",
+    "availableAt": "Available {{date}}"
+  },
+  "swipeActionsLabel": "Show actions",
+  "swipeNoPermission": "No Permission",
+  "swipePermissionTitle": "You don’t have permission for these actions",
+  "swipeUnavailable": "Not available yet",
+  "swipeHistoryPermission": "Only the recorded assignee, the person who completed the task, or a circle admin or manager can edit this entry. Deletion is limited to the task owner, recorded assignee, person who completed the task, or a circle admin.",
+  "swipeReviewPermission": "Only circle admins and managers can approve or reject this completion. Only the task owner or a circle admin can edit or delete the task.",
+  "permissions": {
+    "complete": "You’re not eligible to complete this task or use its timer.",
+    "subtasks": "These subtasks are read-only because you’re not eligible to complete this task.",
+    "approval": "A circle admin or manager must approve this completion.",
+    "archive": "Only the task owner can restore this task.",
+    "archived": "Restore this task before working on it.",
+    "window": "This task is not yet available to complete.",
+    "failed": "This action could not be completed. Please refresh and try again.",
+    "editTime": "Only the task owner or an eligible assignee can edit time records."
+  },
   "tasksForDate": "Tasks for {{date}}",
   "createSuggestion": "Create \"{{value}}\"",
   "myChores": "My Chores",

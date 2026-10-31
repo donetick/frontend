@@ -53,8 +53,8 @@ const statusConfig = {
 }
 
 const HistoryCard = ({
+  actionsOpen = false,
   allHistory,
-  canManage = false,
   historyEntry,
   index,
   onToggleActions,
@@ -63,7 +63,7 @@ const HistoryCard = ({
   pendingCommands,
   performers,
 }) => {
-  const { t } = useTranslation('history')
+  const { t } = useTranslation(['history', 'chores'])
   const { fmt } = useLocalization()
   const performer = performers.find(p => p.userId === historyEntry.completedBy)
   const assignedTo = performers.find(p => p.userId === historyEntry.assignedTo)
@@ -240,8 +240,10 @@ const HistoryCard = ({
         sx={{ display: 'flex', alignItems: 'center', pr: 0.5 }}
         onClick={e => e.stopPropagation()}
       >
-        {canManage && onToggleActions && (
+        {onToggleActions && (
           <IconButton
+            aria-label={t('chores:swipeActionsLabel')}
+            aria-expanded={actionsOpen}
             color='neutral'
             variant='plain'
             size='sm'

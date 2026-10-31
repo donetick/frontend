@@ -11,8 +11,10 @@ platform :ios do
   desc "Build a signed, App Store-ready .ipa"
   lane :release do
     Dir.chdir(File.expand_path("../ios/App")) do
-      Bundler.with_clean_env do
-        sh("pod install --repo-update")
+      # CocoaPods needs a UTF-8 locale or it dies in unicode_normalize on the
+      # Podfile path; non-interactive shells (CI) don't export LANG.
+      Bundler.with_unbundled_env do
+        sh({ "LANG" => "en_US.UTF-8", "LC_ALL" => "en_US.UTF-8" }, "pod", "install", "--repo-update")
       end
     end
 

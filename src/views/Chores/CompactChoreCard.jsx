@@ -3,7 +3,6 @@ import {
   Check,
   DragIndicator,
   HourglassEmpty,
-  OpenInNew,
   Pause,
   PlayArrow,
   Repeat,
@@ -13,11 +12,11 @@ import {
 } from '@mui/icons-material'
 import { Box, Checkbox, Chip, IconButton, Typography } from '@mui/joy'
 
-import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
+import ExternalLinkChip from '../../components/common/ExternalLinkChip'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useThemeSkin } from '../../contexts/ThemeSkinContext'
+import { useChorePermissions } from '../../hooks/useChorePermissions'
 import { usePendingCommands } from '../../hooks/usePendingCommands'
-import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
 import { useXPTranslation as useTranslation } from '../../queries/XPQueries'
 import {
   getDueDateChipColor,
@@ -30,14 +29,13 @@ import {
   getTextColorFromBackgroundColor,
 } from '../../utils/Colors.jsx'
 import {
-  getFirstHttpUrl,
-  getUrlHostname,
-  openExternalUrl,
-  splitTextAtFirstHttpUrl,
+  getFirstLink,
+  splitTextAtFirstLink,
 } from '../../utils/ExternalLinks.js'
 import ChoreActionMenu, {
   ChoreActionMenuTrigger,
 } from '../components/ChoreActionMenu'
+import ChoreStatusChip from '../components/ChoreStatusChip'
 import PendingBadge from '../components/PendingBadge'
 
 // Hoisted so emotion isn't re-serializing an identical object for every row
@@ -77,33 +75,14 @@ const CompactChoreCard = ({
   viewOnly,
 }) => {
   const { t, xpMode } = useTranslation('chores')
+  const permissions = useChorePermissions(chore)
   const { skin } = useThemeSkin()
   const completionColor = skin === 'default' ? 'success' : 'primary'
 
-  const { data: userProfile } = useUserProfile()
   const { timeFormat } = useLocalization()
-  const { data: circleMembersData } = useCircleMembers()
   const { data: pendingCmds } = usePendingCommands(chore.id)
 
-  const { impersonatedUser } = useImpersonateUser()
-
-  // Check if the current user can approve/reject (admin, manager, or task owner)
-  const canApproveReject = () => {
-    if (!circleMembersData?.res || !chore) return false
-
-    const currentUser = circleMembersData.res.find(
-      member => member.userId === (impersonatedUser?.userId || userProfile?.id),
-    )
-
-    // User can approve/reject if they are:
-    // 1. Admin or manager of the circle
-    // 2. Owner/creator of the task
-    return (
-      currentUser?.role === 'admin' ||
-      currentUser?.role === 'manager' ||
-      chore.createdBy === (impersonatedUser?.userId || userProfile?.id)
-    )
-  }
+  const canApproveReject = () => permissions.approve
 
   // Utility functions
 
@@ -146,12 +125,13 @@ const CompactChoreCard = ({
     return parts.join(' • ')
   }
   const {
-    after: titleAfterUrl,
-    before: titleBeforeUrl,
-    url: titleUrl,
-  } = splitTextAtFirstHttpUrl(chore.name)
-  const descriptionUrl = getFirstHttpUrl(chore.description)
-  const showDescriptionUrl = descriptionUrl && descriptionUrl !== titleUrl
+    after: titleAfterLink,
+    before: titleBeforeLink,
+    link: titleLink,
+  } = splitTextAtFirstLink(chore.name)
+  const descriptionLink = getFirstLink(chore.description)
+  const showDescriptionLink =
+    descriptionLink && descriptionLink.href !== titleLink?.href
   const showLeadingSlot = showActions || isMultiSelectMode || isDragging
   const showTrailingSlot = showActions && !isMultiSelectMode
   const visibleLabels = chore.labelsV2?.slice(0, 2) ?? []
@@ -258,10 +238,12 @@ const CompactChoreCard = ({
             }}
           >
             {chore.status === 3 ? (
-              // Pending approval: Show approve/reject for admins/managers/owners, grayed out for others
+              // Reviewers get an action; everyone else sees a status, not a disabled button.
               canApproveReject() ? (
                 <Box sx={{ display: 'flex', gap: 0.25 }}>
                   <IconButton
+                    aria-label={`${t('choreView.approve')}: ${chore.name}`}
+                    title={t('choreView.approve')}
                     variant='soft'
                     color={completionColor}
                     size='sm'
@@ -309,23 +291,14 @@ const CompactChoreCard = ({
                     </IconButton> */}
                 </Box>
               ) : (
-                <IconButton
-                  variant='soft'
-                  color='neutral'
-                  size='sm'
-                  disabled={true}
-                  sx={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: '50%',
-                    opacity: 0.5,
-                  }}
-                >
-                  <HourglassEmpty sx={{ fontSize: 16 }} />
-                </IconButton>
+                <HourglassEmpty
+                  aria-hidden='true'
+                  sx={{ fontSize: 18, color: 'text.tertiary' }}
+                />
               )
             ) : (
               <IconButton
+                aria-label={`${t(chore.status === 0 ? 'completeChore' : chore.status === 1 ? 'choreView.pauseTimer' : 'choreView.start')}: ${chore.name}`}
                 variant='soft'
                 color={chore.status === 0 ? completionColor : 'warning'}
                 size='sm'
@@ -339,7 +312,11 @@ const CompactChoreCard = ({
                     onAction('start', chore)
                   }
                 }}
-                disabled={notInCompletionWindow(chore)}
+                disabled={
+                  !permissions.complete ||
+                  chore.isActive === false ||
+                  notInCompletionWindow(chore)
+                }
                 sx={{
                   width: 32,
                   height: 32,
@@ -451,35 +428,19 @@ const CompactChoreCard = ({
               wordBreak: 'break-word',
             }}
           >
-            {titleBeforeUrl}
-            {titleUrl && (
-              <Chip
-                component='span'
-                variant='soft'
-                color='primary'
-                size='sm'
-                startDecorator={<OpenInNew sx={{ fontSize: 12 }} />}
-                onClick={event => {
-                  event.stopPropagation()
-                  openExternalUrl(titleUrl)
-                }}
-                sx={{
-                  mx: 0.35,
-                  height: 20,
-                  maxWidth: 140,
-                  cursor: 'pointer',
-                  verticalAlign: 'middle',
-                  '& .MuiChip-label': {
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                  },
-                }}
-                title={titleUrl}
-              >
-                {getUrlHostname(titleUrl)}
-              </Chip>
-            )}
-            {titleAfterUrl}
+            {titleBeforeLink}
+            <ExternalLinkChip
+              link={titleLink}
+              component='span'
+              iconSize={12}
+              sx={{
+                mx: 0.35,
+                height: 20,
+                maxWidth: 140,
+                verticalAlign: 'middle',
+              }}
+            />
+            {titleAfterLink}
           </Typography>
           {(chore._pending || (pendingCmds && pendingCmds.length > 0)) && (
             <PendingBadge commands={pendingCmds} size='xs' sx={{ mr: -0.5 }} />
@@ -503,6 +464,7 @@ const CompactChoreCard = ({
           )}
         </Box>
 
+        <ChoreStatusChip chore={chore} />
         {/* Line 2: Metadata */}
         <Box
           sx={{
@@ -529,30 +491,12 @@ const CompactChoreCard = ({
             {formatMetadata()}
           </Typography>
 
-          {showDescriptionUrl && (
-            <Chip
-              variant='soft'
-              color='primary'
-              size='sm'
-              startDecorator={<OpenInNew sx={{ fontSize: 13 }} />}
-              onClick={event => {
-                event.stopPropagation()
-                openExternalUrl(descriptionUrl)
-              }}
-              sx={{
-                ml: 0.5,
-                maxWidth: 140,
-                cursor: 'pointer',
-                flexShrink: 0,
-                '& .MuiChip-label': {
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                },
-              }}
-              title={descriptionUrl}
-            >
-              {getUrlHostname(descriptionUrl)}
-            </Chip>
+          {showDescriptionLink && (
+            <ExternalLinkChip
+              link={descriptionLink}
+              iconSize={13}
+              sx={{ ml: 0.5, maxWidth: 140, flexShrink: 0 }}
+            />
           )}
 
           {/* Labels - show only a couple and summarize the rest with +N */}

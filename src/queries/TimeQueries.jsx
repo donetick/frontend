@@ -31,7 +31,7 @@ export const useStartChore = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: StartChore,
+    mutationFn: async id => (await StartChore(id)).json(),
     onSuccess: (_, choreId) => {
       queryClient.invalidateQueries({ queryKey: ['choreTimer', choreId] })
       queryClient.invalidateQueries({ queryKey: ['chores'] })
@@ -44,7 +44,7 @@ export const usePauseChore = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: PauseChore,
+    mutationFn: async id => (await PauseChore(id)).json(),
     onSuccess: (_, choreId) => {
       queryClient.invalidateQueries({ queryKey: ['choreTimer', choreId] })
       queryClient.invalidateQueries({ queryKey: ['chores'] })
@@ -57,8 +57,8 @@ export const useUpdateTimeSession = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ choreId, sessionData, sessionId }) =>
-      UpdateTimeSession(choreId, sessionId, sessionData),
+    mutationFn: async ({ choreId, sessionData, sessionId }) =>
+      (await UpdateTimeSession(choreId, sessionId, sessionData)).json(),
     onSuccess: (_, { choreId }) => {
       queryClient.invalidateQueries({ queryKey: ['choreTimer', choreId] })
       queryClient.invalidateQueries({ queryKey: ['chores'] })
@@ -71,8 +71,8 @@ export const useDeleteTimeSession = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ choreId, sessionId }) =>
-      DeleteTimeSession(choreId, sessionId),
+    mutationFn: async ({ choreId, sessionId }) =>
+      (await DeleteTimeSession(choreId, sessionId)).json(),
     onSuccess: (_, { choreId }) => {
       queryClient.invalidateQueries({ queryKey: ['choreTimer', choreId] })
       queryClient.invalidateQueries({ queryKey: ['chores'] })
@@ -85,7 +85,7 @@ export const useResetChoreTimer = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ResetChoreTimer,
+    mutationFn: async id => (await ResetChoreTimer(id)).json(),
     onSuccess: (_, choreId) => {
       queryClient.invalidateQueries({ queryKey: ['choreTimer', choreId] })
       queryClient.invalidateQueries({ queryKey: ['chores'] })

@@ -24,9 +24,9 @@ import {
   Typography,
 } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useUserProfile } from '../../queries/UserQueries'
@@ -61,6 +61,14 @@ const surfaceSx = {
   borderRadius: 'xl',
 }
 
+// Transient ring drawn on the join-requests card when the screen is opened
+// from a join-request notification, so the tap lands somewhere obvious.
+const highlightSx = {
+  borderColor: 'primary.outlinedBorder',
+  boxShadow: theme => `0 0 0 3px ${theme.vars.palette.primary.softBg}`,
+  transition: 'box-shadow 200ms ease, border-color 200ms ease',
+}
+
 const CircleSettings = () => {
   const { t } = useTranslation('settings')
   const { data: userProfile } = useUserProfile()
@@ -68,6 +76,7 @@ const CircleSettings = () => {
   const { showNotification } = useNotification()
   const navigate = useNavigate()
   const { fmt } = useLocalization()
+  const [searchParams, setSearchParams] = useSearchParams()
 
   const [userCircles, setUserCircles] = useState([])
   const [circleMemberRequests, setCircleMemberRequests] = useState([])
@@ -79,6 +88,8 @@ const CircleSettings = () => {
   const [acceptingRequest, setAcceptingRequest] = useState(null)
   const [decliningRequest, setDecliningRequest] = useState(null)
   const [confirmModalConfig, setConfirmModalConfig] = useState({})
+  const [requestsHighlighted, setRequestsHighlighted] = useState(false)
+  const requestsSectionRef = useRef(null)
 
   const showConfirmation = (
     message,
@@ -161,6 +172,28 @@ const CircleSettings = () => {
   const isAdmin = circleMembers.some(
     member => member.userId === userProfile?.id && member.role === 'admin',
   )
+
+  // Arriving from a "someone wants to join your Circle" push tap
+  // (/settings/circle?focus=requests). The section only exists once members
+  // have loaded and we know this user is an admin, so wait for that before
+  // scrolling, then drop the param so a reload/back doesn't re-trigger it.
+  const focusRequests = searchParams.get('focus') === 'requests'
+  useEffect(() => {
+    if (!focusRequests || !isAdmin || !requestsSectionRef.current) return
+
+    requestsSectionRef.current.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    })
+    setRequestsHighlighted(true)
+    const params = new URLSearchParams(searchParams)
+    params.delete('focus')
+    setSearchParams(params, { replace: true })
+
+    const timer = setTimeout(() => setRequestsHighlighted(false), 2600)
+    return () => clearTimeout(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focusRequests, isAdmin])
   const circle = userCircles[0]
   const myMembership = circleMembers.find(
     member => member.userId === userProfile?.id,
@@ -442,7 +475,11 @@ const CircleSettings = () => {
         </Sheet>
 
         {isAdmin && (
-          <Box component='section' sx={{ mt: 3.5 }}>
+          <Box
+            component='section'
+            ref={requestsSectionRef}
+            sx={{ mt: 3.5, scrollMarginTop: 16 }}
+          >
             <Box
               sx={{
                 alignItems: { xs: 'flex-start', sm: 'center' },
@@ -483,8 +520,26 @@ const CircleSettings = () => {
               </IconButton>
             </Box>
 
-            {circleMemberRequests.length > 0 && (
-              <Sheet sx={{ ...surfaceSx, overflow: 'hidden' }}>
+            {circleMemberRequests.length === 0 ? (
+              <Sheet
+                sx={{
+                  ...surfaceSx,
+                  p: 1.75,
+                  ...(requestsHighlighted ? highlightSx : {}),
+                }}
+              >
+                <Typography level='body-sm' textColor='text.secondary'>
+                  {t('circleSettings.noPendingRequests')}
+                </Typography>
+              </Sheet>
+            ) : (
+              <Sheet
+                sx={{
+                  ...surfaceSx,
+                  overflow: 'hidden',
+                  ...(requestsHighlighted ? highlightSx : {}),
+                }}
+              >
                 {circleMemberRequests.map((request, index) => (
                   <Box key={request.id}>
                     {index > 0 && <Divider />}

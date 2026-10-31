@@ -3,7 +3,6 @@ import {
   Check,
   Group,
   HourglassEmpty,
-  OpenInNew,
   Pause,
   PlayArrow,
   Repeat,
@@ -25,11 +24,11 @@ import {
 } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
 
-import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
+import ExternalLinkChip from '../../components/common/ExternalLinkChip'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useThemeSkin } from '../../contexts/ThemeSkinContext'
+import { useChorePermissions } from '../../hooks/useChorePermissions'
 import { usePendingCommands } from '../../hooks/usePendingCommands'
-import { useUserProfile } from '../../queries/UserQueries.jsx'
 import {
   getDueDateChipColor,
   getDueDateChipText,
@@ -38,15 +37,14 @@ import {
 import { notInCompletionWindow } from '../../utils/Chores.jsx'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
 import {
-  getFirstHttpUrl,
-  getUrlHostname,
-  openExternalUrl,
-  splitTextAtFirstHttpUrl,
+  getFirstLink,
+  splitTextAtFirstLink,
 } from '../../utils/ExternalLinks.js'
 import Priorities from '../../utils/Priorities'
 import ChoreActionMenu, {
   ChoreActionMenuTrigger,
 } from '../components/ChoreActionMenu'
+import ChoreStatusChip from '../components/ChoreStatusChip'
 import PendingBadge from '../components/PendingBadge'
 
 // Hoisted so emotion isn't re-serializing an identical object for every row
@@ -78,31 +76,13 @@ const ChoreCard = ({
   viewOnly,
 }) => {
   const { t } = useTranslation('chores')
+  const permissions = useChorePermissions(chore)
   const { skin } = useThemeSkin()
   const completionColor = skin === 'default' ? 'success' : 'primary'
-  const { data: userProfile } = useUserProfile({ enabled: !viewOnly })
   const { timeFormat } = useLocalization()
   const { data: pendingCmds } = usePendingCommands(chore.id)
 
-  const { impersonatedUser } = useImpersonateUser()
-
-  // Check if the current user can approve/reject (admin, manager, or task owner)
-  const canApproveReject = () => {
-    if (!performers || !chore) return false
-
-    const currentUser = performers.find(
-      member => member.userId === (impersonatedUser?.userId || userProfile?.id),
-    )
-
-    // User can approve/reject if they are:
-    // 1. Admin or manager of the circle
-    // 2. Owner/creator of the task
-    return (
-      currentUser?.role === 'admin' ||
-      currentUser?.role === 'manager' ||
-      chore.createdBy === (impersonatedUser?.userId || userProfile?.id)
-    )
-  }
+  const canApproveReject = () => permissions.approve
 
   const getFrequencyIcon = chore => {
     if (['once', 'no_repeat'].includes(chore.frequencyType)) {
@@ -125,12 +105,13 @@ const ChoreCard = ({
   }
   const displayName = getName(chore.name)
   const {
-    after: titleAfterUrl,
-    before: titleBeforeUrl,
-    url: titleUrl,
-  } = splitTextAtFirstHttpUrl(displayName)
-  const descriptionUrl = getFirstHttpUrl(chore.description)
-  const showDescriptionUrl = descriptionUrl && descriptionUrl !== titleUrl
+    after: titleAfterLink,
+    before: titleBeforeLink,
+    link: titleLink,
+  } = splitTextAtFirstLink(displayName)
+  const descriptionLink = getFirstLink(chore.description)
+  const showDescriptionLink =
+    descriptionLink && descriptionLink.href !== titleLink?.href
 
   return (
     <Box
@@ -269,34 +250,13 @@ const ChoreCard = ({
                 </Avatar>
                 <Box display='flex' flexDirection='column'>
                   <Typography level='title-md'>
-                    {titleBeforeUrl}
-                    {titleUrl && (
-                      <Chip
-                        component='span'
-                        variant='soft'
-                        color='primary'
-                        size='sm'
-                        startDecorator={<OpenInNew sx={{ fontSize: 14 }} />}
-                        onClick={event => {
-                          event.stopPropagation()
-                          openExternalUrl(titleUrl)
-                        }}
-                        sx={{
-                          mx: 0.4,
-                          maxWidth: 180,
-                          cursor: 'pointer',
-                          verticalAlign: 'middle',
-                          '& .MuiChip-label': {
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                          },
-                        }}
-                        title={titleUrl}
-                      >
-                        {getUrlHostname(titleUrl)}
-                      </Chip>
-                    )}
-                    {titleAfterUrl}
+                    {titleBeforeLink}
+                    <ExternalLinkChip
+                      link={titleLink}
+                      component='span'
+                      sx={{ mx: 0.4, verticalAlign: 'middle' }}
+                    />
+                    {titleAfterLink}
                   </Typography>
                   {chore.assignedTo && (
                     <Box display='flex' alignItems='center' gap={0.5}>
@@ -326,6 +286,7 @@ const ChoreCard = ({
                       </Chip>
                     </Box>
                   )}
+                  <ChoreStatusChip chore={chore} />
                   <Box key={`${chore.id}-labels`}>
                     {chore.priority > 0 && (
                       <Chip
@@ -368,31 +329,18 @@ const ChoreCard = ({
                         {chore.points}
                       </Chip>
                     )}
-                    {showDescriptionUrl && (
-                      <Chip
-                        variant='soft'
-                        color='primary'
-                        startDecorator={<OpenInNew sx={{ fontSize: 16 }} />}
-                        onClick={event => {
-                          event.stopPropagation()
-                          openExternalUrl(descriptionUrl)
-                        }}
+                    {showDescriptionLink && (
+                      <ExternalLinkChip
+                        link={descriptionLink}
+                        size='md'
+                        iconSize={16}
                         sx={{
                           position: 'relative',
                           mr: 0.5,
                           top: 2,
                           zIndex: 1,
-                          maxWidth: 180,
-                          cursor: 'pointer',
-                          '& .MuiChip-label': {
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                          },
                         }}
-                        title={descriptionUrl}
-                      >
-                        {getUrlHostname(descriptionUrl)}
-                      </Chip>
+                      />
                     )}
                     {chore.labelsV2?.map((l, index) => {
                       return (
@@ -465,10 +413,12 @@ const ChoreCard = ({
                 >
                   {/* <ButtonGroup> */}
                   {chore.status === 3 ? (
-                    // Pending approval: Show approve/reject for admins/managers/owners, grayed out for others
+                    // Only reviewers get approval actions; the chip communicates status.
                     canApproveReject() ? (
                       <Box sx={{ display: 'flex', gap: 0.5 }}>
                         <IconButton
+                          aria-label={`${t('choreView.approve')}: ${chore.name}`}
+                          title={t('choreView.approve')}
                           variant='soft'
                           color={completionColor}
                           onClick={e => {
@@ -498,6 +448,8 @@ const ChoreCard = ({
                           <ThumbUp sx={{ fontSize: 18 }} />
                         </IconButton>
                         <IconButton
+                          aria-label={`${t('choreView.reject')}: ${chore.name}`}
+                          title={t('choreView.reject')}
                           variant='soft'
                           color='danger'
                           onClick={e => {
@@ -524,25 +476,14 @@ const ChoreCard = ({
                         </IconButton>
                       </Box>
                     ) : (
-                      <IconButton
-                        variant='soft'
-                        color='neutral'
-                        disabled={true}
-                        sx={{
-                          borderRadius: '50%',
-                          width: 50,
-                          minWidth: 50,
-                          height: 50,
-                          flexShrink: 0,
-                          zIndex: 1,
-                          opacity: 0.5,
-                        }}
-                      >
-                        <HourglassEmpty />
-                      </IconButton>
+                      <HourglassEmpty
+                        aria-hidden='true'
+                        sx={{ m: 1.5, color: 'text.tertiary' }}
+                      />
                     )
                   ) : (
                     <IconButton
+                      aria-label={`${t(chore.status === 0 ? 'completeChore' : chore.status === 1 ? 'choreView.pauseTimer' : 'choreView.start')}: ${chore.name}`}
                       variant={chore.status === 0 ? 'solid' : 'soft'}
                       color={chore.status === 0 ? completionColor : 'warning'}
                       onClick={e => {
@@ -561,7 +502,11 @@ const ChoreCard = ({
                             break
                         }
                       }}
-                      disabled={notInCompletionWindow(chore)}
+                      disabled={
+                        !permissions.complete ||
+                        chore.isActive === false ||
+                        notInCompletionWindow(chore)
+                      }
                       sx={{
                         borderRadius: '50%',
                         width: 50,

@@ -80,10 +80,6 @@ import { useCustomFilters } from './hooks/useCustomFilters'
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
 import { useMultiSelect } from './hooks/useMultiSelect'
 import { useProjectFilter } from './hooks/useProjectFilter'
-import {
-  canScheduleNotification,
-  scheduleChoreNotification,
-} from './LocalNotificationScheduler'
 import NotificationAccessSnackbar from './NotificationAccessSnackbar'
 import Sidepanel from './Sidepanel'
 import { INSIGHT_FILTER_DEFS } from './SmartInsightsCard'
@@ -156,7 +152,6 @@ const MyChores = () => {
     isError: membersError,
     isLoading: membersLoading,
   } = useCircleMembers()
-
   const [chores, setChores] = useState([])
   const [addTaskModalOpen, setAddTaskModalOpen] = useState(false)
   // 'voice' | 'scan' | null — set by the quick-capture widget deep links
@@ -576,25 +571,8 @@ const MyChores = () => {
       membersData?.res &&
       choresData?.res
     ) {
-      // throw new Error('FAKE ERROR') // For testing Sentry error tracking
-      const processEffectAsync = async () => {
-        // Sync local state with query data to ensure updates are reflected
-        setChores(processedChores)
-
-        // Don't set choreSections here - let the dedicated effect handle it
-        // This prevents caching issues when switching between projects
-
-        if (await canScheduleNotification()) {
-          console.log('Scheduling chore notifications...')
-          scheduleChoreNotification(
-            choresData.res,
-            userProfile,
-            membersData.res,
-          )
-        }
-      }
-
-      processEffectAsync()
+      // Section state is managed by its own effect.
+      setChores(processedChores)
     }
   }, [
     membersLoading,

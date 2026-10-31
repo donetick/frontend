@@ -5,7 +5,14 @@ import { useTranslation } from 'react-i18next'
 import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
-function DateModal({ current, isOpen, onClose, onSave, title }) {
+function DateModal({
+  closeOnSave = true,
+  current,
+  isOpen,
+  onClose,
+  onSave,
+  title,
+}) {
   const { t } = useTranslation('common')
   const { ResponsiveModal } = useResponsiveModal()
   const [date, setDate] = useState(
@@ -14,7 +21,7 @@ function DateModal({ current, isOpen, onClose, onSave, title }) {
 
   const handleSave = () => {
     onSave(date)
-    onClose()
+    if (closeOnSave) onClose()
   }
 
   return (

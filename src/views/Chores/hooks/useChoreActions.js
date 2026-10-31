@@ -436,6 +436,7 @@ export const useChoreActions = ({
               if (isConfirmed === true) {
                 try {
                   const response = await DeleteChore(chore.id)
+                  if (!response.ok) throw new Error(t('permissions.failed'))
                   if (response.ok) {
                     setChores(chores.filter(c => c.id !== chore.id))
                     queryClient.invalidateQueries({ queryKey: ['chores'] })
@@ -687,6 +688,7 @@ export const useChoreActions = ({
           const updatedChore = { ...chore, projectId }
           try {
             const response = await SaveChore(updatedChore)
+            if (!response.ok) throw new Error(t('permissions.failed'))
             if (response.ok) {
               updateChoreInState(updatedChore, 'moved-to-project')
               showSuccess({
@@ -821,24 +823,23 @@ export const useChoreActions = ({
   )
 
   const handleCompleteWithPastDate = useCallback(
-    newDate => {
+    async newDate => {
       if (!modalChore) return
-      MarkChoreComplete(
-        modalChore.id,
-        impersonatedUser ? { completedBy: impersonatedUser.userId } : null,
-        new Date(newDate).toISOString(),
-        null,
-      ).then(response => {
-        if (response.ok) {
-          response.json().then(data => {
-            const newChore = data.res
-            updateChoreInState(newChore, 'completed')
-          })
-        }
-      })
-      closeModal()
+      try {
+        const response = await MarkChoreComplete(
+          modalChore.id,
+          impersonatedUser ? { completedBy: impersonatedUser.userId } : null,
+          new Date(newDate).toISOString(),
+          null,
+        )
+        const data = await response.json()
+        updateChoreInState(data.res, 'completed')
+        closeModal()
+      } catch (error) {
+        showError({ message: error.message })
+      }
     },
-    [modalChore, impersonatedUser, updateChoreInState, closeModal],
+    [modalChore, impersonatedUser, updateChoreInState, closeModal, showError],
   )
 
   // Picking a circle member who isn't yet in the chore's assignee pool must
@@ -879,26 +880,25 @@ export const useChoreActions = ({
   )
 
   const handleCompleteWithNote = useCallback(
-    note => {
+    async note => {
       if (!modalChore) return
-      MarkChoreComplete(
-        modalChore.id,
-        impersonatedUser
-          ? { note, completedBy: impersonatedUser.userId }
-          : { note },
-        null,
-        null,
-      ).then(response => {
-        if (response.ok) {
-          response.json().then(data => {
-            const newChore = data.res
-            updateChoreInState(newChore, 'completed')
-          })
-        }
-      })
-      closeModal()
+      try {
+        const response = await MarkChoreComplete(
+          modalChore.id,
+          impersonatedUser
+            ? { note, completedBy: impersonatedUser.userId }
+            : { note },
+          null,
+          null,
+        )
+        const data = await response.json()
+        updateChoreInState(data.res, 'completed')
+        closeModal()
+      } catch (error) {
+        showError({ message: error.message })
+      }
     },
-    [modalChore, impersonatedUser, updateChoreInState, closeModal],
+    [modalChore, impersonatedUser, updateChoreInState, closeModal, showError],
   )
 
   const handleNudge = useCallback(

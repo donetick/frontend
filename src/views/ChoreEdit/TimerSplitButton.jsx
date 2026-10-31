@@ -9,6 +9,8 @@ import { Box, Button, ButtonGroup, IconButton, Menu, MenuItem } from '@mui/joy'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { useThemeSkin } from '../../contexts/ThemeSkinContext'
+
 const TimerSplitButton = ({
   chore,
   disabled = false,
@@ -19,6 +21,8 @@ const TimerSplitButton = ({
   onShowDetails,
 }) => {
   const { t } = useTranslation('timer')
+  const { skin } = useThemeSkin()
+  const completionColor = skin === 'default' ? 'success' : 'primary'
   const [anchorEl, setAnchorEl] = useState(null)
   const isMenuOpen = Boolean(anchorEl)
   const menuRef = useRef(null)
@@ -88,7 +92,7 @@ const TimerSplitButton = ({
     >
       <ButtonGroup
         variant='soft'
-        color={chore.status === 1 ? 'warning' : 'primary'}
+        color={chore.status === 1 ? 'warning' : completionColor}
         sx={{
           '--ButtonGroup-separatorSize': '1px',
           '--ButtonGroup-connected': '1',
@@ -140,10 +144,12 @@ const TimerSplitButton = ({
           <RestartAlt sx={{ mr: 1 }} />
           Restart timer
         </MenuItem> */}
-        <MenuItem onClick={handleClearAllTime} color='danger'>
-          <DeleteSweep sx={{ mr: 1 }} />
-          {t('clearAndReset')}
-        </MenuItem>
+        {onClearAllTime && (
+          <MenuItem onClick={handleClearAllTime} color='danger'>
+            <DeleteSweep sx={{ mr: 1 }} />
+            {t('clearAndReset')}
+          </MenuItem>
+        )}
       </Menu>
     </Box>
   )

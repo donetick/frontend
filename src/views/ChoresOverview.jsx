@@ -27,6 +27,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
+import { useNotification } from '../service/NotificationProvider'
 import { GetAllUsers, GetChores, MarkChoreComplete } from '../utils/Fetcher'
 import DateModal from './Modals/Inputs/DateModal'
 // import moment from 'moment'
@@ -41,6 +42,7 @@ const CHORE_STATUS = {
 
 const ChoresOverview = () => {
   const { t } = useTranslation('chores')
+  const { showError } = useNotification()
   const [chores, setChores] = useState([])
   const [filteredChores, setFilteredChores] = useState([])
   const [performers, setPerformers] = useState([])
@@ -263,8 +265,8 @@ const ChoresOverview = () => {
                     size='sm'
                     // sx={{ borderRadius: '50%' }}
                     onClick={() => {
-                      MarkChoreComplete(chore.id, null, null, null).then(
-                        response => {
+                      MarkChoreComplete(chore.id, null, null, null)
+                        .then(response => {
                           if (response.ok) {
                             response.json().then(data => {
                               const newChore = data.res
@@ -277,8 +279,8 @@ const ChoresOverview = () => {
                               setFilteredChores(newChores)
                             })
                           }
-                        },
-                      )
+                        })
+                        .catch(error => showError({ message: error.message }))
                     }}
                     aria-setsize={2}
                   >
@@ -326,8 +328,8 @@ const ChoresOverview = () => {
             alert('Please select a performer')
             return
           }
-          MarkChoreComplete(choreId, null, date, activeUserId).then(
-            response => {
+          MarkChoreComplete(choreId, null, date, activeUserId)
+            .then(response => {
               if (response.ok) {
                 response.json().then(data => {
                   const newChore = data.res
@@ -338,8 +340,8 @@ const ChoresOverview = () => {
                   setFilteredChores(newChores)
                 })
               }
-            },
-          )
+            })
+            .catch(error => showError({ message: error.message }))
         }}
       />
     </Container>

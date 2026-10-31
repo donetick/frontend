@@ -1,49 +1,49 @@
 {
   "edit": {
-    "title": "Editar Historial",
-    "completedDate": "Fecha de Finalización",
+    "title": "Editar historial",
+    "completedDate": "Fecha de finalización",
     "note": "Nota",
-    "additionalNotes": "Notas Adicionales",
-    "deleteTitle": "Eliminar Historial",
-    "deleteMessage": "¿Estás seguro de que quieres eliminar este historial?"
+    "additionalNotes": "Notas adicionales",
+    "deleteTitle": "Eliminar historial",
+    "deleteMessage": "¿Seguro que quieres eliminar esta entrada del historial?"
   },
   "status": {
-    "inProgress": "En Progreso",
+    "inProgress": "En curso",
     "completed": "Completada",
     "skipped": "Omitida",
-    "pendingApproval": "Pendiente de Aprobación",
+    "pendingApproval": "Pendiente de aprobación",
     "rejected": "Rechazada",
-    "missed": "No Realizada",
-    "rescheduled": "Reagendada",
+    "missed": "No realizada",
+    "rescheduled": "Reprogramada",
     "scheduled": "Programada"
   },
   "badge": {
-    "onTime": "A Tiempo",
+    "onTime": "A tiempo",
     "onTimeLabel": "A tiempo"
   },
   "card": {
     "wasDue": "Vencía el {{date}}",
-    "daysBeforeDue_one": "{{count}} d antes de la fecha límite",
-    "daysBeforeDue_other": "{{count}} d antes de la fecha límite",
-    "daysAfterDue_one": "{{count}} d después de la fecha límite",
-    "daysAfterDue_other": "{{count}} d después de la fecha límite",
-    "hoursBeforeDue_one": "{{count}} h antes de la fecha límite",
-    "hoursBeforeDue_other": "{{count}} h antes de la fecha límite",
-    "hoursAfterDue_one": "{{count}} h después de la fecha límite",
-    "hoursAfterDue_other": "{{count}} h después de la fecha límite",
+    "daysBeforeDue_one": "{{count}} día antes del vencimiento",
+    "daysBeforeDue_other": "{{count}} días antes del vencimiento",
+    "daysAfterDue_one": "{{count}} día después del vencimiento",
+    "daysAfterDue_other": "{{count}} días después del vencimiento",
+    "hoursBeforeDue_one": "{{count}} h antes del vencimiento",
+    "hoursBeforeDue_other": "{{count}} h antes del vencimiento",
+    "hoursAfterDue_one": "{{count}} h después del vencimiento",
+    "hoursAfterDue_other": "{{count}} h después del vencimiento",
     "assignedTo": "Asignada a {{name}}",
     "points_one": "★ {{count}} pt",
     "points_other": "★ {{count}} pts"
   },
   "detail": {
-    "title": "Detalle de Actividad",
-    "openTask": "Abrir Tarea",
-    "editEntry": "Editar Entrada",
-    "performedBy": "Realizado por",
+    "title": "Detalle de la actividad",
+    "openTask": "Abrir tarea",
+    "editEntry": "Editar entrada",
+    "performedBy": "Completada por",
     "assignedTo": "Asignada a",
     "lastUpdated": "Última actualización",
     "duration": "Duración",
-    "pointsEarned": "Puntos ganados",
+    "pointsEarned": "Puntos obtenidos",
     "points_one": "{{count}} pt",
     "points_other": "{{count}} pts",
     "note": "Nota",
@@ -52,17 +52,17 @@
   },
   "charts": {
     "noData": "No hay datos disponibles",
-    "noLabels": "Sin Etiquetas",
-    "unassigned": "Sin Asignar",
-    "unknownTask": "Tarea Desconocida",
+    "noLabels": "Sin etiquetas",
+    "unassigned": "Sin asignar",
+    "unknownTask": "Tarea desconocida",
     "late": "Con retraso",
     "status": {
       "title": "Estado",
-      "description": "Estado de tareas completadas"
+      "description": "Estado de las tareas completadas"
     },
     "due": {
-      "title": "Fecha de Vencimiento",
-      "description": "Fecha de vencimiento de tareas actuales"
+      "title": "Fecha de vencimiento",
+      "description": "Fecha de vencimiento de las tareas actuales"
     },
     "priority": {
       "title": "Prioridad",
@@ -74,14 +74,14 @@
     },
     "labelsDuration": {
       "title": "Etiquetas (tiempo)",
-      "description": "Tiempo invertido por etiqueta (horas)"
+      "description": "Tiempo invertido por etiqueta (en horas)"
     },
     "tasksTime": {
       "title": "Tareas (tiempo)",
-      "description": "Tiempo invertido por tareas individuales (horas)"
+      "description": "Tiempo invertido por tarea (en horas)"
     },
     "assigneeBreakdown": {
-      "title": "por Asignado",
+      "title": "Por persona asignada",
       "description": "Tareas agrupadas por persona asignada"
     }
   },
@@ -89,102 +89,102 @@
     "status": "Estado",
     "pending": "Pendiente",
     "labels": "Etiquetas",
-    "hasNotes": "Tiene Notas",
-    "hasPoints": "Tiene Puntos",
-    "timePeriod": "Período de Tiempo",
+    "hasNotes": "Con notas",
+    "hasPoints": "Con puntos",
+    "timePeriod": "Periodo de tiempo",
     "user": "Usuario",
     "completedBy": "Completada por",
     "completedAt": "Completada el"
   },
   "period": {
-    "days_one": "{{count}} Día",
-    "days_other": "{{count}} Días",
-    "allTime": "Todo el Tiempo"
+    "days_one": "{{count}} día",
+    "days_other": "{{count}} días",
+    "allTime": "Histórico completo"
   },
   "search": {
-    "placeholder": "Search history...",
-    "clear": "Clear search"
+    "placeholder": "Buscar en el historial...",
+    "clear": "Borrar búsqueda"
   },
   "sort": {
-    "date": "Completed date",
-    "updatedDate": "Updated date",
-    "performer": "Completed by",
-    "status": "Status",
-    "points": "Points"
+    "date": "Fecha de finalización",
+    "updatedDate": "Fecha de actualización",
+    "performer": "Completada por",
+    "status": "Estado",
+    "points": "Puntos"
   },
   "activities": {
     "title": "Actividades",
-    "subtitle": "See what's been completed, skipped, or missed",
+    "subtitle": "Descubre qué se ha completado, omitido o quedado pendiente",
     "emptyTitle": "Sin actividad en este rango",
-    "emptyDescriptionEveryone": "Nadie ha completado nada en tu círculo {{period}}. Prueba con un rango de tiempo más amplio o un miembro diferente.",
-    "emptyDescriptionMember": "{{name}} no ha completado nada {{period}}. Prueba con un rango de tiempo más amplio o un miembro diferente.",
+    "emptyDescriptionEveryone": "Nadie en tu círculo ha completado nada {{period}}. Prueba con un rango de fechas más amplio o filtra por otro miembro.",
+    "emptyDescriptionMember": "{{name}} no ha completado nada {{period}}. Prueba con un rango de fechas más amplio o filtra por otro miembro.",
     "periodSoFar": "hasta ahora",
     "periodLastDays": "en los últimos {{count}} días",
     "unknownMember": "este miembro",
-    "searchPlaceholder": "Search activities...",
+    "searchPlaceholder": "Buscar actividades...",
     "sort": {
-      "date": "Date",
-      "name": "Task name",
-      "status": "Status",
-      "points": "Points"
+      "date": "Fecha",
+      "name": "Nombre de la tarea",
+      "status": "Estado",
+      "points": "Puntos"
     }
   },
   "title": {
-    "summary": "Resumen de Tareas",
-    "activity": "Actividad de Tareas"
+    "summary": "Resumen de tareas",
+    "activity": "Actividad de tareas"
   },
   "noResults": {
-    "clear": "Limpiar filtros"
+    "clear": "Borrar filtros"
   },
   "toast": {
     "updateQueued": {
-      "title": "Actualización de Historial en Cola",
-      "message": "Estás sin conexión. La actualización del historial se sincronizará cuando se restablezca la conexión."
+      "title": "Actualización en cola",
+      "message": "Estás sin conexión. La actualización del historial se sincronizará cuando vuelvas a tener red."
     },
     "updated": {
-      "title": "Historial Actualizado",
-      "message": "El registro del historial se ha actualizado correctamente."
+      "title": "Historial actualizado",
+      "message": "La entrada del historial se ha actualizado correctamente."
     },
     "deleteQueued": {
-      "title": "Eliminación de Historial en Cola",
-      "message": "Estás sin conexión. La eliminación del historial se sincronizará cuando se restablezca la conexión."
+      "title": "Eliminación en cola",
+      "message": "Estás sin conexión. La eliminación se sincronizará cuando vuelvas a tener red."
     },
     "deleted": {
-      "title": "Historial Eliminado",
-      "message": "El registro del historial se ha eliminado correctamente."
+      "title": "Entrada eliminada",
+      "message": "La entrada del historial se ha eliminado correctamente."
     }
   },
   "delete": {
-    "title": "Eliminar Registro del Historial",
-    "message": "¿Estás seguro de que quieres eliminar este registro del historial?"
+    "title": "Eliminar entrada del historial",
+    "message": "¿Seguro que quieres eliminar esta entrada del historial?"
   },
   "empty": {
     "title": "Aún no hay historial",
-    "description": "Cada vez que esta tarea se completa u omite, aparece aquí con quién lo hizo y cuándo. Aún no ha ocurrido nada.",
+    "description": "Cada vez que se complete u omita esta tarea, aparecerá aquí con la fecha y quién la hizo. Todavía no ha ocurrido nada.",
     "backToTasks": "Volver a tareas",
-    "noResultsTitle": "Ningún historial coincide con estos filtros",
-    "noResultsDescription": "Hay historial aquí, pero nada se ajusta a los filtros activados actualmente."
+    "noResultsTitle": "Ningún registro coincide con estos filtros",
+    "noResultsDescription": "Hay historial guardado, pero nada encaja con los filtros que tienes activos."
   },
   "info": {
-    "allCompleted": "Todas Completadas",
+    "allCompleted": "Completadas todas",
     "timesSuffix": "{{count}} veces",
-    "averageTiming": "Tiempo Promedio",
+    "averageTiming": "Tiempo medio",
     "onTime": "A tiempo",
-    "longestDelay": "Mayor Retraso",
+    "longestDelay": "Mayor retraso",
     "neverLate": "Nunca tarde",
-    "completedMost": "Más Completadas por",
+    "completedMost": "Quien más ha completado",
     "unknown": "Desconocido",
-    "membersInvolved": "Miembros Involucrados",
+    "membersInvolved": "Miembros que han participado",
     "membersSuffix": "{{count}} miembros",
-    "lastCompleted": "Última Finalización"
+    "lastCompleted": "Última vez completada"
   },
   "noteViewer": {
     "updatedAt": "Actualizado el {{date}}"
   },
   "plan": {
-    "lockedTitle": "El historial antiguo se conserva durante {{days}} días en el plan Básico",
+    "lockedTitle": "El historial antiguo se guarda durante {{days}} días en el plan Básico",
     "allLockedTitle": "El historial de esta tarea tiene más de {{days}} días",
-    "lockedDescription": "Las entradas con más de {{days}} días pueden eliminarse de forma permanente. Actualiza a Plus para conservar todo tu historial.",
-    "unlock": "Actualizar a Plus"
+    "lockedDescription": "Las entradas con más de {{days}} días pueden eliminarse de forma definitiva. Pásate a Plus para conservar todo tu historial para siempre.",
+    "unlock": "Mejorar a Plus"
   }
 }

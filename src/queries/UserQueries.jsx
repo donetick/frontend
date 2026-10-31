@@ -9,6 +9,7 @@ import {
   GetUserProfile,
 } from '../utils/Fetcher'
 import { offlineDB } from '../utils/OfflineDB'
+import { cacheEventPreferences } from '../views/Chores/LocalNotificationScheduler'
 
 // Helper to check if we have a valid token
 const isTokenValid = () => {
@@ -123,17 +124,22 @@ export const useDeviceTokens = () => {
   }
 }
 
-export const useNotificationPreferences = () => {
+export const useNotificationPreferences = ({ enabled = true } = {}) => {
   const queryClient = useQueryClient()
 
   const { data, error, isLoading } = useQuery({
     queryKey: ['notificationPreferences'],
+    enabled,
     queryFn: async () => {
       if (!isTokenValid()) {
         return null
       }
       const resp = await GetNotificationPreferences()
-      return resp.json()
+      const preference = await resp.json()
+      // Mirror the resolved event map for the local notification scheduler,
+      // which runs outside React and has to work on a cold, offline launch.
+      await cacheEventPreferences(preference?.effective)
+      return preference
     },
   })
 
