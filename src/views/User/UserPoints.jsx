@@ -102,6 +102,7 @@ const buildHistorySummary = (history, userId, period) => {
   const bucketByKey = new Map(buckets.map(bucket => [bucket.key, bucket]))
 
   history.forEach(entry => {
+    if (entry.status !== 1) return
     if (userId && entry.completedBy !== userId) return
     const bucket = bucketByKey.get(moment(entry.performedAt).format(keyFormat))
     if (!bucket) return
@@ -205,6 +206,7 @@ const UserPoints = () => {
     )
 
     history.forEach(entry => {
+      if (entry.status !== 1) return
       const user = stats.get(entry.completedBy)
       if (!user) return
       user.periodPoints += entry.points || 0
