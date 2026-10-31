@@ -5,6 +5,8 @@ import vm from 'node:vm'
 
 import { transformSync } from '@swc/core'
 
+import { getChorePermissions } from '../src/utils/ChoreAccess.js'
+
 const element = (type, props) => ({ type, props })
 const components = new Proxy({}, { get: (_, name) => name })
 
@@ -26,6 +28,21 @@ function render(overrides = {}, options = {}) {
     },
     '../../../contexts/LocalizationContext': {
       useLocalization: () => ({ timeFormat: 'HH:mm' }),
+    },
+    '../../../hooks/useChorePermissions': {
+      useChorePermissions: chore =>
+        getChorePermissions(
+          chore,
+          options.impersonatedUser?.userId || 5,
+          options.members || [],
+        ),
+    },
+    '../../../components/common/ExternalLinkChip': {
+      LinkTypeIcon: 'LinkTypeIcon',
+    },
+    '../../components/ChoreStatusChip': {
+      default: 'ChoreStatusChip',
+      __esModule: true,
     },
     '../../../hooks/usePendingCommands': {
       usePendingCommands: () => ({ data: options.pendingCommands || [] }),
@@ -49,8 +66,9 @@ function render(overrides = {}, options = {}) {
       notInCompletionWindow: () => options.outsideWindow,
     },
     '../../../utils/ExternalLinks': {
-      splitTextAtFirstHttpUrl: name => ({ before: name, after: '', url: null }),
-      getFirstHttpUrl: () => null,
+      splitTextAtFirstLink: name => ({ before: name, after: '', link: null }),
+      getFirstLink: () => null,
+      openExternalLink: () => {},
     },
     '../../components/ChoreActionMenu': {
       ChoreActionMenuTrigger: 'MenuTrigger',
