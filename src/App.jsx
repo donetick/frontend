@@ -17,6 +17,7 @@ import {
 import useAnalyticsIdentity from './analytics/useAnalyticsIdentity'
 import { registerCapacitorListeners } from './CapacitorListener'
 import PageTransition from './components/animations/PageTransition'
+import TimezonePrompt from './components/TimezonePrompt'
 import { ImpersonateUserProvider } from './contexts/ImpersonateUserContext'
 import { KeyboardShortcutScopeProvider } from './contexts/KeyboardShortcutScopeContext'
 import { NavBarTitleProvider } from './contexts/NavBarTitleContext'
@@ -157,6 +158,7 @@ const AppContent = () => {
     <div>
       {!Capacitor.isNativePlatform() && <WebServiceWorkerManager />}
       <ImpersonateUserProvider>
+        <TimezonePrompt />
         <NavBarTitleProvider>
           <Box
             sx={{

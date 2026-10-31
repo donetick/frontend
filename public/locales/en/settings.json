@@ -1,5 +1,20 @@
 {
   "title": "Settings",
+  "timezonePrompt": {
+    "title": "A new timezone?",
+    "missingTitle": "Let’s get your time right",
+    "description": "Your device’s timezone is different from your profile. Would you like to update it to keep your schedules and reminders in sync?",
+    "missingDescription": "Your profile doesn’t have a timezone yet. We’ve selected your device’s timezone to help keep schedules and reminders in sync.",
+    "current": "Profile timezone: {{timezone}}",
+    "detected": "Detected on this device: {{timezone}}",
+    "update": "Update timezone",
+    "confirm": "Use this timezone",
+    "later": "Not now",
+    "settingsHint": "You can always change this in Profile settings.",
+    "error": "We couldn’t save your timezone. Check your connection and try again.",
+    "success": "Timezone updated",
+    "successMessage": "Your timezone preference has been saved."
+  },
   "common": {
     "save": "Save",
     "cancel": "Cancel",

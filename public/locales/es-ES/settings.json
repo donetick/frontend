@@ -1,4 +1,19 @@
 {
+  "timezonePrompt": {
+    "title": "¿Una nueva zona horaria?",
+    "missingTitle": "Configuremos tu hora",
+    "description": "La zona horaria de tu dispositivo es diferente de la de tu perfil. ¿Quieres actualizarla para mantener tus horarios y recordatorios sincronizados?",
+    "missingDescription": "Tu perfil aún no tiene una zona horaria. Hemos seleccionado la de tu dispositivo para mantener tus horarios y recordatorios sincronizados.",
+    "current": "Zona horaria del perfil: {{timezone}}",
+    "detected": "Detectada en este dispositivo: {{timezone}}",
+    "update": "Actualizar zona horaria",
+    "confirm": "Usar esta zona horaria",
+    "later": "Ahora no",
+    "settingsHint": "Puedes cambiarla en cualquier momento en los ajustes del perfil.",
+    "error": "No hemos podido guardar tu zona horaria. Comprueba tu conexión e inténtalo de nuevo.",
+    "success": "Zona horaria actualizada",
+    "successMessage": "Se ha guardado tu preferencia de zona horaria."
+  },
   "title": "Ajustes",
   "common": {
     "save": "Guardar",

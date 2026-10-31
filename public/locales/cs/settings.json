@@ -1,4 +1,19 @@
 {
+  "timezonePrompt": {
+    "title": "Nové časové pásmo?",
+    "missingTitle": "Nastavme správný čas",
+    "description": "Časové pásmo vašeho zařízení se liší od pásma ve vašem profilu. Chcete ho aktualizovat, aby vaše plány a připomenutí zůstaly synchronizované?",
+    "missingDescription": "Ve vašem profilu zatím není nastavené časové pásmo. Vybrali jsme pásmo vašeho zařízení, aby vaše plány a připomenutí zůstaly synchronizované.",
+    "current": "Časové pásmo profilu: {{timezone}}",
+    "detected": "Zjištěno na tomto zařízení: {{timezone}}",
+    "update": "Aktualizovat časové pásmo",
+    "confirm": "Použít toto časové pásmo",
+    "later": "Teď ne",
+    "settingsHint": "Časové pásmo můžete kdykoli změnit v nastavení profilu.",
+    "error": "Časové pásmo se nepodařilo uložit. Zkontrolujte připojení a zkuste to znovu.",
+    "success": "Časové pásmo aktualizováno",
+    "successMessage": "Vaše nastavení časového pásma bylo uloženo."
+  },
   "title": "Nastavení",
   "common": {
     "save": "Uložit",

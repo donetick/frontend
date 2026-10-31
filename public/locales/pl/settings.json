@@ -1,4 +1,19 @@
 {
+  "timezonePrompt": {
+    "title": "Nowa strefa czasowa?",
+    "missingTitle": "Ustawmy właściwy czas",
+    "description": "Strefa czasowa urządzenia różni się od tej w Twoim profilu. Czy chcesz ją zaktualizować, aby harmonogramy i przypomnienia były zsynchronizowane?",
+    "missingDescription": "W Twoim profilu nie ma jeszcze ustawionej strefy czasowej. Wybraliśmy strefę urządzenia, aby harmonogramy i przypomnienia były zsynchronizowane.",
+    "current": "Strefa czasowa profilu: {{timezone}}",
+    "detected": "Wykryta na tym urządzeniu: {{timezone}}",
+    "update": "Zaktualizuj strefę czasową",
+    "confirm": "Użyj tej strefy czasowej",
+    "later": "Nie teraz",
+    "settingsHint": "Możesz ją zmienić w dowolnym momencie w ustawieniach profilu.",
+    "error": "Nie udało się zapisać strefy czasowej. Sprawdź połączenie i spróbuj ponownie.",
+    "success": "Strefa czasowa zaktualizowana",
+    "successMessage": "Twoja preferencja strefy czasowej została zapisana."
+  },
   "title": "Ustawienia",
   "common": {
     "save": "Zapisz",

@@ -1,4 +1,19 @@
 {
+  "timezonePrompt": {
+    "title": "时区变了吗？",
+    "missingTitle": "设置正确的时间",
+    "description": "设备的时区与个人资料中的时区不同。是否更新以保持日程和提醒同步？",
+    "missingDescription": "你的个人资料尚未设置时区。我们已选中设备的时区，以帮助保持日程和提醒同步。",
+    "current": "个人资料时区：{{timezone}}",
+    "detected": "此设备检测到的时区：{{timezone}}",
+    "update": "更新时区",
+    "confirm": "使用此时区",
+    "later": "暂不更新",
+    "settingsHint": "你可以随时在个人资料设置中更改时区。",
+    "error": "无法保存时区。请检查网络连接后重试。",
+    "success": "时区已更新",
+    "successMessage": "你的时区偏好设置已保存。"
+  },
   "title": "设置",
   "common": {
     "save": "保存",

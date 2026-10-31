@@ -1,4 +1,19 @@
 {
+  "timezonePrompt": {
+    "title": "Eine neue Zeitzone?",
+    "missingTitle": "Die richtige Zeit einstellen",
+    "description": "Die Zeitzone deines Geräts unterscheidet sich von der in deinem Profil. Möchtest du sie aktualisieren, damit Zeitpläne und Erinnerungen synchron bleiben?",
+    "missingDescription": "In deinem Profil ist noch keine Zeitzone hinterlegt. Wir haben die Zeitzone deines Geräts ausgewählt, damit Zeitpläne und Erinnerungen synchron bleiben.",
+    "current": "Zeitzone im Profil: {{timezone}}",
+    "detected": "Auf diesem Gerät erkannt: {{timezone}}",
+    "update": "Zeitzone aktualisieren",
+    "confirm": "Diese Zeitzone verwenden",
+    "later": "Nicht jetzt",
+    "settingsHint": "Du kannst dies jederzeit in den Profileinstellungen ändern.",
+    "error": "Deine Zeitzone konnte nicht gespeichert werden. Prüfe deine Verbindung und versuche es erneut.",
+    "success": "Zeitzone aktualisiert",
+    "successMessage": "Deine Zeitzoneneinstellung wurde gespeichert."
+  },
   "title": "Einstellungen",
   "common": {
     "save": "Speichern",

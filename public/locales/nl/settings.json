@@ -1,4 +1,19 @@
 {
+  "timezonePrompt": {
+    "title": "Een nieuwe tijdzone?",
+    "missingTitle": "Laten we de juiste tijd instellen",
+    "description": "De tijdzone van je apparaat verschilt van die in je profiel. Wil je deze bijwerken om je planningen en herinneringen gesynchroniseerd te houden?",
+    "missingDescription": "Je profiel heeft nog geen tijdzone. We hebben de tijdzone van je apparaat geselecteerd om je planningen en herinneringen gesynchroniseerd te houden.",
+    "current": "Tijdzone in profiel: {{timezone}}",
+    "detected": "Gedetecteerd op dit apparaat: {{timezone}}",
+    "update": "Tijdzone bijwerken",
+    "confirm": "Deze tijdzone gebruiken",
+    "later": "Niet nu",
+    "settingsHint": "Je kunt dit altijd wijzigen in je profielinstellingen.",
+    "error": "Je tijdzone kon niet worden opgeslagen. Controleer je verbinding en probeer het opnieuw.",
+    "success": "Tijdzone bijgewerkt",
+    "successMessage": "Je tijdzonevoorkeur is opgeslagen."
+  },
   "title": "Instellingen",
   "common": {
     "save": "Opslaan",

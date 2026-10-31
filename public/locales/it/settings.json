@@ -1,4 +1,19 @@
 {
+  "timezonePrompt": {
+    "title": "Un nuovo fuso orario?",
+    "missingTitle": "Impostiamo l’ora corretta",
+    "description": "Il fuso orario del dispositivo è diverso da quello del profilo. Vuoi aggiornarlo per mantenere sincronizzati programmi e promemoria?",
+    "missingDescription": "Il tuo profilo non ha ancora un fuso orario. Abbiamo selezionato quello del dispositivo per mantenere sincronizzati programmi e promemoria.",
+    "current": "Fuso orario del profilo: {{timezone}}",
+    "detected": "Rilevato su questo dispositivo: {{timezone}}",
+    "update": "Aggiorna fuso orario",
+    "confirm": "Usa questo fuso orario",
+    "later": "Non ora",
+    "settingsHint": "Puoi modificarlo in qualsiasi momento nelle impostazioni del profilo.",
+    "error": "Non è stato possibile salvare il fuso orario. Controlla la connessione e riprova.",
+    "success": "Fuso orario aggiornato",
+    "successMessage": "La preferenza del fuso orario è stata salvata."
+  },
   "title": "Impostazioni",
   "common": {
     "save": "Salva",

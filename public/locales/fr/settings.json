@@ -1,4 +1,19 @@
 {
+  "timezonePrompt": {
+    "title": "Un nouveau fuseau horaire ?",
+    "missingTitle": "Réglons votre heure",
+    "description": "Le fuseau horaire de votre appareil est différent de celui de votre profil. Voulez-vous le mettre à jour pour garder vos horaires et rappels synchronisés ?",
+    "missingDescription": "Votre profil n’a pas encore de fuseau horaire. Nous avons sélectionné celui de votre appareil pour garder vos horaires et rappels synchronisés.",
+    "current": "Fuseau horaire du profil : {{timezone}}",
+    "detected": "Détecté sur cet appareil : {{timezone}}",
+    "update": "Mettre à jour le fuseau horaire",
+    "confirm": "Utiliser ce fuseau horaire",
+    "later": "Pas maintenant",
+    "settingsHint": "Vous pouvez le modifier à tout moment dans les paramètres du profil.",
+    "error": "Impossible d’enregistrer votre fuseau horaire. Vérifiez votre connexion et réessayez.",
+    "success": "Fuseau horaire mis à jour",
+    "successMessage": "Votre préférence de fuseau horaire a été enregistrée."
+  },
   "title": "Paramètres",
   "common": {
     "save": "Enregistrer",

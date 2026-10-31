@@ -30,6 +30,7 @@ import { apiClient } from '../../utils/ApiClient'
 import { UpdateUserDetails } from '../../utils/Fetcher'
 import { resolvePhotoURL } from '../../utils/Helpers'
 import { getCroppedImg } from '../../utils/imageCropUtils'
+import { getTimezones } from '../../utils/timezone'
 import LoadingComponent from '../components/Loading'
 import SettingsLayout from './SettingsLayout'
 
@@ -38,13 +39,6 @@ const surfaceSx = {
   border: '1px solid',
   borderColor: 'divider',
   borderRadius: 'xl',
-}
-
-const getTimezones = () => {
-  if (typeof Intl.supportedValuesOf === 'function') {
-    return Intl.supportedValuesOf('timeZone')
-  }
-  return [Intl.DateTimeFormat().resolvedOptions().timeZone]
 }
 
 const ProfileContent = ({ refetchUserProfile, userProfile }) => {
@@ -64,7 +58,7 @@ const ProfileContent = ({ refetchUserProfile, userProfile }) => {
   const [showCropper, setShowCropper] = useState(false)
   const [selectedFile, setSelectedFile] = useState(null)
 
-  const timezones = getTimezones()
+  const timezones = getTimezones(timezone)
 
   const closeCropper = () => {
     if (selectedFile) URL.revokeObjectURL(selectedFile)
@@ -149,8 +143,7 @@ const ProfileContent = ({ refetchUserProfile, userProfile }) => {
 
   const hasChanges =
     displayName.trim() !== (userProfile.displayName || '') ||
-    timezone !==
-      (userProfile.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone)
+    timezone !== userProfile.timezone
   const initials = (displayName || userProfile.displayName || '?')
     .charAt(0)
     .toUpperCase()
