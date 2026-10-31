@@ -462,10 +462,16 @@ test('new tasks append at the bottom online and offline, ignoring copied positio
       projectId: 'p1',
       sectionId: 20,
       boardPosition: -1,
+      xpCategoryId: 7,
+      points: 25,
     })
     assert.equal(created.boardPosition, 4000)
+    assert.equal(created.xpCategoryId, 7)
+    assert.equal(created.points, 25)
     if (online) {
       assert.equal(app.createCalls[0].boardPosition, 4000)
+      assert.equal(app.createCalls[0].xpCategoryId, 7)
+      assert.equal(app.createCalls[0].points, 25)
     } else {
       const second = await create.mutationFn({ projectId: 'p1', sectionId: 20 })
       assert.equal(second.boardPosition, 5000)
@@ -474,6 +480,8 @@ test('new tasks append at the bottom online and offline, ignoring copied positio
         Array.from(restored, chore => chore.boardPosition),
         [4000, 5000],
       )
+      assert.equal(restored[0].xpCategoryId, 7)
+      assert.equal(restored[0].points, 25)
     }
   }
 })

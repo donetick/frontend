@@ -12,7 +12,13 @@
     "quickAdd": "Quick add:",
     "aboutToRedeem": "You are about to deduct",
     "amount": "{{count}} points",
-    "remaining": "Remaining: {{count}} points"
+    "remaining": "Remaining: {{count}} points",
+    "pointsAvailable_xp": "{{count}} XP available",
+    "pointsToRedeem_xp": "XP to deduct",
+    "placeholder_xp": "Enter XP...",
+    "cannotExceed_xp": "Cannot exceed available XP",
+    "amount_xp": "{{count}} XP",
+    "remaining_xp": "Remaining: {{count}} XP"
   },
   "leaderboard": {
     "titlePoints": "Points Leaderboard",
@@ -25,7 +31,12 @@
     "tasksAndAvg": "{{tasks}} tasks • {{avg}} avg per task",
     "available": "{{count}} available",
     "points_one": "{{count}} point",
-    "points_other": "{{count}} points"
+    "points_other": "{{count}} points",
+    "titlePoints_xp": "XP Leaderboard",
+    "subtitlePoints_xp": "Rankings based on XP earned during the selected time period",
+    "modePoints_xp": "XP",
+    "points_xp_one": "{{count}} XP",
+    "points_xp_other": "{{count}} XP"
   },
   "tabs": {
     "short7d": "7D",
@@ -41,7 +52,9 @@
     "analysisTitle": "Filter & Analysis",
     "title": "Filter Points",
     "showFor": "Show points for:",
-    "timePeriod": "Time period:"
+    "timePeriod": "Time period:",
+    "title_xp": "Filter XP",
+    "showFor_xp": "Show XP for:"
   },
   "cards": {
     "available": {
@@ -61,7 +74,8 @@
       "allTime": "All time",
       "last6Months": "Last 6 months",
       "lastDays_one": "Last {{count}} day",
-      "lastDays_other": "Last {{count}} days"
+      "lastDays_other": "Last {{count}} days",
+      "title_xp": "Period XP"
     }
   },
   "summary": {
@@ -72,9 +86,42 @@
     "allTime": "All Time",
     "last6Months": "Last 6 Months",
     "lastDays_one": "Last {{count}} Day",
-    "lastDays_other": "Last {{count}} Days"
+    "lastDays_other": "Last {{count}} Days",
+    "showingFor_xp": "Showing XP for",
+    "selectUser_xp": "Select member to view XP for"
   },
   "trend": {
-    "title": "Points Trend"
+    "title": "Points Trend",
+    "title_xp": "XP Trend"
+  },
+  "redeem_xp": "Deduct XP",
+  "xp": {
+    "category": "XP category",
+    "chooseCategory": "Choose a category",
+    "uncategorized": "Uncategorized",
+    "archived": "archived",
+    "settingsTitle": "Points and XP",
+    "useXP": "Use XP instead of Points",
+    "historyHelp": "Existing balances remain Uncategorized. Archiving a category preserves its history and existing task assignments.",
+    "rename": "Rename",
+    "restore": "Restore",
+    "archive": "Archive",
+    "categoryName": "Category name",
+    "save": "Save",
+    "addCategory": "Add category",
+    "loading": "Loading category balances…",
+    "retry": "Retry",
+    "breakdownTitle": "{{unit}} by category",
+    "points": "Points",
+    "totals": "Available: {{available}} · Earned: {{earned}} · Spent: {{spent}}",
+    "adjustment": "Balance adjustment",
+    "add": "Add",
+    "deduct": "Deduct",
+    "amount": "Amount",
+    "apply": "Apply adjustment",
+    "redeemReward": "Choose a category for this reward",
+    "note": "Note (optional)",
+    "request": "Request reward",
+    "quickAddAmount": "Add {{count}} {{unit}}"
   }
 }

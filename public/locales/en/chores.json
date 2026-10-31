@@ -847,7 +847,12 @@
     "archive": "Archive",
     "unarchive": "Unarchive",
     "create": "Create",
-    "notificationsFreePlanNote": "Your plan includes a reminder on the due date. Plus adds reminders before it's due and follow-ups after."
+    "notificationsFreePlanNote": "Your plan includes a reminder on the due date. Plus adds reminders before it's due and follow-ups after.",
+    "pointsSystem_xp": "XP System",
+    "assignPoints_xp": "Assign XP for completion",
+    "assignPointsHelp_xp": "Assign XP to this task and user will earn XP when they completed it",
+    "pointsLabel_xp": "XP:",
+    "pointsPlaceholder_xp": "XP"
   },
   "addTask": {
     "descriptionLabel": "Description:",
@@ -1041,7 +1046,9 @@
     },
     "hrs": "hrs",
     "setDueDateHint": "Set a due date to configure completion window",
-    "more": "More"
+    "more": "More",
+    "points_xp": "XP",
+    "pointsDescription_xp": "Award XP for completing this task"
   },
   "filterBuilder": {
     "customDueDate": {
@@ -1088,7 +1095,8 @@
     "project": "Project",
     "filterFallback": "Filter",
     "notPrefix": "Not ",
-    "clear": "Clear"
+    "clear": "Clear",
+    "points_xp": "XP"
   },
   "empty": {
     "errorTitle": "Can't reach Donetick",
@@ -1239,6 +1247,9 @@
     "changeAThing": "Change a Thing",
     "inheritedFromSharedProject": "Inherited from the project: only its members can see tasks in it",
     "onlyProjectAudienceAssignable": "Only people who can see the project “{{project}}” can be assigned.",
-    "followsProjectName": "Follows the project “{{project}}”"
+    "followsProjectName": "Follows the project “{{project}}”",
+    "awardPointsOrChangeThingsWhenThis_xp": "Award XP or change Things when this task is completed. Skipping or postponing does not run these actions.",
+    "awardPoints_xp": "Award XP",
+    "removePointsAction_xp": "Remove XP action"
   }
 }

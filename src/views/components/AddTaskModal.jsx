@@ -24,7 +24,6 @@ import * as chrono from 'chrono-node'
 import moment from 'moment'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
-import { useTranslation } from 'react-i18next'
 
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import ModalActions from '../../components/common/ModalActions'
@@ -34,6 +33,7 @@ import { useFileUpload } from '../../hooks/useFileUpload'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 import { useCreateChore } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
+import { useXPTranslation as useTranslation } from '../../queries/XPQueries'
 import { localAIService } from '../../service/LocalAIService'
 import {
   fileToDataUrl,
@@ -217,7 +217,7 @@ const TaskInput = ({
   onChoreUpdate,
   onClose,
 }) => {
-  const { t } = useTranslation('chores')
+  const { t, xpMode } = useTranslation('chores')
   // Claims the keyboard while open so background listeners (e.g. the project
   // selector's own Cmd+E) know to stay out of the way — see
   // KeyboardShortcutScopeContext.
@@ -312,6 +312,7 @@ const TaskInput = ({
   }))
   const [subTasks, setSubTasks] = useState(null)
   const [points, setPoints] = useState(-1)
+  const [xpCategoryID, setXPCategoryID] = useState(0)
   const [isAnyoneTask, setIsAnyoneTask] = useState(false)
   const [hasDescription, setHasDescription] = useState(false)
   const [hasSubTasks, setHasSubTasks] = useState(false)
@@ -456,9 +457,15 @@ const TaskInput = ({
           ...assignableMembers,
         ],
       },
-      '*': POINTS_SUGGESTIONS,
+      '*': {
+        ...POINTS_SUGGESTIONS,
+        options: POINTS_SUGGESTIONS.options.map(option => ({
+          ...option,
+          name: `${option.id} ${xpMode ? 'XP' : t('points:xp.points')}`,
+        })),
+      },
     }),
-    [userLabels, assignableMembers, handleCreateLabel, t],
+    [userLabels, assignableMembers, handleCreateLabel, t, xpMode],
   )
 
   const projectAudienceKey = (getProjectAudienceIds(taskProject) || []).join(
@@ -1287,6 +1294,7 @@ const TaskInput = ({
     setFrequency(null)
     setPriority(0)
     setPoints(-1)
+    setXPCategoryID(0)
     setIsAnyoneTask(false)
     setHasDescription(false)
     setDescription(null)
@@ -1379,6 +1387,7 @@ const TaskInput = ({
       labelsV2: labelsV2,
       priority: priority ? Number(priority) : 0,
       points: points > -1 ? points : null,
+      xpCategoryId: xpCategoryID,
       deadlineOffset: deadlineOffset < 0 ? null : deadlineOffset,
       completionWindow:
         completionWindow < 0 || !dueDate || isAlwaysAvailable
@@ -2152,6 +2161,8 @@ const TaskInput = ({
               open={showAdvanced}
               points={points}
               onPointsChange={setPoints}
+              categoryID={xpCategoryID}
+              onCategoryChange={setXPCategoryID}
               requireApproval={requireApproval}
               onRequireApprovalChange={setRequireApproval}
               completionWindow={completionWindow}

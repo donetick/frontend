@@ -6,11 +6,11 @@ import {
 } from '@mui/icons-material'
 import { Box, IconButton, Typography } from '@mui/joy'
 import { memo } from 'react'
-import { useTranslation } from 'react-i18next'
 
 import { LinkTypeIcon } from '../../../components/common/ExternalLinkChip'
 import { useLocalization } from '../../../contexts/LocalizationContext'
 import { usePendingCommands } from '../../../hooks/usePendingCommands'
+import { useXPTranslation as useTranslation } from '../../../queries/XPQueries'
 import {
   getDueDateChipColor,
   getDueDateChipText,
@@ -45,7 +45,7 @@ const ProjectBoardCard = memo(function ProjectBoardCard({
   onSelectionToggle,
   performers = [],
 }) {
-  const { t } = useTranslation('chores')
+  const { t, xpMode } = useTranslation('chores')
   const { timeFormat } = useLocalization()
   const { data: pendingCommands } = usePendingCommands(chore.id)
   const assignee = performers.find(item => item.userId === chore.assignedTo)
@@ -193,6 +193,12 @@ const ProjectBoardCard = memo(function ProjectBoardCard({
               >
                 {assigneeName}
               </Box>
+            </Typography>
+          )}
+          {chore.points > 0 && (
+            <Typography sx={metadataSx}>
+              {chore.points}
+              {xpMode ? ' XP' : 'pts'}
             </Typography>
           )}
           {recurrent && (
