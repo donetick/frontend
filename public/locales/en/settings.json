@@ -1,6 +1,8 @@
 {
   "title": "Settings",
   "timezonePrompt": {
+    "ignore": "Don’t ask again",
+    "ignoreHint": "Stops timezone prompts for your account on this device or browser.",
     "title": "A new timezone?",
     "missingTitle": "Let’s get your time right",
     "description": "Your device’s timezone is different from your profile. Would you like to update it to keep your schedules and reminders in sync?",

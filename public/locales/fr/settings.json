@@ -1,5 +1,7 @@
 {
   "timezonePrompt": {
+    "ignore": "Ne plus demander",
+    "ignoreHint": "Désactive les demandes de fuseau horaire pour votre compte sur cet appareil ou ce navigateur.",
     "title": "Un nouveau fuseau horaire ?",
     "missingTitle": "Réglons votre heure",
     "description": "Le fuseau horaire de votre appareil est différent de celui de votre profil. Voulez-vous le mettre à jour pour garder vos horaires et rappels synchronisés ?",

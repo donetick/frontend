@@ -1,5 +1,7 @@
 {
   "timezonePrompt": {
+    "ignore": "Nie pytaj ponownie",
+    "ignoreHint": "Wyłącza monity o strefę czasową dla Twojego konta na tym urządzeniu lub w tej przeglądarce.",
     "title": "Nowa strefa czasowa?",
     "missingTitle": "Ustawmy właściwy czas",
     "description": "Strefa czasowa urządzenia różni się od tej w Twoim profilu. Czy chcesz ją zaktualizować, aby harmonogramy i przypomnienia były zsynchronizowane?",

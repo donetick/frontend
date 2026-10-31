@@ -1,5 +1,7 @@
 {
   "timezonePrompt": {
+    "ignore": "不再询问",
+    "ignoreHint": "在此设备或浏览器上停止显示你账户的时区提示。",
     "title": "时区变了吗？",
     "missingTitle": "设置正确的时间",
     "description": "设备的时区与个人资料中的时区不同。是否更新以保持日程和提醒同步？",

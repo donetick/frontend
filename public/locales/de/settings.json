@@ -1,5 +1,7 @@
 {
   "timezonePrompt": {
+    "ignore": "Nicht mehr fragen",
+    "ignoreHint": "Deaktiviert Zeitzonenabfragen für dein Konto auf diesem Gerät oder in diesem Browser.",
     "title": "Eine neue Zeitzone?",
     "missingTitle": "Die richtige Zeit einstellen",
     "description": "Die Zeitzone deines Geräts unterscheidet sich von der in deinem Profil. Möchtest du sie aktualisieren, damit Zeitpläne und Erinnerungen synchron bleiben?",

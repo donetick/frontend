@@ -1,5 +1,7 @@
 {
   "timezonePrompt": {
+    "ignore": "Niet meer vragen",
+    "ignoreHint": "Schakelt tijdzonemeldingen voor je account op dit apparaat of in deze browser uit.",
     "title": "Een nieuwe tijdzone?",
     "missingTitle": "Laten we de juiste tijd instellen",
     "description": "De tijdzone van je apparaat verschilt van die in je profiel. Wil je deze bijwerken om je planningen en herinneringen gesynchroniseerd te houden?",

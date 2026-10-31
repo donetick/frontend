@@ -1,5 +1,7 @@
 {
   "timezonePrompt": {
+    "ignore": "Não perguntar novamente",
+    "ignoreHint": "Desativa os avisos de fuso horário para sua conta neste dispositivo ou navegador.",
     "title": "Um novo fuso horário?",
     "missingTitle": "Vamos acertar seu horário",
     "description": "O fuso horário do seu dispositivo é diferente do seu perfil. Quer atualizá-lo para manter seus agendamentos e lembretes sincronizados?",

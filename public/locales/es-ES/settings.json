@@ -1,5 +1,7 @@
 {
   "timezonePrompt": {
+    "ignore": "No volver a preguntar",
+    "ignoreHint": "Desactiva los avisos de zona horaria para tu cuenta en este dispositivo o navegador.",
     "title": "¿Una nueva zona horaria?",
     "missingTitle": "Configuremos tu hora",
     "description": "La zona horaria de tu dispositivo es diferente de la de tu perfil. ¿Quieres actualizarla para mantener tus horarios y recordatorios sincronizados?",

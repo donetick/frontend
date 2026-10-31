@@ -1,5 +1,7 @@
 {
   "timezonePrompt": {
+    "ignore": "Znovu se neptat",
+    "ignoreHint": "Vypne výzvy k nastavení časového pásma pro váš účet na tomto zařízení nebo v tomto prohlížeči.",
     "title": "Nové časové pásmo?",
     "missingTitle": "Nastavme správný čas",
     "description": "Časové pásmo vašeho zařízení se liší od pásma ve vašem profilu. Chcete ho aktualizovat, aby vaše plány a připomenutí zůstaly synchronizované?",

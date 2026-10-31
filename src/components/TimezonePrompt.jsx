@@ -44,6 +44,7 @@ const TimezonePrompt = () => {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(false)
   const [dismissed, setDismissed] = useState({})
+  const [ignoredUsers, setIgnoredUsers] = useState({})
   const savingRef = useRef(false)
   const [checkTime, setCheckTime] = useState(Date.now)
 
@@ -66,8 +67,11 @@ const TimezonePrompt = () => {
   const key = timezonePromptKey(profile?.id, profile?.timezone, detected)
   const selected = selection?.key === key ? selection.value : detected
 
+  const ignoreKey = `timezone-prompt-disabled:${profile?.id}`
+  let ignored = Boolean(ignoredUsers[ignoreKey])
   let snoozedUntil = dismissed[key] || 0
   try {
+    ignored = ignored || localStorage.getItem(ignoreKey) === 'true'
     snoozedUntil = Math.max(
       snoozedUntil,
       Number(localStorage.getItem(key)) || 0,
@@ -78,6 +82,7 @@ const TimezonePrompt = () => {
   const open = Boolean(
     localStorage.getItem('token') &&
     profile?.id &&
+    !ignored &&
     !excludedRoute(pathname) &&
     needsTimezoneUpdate(profile.timezone, detected) &&
     checkTime >= snoozedUntil,
@@ -91,6 +96,16 @@ const TimezonePrompt = () => {
       localStorage.setItem(key, String(until))
     } catch {
       // Storage is optional.
+    }
+  }
+
+  const ignore = () => {
+    if (savingRef.current) return
+    setIgnoredUsers(previous => ({ ...previous, [ignoreKey]: true }))
+    try {
+      localStorage.setItem(ignoreKey, 'true')
+    } catch {
+      // Still suppress prompts for this session if storage is unavailable.
     }
   }
 
@@ -234,7 +249,7 @@ const TimezonePrompt = () => {
       <Button
         fullWidth
         size='lg'
-        sx={authButtonSx}
+        sx={{ ...authButtonSx, fontSize: '1rem' }}
         loading={saving}
         disabled={!selected}
         onClick={save}
@@ -247,13 +262,25 @@ const TimezonePrompt = () => {
       </Button>
       <Button
         fullWidth
-        variant='plain'
+        variant='soft'
         color='neutral'
         disabled={saving}
         onClick={dismiss}
-        sx={{ mt: 1 }}
+        size='lg'
+        sx={{ ...authButtonSx, fontSize: '1rem', mt: 1 }}
       >
         {t('timezonePrompt.later')}
+      </Button>
+      <Button
+        fullWidth
+        variant='plain'
+        color='neutral'
+        size='lg'
+        sx={{ ...authButtonSx, fontSize: '1rem' }}
+        disabled={saving}
+        onClick={ignore}
+      >
+        {t('timezonePrompt.ignore')}
       </Button>
       <Typography level='body-xs' textColor='text.tertiary' sx={{ mt: 1 }}>
         {t('timezonePrompt.settingsHint')}
