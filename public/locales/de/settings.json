@@ -471,6 +471,14 @@
   "homeSections": {
     "title": "Übersicht Anpassung",
     "description": "Lege fest, welche Abschnitte in welcher Reihenfolge auf dem Startbildschirm erscheinen. Ziehen und Ablegen um die Abschnitte neu anzuordnen oder wechsle ihre Sichtbarkeit.",
+    "taskScope": {
+      "title": "Sichtbarkeit von Aufgaben",
+      "label": "Angezeigte Aufgaben",
+      "description": "Lege fest, wessen Aufgaben in deinen Übersichtslisten und Zusammenfassungen erscheinen. „Dein Kreis“ zeigt immer die Aktivitäten im Kreis.",
+      "myTasks": "Nur meine Aufgaben",
+      "allCircleTasks": "Alle Aufgaben im Kreis"
+    },
+    "sectionsTitle": "Bereiche auf dem Startbildschirm",
     "resetToDefaults": "Auf Standard zurücksetzen",
     "resetHelper": "Dadurch werden alle Abschnitte auf ihre Standard-Sichtbarkeit und Reihenfolge zurückgesetzt.",
     "sections": {
@@ -512,6 +520,16 @@
   "layout": {
     "title": "Layout & Navigation",
     "detailedDescription": "Wähle den Bildschirm, mit dem die App startet, und welche Verknüpfungen und Panels ihn umgeben.",
+    "savedOnDevice": "Änderungen werden automatisch auf diesem Gerät bzw. in diesem Browser gespeichert.",
+    "preview": "Vorschau",
+    "reorderItem": "{{name}} verschieben",
+    "reorderHint": "Ziehe die Griffe, um die Reihenfolge zu ändern. Mit der Tastatur: Griff auswählen, Leertaste drücken, dann die Pfeiltasten verwenden.",
+    "taskEditor": {
+      "title": "Aufgabeneditor",
+      "description": "Lege fest, wie du dich durch die Aufgabeneinstellungen bewegst.",
+      "singlePage": "Alles auf einer Seite",
+      "helper": "Zeige alle Aufgabeneinstellungen auf einer scrollbaren Seite statt in einzelnen Schritten."
+    },
     "defaultView": {
       "title": "Standardansicht",
       "description": "Wähle, mit welchem Bildschirm die App startet.",
@@ -528,6 +546,8 @@
     },
     "bottomNav": {
       "title": "Untere Navigation",
+      "selectedCount": "{{count}} von {{max}} Verknüpfungen ausgewählt",
+      "limitHint": "Alle Plätze für Verknüpfungen sind belegt. Deaktiviere eine, um eine andere auszuwählen.",
       "description": "Wähle bis zu {{max}} Verknüpfungen für die untere Navigationsleiste auf dem Handy und ordne sie per Drag-and-drop. „Mehr“ bleibt immer der letzte Eintrag und öffnet das vollständige Menü.",
       "resetToDefaults": "Auf Standard zurücksetzen",
       "resetHelper": "Dadurch werden Verknüpfungen und Reihenfolge der unteren Navigation auf den Standard zurückgesetzt.",
@@ -543,7 +563,23 @@
   "theme": {
     "title": "Design-Einstellungen",
     "description": "Lege fest, wie die Seite für dich aussieht. Wähle ein festes Design oder synchronisiere mit deinem System, um automatisch zwischen hellem und dunklem Design zu wechseln.",
+    "skin": "Farbschema",
+    "skinDescription": "Jedes Farbschema unterstützt den hellen und den dunklen Modus. Deine Auswahl wird auf diesem Gerät gespeichert.",
+    "skins": {
+      "default": "Standard",
+      "forest": "Wald",
+      "lavender": "Lavendel",
+      "sand": "Sand",
+      "ocean": "Ozean",
+      "rose": "Rose",
+      "sunset": "Sonnenuntergang",
+      "bubblegum": "Pink",
+      "mint": "Minze",
+      "graphite": "Graphit"
+    },
     "themeMode": "Designmodus",
+    "modeDescription": "Wähle ein Erscheinungsbild, das sich den ganzen Tag über angenehm anfühlt.",
+    "systemHint": "„System“ folgt automatisch dem hellen oder dunklen Erscheinungsbild deines Geräts.",
     "light": "Hell",
     "dark": "Dunkel",
     "system": "System"
