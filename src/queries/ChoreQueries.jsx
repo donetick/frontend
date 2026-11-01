@@ -30,7 +30,6 @@ import { isOfflineFeatureEnabled } from '../utils/OfflineFeatureToggle'
 import { mergePendingCreates } from '../utils/PendingChores'
 import { syncEngine } from '../utils/SyncEngine'
 import { withDefaultTimezone } from '../utils/timezone'
-import { useUserProfile } from './UserQueries'
 
 // Effectively "can this action be queued offline?" — the offline feature must
 // be enabled, otherwise there is no command queue to replay it later and the
@@ -68,13 +67,21 @@ const buildOfflineChore = task => ({
 // Every create path (editor, quick add, voice/scan, project board) passes
 // through useCreateChore, so defaults for new chores belong here rather than in
 // each producer. Updates never reach it, so existing chores are left alone.
-const normalizeCreatePayload = (task, userProfile) => ({
-  ...task,
-  frequencyMetadata: withDefaultTimezone(
-    task.frequencyMetadata,
-    userProfile?.timezone,
-  ),
-})
+const normalizeCreatePayload = async (task, queryClient) => {
+  if (task.frequencyMetadata?.timezone) return task
+  // Looked up only when needed. The app-level TimezonePrompt keeps the
+  // profile query warm; offlineDB covers a cold cache while offline.
+  const profile =
+    queryClient.getQueryData(['userProfile', localStorage.getItem('token')]) ??
+    (await offlineDB.getKV('user_profile').catch(() => null))
+  return {
+    ...task,
+    frequencyMetadata: withDefaultTimezone(
+      task.frequencyMetadata,
+      profile?.timezone,
+    ),
+  }
+}
 
 export const useChores = (includeArchive = false, { enabled = true } = {}) => {
   return useQuery({
@@ -174,7 +181,6 @@ export const useDeleteChores = () => {
 }
 export const useCreateChore = () => {
   const queryClient = useQueryClient()
-  const { data: userProfile } = useUserProfile()
 
   const queueOfflineCreate = async newTask => {
     const offlineChore = buildOfflineChore(newTask)
@@ -206,7 +212,7 @@ export const useCreateChore = () => {
       // send it to the backend as part of the chore payload.
       const { source, ...taskData } = rawTask
       const newTask = appendChoreToSection(
-        normalizeCreatePayload(taskData, userProfile),
+        await normalizeCreatePayload(taskData, queryClient),
         queryClient.getQueryData(['chores', false])?.res || [],
       )
       if (isOfflineFeatureEnabled() && !networkManager.isOnline) {
