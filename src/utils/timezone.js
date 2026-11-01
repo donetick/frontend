@@ -18,6 +18,14 @@ export const detectTimezone = () => {
   }
 }
 
+// The server evaluates a recurring schedule in frequencyMetadata.timezone and
+// falls back to UTC without one, which moves local due times at DST changes.
+export const withDetectedTimezone = metadata => {
+  if (metadata?.timezone) return metadata
+  const timezone = detectTimezone()
+  return timezone ? { ...metadata, timezone } : metadata
+}
+
 export const needsTimezoneUpdate = (saved, detected) =>
   Boolean(detected && canonicalTimezone(saved) !== canonicalTimezone(detected))
 

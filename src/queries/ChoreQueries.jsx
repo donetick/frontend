@@ -29,6 +29,7 @@ import { offlineDB } from '../utils/OfflineDB'
 import { isOfflineFeatureEnabled } from '../utils/OfflineFeatureToggle'
 import { mergePendingCreates } from '../utils/PendingChores'
 import { syncEngine } from '../utils/SyncEngine'
+import { withDetectedTimezone } from '../utils/timezone'
 
 // Effectively "can this action be queued offline?" — the offline feature must
 // be enabled, otherwise there is no command queue to replay it later and the
@@ -191,6 +192,11 @@ export const useCreateChore = () => {
       // `source` is analytics-only metadata (typed/voice/scan/clone) — never
       // send it to the backend as part of the chore payload.
       const { source, ...taskData } = rawTask
+      // Updates go through useUpdateChore, so existing chores never gain a
+      // timezone here; adding one would move their future recurrences.
+      taskData.frequencyMetadata = withDetectedTimezone(
+        taskData.frequencyMetadata,
+      )
       const newTask = appendChoreToSection(
         taskData,
         queryClient.getQueryData(['chores', false])?.res || [],
