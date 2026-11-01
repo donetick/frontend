@@ -527,6 +527,20 @@ const BoardColumn = ({
   const isExpanded = displayMode !== 'list' || !isCollapsed
   const [isEditing, setIsEditing] = useState(false)
   const [name, setName] = useState(section.name)
+  const nameInputRef = useRef(null)
+  const editingNameRef = useRef(false)
+
+  // Dropdown restores focus to its trigger when it closes. Focus the editor
+  // afterwards so that restoring focus doesn't immediately blur/save it.
+  useEffect(() => {
+    if (!isEditing) return
+    const frame = requestAnimationFrame(() => {
+      nameInputRef.current?.focus()
+      nameInputRef.current?.select()
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [isEditing])
+
   useDndMonitor({
     onDragOver: ({ active, over }) => {
       if (
@@ -542,6 +556,8 @@ const BoardColumn = ({
   useEffect(() => setName(section.name), [section.name])
 
   const saveName = () => {
+    if (!editingNameRef.current) return
+    editingNameRef.current = false
     const trimmed = name.trim()
     if (trimmed && trimmed !== section.name) onRename(trimmed)
     else setName(section.name)
@@ -637,14 +653,19 @@ const BoardColumn = ({
           )}
           {isEditing ? (
             <Input
-              autoFocus
+              slotProps={{ input: { ref: nameInputRef } }}
               size='sm'
               value={name}
               onChange={event => setName(event.target.value)}
               onBlur={saveName}
               onKeyDown={event => {
-                if (event.key === 'Enter') saveName()
+                event.stopPropagation()
+                if (event.key === 'Enter') {
+                  event.preventDefault()
+                  saveName()
+                }
                 if (event.key === 'Escape') {
+                  editingNameRef.current = false
                   setName(section.name)
                   setIsEditing(false)
                 }
@@ -677,7 +698,13 @@ const BoardColumn = ({
               size='sm'
               onClick={event => event.stopPropagation()}
             >
-              <MenuItem onClick={() => setIsEditing(true)}>
+              <MenuItem
+                onClick={() => {
+                  editingNameRef.current = true
+                  setName(section.name)
+                  setIsEditing(true)
+                }}
+              >
                 <EditOutlined sx={{ fontSize: 17 }} />
                 {t('board.renameSection')}
               </MenuItem>
@@ -783,7 +810,7 @@ const ProjectBoard = ({
   const [pendingTaskOrder, setPendingTaskOrder] = useState(null)
   const [dragTaskOrder, setDragTaskOrder] = useState(null)
   const [pendingSectionOrder, setPendingSectionOrder] = useState(null)
-  const hasEnsuredDefaultsRef = useRef(false)
+  const hasEnsuredDefaultsRef = useRef(null)
 
   const {
     data: sections = [],
@@ -827,27 +854,22 @@ const ProjectBoard = ({
     }),
   )
 
-  // A project's board starts without any columns. Create the usual three the
-  // first time anyone opens it empty, so it isn't blank. This can race with
-  // another viewer doing the same at the same moment; worst case is a couple
-  // of duplicate default sections, which anyone can rename or delete.
+  // The backend treats unsectioned tasks as belonging to the first section.
+  // Start empty projects with one real section shared by board and list views.
   useEffect(() => {
     if (
       !hasLoadedSections ||
       isFetchingSections ||
       !networkManager.isOnline ||
       sections.length > 0 ||
-      hasEnsuredDefaultsRef.current
+      hasEnsuredDefaultsRef.current === projectId
     ) {
       return
     }
-    hasEnsuredDefaultsRef.current = true
-    ;[
-      t('board.defaults.todo'),
-      t('board.defaults.inProgress'),
-      t('board.defaults.done'),
-    ].forEach(name => {
-      createSectionMutation.mutate({ projectId, name })
+    hasEnsuredDefaultsRef.current = projectId
+    createSectionMutation.mutate({
+      projectId,
+      name: t('board.defaults.default', { defaultValue: 'Default' }),
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasLoadedSections, isFetchingSections, sections.length, projectId])

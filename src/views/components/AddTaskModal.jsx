@@ -28,6 +28,7 @@ import { flushSync } from 'react-dom'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import ModalActions from '../../components/common/ModalActions'
 import { useModalShortcutScope } from '../../contexts/KeyboardShortcutScopeContext'
+import { useQuickAddModalRegistration } from '../../contexts/QuickAddModalContext'
 import { useDocumentScanner } from '../../hooks/useDocumentScanner'
 import { useFileUpload } from '../../hooks/useFileUpload'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
@@ -222,6 +223,7 @@ const TaskInput = ({
   // selector's own Cmd+E) know to stay out of the way — see
   // KeyboardShortcutScopeContext.
   const isShortcutScopeActive = useModalShortcutScope(isModalOpen)
+  useQuickAddModalRegistration(isModalOpen)
   const { ResponsiveModal } = useResponsiveModal()
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
   const pickerEmptyDisplay = isMobile ? 'icon' : 'icon-text'
@@ -547,6 +549,7 @@ const TaskInput = ({
         setShowKeyboardShortcuts(false)
       }
       if (isHoldingCmd && event.key.toLowerCase() === 'j') {
+        event.preventDefault()
         setHasSubTasks(true)
         setShowKeyboardShortcuts(false)
       }

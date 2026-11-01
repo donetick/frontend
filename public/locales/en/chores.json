@@ -184,6 +184,7 @@
     "newSectionPlaceholder": "New section",
     "renameSection": "Rename section",
     "defaults": {
+      "default": "Default",
       "todo": "To do",
       "inProgress": "In progress",
       "done": "Done"
