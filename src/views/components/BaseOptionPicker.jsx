@@ -247,7 +247,6 @@ const BaseOptionPicker = ({
             >
               {filterItems && (
                 <Input
-                  autoFocus
                   size='sm'
                   placeholder={searchPlaceholder}
                   startDecorator={<Search sx={{ fontSize: 18 }} />}
