@@ -86,6 +86,10 @@ export const parsePriority = inputSentence => {
       }),
       cleanedSentence: inputSentence
         .replace(pattern, '$1')
+        // Drop punctuation that belonged to the keyword, e.g. "Urgent: ..."
+        // or "(asap)", so it doesn't stay behind in the title
+        .replace(/\(\s*\)|\[\s*\]/g, '')
+        .replace(/^[\s:;,\-–—]+|[\s:;,\-–—]+$/g, '')
         .replace(/\s+/g, ' ')
         .trim(),
     }
