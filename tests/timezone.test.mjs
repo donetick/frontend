@@ -1,23 +1,31 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
-import { detectTimezone, withDetectedTimezone } from '../src/utils/timezone.js'
+import { detectTimezone, withDefaultTimezone } from '../src/utils/timezone.js'
 
 const detected = detectTimezone()
 
-test('withDetectedTimezone fills a missing timezone', () => {
-  assert.deepEqual(withDetectedTimezone({ unit: null, time: '' }), {
-    unit: null,
+test('withDefaultTimezone prefers the profile timezone', () => {
+  assert.deepEqual(withDefaultTimezone({ time: '' }, 'Asia/Singapore'), {
     time: '',
-    timezone: detected,
+    timezone: 'Asia/Singapore',
   })
-  assert.deepEqual(withDetectedTimezone({ timezone: '' }), {
-    timezone: detected,
+  assert.deepEqual(withDefaultTimezone({}, 'US/Eastern'), {
+    timezone: 'America/New_York',
   })
-  assert.deepEqual(withDetectedTimezone(undefined), { timezone: detected })
 })
 
-test('withDetectedTimezone keeps an existing timezone', () => {
-  const metadata = { timezone: 'Asia/Singapore' }
-  assert.equal(withDetectedTimezone(metadata), metadata)
+test('withDefaultTimezone falls back to the device timezone', () => {
+  assert.deepEqual(withDefaultTimezone({ timezone: '' }), {
+    timezone: detected,
+  })
+  assert.deepEqual(withDefaultTimezone(undefined, ''), { timezone: detected })
+  assert.deepEqual(withDefaultTimezone({}, 'Not/AZone'), {
+    timezone: detected,
+  })
+})
+
+test('withDefaultTimezone keeps an existing timezone', () => {
+  const metadata = { timezone: 'Europe/Berlin' }
+  assert.equal(withDefaultTimezone(metadata, 'Asia/Singapore'), metadata)
 })
