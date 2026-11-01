@@ -207,6 +207,16 @@ const BaseOptionPicker = ({
                 fallbackPlacements: ['bottom-start', 'top-start'],
               },
             },
+            {
+              name: 'preventOverflow',
+              options: {
+                rootBoundary: 'viewport',
+                padding: 12,
+                // Also constrain the vertical axis for top/bottom placements.
+                altAxis: true,
+                tether: false,
+              },
+            },
           ]}
           sx={{ zIndex: 'calc(var(--joy-zIndex-modal) + 1)' }}
         >
