@@ -60,7 +60,6 @@ const isValidWordBoundary = (text, matchIndex, matchLength) => {
 }
 
 export const parsePriority = inputSentence => {
-  let sentence = inputSentence.toLowerCase()
   const priorityMap = {
     1: ['!p1', 'priority 1', 'high priority', 'urgent', 'asap', 'important'],
     2: ['!p2', 'priority 2', 'medium priority'],
@@ -69,25 +68,26 @@ export const parsePriority = inputSentence => {
   }
 
   for (const [priority, terms] of Object.entries(priorityMap)) {
-    if (terms.some(term => sentence.includes(term))) {
-      return {
-        result: priority,
-        highlight: terms
-          .map(term => {
-            const index = sentence.indexOf(term)
-            return {
-              text: term,
-              start: index,
-              end: index + term.length,
-            }
-          })
-          .filter(term => term.start !== -1),
+    // Whole words only, so "unimportant" or "urgently" don't count. The
+    // preceding char is captured instead of using a lookbehind, which
+    // Safari/iOS < 16.4 doesn't support.
+    const pattern = new RegExp(
+      `(^|[^\\p{L}\\p{N}_])(${terms.join('|')})(?![\\p{L}\\p{N}_])`,
+      'giu',
+    )
+    const matches = [...inputSentence.matchAll(pattern)]
+    if (matches.length === 0) continue
 
-        cleanedSentence: inputSentence
-          .replace(new RegExp(`(${terms.join('|')})`, 'gi'), '')
-          .replace(/\s+/g, ' ')
-          .trim(),
-      }
+    return {
+      result: priority,
+      highlight: matches.map(match => {
+        const start = match.index + match[1].length
+        return { text: match[2], start, end: start + match[2].length }
+      }),
+      cleanedSentence: inputSentence
+        .replace(pattern, '$1')
+        .replace(/\s+/g, ' ')
+        .trim(),
     }
   }
   return {
