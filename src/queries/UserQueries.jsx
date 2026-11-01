@@ -62,38 +62,32 @@ export const useCircleMembers = () => {
   return { data, error, isLoading, handleRefetch }
 }
 
-// Exported for non-hook code such as mutation functions:
-// queryClient.ensureQueryData(userProfileQuery()).
-export const userProfileQuery = (token = localStorage.getItem('token')) => ({
-  queryKey: ['userProfile', token],
-  queryFn: async () => {
-    if (!token) {
-      return null
-    }
-
-    try {
-      const resp = await GetUserProfile()
-      const result = await resp.json()
-      // if we got 403 then user probably deleted their account and token is still valid. navigate to login
-      if (result?.res) {
-        await offlineDB.saveKV('user_profile', result.res)
-      }
-      return result.res || null
-    } catch {
-      // API unreachable — only serve cached profile for authenticated sessions
-      return await offlineDB.getKV('user_profile')
-    }
-  },
-  staleTime: 30 * 60 * 1000,
-  gcTime: 30 * 60 * 1000,
-})
-
 export const useUserProfile = ({ enabled = true } = {}) => {
   const queryClient = useQueryClient()
   const token = localStorage.getItem('token')
 
   const { data, error, isLoading } = useQuery({
-    ...userProfileQuery(token),
+    queryKey: ['userProfile', token],
+    queryFn: async () => {
+      if (!token) {
+        return null
+      }
+
+      try {
+        const resp = await GetUserProfile()
+        const result = await resp.json()
+        // if we got 403 then user probably deleted their account and token is still valid. navigate to login
+        if (result?.res) {
+          await offlineDB.saveKV('user_profile', result.res)
+        }
+        return result.res || null
+      } catch {
+        // API unreachable — only serve cached profile for authenticated sessions
+        return await offlineDB.getKV('user_profile')
+      }
+    },
+    staleTime: 30 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
     enabled: enabled && !!token,
   })
   return {
