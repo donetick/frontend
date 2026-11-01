@@ -17,6 +17,7 @@ import {
 import useAnalyticsIdentity from './analytics/useAnalyticsIdentity'
 import { registerCapacitorListeners } from './CapacitorListener'
 import PageTransition from './components/animations/PageTransition'
+import GlobalQuickAdd from './components/GlobalQuickAdd'
 import TimezonePrompt from './components/TimezonePrompt'
 import { ImpersonateUserProvider } from './contexts/ImpersonateUserContext'
 import { KeyboardShortcutScopeProvider } from './contexts/KeyboardShortcutScopeContext'
@@ -160,30 +161,32 @@ const AppContent = () => {
       <ImpersonateUserProvider>
         <TimezonePrompt />
         <NavBarTitleProvider>
-          <Box
-            sx={{
-              alignItems: 'stretch',
-              display: 'flex',
-              flexDirection: 'column',
-              width: '100%',
-              // Only force full viewport height on desktop, where the
-              // sidebar NavBar needs to span the full column height. On
-              // mobile the NavBar isn't a sidebar, so forcing 100dvh here
-              // just leaves blank space below short pages once you scroll.
-              '@media (min-width: 1024px)': {
-                flexDirection: 'row',
-                minHeight: '100dvh',
-              },
-            }}
-          >
-            <NavBar />
-            <Box sx={{ flex: 1, minWidth: 0, width: '100%' }}>
-              <PageTransition>
-                <Outlet />
-              </PageTransition>
-              <MobileBottomNav />
+          <GlobalQuickAdd>
+            <Box
+              sx={{
+                alignItems: 'stretch',
+                display: 'flex',
+                flexDirection: 'column',
+                width: '100%',
+                // Only force full viewport height on desktop, where the
+                // sidebar NavBar needs to span the full column height. On
+                // mobile the NavBar isn't a sidebar, so forcing 100dvh here
+                // just leaves blank space below short pages once you scroll.
+                '@media (min-width: 1024px)': {
+                  flexDirection: 'row',
+                  minHeight: '100dvh',
+                },
+              }}
+            >
+              <NavBar />
+              <Box sx={{ flex: 1, minWidth: 0, width: '100%' }}>
+                <PageTransition>
+                  <Outlet />
+                </PageTransition>
+                <MobileBottomNav />
+              </Box>
             </Box>
-          </Box>
+          </GlobalQuickAdd>
         </NavBarTitleProvider>
       </ImpersonateUserProvider>
     </div>
