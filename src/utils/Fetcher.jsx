@@ -61,7 +61,13 @@ const signUp = async (username, password, displayName, email) => {
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ username, password, displayName, email }),
+    body: JSON.stringify({
+      username,
+      password,
+      displayName,
+      email,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    }),
   })
 }
 

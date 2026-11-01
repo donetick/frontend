@@ -902,8 +902,6 @@ const MyChores = () => {
     choreSections,
     openChoreSections,
     handlers: {
-      onOpenTaskModal: () => setAddTaskModalOpen(true),
-      onNavigateToCreate: () => Navigate('/chores/create'),
       onFocusSearch: () => searchInputRef.current?.focus(),
       onCloseSearch: () => {
         setSearchTerm('')
