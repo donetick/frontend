@@ -68,20 +68,14 @@ const buildOfflineChore = task => ({
 // Every create path (editor, quick add, voice/scan, project board) passes
 // through useCreateChore, so defaults for new chores belong here rather than in
 // each producer. Updates never reach it, so existing chores are left alone.
-const normalizeCreatePayload = async (task, queryClient) => {
-  if (task.frequencyMetadata?.timezone) return task
-  // A failed lookup must not block the create; the device timezone is used.
-  const profile = await queryClient
-    .ensureQueryData(userProfileQuery())
-    .catch(() => null)
-  return {
-    ...task,
-    frequencyMetadata: withDefaultTimezone(
-      task.frequencyMetadata,
-      profile?.timezone,
-    ),
-  }
-}
+const normalizeCreatePayload = async (task, queryClient) => ({
+  ...task,
+  frequencyMetadata: await withDefaultTimezone(
+    task.frequencyMetadata,
+    async () =>
+      (await queryClient.ensureQueryData(userProfileQuery()))?.timezone,
+  ),
+})
 
 export const useChores = (includeArchive = false, { enabled = true } = {}) => {
   return useQuery({
