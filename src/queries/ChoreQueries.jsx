@@ -30,6 +30,7 @@ import { isOfflineFeatureEnabled } from '../utils/OfflineFeatureToggle'
 import { mergePendingCreates } from '../utils/PendingChores'
 import { syncEngine } from '../utils/SyncEngine'
 import { withDefaultTimezone } from '../utils/timezone'
+import { userProfileQuery } from './UserQueries'
 
 // Effectively "can this action be queued offline?" — the offline feature must
 // be enabled, otherwise there is no command queue to replay it later and the
@@ -69,11 +70,10 @@ const buildOfflineChore = task => ({
 // each producer. Updates never reach it, so existing chores are left alone.
 const normalizeCreatePayload = async (task, queryClient) => {
   if (task.frequencyMetadata?.timezone) return task
-  // Looked up only when needed. The app-level TimezonePrompt keeps the
-  // profile query warm; offlineDB covers a cold cache while offline.
-  const profile =
-    queryClient.getQueryData(['userProfile', localStorage.getItem('token')]) ??
-    (await offlineDB.getKV('user_profile').catch(() => null))
+  // A failed lookup must not block the create; the device timezone is used.
+  const profile = await queryClient
+    .ensureQueryData(userProfileQuery())
+    .catch(() => null)
   return {
     ...task,
     frequencyMetadata: withDefaultTimezone(
