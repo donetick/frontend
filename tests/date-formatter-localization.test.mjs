@@ -1,7 +1,9 @@
+import 'moment/locale/zh-cn.js'
+
 import assert from 'node:assert/strict'
 import test from 'node:test'
+
 import moment from 'moment'
-import 'moment/locale/zh-cn.js'
 
 import { createDateFormatter } from '../src/utils/DateFormatter.js'
 

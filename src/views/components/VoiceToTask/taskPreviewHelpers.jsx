@@ -153,7 +153,7 @@ export const buildChips = (
       label: t('chores:voiceToTask.reminder', { count: reminderCount }),
     })
   }
-  if (effective.points != null) {
+  if (effective.points !== null && effective.points !== undefined) {
     chips.push({
       key: 'points',
       color: 'primary',
