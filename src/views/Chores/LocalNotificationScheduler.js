@@ -3,6 +3,8 @@ import { LocalNotifications } from '@capacitor/local-notifications'
 import { Preferences } from '@capacitor/preferences'
 import murmurhash from 'murmurhash'
 
+import i18n from '../../i18n/config'
+
 const MAX_LOCAL_NOTIFICATIONS = 64
 
 // Where the server-resolved `effective` event map is mirrored so the scheduler
@@ -165,33 +167,39 @@ const getNotificationText = (
     (startOfDay(dueDate) - startOfDay(notificationTime)) /
       (24 * 60 * 60 * 1000),
   )
-  const time = dueDate.toLocaleTimeString([], {
-    hour: 'numeric',
-    minute: '2-digit',
-  })
+  const time = dueDate.toLocaleTimeString(
+    i18n.resolvedLanguage || i18n.language,
+    {
+      hour: 'numeric',
+      minute: '2-digit',
+    },
+  )
 
   let dueTime
   if (dayDifference === 0) {
-    dueTime = `today at ${time}`
+    dueTime = i18n.t('common:ui.remaining.todayAt', { time })
   } else if (dayDifference === 1) {
-    dueTime = `tomorrow at ${time}`
+    dueTime = i18n.t('common:ui.remaining.tomorrowAt', { time })
   } else if (dayDifference === -1) {
-    dueTime = `yesterday at ${time}`
+    dueTime = i18n.t('common:ui.remaining.yesterdayAt', { time })
   } else {
-    const date = dueDate.toLocaleDateString([], {
-      month: 'short',
-      day: 'numeric',
-    })
-    dueTime = `${date} at ${time}`
+    const date = dueDate.toLocaleDateString(
+      i18n.resolvedLanguage || i18n.language,
+      {
+        month: 'short',
+        day: 'numeric',
+      },
+    )
+    dueTime = i18n.t('common:ui.remaining.dateAt', { date, time })
   }
 
   let body
   if (template.value < 0) {
-    body = `Due ${dueTime}`
+    body = i18n.t('common:ui.remaining.dueAt', { date: dueTime })
   } else if (template.value > 0) {
-    body = `Overdue · Was due ${dueTime}`
+    body = i18n.t('common:ui.remaining.overdueAt', { date: dueTime })
   } else {
-    body = 'Due now'
+    body = i18n.t('common:ui.remaining.dueNow')
   }
 
   return {

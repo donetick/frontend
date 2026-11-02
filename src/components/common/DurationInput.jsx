@@ -1,6 +1,7 @@
 import { Add, Remove } from '@mui/icons-material'
 import { Box, IconButton, Option, Select } from '@mui/joy'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import {
   secondsToValueAndUnit,
@@ -19,6 +20,7 @@ import NumberInput from './NumberInput'
  *   minValue – minimum numeric value (default 1)
  */
 const DurationInput = ({ minValue = 1, onChange, size = 'md', value }) => {
+  const { t } = useTranslation('chores')
   const derived =
     value != null && value >= 0
       ? secondsToValueAndUnit(value)
@@ -93,7 +95,7 @@ const DurationInput = ({ minValue = 1, onChange, size = 'md', value }) => {
       >
         {TIME_UNITS.map(u => (
           <Option key={u.value} value={u.value}>
-            {u.label}
+            {t(`notificationTemplate.unitShort.${u.value}`)}
           </Option>
         ))}
       </Select>

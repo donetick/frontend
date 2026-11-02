@@ -92,7 +92,10 @@ const TimingBadge = ({ historyEntry }) => {
     )
   } else if (performedAt.isBefore(dueDate)) {
     const abs = Math.abs(diffHours)
-    const label = abs >= 48 ? `${Math.floor(abs / 24)}d early` : `${abs}h early`
+    const label =
+      abs >= 48
+        ? t('common:ui.history.earlyDays', { count: Math.floor(abs / 24) })
+        : t('common:ui.history.earlyHours', { count: abs })
     return (
       <Chip
         size='sm'
@@ -105,7 +108,10 @@ const TimingBadge = ({ historyEntry }) => {
     )
   } else {
     const abs = Math.abs(diffHours)
-    const label = abs >= 48 ? `${Math.floor(abs / 24)}d late` : `${abs}h late`
+    const label =
+      abs >= 48
+        ? t('common:ui.history.lateDays', { count: Math.floor(abs / 24) })
+        : t('common:ui.history.lateHours', { count: abs })
     return (
       <Chip
         size='sm'
@@ -248,12 +254,12 @@ function HistoryDetailModal({ config }) {
             icon={<AccessTime sx={{ fontSize: 16 }} />}
             label={
               isFirstSchedule
-                ? 'Scheduled on'
+                ? t('common:ui.history.scheduledOn')
                 : entry.status === 6
-                  ? 'Rescheduled on'
+                  ? t('common:ui.history.rescheduledOn')
                   : entry.status === 2
-                    ? 'Skipped on'
-                    : 'Completed on'
+                    ? t('common:ui.history.skippedOn')
+                    : t('common:ui.history.completedOn')
             }
             value={fmt.dateTime(entry.performedAt)}
           />
@@ -265,10 +271,10 @@ function HistoryDetailModal({ config }) {
             icon={<CalendarMonth sx={{ fontSize: 16 }} />}
             label={
               entry.status === 6
-                ? 'Previous due date'
+                ? t('common:ui.history.previousDue')
                 : entry.status === 5
-                  ? 'Was due'
-                  : 'Due date'
+                  ? t('common:ui.history.wasDue')
+                  : t('chores:archived.sortDueDate')
             }
             value={fmt.dateTime(entry.dueDate)}
           />

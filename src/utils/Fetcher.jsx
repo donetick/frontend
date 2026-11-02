@@ -1,3 +1,4 @@
+import i18n from '../i18n/config'
 import { apiClient } from './ApiClient'
 
 // Migration helpers to maintain compatibility with existing code
@@ -21,7 +22,7 @@ const Fetch = async (endpoint, options = {}) => {
 const ActionFetch = async (endpoint, options) => {
   const response = await Fetch(endpoint, options)
   if (!response?.ok) {
-    let message = 'Unable to perform this action. Please try again.'
+    let message = i18n.t('common:errors.actionFailed')
     try {
       const data = await response.clone().json()
       message = data.error || data.message || message

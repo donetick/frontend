@@ -33,9 +33,6 @@ const isNetworkError = err =>
   err instanceof TypeError &&
   err.message === 'Failed to fetch'
 
-const plural = count => (count === 1 ? '' : 's')
-const taskCount = count => `${count} task${plural(count)}`
-
 // "No specific time" is stored as end of day, and it has to be exactly
 // 23:59:59 — that stamp is what ChoreEdit writes and what the task card checks
 // to render "Today" rather than "Today 11:59 PM". Rebuilding from HH:mm alone
@@ -100,10 +97,10 @@ export const useChoreActions = ({
       }
 
       const undoableActions = {
-        completed: 'Task completed',
-        approved: 'Task approved',
-        rejected: 'Task rejected',
-        skipped: 'Task skipped',
+        completed: t('actions.undoable.completed'),
+        approved: t('common:ui.actions.approved'),
+        rejected: t('common:ui.actions.rejected'),
+        skipped: t('common:ui.actions.skipped'),
       }
 
       if (undoableActions[event]) {
@@ -115,10 +112,10 @@ export const useChoreActions = ({
               if (undoResponse.ok) {
                 queryClient.invalidateQueries({ queryKey: ['chores'] })
                 const undoMessages = {
-                  completed: 'Task completion has been undone.',
-                  approved: 'Task approval has been undone.',
-                  rejected: 'Task rejection has been undone.',
-                  skipped: 'Task skip has been undone.',
+                  completed: t('choreView.taskCompletionUndone'),
+                  approved: t('common:ui.actions.approvalUndone'),
+                  rejected: t('common:ui.actions.rejectionUndone'),
+                  skipped: t('choreView.taskSkipUndone'),
                 }
                 showUndo({
                   title: t('choreView.undoSuccessful'),
@@ -157,8 +154,7 @@ export const useChoreActions = ({
         archive: {
           type: 'success',
           title: t('actions.archivedTitle'),
-          message:
-            'The task has been archived and hidden from the active list.',
+          message: t('common:ui.actions.archivedMessage'),
         },
         started: {
           type: 'success',
@@ -192,6 +188,7 @@ export const useChoreActions = ({
       showError,
       showWarning,
       showUndo,
+      t,
     ],
   )
 
@@ -271,8 +268,7 @@ export const useChoreActions = ({
               queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
               showSuccess({
                 title: t('actions.completionPending'),
-                message:
-                  "You're offline — completion will sync when back online",
+                message: t('choreView.offlineComplete'),
                 undoAction: async () => {
                   await commandQueue.cancel(cmdId)
                   queryClient.invalidateQueries({
@@ -283,7 +279,7 @@ export const useChoreActions = ({
             } else {
               showError({
                 title: t('actions.failCompleteTitle'),
-                message: error?.message || 'Unable to complete chore',
+                message: error?.message || t('choreView.unableComplete'),
               })
             }
           }
@@ -319,7 +315,7 @@ export const useChoreActions = ({
               })
               queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
               showSuccess({
-                message: "You're offline — start will sync when back online",
+                message: t('choreView.offlineStart'),
                 undoAction: async () => {
                   await commandQueue.cancel(cmdId)
                   queryClient.invalidateQueries({
@@ -335,7 +331,7 @@ export const useChoreActions = ({
             } else {
               showError({
                 title: t('actions.failStartTitle'),
-                message: error?.message || 'Unable to start chore',
+                message: error?.message || t('choreView.unableStart'),
               })
             }
           }
@@ -372,7 +368,7 @@ export const useChoreActions = ({
               })
               queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
               showSuccess({
-                message: "You're offline — pause will sync when back online",
+                message: t('choreView.offlinePause'),
                 undoAction: async () => {
                   await commandQueue.cancel(cmdId)
                   queryClient.invalidateQueries({
@@ -388,7 +384,7 @@ export const useChoreActions = ({
             } else {
               showError({
                 title: t('actions.failPauseTitle'),
-                message: error?.message || 'Unable to pause chore',
+                message: error?.message || t('choreView.unablePause'),
               })
             }
           }
@@ -405,7 +401,7 @@ export const useChoreActions = ({
           } catch (error) {
             showError({
               title: t('actions.failApproveTitle'),
-              message: error.message || 'Unable to approve chore',
+              message: error.message || t('common:ui.actions.unableApprove'),
             })
           }
           break
@@ -420,7 +416,7 @@ export const useChoreActions = ({
           } catch (error) {
             showError({
               title: t('actions.failRejectTitle'),
-              message: error.message || 'Unable to reject chore',
+              message: error.message || t('common:ui.actions.unableReject'),
             })
           }
           break
@@ -457,8 +453,7 @@ export const useChoreActions = ({
                       queryKey: ['pendingCommands'],
                     })
                     showSuccess({
-                      message:
-                        "You're offline — deletion will sync when back online",
+                      message: t('common:ui.actions.offlineDelete'),
                       undoAction: async () => {
                         await commandQueue.cancel(cmdId)
                         queryClient.invalidateQueries({
@@ -470,7 +465,8 @@ export const useChoreActions = ({
                   } else {
                     showError({
                       title: t('actions.failDeleteTitle'),
-                      message: error?.message || 'Unable to delete chore',
+                      message:
+                        error?.message || t('choreView.unableDeleteTask'),
                     })
                   }
                 }
@@ -503,8 +499,7 @@ export const useChoreActions = ({
                       queryKey: ['pendingCommands'],
                     })
                     showSuccess({
-                      message:
-                        "You're offline — archive will sync when back online",
+                      message: t('common:ui.actions.offlineArchive'),
                       undoAction: async () => {
                         await commandQueue.cancel(cmdId)
                         await offlineDB.saveChores([
@@ -520,7 +515,8 @@ export const useChoreActions = ({
                   } else {
                     showError({
                       title: t('actions.failArchiveTitle'),
-                      message: error.message || 'Unable to archive chore',
+                      message:
+                        error.message || t('choreView.unableArchiveTask'),
                     })
                     reject(error)
                   }
@@ -552,8 +548,7 @@ export const useChoreActions = ({
                       queryKey: ['pendingCommands'],
                     })
                     showSuccess({
-                      message:
-                        "You're offline — restore will sync when back online",
+                      message: t('choreView.offlineRestore'),
                       undoAction: async () => {
                         await commandQueue.cancel(cmdId)
                         await offlineDB.saveChores([
@@ -568,7 +563,7 @@ export const useChoreActions = ({
                   } else {
                     showError({
                       title: t('choreView.restoreFailed'),
-                      message: error.message || 'Unable to restore chore',
+                      message: error.message || t('choreView.unableRestore'),
                     })
                     reject(error)
                   }
@@ -598,7 +593,7 @@ export const useChoreActions = ({
               )
               queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
               showSuccess({
-                message: "You're offline — skip will sync when back online",
+                message: t('choreView.offlineSkip'),
                 undoAction: async () => {
                   await commandQueue.cancel(cmdId)
                   queryClient.invalidateQueries({
@@ -609,7 +604,7 @@ export const useChoreActions = ({
             } else {
               showError({
                 title: t('actions.failSkipTitle'),
-                message: error?.message || 'Unable to skip chore',
+                message: error?.message || t('choreView.unableSkip'),
               })
             }
           }
@@ -652,8 +647,7 @@ export const useChoreActions = ({
                 )
                 queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
                 showSuccess({
-                  message:
-                    "You're offline — reschedule will sync when back online",
+                  message: t('common:ui.actions.offlineReschedule'),
                   undoAction: async () => {
                     await commandQueue.cancel(cmdId)
                     queryClient.invalidateQueries({
@@ -671,9 +665,9 @@ export const useChoreActions = ({
                 showError({
                   title:
                     extraData.date === null
-                      ? 'Failed to remove due date'
-                      : 'Failed to reschedule',
-                  message: error.message || 'Unable to update due date',
+                      ? t('actions.failRemoveDueDateTitle')
+                      : t('actions.failRescheduleTitle'),
+                  message: error.message || t('actions.failRescheduleMessage'),
                 })
               }
             }
@@ -693,13 +687,15 @@ export const useChoreActions = ({
               updateChoreInState(updatedChore, 'moved-to-project')
               showSuccess({
                 title: t('actions.movedTitle'),
-                message: `Task moved to ${project?.name || 'Default Project'}.`,
+                message: t('choreView.taskMovedMessage', {
+                  project: project?.name || t('toolbar.defaultProject'),
+                }),
               })
             }
           } catch (error) {
             showError({
               title: t('actions.failMoveTitle'),
-              message: error?.message || 'Unable to move task to project',
+              message: error?.message || t('choreView.unableMoveTaskToProject'),
             })
           }
           break
@@ -757,6 +753,7 @@ export const useChoreActions = ({
       unarchiveChore,
       startChore,
       pauseChore,
+      t,
     ],
   )
 
@@ -794,7 +791,7 @@ export const useChoreActions = ({
           )
           queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
           showSuccess({
-            message: "You're offline — reschedule will sync when back online",
+            message: t('common:ui.actions.offlineReschedule'),
             undoAction: async () => {
               await commandQueue.cancel(cmdId)
               queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
@@ -807,7 +804,7 @@ export const useChoreActions = ({
         } else {
           showError({
             title: t('actions.failRescheduleTitle'),
-            message: error.message || 'Unable to update due date',
+            message: error.message || t('actions.failRescheduleMessage'),
           })
         }
       }
@@ -819,6 +816,7 @@ export const useChoreActions = ({
       showSuccess,
       showError,
       queryClient,
+      t,
     ],
   )
 
@@ -912,7 +910,7 @@ export const useChoreActions = ({
           const data = await response.json()
           showSuccess({
             title: t('actions.nudgeSentTitle'),
-            message: data.message || 'Nudge sent successfully',
+            message: data.message || t('choreView.nudgeSentMessage'),
           })
         } else {
           throw new Error(t('actions.nudgeFailed'))
@@ -920,13 +918,13 @@ export const useChoreActions = ({
       } catch (error) {
         showError({
           title: t('actions.failNudgeTitle'),
-          message: error.message || 'Unable to send nudge at this time',
+          message: error.message || t('choreView.unableSendNudge'),
         })
       } finally {
         closeModal()
       }
     },
-    [showSuccess, showError, closeModal],
+    [showSuccess, showError, closeModal, t],
   )
 
   // ── bulk operations ────────────────────────────────────────────────────────
@@ -969,15 +967,14 @@ export const useChoreActions = ({
       // { title, confirmText, message } — omitted when the picker the user
       // just used is itself the confirmation.
       confirm,
-      // "completed", "rescheduled", … — reads as `2 tasks could not be ${verb}.`
-      // t() key output for the "the whole batch blew up" toast title.
+      // Localized full-sentence callbacks keep counts and word order together.
       failedTitle,
-      failureVerb,
+      failureMessage,
       onSucceeded,
       perChore,
+      // Format the full success message after the successful count is known.
+      successMessage,
       successTitle,
-      // "Completed", "Rescheduled", … — reads as `${verb} 3 tasks.`
-      successVerb,
       targets,
     }) => {
       if (!targets || targets.length === 0) return
@@ -999,7 +996,7 @@ export const useChoreActions = ({
           onSucceeded?.(succeeded)
           showSuccess({
             title: successTitle,
-            message: `${successVerb} ${taskCount(succeeded.length)}.`,
+            message: successMessage(succeeded.length),
             ...(buildUndo ? { undoAction: buildUndo(succeeded) } : {}),
           })
         }
@@ -1007,7 +1004,7 @@ export const useChoreActions = ({
         if (failed.length > 0) {
           showError({
             title: t('archived.someFailedTitle'),
-            message: `${taskCount(failed.length)} could not be ${failureVerb}.`,
+            message: failureMessage(failed.length),
           })
         }
 
@@ -1020,7 +1017,7 @@ export const useChoreActions = ({
           await execute()
         } catch (error) {
           showError({
-            title: failedTitle || `Bulk ${failureVerb} failed`,
+            title: failedTitle || t('common:ui.actions.bulkFailedTitle'),
             message: t('archived.unexpectedError'),
           })
         }
@@ -1038,7 +1035,7 @@ export const useChoreActions = ({
             await execute()
           } catch (error) {
             showError({
-              title: failedTitle || `Bulk ${failureVerb} failed`,
+              title: failedTitle || t('common:ui.actions.bulkFailedTitle'),
               message: t('archived.unexpectedError'),
             })
           }
@@ -1051,6 +1048,7 @@ export const useChoreActions = ({
       refetchChores,
       clearSelection,
       setConfirmModelConfig,
+      t,
     ],
   )
 
@@ -1061,7 +1059,9 @@ export const useChoreActions = ({
       confirm: {
         title: t('actions.bulk.completeTitle'),
         confirmText: t('list.complete'),
-        message: `Mark ${taskCount(targets.length)} as completed?`,
+        message: t('common:ui.actions.bulkCompleteConfirm', {
+          count: targets.length,
+        }),
       },
       perChore: chore =>
         expectOk(
@@ -1073,11 +1073,12 @@ export const useChoreActions = ({
           ),
         ),
       successTitle: t('actions.bulk.completedTitle'),
-      successVerb: 'Completed',
-      failureVerb: 'completed',
+      successMessage: count => t('common:ui.actions.bulkCompleted', { count }),
+      failureMessage: count =>
+        t('common:ui.actions.bulkFailedCompleted', { count }),
       failedTitle: t('actions.bulk.completeFailedTitle'),
     })
-  }, [getSelectedChoresData, chores, impersonatedUser, runBulk])
+  }, [getSelectedChoresData, chores, impersonatedUser, runBulk, t])
 
   const handleBulkSkip = useCallback(async () => {
     const targets = getSelectedChoresData(chores)
@@ -1086,12 +1087,15 @@ export const useChoreActions = ({
       confirm: {
         title: t('actions.bulk.skipTitle'),
         confirmText: t('multiToolbar.skip'),
-        message: `Skip ${taskCount(targets.length)} to next due date?`,
+        message: t('common:ui.actions.bulkSkipConfirm', {
+          count: targets.length,
+        }),
       },
       perChore: chore => expectOk(SkipChore(chore.id)),
       successTitle: t('actions.bulk.skippedTitle'),
-      successVerb: 'Skipped',
-      failureVerb: 'skipped',
+      successMessage: count => t('common:ui.actions.bulkSkipped', { count }),
+      failureMessage: count =>
+        t('common:ui.actions.bulkFailedSkipped', { count }),
       failedTitle: t('actions.bulk.skipFailedTitle'),
       buildUndo: succeeded => async () => {
         try {
@@ -1101,7 +1105,9 @@ export const useChoreActions = ({
           queryClient.invalidateQueries({ queryKey: ['chores'] })
           showUndo({
             title: t('choreView.undoSuccessful'),
-            message: `Undo skip for ${taskCount(succeeded.length)}.`,
+            message: t('common:ui.actions.bulkSkipUndone', {
+              count: succeeded.length,
+            }),
           })
         } catch (error) {
           showError({
@@ -1111,7 +1117,15 @@ export const useChoreActions = ({
         }
       },
     })
-  }, [getSelectedChoresData, chores, runBulk, queryClient, showUndo, showError])
+  }, [
+    getSelectedChoresData,
+    chores,
+    runBulk,
+    queryClient,
+    showUndo,
+    showError,
+    t,
+  ])
 
   const handleBulkArchive = useCallback(async () => {
     const targets = getSelectedChoresData(chores)
@@ -1120,7 +1134,9 @@ export const useChoreActions = ({
       confirm: {
         title: t('actions.bulk.archiveTitle'),
         confirmText: t('actionMenu.archive'),
-        message: `Archive ${taskCount(targets.length)}?`,
+        message: t('common:ui.actions.bulkArchiveConfirm', {
+          count: targets.length,
+        }),
       },
       perChore: chore =>
         new Promise((resolve, reject) => {
@@ -1130,12 +1146,20 @@ export const useChoreActions = ({
           })
         }),
       successTitle: t('actions.bulk.archivedTitle'),
-      successVerb: 'Archived',
-      failureVerb: 'archived',
+      successMessage: count => t('common:ui.actions.bulkArchived', { count }),
+      failureMessage: count =>
+        t('common:ui.actions.bulkFailedArchived', { count }),
       failedTitle: t('actions.bulk.archiveFailedTitle'),
       onSucceeded: succeeded => removeLocalChores(succeeded.map(c => c.id)),
     })
-  }, [getSelectedChoresData, chores, runBulk, archiveChore, removeLocalChores])
+  }, [
+    getSelectedChoresData,
+    chores,
+    runBulk,
+    archiveChore,
+    removeLocalChores,
+    t,
+  ])
 
   const handleBulkDelete = useCallback(async () => {
     const targets = getSelectedChoresData(chores)
@@ -1144,16 +1168,19 @@ export const useChoreActions = ({
       confirm: {
         title: t('actions.bulk.deleteTitle'),
         confirmText: t('archived.delete'),
-        message: `Delete ${taskCount(targets.length)}?\n\nThis action cannot be undone.`,
+        message: t('common:ui.actions.bulkDeleteConfirm', {
+          count: targets.length,
+        }),
       },
       perChore: chore => expectOk(DeleteChore(chore.id)),
       successTitle: t('archived.deletedBulkTitle'),
-      successVerb: 'Deleted',
-      failureVerb: 'deleted',
+      successMessage: count => t('common:ui.actions.bulkDeleted', { count }),
+      failureMessage: count =>
+        t('common:ui.actions.bulkFailedDeleted', { count }),
       failedTitle: t('archived.bulkDeleteFailTitle'),
       onSucceeded: succeeded => removeLocalChores(succeeded.map(c => c.id)),
     })
-  }, [getSelectedChoresData, chores, runBulk, removeLocalChores])
+  }, [getSelectedChoresData, chores, runBulk, removeLocalChores, t])
 
   const handleBulkMoveToProject = useCallback(
     async project => {
@@ -1161,9 +1188,14 @@ export const useChoreActions = ({
       runBulk({
         targets: getSelectedChoresData(chores),
         perChore: chore => expectOk(SaveChore({ ...chore, projectId })),
-        successTitle: 'Tasks Moved',
-        successVerb: `Moved to ${project?.name || 'Default Project'} —`,
-        failureVerb: 'moved',
+        successTitle: t('common:ui.actions.tasksMoved'),
+        successMessage: count =>
+          t('common:ui.actions.bulkMovedProject', {
+            count,
+            name: project?.name || t('toolbar.defaultProject'),
+          }),
+        failureMessage: count =>
+          t('common:ui.actions.bulkFailedMoved', { count }),
         onSucceeded: succeeded =>
           patchLocalChores(
             succeeded.map(c => c.id),
@@ -1171,7 +1203,7 @@ export const useChoreActions = ({
           ),
       })
     },
-    [getSelectedChoresData, chores, runBulk, patchLocalChores],
+    [getSelectedChoresData, chores, runBulk, patchLocalChores, t],
   )
 
   const handleBulkMoveToSection = useCallback(
@@ -1187,9 +1219,14 @@ export const useChoreActions = ({
               null,
             ),
           ),
-        successTitle: 'Tasks Moved',
-        successVerb: `Moved to ${section?.name || 'section'} —`,
-        failureVerb: 'moved',
+        successTitle: t('common:ui.actions.tasksMoved'),
+        successMessage: count =>
+          t('common:ui.actions.bulkMovedSection', {
+            count,
+            name: section?.name || t('common:ui.actions.section'),
+          }),
+        failureMessage: count =>
+          t('common:ui.actions.bulkFailedMoved', { count }),
         onSucceeded: succeeded =>
           patchLocalChores(
             succeeded.map(c => c.id),
@@ -1197,7 +1234,7 @@ export const useChoreActions = ({
           ),
       })
     },
-    [getSelectedChoresData, chores, runBulk, patchLocalChores],
+    [getSelectedChoresData, chores, runBulk, patchLocalChores, t],
   )
 
   // Takes the picker's { dueDateOnly, dueTime, useCustomTime } parts, or null to
@@ -1228,9 +1265,17 @@ export const useChoreActions = ({
       runBulk({
         targets: getSelectedChoresData(chores),
         perChore: chore => expectOk(UpdateDueDate(chore.id, dueDateFor(chore))),
-        successTitle: clearing ? 'Due Date Removed' : 'Tasks Scheduled',
-        successVerb: clearing ? 'Unplanned' : 'Rescheduled',
-        failureVerb: clearing ? 'unplanned' : 'rescheduled',
+        successTitle: clearing
+          ? t('actions.unplannedTitle')
+          : t('common:ui.actions.tasksScheduled'),
+        successMessage: count =>
+          clearing
+            ? t('common:ui.actions.bulkUnplanned', { count })
+            : t('common:ui.actions.bulkRescheduled', { count }),
+        failureMessage: count =>
+          clearing
+            ? t('common:ui.actions.bulkFailedUnplanned', { count })
+            : t('common:ui.actions.bulkFailedRescheduled', { count }),
         onSucceeded: succeeded =>
           patchLocalChores(
             succeeded.map(c => c.id),
@@ -1240,7 +1285,7 @@ export const useChoreActions = ({
           ),
       })
     },
-    [getSelectedChoresData, chores, runBulk, patchLocalChores],
+    [getSelectedChoresData, chores, runBulk, patchLocalChores, t],
   )
 
   const handleBulkAssignee = useCallback(
@@ -1248,9 +1293,11 @@ export const useChoreActions = ({
       runBulk({
         targets: getSelectedChoresData(chores),
         perChore: chore => expectOk(UpdateChoreAssignee(chore.id, assigneeId)),
-        successTitle: 'Tasks Reassigned',
-        successVerb: 'Reassigned',
-        failureVerb: 'reassigned',
+        successTitle: t('common:ui.actions.tasksReassigned'),
+        successMessage: count =>
+          t('common:ui.actions.bulkReassigned', { count }),
+        failureMessage: count =>
+          t('common:ui.actions.bulkFailedReassigned', { count }),
         onSucceeded: succeeded =>
           patchLocalChores(
             succeeded.map(c => c.id),
@@ -1258,7 +1305,7 @@ export const useChoreActions = ({
           ),
       })
     },
-    [getSelectedChoresData, chores, runBulk, patchLocalChores],
+    [getSelectedChoresData, chores, runBulk, patchLocalChores, t],
   )
 
   const handleBulkPriority = useCallback(
@@ -1266,9 +1313,11 @@ export const useChoreActions = ({
       runBulk({
         targets: getSelectedChoresData(chores),
         perChore: chore => expectOk(UpdateChorePriority(chore.id, priority)),
-        successTitle: 'Priority Updated',
-        successVerb: 'Updated priority on',
-        failureVerb: 'updated',
+        successTitle: t('actions.priorityUpdatedTitle'),
+        successMessage: count =>
+          t('common:ui.actions.bulkUpdatedPriority', { count }),
+        failureMessage: count =>
+          t('common:ui.actions.bulkFailedUpdated', { count }),
         onSucceeded: succeeded =>
           patchLocalChores(
             succeeded.map(c => c.id),
@@ -1276,7 +1325,7 @@ export const useChoreActions = ({
           ),
       })
     },
-    [getSelectedChoresData, chores, runBulk, patchLocalChores],
+    [getSelectedChoresData, chores, runBulk, patchLocalChores, t],
   )
 
   // Add/remove rather than replace: a mixed selection has no single "current"
@@ -1302,11 +1351,11 @@ export const useChoreActions = ({
 
       if (targets.length === 0) {
         showSuccess({
-          title: 'No Changes',
+          title: t('common:ui.actions.noChanges'),
           message:
             mode === 'add'
-              ? `Every selected task already has "${label.name}".`
-              : `No selected task has "${label.name}".`,
+              ? t('common:ui.actions.labelAlreadyPresent', { name: label.name })
+              : t('common:ui.actions.labelNotPresent', { name: label.name }),
         })
         clearSelection()
         return
@@ -1316,12 +1365,19 @@ export const useChoreActions = ({
         targets,
         perChore: chore =>
           expectOk(SaveChore({ ...chore, labelsV2: nextLabelsFor(chore) })),
-        successTitle: mode === 'add' ? 'Label Added' : 'Label Removed',
-        successVerb:
+        successTitle:
           mode === 'add'
-            ? `Added "${label.name}" to`
-            : `Removed "${label.name}" from`,
-        failureVerb: 'updated',
+            ? t('common:ui.actions.labelAdded')
+            : t('common:ui.actions.labelRemoved'),
+        successMessage: count =>
+          mode === 'add'
+            ? t('common:ui.actions.bulkLabelAdded', { count, name: label.name })
+            : t('common:ui.actions.bulkLabelRemoved', {
+                count,
+                name: label.name,
+              }),
+        failureMessage: count =>
+          t('common:ui.actions.bulkFailedUpdated', { count }),
         onSucceeded: succeeded =>
           patchLocalChores(
             succeeded.map(c => c.id),
@@ -1338,6 +1394,7 @@ export const useChoreActions = ({
       patchLocalChores,
       showSuccess,
       clearSelection,
+      t,
     ],
   )
 

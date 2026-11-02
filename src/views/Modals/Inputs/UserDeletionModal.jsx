@@ -98,11 +98,11 @@ function UserDeletionModal({ isOpen, onClose, userProfile }) {
           setStep(3)
         }
       } else {
-        setError(data.error || 'Failed to check deletion requirements')
+        setError(data.error || t('common:ui.deletion.requirementsFailed'))
       }
     } catch (err) {
       console.error('Failed to check deletion requirements:', err)
-      setError('Failed to check deletion requirements')
+      setError(t('common:ui.deletion.requirementsFailed'))
     } finally {
       setLoading(false)
     }
@@ -148,7 +148,7 @@ function UserDeletionModal({ isOpen, onClose, userProfile }) {
         handleClose(true)
         // Redirect to login or home page after successful deletion
       } else {
-        setError(data.message || 'Failed to delete account')
+        setError(data.message || t('deletion.failed'))
       }
     } catch (err) {
       console.error('Failed to delete account:', err)
@@ -354,10 +354,10 @@ function UserDeletionModal({ isOpen, onClose, userProfile }) {
       size='lg'
       title={
         step === 1
-          ? 'Delete Account'
+          ? t('accountSettings.deleteAccount')
           : step === 2
-            ? 'Transfer Circle Ownership'
-            : 'Final Confirmation'
+            ? t('common:ui.deletion.transferOwnership')
+            : t('common:ui.deletion.finalConfirmation')
       }
       role={step === 3 ? 'alertdialog' : 'dialog'}
       closeOnBackdrop={false}
@@ -366,11 +366,14 @@ function UserDeletionModal({ isOpen, onClose, userProfile }) {
           <ModalActions
             stackOnMobile
             secondary={{
-              label: t('accountSettings.cancel'),
+              label: t('common:cancel'),
               onClick: () => handleClose(false),
             }}
             primary={{
-              label: step === 3 ? 'Delete Account' : 'Continue',
+              label:
+                step === 3
+                  ? t('accountSettings.deleteAccount')
+                  : t('common:ui.deletion.continue'),
               color: step === 3 ? 'danger' : 'primary',
               onClick:
                 step === 1

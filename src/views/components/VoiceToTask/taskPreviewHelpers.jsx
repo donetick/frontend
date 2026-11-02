@@ -31,35 +31,78 @@ export const PRIORITY_LABELS = {
   4: 'P4',
 }
 
-export const formatDue = dueDate => {
+export const formatDue = (dueDate, fmt) => {
   const m = moment(dueDate)
   return m.format('HH:mm') === '23:59'
-    ? m.format('MMM D')
-    : m.format('MMM D, h:mm A')
+    ? fmt.date(dueDate)
+    : fmt.dateTime(dueDate)
 }
 
-// Compact description for picker-overridden frequencies where the parser's
-// human name no longer applies
-export const describeFrequency = (f, t) => {
+// Describe structured recurrence at render time; parser names and identifiers
+// remain unchanged so language switches never affect task payloads.
+export const describeFrequency = (f, t, parserName) => {
   if (!f) return null
+  const metadata = f.frequencyMetadata || {}
+  const monthlyDay = parserName?.match(/^Every (\d+) of every month$/i)
+  if (monthlyDay) {
+    return t('chores:voiceToTask.frequency.monthlyOnDay', {
+      day: Number(monthlyDay[1]),
+    })
+  }
+  const dailyPeriod = parserName?.match(
+    /^Every (morning|noon|afternoon|evening|night) daily$/i,
+  )
+  if (dailyPeriod) {
+    return t('chores:voiceToTask.frequency.dailyPeriod', {
+      period: t(
+        `chores:voiceToTask.frequency.period.${dailyPeriod[1].toLowerCase()}`,
+      ),
+    })
+  }
   if (f.frequencyType === 'interval') {
-    const unit = f.frequencyMetadata?.unit || 'days'
-    return f.frequency > 1
-      ? t('chores:voiceToTask.frequency.everyN', {
-          count: f.frequency,
-          unit,
-        })
-      : t('chores:voiceToTask.frequency.everyUnit', {
-          unit: unit.replace(/s$/, ''),
-        })
+    const count = Number(f.frequency) || 1
+    const unit = (metadata.unit || 'days').replace(/s$/, '')
+    if (!['minute', 'hour', 'day', 'week', 'month', 'year'].includes(unit)) {
+      return t('chores:voiceToTask.frequency.repeats')
+    }
+    return t('common:recurrence.interval', {
+      count,
+      unit: t(`common:recurrence.units.${unit}`, { count }),
+    })
+  }
+  if (f.frequencyType === 'days_of_the_week') {
+    const days = (metadata.days || [])
+      .map(day => t(`chores:repeat.days.${day.toLowerCase()}`))
+      .join(', ')
+    if (metadata.weekPattern === 'week_of_month') {
+      const occurrences = (metadata.occurrences || [])
+        .map(occurrence =>
+          t(`chores:repeat.ordinal.${occurrence === -1 ? 'last' : occurrence}`),
+        )
+        .join(', ')
+      return t('chores:voiceToTask.frequency.monthlyOccurrences', {
+        occurrences,
+        days,
+      })
+    }
+    return days
+      ? t('chores:voiceToTask.frequency.everyDays', { days })
+      : t('chores:voiceToTask.frequency.customDays')
+  }
+  if (f.frequencyType === 'day_of_the_month') {
+    const months = (metadata.months || [])
+      .map(month => t(`chores:repeat.months.${month.toLowerCase()}`))
+      .join(', ')
+    return t('chores:voiceToTask.frequency.onDayOfMonths', {
+      day: f.frequency,
+      months,
+    })
   }
   const names = {
     daily: t('chores:voiceToTask.frequency.daily'),
     weekly: t('chores:voiceToTask.frequency.weekly'),
     monthly: t('chores:voiceToTask.frequency.monthly'),
     yearly: t('chores:voiceToTask.frequency.yearly'),
-    days_of_the_week: t('chores:voiceToTask.frequency.customDays'),
-    day_of_the_month: t('chores:voiceToTask.frequency.monthly'),
   }
   return names[f.frequencyType] || t('chores:voiceToTask.frequency.repeats')
 }
@@ -67,7 +110,7 @@ export const describeFrequency = (f, t) => {
 export const buildChips = (
   effective,
   frequencyLabel,
-  { canRemind, currentUserId, members },
+  { canRemind, currentUserId, fmt, members },
   t,
 ) => {
   const chips = []
@@ -76,7 +119,7 @@ export const buildChips = (
       key: 'due',
       color: 'warning',
       icon: <CalendarMonth sx={{ fontSize: 12 }} />,
-      label: formatDue(effective.dueDate),
+      label: formatDue(effective.dueDate, fmt),
     })
   }
   if (frequencyLabel) {

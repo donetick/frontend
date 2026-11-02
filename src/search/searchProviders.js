@@ -1,4 +1,5 @@
 import { SETTINGS_SECTIONS } from '../constants/settingsSections'
+import i18n from '../i18n/config'
 import { stripHtml } from '../utils/Helpers'
 
 const HISTORY_STATUS = {
@@ -32,7 +33,7 @@ const document = (provider, item) => ({ provider, ...item })
 
 registerSearchProvider({
   id: 'tasks',
-  getDocuments: ({ chores, membersById, projectsById }) =>
+  getDocuments: ({ chores, membersById, projectsById, t }) =>
     chores.map(chore => {
       const labels =
         chore.labelsV2?.map(label => label.name).filter(Boolean) || []
@@ -44,9 +45,10 @@ registerSearchProvider({
       return document('tasks', {
         id: `task:${chore.id}`,
         entityId: chore.id,
-        title: chore.name || 'Untitled task',
+        title: chore.name || t('common:ui.search.untitledTask'),
         subtitle:
-          [project?.name, ...labels].filter(Boolean).join(' · ') || 'Task',
+          [project?.name, ...labels].filter(Boolean).join(' · ') ||
+          t('common:ui.search.task'),
         body: description,
         keywords: [...labels, project?.name, ...assignees]
           .filter(Boolean)
@@ -59,7 +61,7 @@ registerSearchProvider({
 
 registerSearchProvider({
   id: 'history',
-  getDocuments: ({ choresById, history, membersById }) =>
+  getDocuments: ({ choresById, history, membersById, t }) =>
     history.flatMap(entry => {
       const note = stripHtml(entry.notes).trim()
       if (!note) return []
@@ -70,11 +72,14 @@ registerSearchProvider({
         document('history', {
           id: `history:${entry.id}`,
           entityId: entry.id,
-          title: chore?.name || entry.choreName || 'Task note',
+          title:
+            chore?.name || entry.choreName || t('common:ui.search.taskNote'),
           subtitle: [
             member?.displayName,
             entry.performedAt
-              ? new Date(entry.performedAt).toLocaleDateString()
+              ? new Date(entry.performedAt).toLocaleDateString(
+                  i18n.resolvedLanguage || i18n.language,
+                )
               : null,
           ]
             .filter(Boolean)
@@ -92,13 +97,13 @@ registerSearchProvider({
 
 registerSearchProvider({
   id: 'projects',
-  getDocuments: ({ projects }) =>
+  getDocuments: ({ projects, t }) =>
     projects.map(project =>
       document('projects', {
         id: `project:${project.id}`,
         entityId: project.id,
-        title: project.name || 'Untitled project',
-        subtitle: 'Project',
+        title: project.name || t('common:ui.search.untitledProject'),
+        subtitle: t('common:ui.search.project'),
         body: stripHtml(project.description),
         keywords: 'folder project',
         route: `/chores?project=${encodeURIComponent(project.id)}`,
@@ -109,13 +114,13 @@ registerSearchProvider({
 
 registerSearchProvider({
   id: 'labels',
-  getDocuments: ({ labels }) =>
+  getDocuments: ({ labels, t }) =>
     labels.map(label =>
       document('labels', {
         id: `label:${label.id}`,
         entityId: label.id,
-        title: label.name || 'Untitled label',
-        subtitle: 'Label',
+        title: label.name || t('common:ui.search.untitledLabel'),
+        subtitle: t('common:ui.search.label'),
         keywords: 'tag label',
         route: `/labels/${label.id}`,
         color: label.color,
@@ -125,13 +130,16 @@ registerSearchProvider({
 
 registerSearchProvider({
   id: 'people',
-  getDocuments: ({ members }) =>
+  getDocuments: ({ members, t }) =>
     members.map(member =>
       document('people', {
         id: `person:${member.userId}`,
         entityId: member.userId,
-        title: member.displayName || member.username || 'Circle member',
-        subtitle: 'Circle member',
+        title:
+          member.displayName ||
+          member.username ||
+          t('common:ui.search.circleMember'),
+        subtitle: t('common:ui.search.circleMember'),
         keywords: `${member.username || ''} person member assignee tasks assigned`,
         route: `/chores?filterId=assignedTo:${member.userId}`,
       }),
@@ -147,7 +155,7 @@ registerSearchProvider({
           id: `setting:${id}`,
           entityId: id,
           title: t(`overview.sections.${id}.title`),
-          subtitle: 'Settings',
+          subtitle: t('title'),
           body: t(`overview.sections.${id}.description`),
           keywords: `preferences configuration ${id}`,
           route: `/settings/${id}`,

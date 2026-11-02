@@ -1,0 +1,128 @@
+{
+  "iconPicker": {
+    "chooseIcon": "选择项目图标",
+    "availableIcons": "可用图标"
+  },
+  "icons": {
+    "FolderOpen": "文件夹",
+    "Work": "工作",
+    "Home": "家庭",
+    "School": "学校",
+    "BusinessCenter": "商务",
+    "Code": "代码",
+    "Build": "建造",
+    "Palette": "设计",
+    "SportsSoccer": "运动",
+    "FitnessCenter": "健身",
+    "ShoppingCart": "购物",
+    "Restaurant": "餐饮",
+    "Flight": "旅行",
+    "Book": "学习",
+    "MusicNote": "音乐",
+    "PhotoCamera": "摄影",
+    "Games": "游戏",
+    "Science": "科学",
+    "AccountBalance": "财务",
+    "LocalHospital": "健康",
+    "DirectionsCar": "汽车",
+    "Pets": "宠物",
+    "Garden": "园艺",
+    "Computer": "科技"
+  },
+  "defaultChip": "默认",
+  "tasks_one": "{{count}} 个任务",
+  "tasks_other": "{{count}} 个任务",
+  "delete": {
+    "title": "删除项目",
+    "message": "确定要删除“{{name}}”吗？项目将被删除，但所有任务都会保留并移至默认项目。"
+  },
+  "loadError": "加载项目失败，请重试。",
+  "search": {
+    "placeholder": "搜索项目",
+    "noResultsTitle": "没有匹配的项目",
+    "noResultsDescription": "没有与“{{searchTerm}}”匹配的项目。",
+    "noFilterResultsDescription": "没有符合当前筛选条件的项目。",
+    "clear": "清除搜索",
+    "showAll": "显示所有项目"
+  },
+  "blurb": "将任务归入不同项目。创建自定义工作区，让任务井井有条、便于查找。",
+  "defaultDescription": "所有未指定项目的任务",
+  "selector": {
+    "title": "项目",
+    "createNew": "创建新项目",
+    "createNewDescription": "添加自定义项目工作区",
+    "manage": "管理项目",
+    "manageDescription": "查看、编辑和整理所有项目",
+    "currentProjectTitle": "当前项目：{{project}}（Ctrl+E）",
+    "builtInWorkspace": "内置项目工作区"
+  },
+  "modal": {
+    "errorNameRequired": "必须填写项目名称",
+    "errorUpdate": "更新项目失败",
+    "errorCreate": "创建项目失败",
+    "namePlaceholder": "输入项目名称…",
+    "descriptionPlaceholder": "项目描述（可选）…",
+    "nameLabel": "项目名称",
+    "descriptionLabel": "描述",
+    "iconLabel": "项目图标",
+    "selectIcon": "选择图标",
+    "colorLabel": "项目颜色",
+    "displayLabel": "默认视图",
+    "displayHint": "查看此项目任务时使用的默认视图。你可以随时通过视图菜单更改。",
+    "displayBoard": "看板",
+    "displayList": "列表",
+    "editTitle": "编辑项目",
+    "createTitle": "创建新项目",
+    "update": "更新",
+    "create": "创建"
+  },
+  "visibility": {
+    "label": "谁可以查看此项目？",
+    "ownerOnly": "只有项目所有者可以更改可见范围。",
+    "changeHint": "更改项目可见范围也会影响其中的任务。保存前，你可以查看具体的变更内容。",
+    "private": {
+      "title": "仅自己可见",
+      "description": "圈子中的其他人（包括管理员）均不可见。其中的任务也仅自己可见。"
+    },
+    "members": {
+      "title": "指定成员",
+      "description": "只有你和下方选中的成员可以查看此项目及其所有任务。",
+      "pickerTitle": "共享给",
+      "noCandidates": "圈子里还没有其他成员。请先邀请他人加入圈子。",
+      "emptyHint": "尚未选择任何成员，目前只有你可以查看此项目。你可以随时添加成员。",
+      "hint_one": "已与 {{count}} 人共享。以后移除成员时，所有任务和历史记录都会保留。",
+      "hint_other": "已与 {{count}} 人共享。以后移除成员时，所有任务和历史记录都会保留。"
+    },
+    "circle": {
+      "title": "整个圈子",
+      "description": "圈子中的所有人都可以查看此项目：{{names}}"
+    },
+    "chip": {
+      "private": "仅自己可见",
+      "members_one": "{{count}} 位成员",
+      "members_other": "{{count}} 位成员",
+      "everyone": "所有人"
+    },
+    "review": {
+      "title": "保存前请确认",
+      "back": "返回",
+      "confirm": "保存更改",
+      "you": "你",
+      "audienceMembers": "指定成员：{{names}}",
+      "audienceMembersNone": "指定成员：尚未选择",
+      "loseAccess": "将失去访问权限",
+      "loseAccessHint_one": "这些成员将无法再查看此项目及其中的 {{count}} 个任务。已同步的设备将在下次同步时移除相应内容。",
+      "loseAccessHint_other": "这些成员将无法再查看此项目及其中的 {{count}} 个任务。已同步的设备将在下次同步时移除相应内容。",
+      "gainAccess": "将获得访问权限",
+      "opensToCircle": "圈子中的所有人（包括以后加入的成员）都可以查看此项目及其所有任务。",
+      "assignmentChanges_one": "{{count}} 个任务的分配将发生变化",
+      "assignmentChanges_other": "{{count}} 个任务的分配将发生变化",
+      "removedAssignees": "已移除的负责人：{{names}}。",
+      "addedAssignees": "已添加的负责人：{{names}}。",
+      "nowAssigned": "当前负责人：{{name}}。",
+      "nowUnassigned": "当前未分配负责人。",
+      "keepsHistory": "任务、完成记录和积分将保留原样。如果以后再次共享此项目，任务和历史记录将再次可见；已移除的负责人需要重新分配。",
+      "previewFailed": "无法检查此次更改的影响，请重试。"
+    }
+  }
+}

@@ -10,6 +10,25 @@ import { useNotification } from '../service/NotificationProvider'
 import { apiClient } from '../utils/ApiClient'
 import { useAuth } from './useAuth.jsx'
 
+const taskEventKeys = {
+  'chore.updated': {
+    title: 'ui.remaining.eventTitle_updated',
+    message: 'ui.remaining.eventMessage_updated',
+  },
+  'chore.completed': {
+    title: 'ui.remaining.eventTitle_completed',
+    message: 'ui.remaining.eventMessage_completed',
+  },
+  'chore.status': {
+    title: 'ui.remaining.eventTitle_status',
+    message: 'ui.remaining.eventMessage_status',
+  },
+  'chore.skipped': {
+    title: 'ui.remaining.eventTitle_skipped',
+    message: 'ui.remaining.eventMessage_skipped',
+  },
+}
+
 const SSE_STATES = {
   CONNECTING: 0,
   OPEN: 1,
@@ -101,7 +120,10 @@ export const useSSE = () => {
             showNotification({
               type: 'info',
               title: t('realtime.newTaskTitle'),
-              message: `${eventData.data.user.displayName} created "${eventData.data.chore.name}"`,
+              message: t('common:ui.remaining.taskCreatedMessage', {
+                name: eventData.data.user.displayName,
+                task: eventData.data.chore.name,
+              }),
               duration: 5000,
             })
             const newChore = eventData.data.chore
@@ -128,8 +150,11 @@ export const useSSE = () => {
             if (eventData?.data?.user?.id !== userProfile?.id) {
               showNotification({
                 type: 'info',
-                title: `Task ${eventData.type.replace('chore.', '')}`,
-                message: `${eventData.data.user.displayName}  ${eventData.type.replace('chore.', '')} "${eventData.data.chore.name}"`,
+                title: t(taskEventKeys[eventData.type].title),
+                message: t(taskEventKeys[eventData.type].message, {
+                  name: eventData.data.user.displayName,
+                  task: eventData.data.chore.name,
+                }),
                 duration: 5000,
               })
             }
@@ -291,7 +316,7 @@ export const useSSE = () => {
         return // Stop processing if JSON parsing fails
       }
     },
-    [queryClient, showNotification, showError, userProfile, showAlert],
+    [queryClient, showNotification, showError, userProfile, showAlert, t],
   )
 
   const stopHeartbeatMonitor = useCallback(() => {

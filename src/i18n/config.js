@@ -1,15 +1,24 @@
-import 'moment/locale/cs'
-import 'moment/locale/he'
-import 'moment/locale/ru'
-import 'moment/locale/ja'
-import 'moment/locale/es'
-import 'moment/locale/pl'
-import 'moment/locale/it'
+// Use the same ESM Moment instance as the application for every date locale.
+import 'moment/dist/locale/ar'
+import 'moment/dist/locale/cs'
+import 'moment/dist/locale/de'
+import 'moment/dist/locale/es'
+import 'moment/dist/locale/fr'
+import 'moment/dist/locale/he'
+import 'moment/dist/locale/it'
+import 'moment/dist/locale/ja'
+import 'moment/dist/locale/nl'
+import 'moment/dist/locale/pl'
+import 'moment/dist/locale/pt-br'
+import 'moment/dist/locale/ru'
+import 'moment/dist/locale/zh-cn'
 
 import i18n from 'i18next'
 import LanguageDetector from 'i18next-browser-languagedetector'
 import HttpBackend from 'i18next-http-backend'
 import { initReactI18next } from 'react-i18next'
+
+import { AVAILABLE_LANGUAGES, resolveLanguage } from './languages'
 
 i18n
   .use(HttpBackend)
@@ -17,6 +26,7 @@ i18n
   .use(initReactI18next)
   .init({
     fallbackLng: 'en',
+    supportedLngs: AVAILABLE_LANGUAGES.map(language => language.code),
     debug: import.meta.env.DEV,
     returnEmptyString: false,
     interpolation: {
@@ -47,6 +57,7 @@ i18n
       order: ['localStorage', 'navigator'],
       caches: ['localStorage'],
       lookupLocalStorage: 'i18nextLng',
+      convertDetectedLanguage: resolveLanguage,
     },
 
     react: {

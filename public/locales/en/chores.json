@@ -261,7 +261,11 @@
     "highPriorityDesc_one": "{{count}} task requires immediate attention",
     "highPriorityDesc_other": "{{count}} tasks require immediate attention",
     "noDueDateDesc_one": "{{count}} task needs a deadline",
-    "noDueDateDesc_other": "{{count}} tasks need a deadline"
+    "noDueDateDesc_other": "{{count}} tasks need a deadline",
+    "dueTodayAndTomorrow": "Due Today & Tomorrow",
+    "comingUp": "Coming Up",
+    "dueThisWeekAndOverdue": "Due This Week & Overdue",
+    "assignedToMember": "Assigned to {{name}}"
   },
   "labels": {
     "label": "Labels"
@@ -659,7 +663,19 @@
       "monthly": "Monthly",
       "yearly": "Yearly",
       "customDays": "Custom days",
-      "repeats": "Repeats"
+      "repeats": "Repeats",
+      "monthlyOnDay": "Every month on day {{day}}",
+      "dailyPeriod": "Every {{period}}",
+      "period": {
+        "morning": "morning",
+        "noon": "noon",
+        "afternoon": "afternoon",
+        "evening": "evening",
+        "night": "night"
+      },
+      "monthlyOccurrences": "{{occurrences}} {{days}} of the month",
+      "everyDays": "Every {{days}}",
+      "onDayOfMonths": "Day {{day}} of {{months}}"
     }
   },
   "smartInput": {

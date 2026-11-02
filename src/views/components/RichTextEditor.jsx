@@ -204,7 +204,7 @@ const RichTextEditor = forwardRef(
           })
         }
       }
-    }, [entityId, entityType, draftId, showError, showPaywall, userProfile]) // Dependencies for useCallback
+    }, [entityId, entityType, draftId, showError, showPaywall, userProfile, t]) // Dependencies for useCallback
 
     useEffect(() => {
       if (!quillRef.current) return
@@ -241,6 +241,44 @@ const RichTextEditor = forwardRef(
         editorRef.current.enable(isEditable)
       }
     }, [onChange, value, isEditable, variant, handleImageUpload, userProfile]) // Added handleImageUpload and userProfile to dependency array
+
+    useEffect(() => {
+      const editor = editorRef.current
+      if (!editor || !isEditable) return
+      editor.root.setAttribute(
+        'data-placeholder',
+        placeholder ?? t('descriptionPlaceholder'),
+      )
+      const toolbar = editor.getModule('toolbar')?.container
+      const labels = {
+        bold: t('common:richText.bold'),
+        italic: t('common:richText.italic'),
+        underline: t('common:richText.underline'),
+        strike: t('common:richText.strike'),
+        blockquote: t('common:richText.blockquote'),
+        'code-block': t('common:richText.codeBlock'),
+        link: t('common:richText.link'),
+        image: t('common:richText.image'),
+        clean: t('common:richText.clearFormatting'),
+      }
+      toolbar?.querySelectorAll('button').forEach(button => {
+        const format = Object.keys(labels).find(name =>
+          button.classList.contains(`ql-${name}`),
+        )
+        const label = button.classList.contains('ql-list')
+          ? button.value === 'ordered'
+            ? t('common:richText.orderedList')
+            : t('common:richText.bulletList')
+          : labels[format]
+        if (label) {
+          button.setAttribute('aria-label', label)
+          button.setAttribute('title', label)
+        }
+      })
+      toolbar
+        ?.querySelector('.ql-header .ql-picker-label')
+        ?.setAttribute('aria-label', t('common:richText.heading'))
+    }, [t, placeholder, isEditable, variant])
 
     useEffect(() => {
       if (editorRef.current && isEditable) {
@@ -285,7 +323,21 @@ const RichTextEditor = forwardRef(
     }
 
     return (
-      <div className={`quill-root quill-variant-${variant}`}>
+      <div
+        className={`quill-root quill-variant-${variant}`}
+        style={{
+          '--quill-normal': JSON.stringify(t('common:richText.normal')),
+          '--quill-heading-1': JSON.stringify(t('common:richText.heading1')),
+          '--quill-heading-2': JSON.stringify(t('common:richText.heading2')),
+          '--quill-heading-3': JSON.stringify(t('common:richText.heading3')),
+          '--quill-heading-4': JSON.stringify(t('common:richText.heading4')),
+          '--quill-visit-link': JSON.stringify(t('common:richText.visitLink')),
+          '--quill-enter-link': JSON.stringify(t('common:richText.enterLink')),
+          '--quill-edit': JSON.stringify(t('common:edit')),
+          '--quill-save': JSON.stringify(t('common:save')),
+          '--quill-remove': JSON.stringify(t('common:richText.removeLink')),
+        }}
+      >
         <div
           ref={quillRef}
           style={{

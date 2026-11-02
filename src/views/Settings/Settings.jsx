@@ -945,7 +945,7 @@ const Settings = () => {
           if (success) {
             showNotification({
               type: 'success',
-              message: 'Account deleted successfully',
+              message: t('common:ui.remaining.accountDeleted'),
             })
           }
         }}
@@ -961,13 +961,13 @@ const Settings = () => {
               if (resp.ok) {
                 showNotification({
                   type: 'success',
-                  message: 'Subscription cancelled',
+                  message: t('common:ui.remaining.subscriptionCancelled'),
                 })
                 window.location.reload()
               } else {
                 showNotification({
                   type: 'error',
-                  message: 'Failed to cancel subscription',
+                  message: t('common:ui.remaining.cancelSubscriptionFailed'),
                 })
               }
             })

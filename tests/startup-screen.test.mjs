@@ -54,6 +54,22 @@ test('startup does not depend on translations, providers, or app chunks', () => 
   )
 })
 
+test('startup respects a saved Chinese language without waiting for translation resources', () => {
+  const previous = globalThis.window
+  globalThis.window = {
+    localStorage: { getItem: key => (key === 'language' ? '"zh-CN"' : null) },
+  }
+  try {
+    const markup = renderToStaticMarkup(React.createElement(StartupScreen))
+    assert.match(markup, /正在准备/)
+    assert.match(markup, /正在加载 Donetick/)
+    assert.doesNotMatch(markup, /Getting things ready/)
+  } finally {
+    if (previous === undefined) delete globalThis.window
+    else globalThis.window = previous
+  }
+})
+
 test('startup uses the original cyan accent in light and dark mode', () => {
   const style = html.match(/<style>([\s\S]*?)<\/style>/)[1]
   const [light, dark] = style.split('@media (prefers-color-scheme: dark)')

@@ -134,10 +134,10 @@ const DATE_RANGE_PRESETS = [
 
 const toInputDate = iso => (iso ? iso.split('T')[0] : '')
 
-const fmtDisplayDate = iso => {
+const fmtDisplayDate = (iso, language) => {
   if (!iso) return null
   const dt = new Date(iso)
-  return dt.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+  return dt.toLocaleDateString(language, { month: 'short', day: 'numeric' })
 }
 
 // ── Component ────────────────────────────────────────────────────────────────
@@ -155,7 +155,7 @@ const FilterBar = ({
   showTrigger = true,
   totalCount,
 }) => {
-  const { t } = useTranslation('common')
+  const { i18n, t } = useTranslation('common')
   const [internalOpen, setInternalOpen] = useState(false)
   const isControlled = open !== undefined
   const isOpen = isControlled ? open : internalOpen
@@ -254,8 +254,8 @@ const FilterBar = ({
           ? t(presetLabelKey)
           : t('filterBar.dateRangeFallback')
       }
-      const from = fmtDisplayDate(value.from)
-      const to = fmtDisplayDate(value.to)
+      const from = fmtDisplayDate(value.from, i18n.resolvedLanguage)
+      const to = fmtDisplayDate(value.to, i18n.resolvedLanguage)
       if (from && to) return `${from} – ${to}`
       if (from) return t('filterBar.fromDate', { date: from })
       if (to) return t('filterBar.untilDate', { date: to })

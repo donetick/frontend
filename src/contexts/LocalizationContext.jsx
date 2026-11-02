@@ -4,6 +4,14 @@ import { useTranslation } from 'react-i18next'
 
 import useStickyState from '@/hooks/useStickyState'
 
+import {
+  AVAILABLE_LANGUAGES,
+  getMomentLocale,
+  resolveLanguage,
+} from '../i18n/languages'
+
+export { AVAILABLE_LANGUAGES } from '../i18n/languages'
+
 const LocalizationContext = createContext()
 
 export const DATE_FORMATS = {
@@ -97,26 +105,8 @@ export const LANGUAGE_DEFAULTS = {
   },
 }
 
-export const AVAILABLE_LANGUAGES = [
-  { code: 'ar', name: 'Arabic', nativeName: 'العربية' },
-  { code: 'cs', name: 'Czech', nativeName: 'Čeština' },
-  { code: 'de', name: 'German', nativeName: 'Deutsch' },
-  { code: 'en', name: 'English', nativeName: 'English' },
-  { code: 'es', name: 'Spanish', nativeName: 'Español' },
-  { code: 'es-ES', name: 'Spanish (Spain)', nativeName: 'Español (España)' },
-  { code: 'fr', name: 'French', nativeName: 'Français' },
-  { code: 'he', name: 'Hebrew', nativeName: 'עברית' },
-  { code: 'it', name: 'Italian', nativeName: 'Italiano' },
-  { code: 'nl', name: 'Dutch', nativeName: 'Nederlands' },
-  { code: 'ja', name: 'Japanese', nativeName: '日本語' },
-  { code: 'pl', name: 'Polish', nativeName: 'Polski' },
-  { code: 'pt', name: 'Portuguese (Brazil)', nativeName: 'Português (Brasil)' },
-  { code: 'ru', name: 'Russian', nativeName: 'Русский' },
-  { code: 'zh-CN', name: 'Chinese (Simplified)', nativeName: '简体中文' },
-]
-
 export const LocalizationProvider = ({ children }) => {
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
   const [dateFormat, setDateFormat] = useStickyState(
     DATE_FORMATS.MDY,
     'dateFormat',
@@ -129,12 +119,14 @@ export const LocalizationProvider = ({ children }) => {
     0,
     'firstDayOfWeek',
   ) // 0 = Sunday, 1 = Monday
-  const [language, setLanguageRaw] = useStickyState('en', 'language')
+  const [storedLanguage, setLanguageRaw] = useStickyState('en', 'language')
+  const language = resolveLanguage(storedLanguage)
 
   const setLanguage = code => {
-    setLanguageRaw(code)
+    const resolved = resolveLanguage(code)
+    setLanguageRaw(resolved)
     const defaults =
-      LANGUAGE_DEFAULTS[code] || LANGUAGE_DEFAULTS[code.split('-')[0]]
+      LANGUAGE_DEFAULTS[resolved] || LANGUAGE_DEFAULTS[resolved.split('-')[0]]
     if (defaults) {
       setDateFormat(defaults.dateFormat)
       setTimeFormat(defaults.timeFormat)
@@ -144,7 +136,7 @@ export const LocalizationProvider = ({ children }) => {
 
   useEffect(() => {
     i18n.changeLanguage(language)
-    moment.locale(language)
+    moment.locale(getMomentLocale(language))
   }, [language, i18n])
 
   useEffect(() => {
@@ -180,11 +172,11 @@ export const LocalizationProvider = ({ children }) => {
   const formatCalendar = date => {
     if (!date) return ''
     return moment(date).calendar(null, {
-      sameDay: `[Today] ${timeFormat}`,
-      nextDay: `[Tomorrow] ${timeFormat}`,
+      sameDay: `[${t('calendar.today')}] ${timeFormat}`,
+      nextDay: `[${t('calendar.tomorrow')}] ${timeFormat}`,
       nextWeek: `dddd ${timeFormat}`,
-      lastDay: `[Yesterday] ${timeFormat}`,
-      lastWeek: `[Last] dddd ${timeFormat}`,
+      lastDay: `[${t('calendar.yesterday')}] ${timeFormat}`,
+      lastWeek: `[${t('calendar.last')}] dddd ${timeFormat}`,
       sameElse: `${dateFormat} ${timeFormat}`,
     })
   }
