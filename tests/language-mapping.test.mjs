@@ -45,7 +45,7 @@ test('browser and saved regional aliases resolve to offered resource codes', () 
     assert.equal(languages.resolveLanguage(input), expected, String(input))
 })
 
-test('all language choices register their matching Moment locale in a browser bundle', () => {
+test('language choices register date locales and preserve machine-readable date values', () => {
   assert.equal(typeof languages.getMomentLocale, 'function')
   const config = readFileSync(
     new URL('../src/i18n/config.js', import.meta.url),
@@ -64,7 +64,7 @@ test('all language choices register their matching Moment locale in a browser bu
           moment.locale('en');
           const expected = getMomentLocale(language.code);
           const sample = moment('2026-01-15').locale(expected);
-          return { code: language.code, expected, actual: sample.locale(), month: sample.format('MMMM') };
+          return { code: language.code, expected, actual: sample.locale(), month: sample.format('MMMM'), machineDate: sample.format('YYYY-MM-DDTHH:mm:ss') };
         });`,
       resolveDir: new URL('..', import.meta.url).pathname,
     },
@@ -77,9 +77,17 @@ test('all language choices register their matching Moment locale in a browser bu
   })
   const context = {}
   vm.runInNewContext(result.outputFiles[0].text, context)
-  for (const item of context.results)
+  for (const item of context.results) {
     assert.equal(item.actual, item.expected, item.code)
+    assert.match(
+      item.machineDate,
+      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/,
+      `${item.code}: native inputs and persisted dates require ASCII digits`,
+    )
+    assert.doesNotThrow(() => new Date(item.machineDate).toISOString())
+  }
   assert.equal(context.results.find(item => item.code === 'pt').actual, 'pt-br')
+  assert.equal(context.results.find(item => item.code === 'ar').actual, 'en')
   assert.equal(context.results.find(item => item.code === 'es-ES').actual, 'es')
   assert.equal(
     context.results.find(item => item.code === 'zh-CN').month,

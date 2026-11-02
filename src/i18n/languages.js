@@ -1,6 +1,8 @@
 // Codes match public/locales and Crowdin; date locales follow Moment's names.
 export const AVAILABLE_LANGUAGES = [
-  { code: 'ar', name: 'Arabic', nativeName: 'العربية', momentLocale: 'ar' },
+  // Keep the existing English date fallback until machine date serialization
+  // is independent of Arabic numeral postformatting.
+  { code: 'ar', name: 'Arabic', nativeName: 'العربية', momentLocale: 'en' },
   { code: 'cs', name: 'Czech', nativeName: 'Čeština', momentLocale: 'cs' },
   { code: 'de', name: 'German', nativeName: 'Deutsch', momentLocale: 'de' },
   { code: 'en', name: 'English', nativeName: 'English', momentLocale: 'en' },

@@ -1,5 +1,4 @@
 // Use the same ESM Moment instance as the application for every date locale.
-import 'moment/dist/locale/ar'
 import 'moment/dist/locale/cs'
 import 'moment/dist/locale/de'
 import 'moment/dist/locale/es'
