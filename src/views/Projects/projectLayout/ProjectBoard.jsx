@@ -365,9 +365,6 @@ const TaskCard = memo(function TaskCard({
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'stretch' }}>
-        {displayMode === 'list' && !showSubtasks && !isMultiSelectMode && (
-          <Box sx={{ width: 24, flexShrink: 0 }} />
-        )}
         {showSubtasks && (
           <IconButton
             aria-label={t(

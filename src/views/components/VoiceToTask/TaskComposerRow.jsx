@@ -40,7 +40,14 @@ const TaskComposerRow = ({
   }
 
   return (
-    <Box sx={{ p: 1 }}>
+    <Box
+      component='form'
+      onSubmit={event => {
+        event.preventDefault()
+        handleSubmit()
+      }}
+      sx={{ p: 1 }}
+    >
       <Input
         size='sm'
         placeholder={placeholder}
@@ -63,7 +70,9 @@ const TaskComposerRow = ({
             event.target.blur()
           }
         }}
-        slotProps={{ input: { 'aria-label': placeholder } }}
+        slotProps={{
+          input: { 'aria-label': placeholder, enterKeyHint: 'send' },
+        }}
         startDecorator={
           isSubmitting ? (
             <CircularProgress size='sm' />
@@ -73,6 +82,7 @@ const TaskComposerRow = ({
         }
         endDecorator={
           <IconButton
+            type='button'
             size='sm'
             variant='plain'
             color='neutral'
