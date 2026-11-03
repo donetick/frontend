@@ -57,14 +57,7 @@ import { useLabels } from '../Labels/LabelQueries'
 import AdvancedFilterBuilder from '../Modals/Inputs/AdvancedFilterBuilder'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import ProjectBoard from '../Projects/projectLayout/ProjectBoard.jsx'
-import {
-  projectViewToViewMode,
-  useProjects,
-  useProjectSections,
-  useProjectView,
-  useSetProjectView,
-  viewModeToProjectView,
-} from '../Projects/ProjectQueries.js'
+import { useProjects, useProjectSections } from '../Projects/ProjectQueries.js'
 import ChoreListView from './ChoreListView.jsx'
 import ChoreModals from './components/ChoreModals'
 import ChoreToolbar from './components/ChoreToolbarPrototype'
@@ -76,6 +69,7 @@ import MultiSelectToolbar from './components/MultiSelectToolbar'
 import { useChoreActions } from './hooks/useChoreActions'
 import { useChoreFilters } from './hooks/useChoreFilters'
 import { useChoreModals } from './hooks/useChoreModals'
+import { useChoreViewMode } from './hooks/useChoreViewMode'
 import { useCustomFilters } from './hooks/useCustomFilters'
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
 import { useMultiSelect } from './hooks/useMultiSelect'
@@ -188,27 +182,11 @@ const MyChores = () => {
   const openSectionsInitializedRef = useRef(
     localStorage.getItem('openChoreSections') !== null,
   )
-  const [viewMode, setViewMode] = useState(
-    localStorage.getItem('choreCardViewMode') || 'default',
-  )
   const [selectedCalendarDate, setSelectedCalendarDate] = useState(new Date())
   const [confirmModelConfig, setConfirmModelConfig] = useState({})
 
   const { projectsWithDefault, selectedProject, setSelectedProjectWithCache } =
     useProjectFilter(projects, !projectsLoading)
-
-  // Per-user, per-project choice of board vs. list, shared across devices.
-  const isCustomProjectSelected = Boolean(
-    selectedProject && selectedProject.id !== 'default',
-  )
-  const { data: savedProjectView } = useProjectView(
-    isCustomProjectSelected ? selectedProject.id : null,
-  )
-  const setProjectViewMutation = useSetProjectView()
-  const { data: multiSelectSections = [] } = useProjectSections(
-    isCustomProjectSelected ? selectedProject.id : null,
-  )
-  const lastSyncedProjectIdRef = useRef(null)
 
   const {
     nonProjectFilteredChores,
@@ -263,6 +241,21 @@ const MyChores = () => {
     membersData?.res,
     userLabels,
     projectsWithDefault,
+  )
+
+  // Filters can retain the last selected project underneath, but their
+  // display preference belongs to the shared, non-project scope.
+  const isCustomProjectSelected = Boolean(
+    selectedProject &&
+    selectedProject.id !== 'default' &&
+    !activeFilterId &&
+    !tempFilter,
+  )
+  const { toggleViewMode, viewMode } = useChoreViewMode(
+    isCustomProjectSelected ? selectedProject.id : null,
+  )
+  const { data: multiSelectSections = [] } = useProjectSections(
+    isCustomProjectSelected ? selectedProject.id : null,
   )
 
   const handleProjectSelect = useCallback(
@@ -764,7 +757,6 @@ const MyChores = () => {
       const filterName = filterMap[oldFilter.toLowerCase()]
       if (filterName) {
         setQuickFilter('status', filterName)
-        setViewMode('default')
         setSelectedCalendarDate(null)
       }
     }
@@ -781,7 +773,6 @@ const MyChores = () => {
     selectedProject,
     projectFilteredChores,
     setQuickFilter,
-    setViewMode,
     setSelectedCalendarDate,
   ])
 
@@ -1040,39 +1031,9 @@ const MyChores = () => {
     localStorage.setItem('openChoreSections', JSON.stringify(value))
   }
 
-  const toggleViewMode = useCallback(
-    value => {
-      const newMode =
-        value ??
-        (() => {
-          const modes = ['default', 'compact', 'calendar']
-          return modes[(modes.indexOf(viewMode) + 1) % modes.length]
-        })()
-      setViewMode(newMode)
-      localStorage.setItem('choreCardViewMode', newMode)
-      if (newMode !== 'calendar') {
-        setSelectedCalendarDate(null)
-      }
-      // An explicit layout pick for the currently selected project is this
-      // user's own preference for it; save it so it's there next time, on any
-      // device. Marking it "synced" here too stops the loader effect above
-      // from immediately overwriting this pick with a stale value.
-      const projectView = viewModeToProjectView(newMode)
-      if (isCustomProjectSelected && projectView) {
-        lastSyncedProjectIdRef.current = selectedProject.id
-        setProjectViewMutation.mutate({
-          projectId: selectedProject.id,
-          view: projectView,
-        })
-      }
-    },
-    [
-      viewMode,
-      isCustomProjectSelected,
-      selectedProject,
-      setProjectViewMutation,
-    ],
-  )
+  useEffect(() => {
+    if (viewMode !== 'calendar') setSelectedCalendarDate(null)
+  }, [viewMode])
 
   const selectedDateChores = useMemo(() => {
     if (!selectedCalendarDate) return []
@@ -1113,37 +1074,6 @@ const MyChores = () => {
     !hasQuickFilters &&
     !activeFilterId,
   )
-
-  // Workflow layouts belong to real projects. If the user leaves a project
-  // while viewing its board or section list, return to the standard list
-  // instead of rendering a layout with nowhere to persist its sections.
-  useEffect(() => {
-    if (isProjectWorkflowView && !isCustomProjectSelected) {
-      toggleViewMode('default')
-    }
-  }, [isCustomProjectSelected, isProjectWorkflowView, toggleViewMode])
-
-  // Selecting a project loads its own saved layout choice, once per project —
-  // after that, the user's explicit picks (persisted by toggleViewMode below)
-  // win over this sync, even if they differ from what was saved. This has to
-  // apply even when not already in a workflow view: on a fresh browser
-  // `viewMode` starts at its 'default' fallback (nothing in localStorage yet),
-  // so gating on isProjectWorkflowView would mean the saved view never gets a
-  // chance to switch layouts at all.
-  useEffect(() => {
-    if (!isCustomProjectSelected) return
-    if (savedProjectView == null) return
-    if (lastSyncedProjectIdRef.current === selectedProject.id) return
-    lastSyncedProjectIdRef.current = selectedProject.id
-    const mapped = projectViewToViewMode(savedProjectView)
-    if (mapped && mapped !== viewMode) {
-      setViewMode(mapped)
-      localStorage.setItem('choreCardViewMode', mapped)
-      if (mapped !== 'calendar') {
-        setSelectedCalendarDate(null)
-      }
-    }
-  }, [isCustomProjectSelected, savedProjectView, selectedProject, viewMode])
 
   // What the list actually renders. Sections are the source of truth outside
   // of search, since they are the only place the assignee filter is applied.
