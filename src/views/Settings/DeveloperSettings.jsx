@@ -25,6 +25,7 @@ import { RefreshToken } from '../../utils/Fetcher'
 import { offlineDB } from '../../utils/OfflineDB'
 import { syncEngine } from '../../utils/SyncEngine'
 import { getRefreshTokenExpiry, isNative } from '../../utils/TokenStorage'
+import BulkTaskImportModal from '../components/BulkTaskImportModal'
 import FeedbackModal from '../Modals/FeedbackModal'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import PolicyUpdateModal from '../Modals/PolicyUpdateModal'
@@ -57,6 +58,7 @@ const DeveloperSettings = () => {
   const [scheduledNotifications, setScheduledNotifications] = useState([])
   const [isLoadingNotifications, setIsLoadingNotifications] = useState(false)
   const [isResettingSync, setIsResettingSync] = useState(false)
+  const [bulkImportOpen, setBulkImportOpen] = useState(false)
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false)
   const [policyModalOpen, setPolicyModalOpen] = useState(false)
   const [feedbackEligibility, setFeedbackEligibility] = useState(null)
@@ -449,6 +451,9 @@ const DeveloperSettings = () => {
 
   return (
     <div className='grid gap-4 py-4' id='developer'>
+      {bulkImportOpen && (
+        <BulkTaskImportModal onClose={() => setBulkImportOpen(false)} />
+      )}
       <Typography level='h3'>Developer Settings</Typography>
       <Divider />
       <Typography level='body-md'>
@@ -456,6 +461,13 @@ const DeveloperSettings = () => {
         state. This information is useful for debugging and development
         purposes.
       </Typography>
+
+      <Card variant='outlined'>
+        <Typography level='title-lg'>{t('chores:bulkImport.title')}</Typography>
+        <Button onClick={() => setBulkImportOpen(true)}>
+          {t('chores:bulkImport.title')}
+        </Button>
+      </Card>
 
       <Card variant='outlined'>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>

@@ -42,7 +42,7 @@ export const EVENT_SCHEMAS = {
     priority: 'number',
     // quick_add/voice/scan/share = the AddTaskModal popup; full_page/clone =
     // the dedicated create page (ChoreEdit.jsx with no existing chore id).
-    source: 'enum:quick_add,voice,scan,share,full_page,clone',
+    source: 'enum:quick_add,voice,scan,share,full_page,clone,bulk_import',
   }),
   chore_updated: withCommon({
     has_due_date: 'boolean',
