@@ -193,7 +193,7 @@ const ChildUserSettings = () => {
 
   return (
     <SettingsLayout title={t('subaccounts.title')}>
-      <Box sx={{ maxWidth: 760, pb: 4 }}>
+      <Box sx={{ maxWidth: 760 }}>
         <Box
           sx={{
             alignItems: { xs: 'flex-start', sm: 'center' },

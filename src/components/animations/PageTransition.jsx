@@ -4,6 +4,8 @@ import { useLayoutEffect, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { useLocation } from 'react-router-dom'
 
+import PageContent from '../common/PageContent'
+
 // Route hierarchy for determining navigation direction
 const routeHierarchy = {
   '/': 0,
@@ -121,13 +123,10 @@ const PageTransition = ({ children }) => {
   }, [location, displayLocation.pathname])
 
   return (
-    <div
-      className='page-wrapper'
-      style={{
-        paddingBottom: `var(--safe-area-inset-bottom, 0px)`,
-      }}
-    >
-      {displayLocation.pathname === location.pathname ? children : null}
+    <div className='page-wrapper'>
+      <PageContent>
+        {displayLocation.pathname === location.pathname ? children : null}
+      </PageContent>
     </div>
   )
 }

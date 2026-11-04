@@ -16,7 +16,6 @@ import {
   getHomeSectionsConfig,
   getHomeTaskScope,
 } from '../../utils/HomeSectionsConfig'
-import { getSafeBottomPadding } from '../../utils/SafeAreaUtils'
 import ChoreModals from '../Chores/components/ChoreModals'
 import { useChoreActions } from '../Chores/hooks/useChoreActions'
 import { useChoreModals } from '../Chores/hooks/useChoreModals'
@@ -50,8 +49,8 @@ const SectionHeader = ({ action, actionTo, title }) => (
       display: 'flex',
       gap: 2,
       justifyContent: 'space-between',
-      mb: 1.25,
-      mt: 2.25,
+      mb: 2,
+      mt: 3,
     }}
   >
     <Typography level='title-sm' sx={{ letterSpacing: '0.01em' }}>
@@ -315,7 +314,7 @@ const HomeView = () => {
               borderRadius: 'lg',
               display: 'grid',
               gap: 0.5,
-              mt: 3.5,
+              mt: 3,
               px: 2,
               py: 2,
             }}
@@ -363,12 +362,8 @@ const HomeView = () => {
     <Container
       maxWidth='md'
       sx={{
-        pb: getSafeBottomPadding(CAPTURE_CLEARANCE),
-        pt: 1,
+        pb: CAPTURE_CLEARANCE,
         px: { xs: 2, sm: 3 },
-        '@media (max-width: 768px)': {
-          pb: getSafeBottomPadding(CAPTURE_CLEARANCE + 7),
-        },
       }}
     >
       <Box
@@ -377,8 +372,7 @@ const HomeView = () => {
           display: 'flex',
           gap: 1,
           justifyContent: 'space-between',
-          mb: 1.5,
-          mt: 0.5,
+          mb: 2,
         }}
       >
         {sectionOrder.includes('greeting') ? (

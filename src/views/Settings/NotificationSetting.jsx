@@ -503,7 +503,7 @@ const NotificationSetting = () => {
 
   return (
     <SettingsLayout title={t('notifications.title')}>
-      <Box id='notifications' sx={{ maxWidth: 720, pb: 4 }}>
+      <Box id='notifications' sx={{ maxWidth: 720 }}>
         <Typography
           level='body-md'
           textColor='text.secondary'
