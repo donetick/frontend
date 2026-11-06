@@ -1,6 +1,7 @@
 import Fuse from 'fuse.js'
 import { useCallback, useMemo, useState } from 'react'
 
+import { usePersistedState } from '../../../hooks/usePersistedState'
 import { ChoreFilters, filterByProject } from '../../../utils/Chores'
 import { stripHtml } from '../../../utils/Helpers'
 
@@ -10,8 +11,11 @@ export const useChoreFilters = ({
   selectedProject,
   userProfile,
 }) => {
-  const [searchTerm, setSearchTerm] = useState('')
-  const [searchFilter, setSearchFilter] = useState('All')
+  const [searchTerm, setSearchTerm] = usePersistedState('chores.searchTerm', '')
+  const [searchFilter, setSearchFilter] = usePersistedState(
+    'chores.searchFilter',
+    'All',
+  )
   const [selectedChoreFilter, setSelectedChoreFilter] = useState(
     localStorage.getItem('selectedChoreFilter') || 'anyone',
   )

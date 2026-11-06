@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from 'react'
 
+import { usePersistedState } from '../../../hooks/usePersistedState'
 import { useUserProfile } from '../../../queries/UserQueries'
 import { applyFilter, validateFilter } from '../../../utils/FilterEngine'
 import {
@@ -20,9 +21,31 @@ export const useCustomFilters = (chores, membersData, labels, projects) => {
   const deleteFilterMutation = useDeleteFilter()
   const togglePinMutation = useToggleFilterPin()
 
-  const [activeFilterId, setActiveFilterId] = useState(null)
-  const [tempFilter, setTempFilter] = useState(null)
-  const [tempFilterMeta, setTempFilterMeta] = useState(null)
+  const [activeFilterId, setActiveFilterId] = usePersistedState(
+    'chores.activeFilterId',
+    null,
+  )
+  const [tempFilter, setTempFilter] = usePersistedState(
+    'chores.tempFilter',
+    null,
+  )
+  // Meta can carry a React icon element, which can't be serialized, so only
+  // the plain fields are persisted; the icon lives in memory for the session.
+  const [persistedMeta, setPersistedMeta] = usePersistedState(
+    'chores.tempFilterMeta',
+    null,
+  )
+  const [liveMeta, setLiveMeta] = useState(null)
+  const tempFilterMeta = liveMeta ?? persistedMeta
+  const setTempFilterMeta = useCallback(
+    meta => {
+      setLiveMeta(meta)
+      if (!meta) return setPersistedMeta(null)
+      const { icon: _icon, ...serializable } = meta
+      setPersistedMeta(serializable)
+    },
+    [setPersistedMeta],
+  )
 
   const context = useMemo(
     () => ({

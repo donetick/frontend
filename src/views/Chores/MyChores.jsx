@@ -483,7 +483,7 @@ const MyChores = () => {
     filteredData: quickFilteredChores,
     hasActiveFilters: hasQuickFilters,
     setFilter: setQuickFilter,
-  } = useFilter(projectFilteredChores, quickFilterDefs)
+  } = useFilter(projectFilteredChores, quickFilterDefs, 'chores.quickFilters')
 
   const processedChores = useMemo(() => {
     if (!choresData?.res) {
@@ -671,7 +671,8 @@ const MyChores = () => {
     // back into the URL. Only act when the URL itself actually changed —
     // otherwise switching insights (state changes first, URL a tick later)
     // makes the two effects fight and flip between the old and new insight.
-    const urlFilterIdChanged = lastUrlFilterIdRef.current !== rawFilterId
+    const previousUrlFilterId = lastUrlFilterIdRef.current
+    const urlFilterIdChanged = previousUrlFilterId !== rawFilterId
     lastUrlFilterIdRef.current = rawFilterId
 
     // Restore smart insight temp filter from URL (e.g. on page reload)
@@ -726,8 +727,10 @@ const MyChores = () => {
       return
     }
 
-    // If filterId is no longer in URL but filter is still active in state, clear it
-    if (!filterId && !oldFilter && activeFilterId) {
+    // If filterId was removed from the URL while this view was mounted, clear
+    // the filter. On first mount the URL is simply bare (e.g. after coming back
+    // from a task) and the persisted filter should be kept.
+    if (!filterId && !oldFilter && activeFilterId && previousUrlFilterId) {
       clearActiveFilter()
       return
     }
