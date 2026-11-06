@@ -18,6 +18,19 @@ export const detectTimezone = () => {
   }
 }
 
+// Fills in frequencyMetadata.timezone for a new chore. The server evaluates
+// recurrences in it and falls back to UTC without one, so local due times
+// would shift at DST. Nothing in the UI can change it afterwards, so:
+// - an existing timezone is kept;
+// - the profile timezone comes first: it is the user's home zone, so a chore
+//   created while travelling stays on home time;
+// - the device timezone covers accounts without one.
+export const withDefaultTimezone = (metadata, profileTimezone) => {
+  if (metadata?.timezone) return metadata
+  const timezone = canonicalTimezone(profileTimezone) ?? detectTimezone()
+  return timezone ? { ...metadata, timezone } : metadata
+}
+
 export const needsTimezoneUpdate = (saved, detected) =>
   Boolean(detected && canonicalTimezone(saved) !== canonicalTimezone(detected))
 
