@@ -60,7 +60,6 @@ const isValidWordBoundary = (text, matchIndex, matchLength) => {
 }
 
 export const parsePriority = inputSentence => {
-  let sentence = inputSentence.toLowerCase()
   const priorityMap = {
     1: ['!p1', 'priority 1', 'high priority', 'urgent', 'asap', 'important'],
     2: ['!p2', 'priority 2', 'medium priority'],
@@ -69,25 +68,30 @@ export const parsePriority = inputSentence => {
   }
 
   for (const [priority, terms] of Object.entries(priorityMap)) {
-    if (terms.some(term => sentence.includes(term))) {
-      return {
-        result: priority,
-        highlight: terms
-          .map(term => {
-            const index = sentence.indexOf(term)
-            return {
-              text: term,
-              start: index,
-              end: index + term.length,
-            }
-          })
-          .filter(term => term.start !== -1),
+    // Whole words only, so "unimportant" or "urgently" don't count. The
+    // preceding char is captured instead of using a lookbehind, which
+    // Safari/iOS < 16.4 doesn't support.
+    const pattern = new RegExp(
+      `(^|[^\\p{L}\\p{N}_])(${terms.join('|')})(?![\\p{L}\\p{N}_])`,
+      'giu',
+    )
+    const matches = [...inputSentence.matchAll(pattern)]
+    if (matches.length === 0) continue
 
-        cleanedSentence: sentence.replace(
-          new RegExp(`(${terms.join('|')})`, 'g'),
-          '',
-        ),
-      }
+    return {
+      result: priority,
+      highlight: matches.map(match => {
+        const start = match.index + match[1].length
+        return { text: match[2], start, end: start + match[2].length }
+      }),
+      cleanedSentence: inputSentence
+        .replace(pattern, '$1')
+        // Drop punctuation that belonged to the keyword, e.g. "Urgent: ..."
+        // or "(asap)", so it doesn't stay behind in the title
+        .replace(/\(\s*\)|\[\s*\]/g, '')
+        .replace(/^[\s:;,\-–—]+|[\s:;,\-–—]+$/g, '')
+        .replace(/\s+/g, ' ')
+        .trim(),
     }
   }
   return {
@@ -168,6 +172,15 @@ export const parseLabels = (inputSentence, userLabels) => {
 export const parseRepeatV2 = inputSentence => {
   const sentence = inputSentence.toLowerCase()
   const lowerInputSentence = inputSentence.toLowerCase()
+  // Matches come from the lowercased sentence, so remove them from the
+  // original case-insensitively to keep the rest of the title's casing
+  const removeMatch = text =>
+    inputSentence
+      .replace(
+        new RegExp(text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'),
+        '',
+      )
+      .trim()
   const result = {
     frequency: 1,
     frequencyType: null,
@@ -286,7 +299,7 @@ export const parseRepeatV2 = inputSentence => {
               end: lowerInputSentence.indexOf(match[0]) + match[0].length,
             },
           ],
-          cleanedSentence: inputSentence.replace(match[0], '').trim(),
+          cleanedSentence: removeMatch(match[0]),
         }
 
       case 'interval':
@@ -304,7 +317,7 @@ export const parseRepeatV2 = inputSentence => {
               end: lowerInputSentence.indexOf(match[0]) + match[0].length,
             },
           ],
-          cleanedSentence: inputSentence.replace(match[0], '').trim(),
+          cleanedSentence: removeMatch(match[0]),
         }
 
       case 'days_of_the_week':
@@ -344,7 +357,7 @@ export const parseRepeatV2 = inputSentence => {
               end: lowerInputSentence.indexOf(match[0]) + match[0].length,
             },
           ],
-          cleanedSentence: inputSentence.replace(match[0], '').trim(),
+          cleanedSentence: removeMatch(match[0]),
         }
 
       case 'day_of_the_month':
@@ -381,7 +394,7 @@ export const parseRepeatV2 = inputSentence => {
               end: lowerInputSentence.indexOf(match[0]) + match[0].length,
             },
           ],
-          cleanedSentence: inputSentence.replace(match[0], '').trim(),
+          cleanedSentence: removeMatch(match[0]),
         }
       case 'interval:2week':
         result.frequency = 2
@@ -397,7 +410,7 @@ export const parseRepeatV2 = inputSentence => {
               end: lowerInputSentence.indexOf(match[0]) + match[0].length,
             },
           ],
-          cleanedSentence: inputSentence.replace(match[0], '').trim(),
+          cleanedSentence: removeMatch(match[0]),
         }
       case 'daily:time':
         result.frequency = 1
@@ -414,7 +427,7 @@ export const parseRepeatV2 = inputSentence => {
               end: lowerInputSentence.indexOf(match[0]) + match[0].length,
             },
           ],
-          cleanedSentence: inputSentence.replace(match[0], '').trim(),
+          cleanedSentence: removeMatch(match[0]),
         }
 
       case 'day_of_the_month:every':
@@ -456,7 +469,7 @@ export const parseRepeatV2 = inputSentence => {
               end: lowerInputSentence.indexOf(match[0]) + match[0].length,
             },
           ],
-          cleanedSentence: inputSentence.replace(match[0], '').trim(),
+          cleanedSentence: removeMatch(match[0]),
         }
       case 'interval:every_other':
         result.frequency = 2
@@ -472,7 +485,7 @@ export const parseRepeatV2 = inputSentence => {
               end: lowerInputSentence.indexOf(match[0]) + match[0].length,
             },
           ],
-          cleanedSentence: inputSentence.replace(match[0], '').trim(),
+          cleanedSentence: removeMatch(match[0]),
         }
 
       case 'days_of_the_week:nth_occurrence':
@@ -523,7 +536,7 @@ export const parseRepeatV2 = inputSentence => {
               end: startIndex + match[0].length,
             },
           ],
-          cleanedSentence: inputSentence.replace(match[0], '').trim(),
+          cleanedSentence: removeMatch(match[0]),
         }
 
       case 'days_of_the_week:nth_occurrence_multiple':
@@ -582,7 +595,7 @@ export const parseRepeatV2 = inputSentence => {
               end: startIndex2 + match[0].length,
             },
           ],
-          cleanedSentence: inputSentence.replace(match[0], '').trim(),
+          cleanedSentence: removeMatch(match[0]),
         }
     }
   }
