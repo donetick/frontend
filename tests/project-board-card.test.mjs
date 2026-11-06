@@ -5,6 +5,8 @@ import vm from 'node:vm'
 
 import { transformSync } from '@swc/core'
 
+import { getChorePermissions } from '../src/utils/ChoreAccess.js'
+
 const element = (type, props) => ({ type, props })
 const components = new Proxy({}, { get: (_, name) => name })
 
@@ -27,8 +29,29 @@ function render(overrides = {}, options = {}) {
     '../../../contexts/LocalizationContext': {
       useLocalization: () => ({ timeFormat: 'HH:mm' }),
     },
+    '../../../hooks/useChorePermissions': {
+      useChorePermissions: chore =>
+        getChorePermissions(
+          chore,
+          options.impersonatedUser?.userId || 5,
+          options.members || [],
+        ),
+    },
+    '../../../components/common/ExternalLinkChip': {
+      LinkTypeIcon: 'LinkTypeIcon',
+    },
+    '../../components/ChoreStatusChip': {
+      default: 'ChoreStatusChip',
+      __esModule: true,
+    },
     '../../../hooks/usePendingCommands': {
       usePendingCommands: () => ({ data: options.pendingCommands || [] }),
+    },
+    '../../../queries/XPQueries': {
+      useXPTranslation: () => ({
+        t: key => key,
+        xpMode: Boolean(options.xpMode),
+      }),
     },
     '../../../queries/UserQueries': {
       useUserProfile: () => ({ data: { id: 5 } }),
@@ -43,8 +66,9 @@ function render(overrides = {}, options = {}) {
       notInCompletionWindow: () => options.outsideWindow,
     },
     '../../../utils/ExternalLinks': {
-      splitTextAtFirstHttpUrl: name => ({ before: name, after: '', url: null }),
-      getFirstHttpUrl: () => null,
+      splitTextAtFirstLink: name => ({ before: name, after: '', link: null }),
+      getFirstLink: () => null,
+      openExternalLink: () => {},
     },
     '../../components/ChoreActionMenu': {
       ChoreActionMenuTrigger: 'MenuTrigger',
@@ -110,6 +134,49 @@ function find(node, predicate) {
   }
 }
 const event = { currentTarget: 'anchor', stopPropagation() {} }
+
+function renderedText(node) {
+  if (typeof node === 'string' || typeof node === 'number') return String(node)
+  if (Array.isArray(node)) return node.map(renderedText).join('')
+  if (!node || typeof node !== 'object') return ''
+  return renderedText(node.props?.children)
+}
+
+test('board card shows the configured award in XP mode', () => {
+  const card = render(
+    { chore: { id: 9, name: 'Task', status: 0, points: 25, xpCategoryId: 3 } },
+    { xpMode: true },
+  )
+  assert.ok(
+    find(
+      card.tree,
+      node => node.type === 'Typography' && renderedText(node) === '25 XP',
+    ),
+  )
+})
+
+test('board card shows the configured award in Points mode', () => {
+  const card = render(
+    { chore: { id: 9, name: 'Task', status: 0, points: 25 } },
+    { xpMode: false },
+  )
+  assert.ok(
+    find(
+      card.tree,
+      node => node.type === 'Typography' && renderedText(node) === '25pts',
+    ),
+  )
+})
+
+test('board card omits award metadata for zero or missing amounts', () => {
+  for (const points of [undefined, null, 0]) {
+    const card = render(
+      { chore: { id: 9, name: 'Task', status: 0, points } },
+      { xpMode: true },
+    )
+    assert.doesNotMatch(renderedText(card.tree), /\d+\s?XP|\d+pts/)
+  }
+})
 
 test('one-tap actions retain completion, pause, resume and approval semantics', () => {
   for (const [status, action] of [
