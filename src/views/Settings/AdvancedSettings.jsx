@@ -104,7 +104,7 @@ const AdvancedSettings = () => {
 
   return (
     <SettingsLayout title={t('advanced.title')}>
-      <Box sx={{ maxWidth: 680, pb: 4 }}>
+      <Box sx={{ maxWidth: 680 }}>
         <Typography
           level='body-md'
           textColor='text.secondary'

@@ -120,7 +120,24 @@ const Sidepanel = ({
 
   const sortedCards = [...sidepanelConfig].sort((a, b) => a.order - b.order)
 
-  return <Box>{sortedCards.map(cardConfig => renderCard(cardConfig))}</Box>
+  if (!sortedCards.some(card => card.enabled)) return null
+
+  return (
+    <Box
+      component='aside'
+      aria-label='Task insights'
+      sx={{
+        width: 315,
+        flexShrink: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 2,
+        '& > .MuiSheet-root': { width: '100%', m: 0 },
+      }}
+    >
+      {sortedCards.map(cardConfig => renderCard(cardConfig))}
+    </Box>
+  )
 }
 
 export default Sidepanel

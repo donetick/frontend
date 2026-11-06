@@ -159,7 +159,7 @@ const AccountSettings = () => {
 
   return (
     <SettingsLayout title={t('accountSettings.title')}>
-      <Box sx={{ maxWidth: 720, pb: 4 }}>
+      <Box sx={{ maxWidth: 720 }}>
         <Typography
           level='body-md'
           textColor='text.secondary'

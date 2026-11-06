@@ -740,7 +740,6 @@ const ArchivedTasks = () => {
         display: 'flex',
         flexDirection: 'column',
         px: { xs: 2, sm: 3 },
-        pt: { xs: 0, md: 3 },
       }}
     >
       {/* Header */}

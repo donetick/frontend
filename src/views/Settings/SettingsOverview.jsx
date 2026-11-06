@@ -25,7 +25,7 @@ const SettingsOverview = () => {
   const [bugReportOpen, setBugReportOpen] = useState(false)
 
   return (
-    <Container maxWidth='lg' sx={{ py: { xs: 3, sm: 4 } }}>
+    <Container maxWidth='lg'>
       <Box sx={{ mb: 3 }}>
         <Typography level='h2'>{t('overview.title')}</Typography>
         <Typography level='body-md' textColor='text.secondary' sx={{ mt: 1 }}>

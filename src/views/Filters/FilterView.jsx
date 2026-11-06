@@ -516,11 +516,9 @@ const FilterView = () => {
   }
 
   return (
-    <Container maxWidth='md' sx={{ px: 0, pt: { xs: 0, md: 3 } }}>
+    <Container maxWidth='md' sx={{ px: 0 }}>
       {savedFilters.length > 0 && (
-        <Box
-          sx={{ px: 2, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}
-        >
+        <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
           <Input
             slotProps={{ input: { ref: searchInputRef } }}
             placeholder={t('searchPlaceholder')}

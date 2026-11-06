@@ -407,7 +407,7 @@ const TimerDetails = () => {
           : null
 
   return (
-    <Container maxWidth='lg' sx={{ py: 2 }}>
+    <Container maxWidth='lg'>
       {/* Header */}
 
       {loading && (
