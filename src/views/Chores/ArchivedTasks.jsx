@@ -616,9 +616,7 @@ const ArchivedTasks = () => {
             const allRestored = [...restoredTasks, ...queuedTasks]
             if (allRestored.length > 0) {
               const offlineNote =
-                queuedTasks.length > 0
-                  ? ' (queued — will sync when back online)'
-                  : ''
+                queuedTasks.length > 0 ? t('common:ui.actions.queuedNote') : ''
               // Remove from archived view optimistically for both online and queued
               const restoredIds = new Set(allRestored.map(c => c.id))
               const newArchivedChores = archivedChores.filter(

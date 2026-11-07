@@ -269,7 +269,7 @@ const ChoreToolbar = ({
   const inlineChips = []
 
   const getConditionChipLabel = condition => {
-    if (!condition?.type) return 'Filter'
+    if (!condition?.type) return t('filterBuilder.filterFallback')
 
     const typeLabels = {
       assignee: t('filterBuilder.assignee'),
@@ -344,7 +344,7 @@ const ChoreToolbar = ({
         return labels.find(l => l.id === value)?.name || String(value)
       }
       if (condition.type === 'project') {
-        if (value === 'default') return 'Default Project'
+        if (value === 'default') return t('toolbar.defaultProject')
         const project = projects.find(p => p.id === value)
         if (!project) return String(value)
         return project.isPrivate ? `🔒 ${project.name}` : project.name
@@ -516,7 +516,9 @@ const ChoreToolbar = ({
       return
     }
     setSaveFilterName(
-      editingSavedFilter ? `${editingSavedFilter.name} Copy` : '',
+      editingSavedFilter
+        ? t('common:ui.actions.filterCopy', { name: editingSavedFilter.name })
+        : '',
     )
     setSaveFilterShared(editingSavedFilter?.isShared ?? false)
     setSavingFilter(true)
@@ -676,7 +678,9 @@ const ChoreToolbar = ({
               }}
             >
               <ProjectSelector
-                selectedProject={selectedProject?.name || 'Default Project'}
+                selectedProject={
+                  selectedProject?.name || t('toolbar.defaultProject')
+                }
                 onProjectSelect={onProjectSelect}
                 showKeyboardShortcuts={showKeyboardShortcuts}
               />
@@ -746,12 +750,14 @@ const ChoreToolbar = ({
             sx={{ height: 32, width: 32, borderRadius: '50%' }}
             onClick={onToggleMultiSelect}
             aria-label={
-              isMultiSelectMode ? 'Exit multi-select' : 'Enter multi-select'
+              isMultiSelectMode
+                ? t('common:ui.actions.exitMultiSelect')
+                : t('common:ui.actions.enterMultiSelect')
             }
             title={
               isMultiSelectMode
-                ? 'Exit multi-select (Ctrl+S)'
-                : 'Multi-select (Ctrl+S)'
+                ? t('common:ui.actions.exitMultiSelectShortcut')
+                : t('common:ui.actions.multiSelectShortcut')
             }
           >
             {isMultiSelectMode ? <CheckBox /> : <CheckBoxOutlineBlank />}

@@ -1,0 +1,61 @@
+{
+  "builder": {
+    "errorName": "请输入筛选器名称",
+    "errorConditions": "请至少设置一个筛选条件",
+    "editTitle": "编辑筛选器",
+    "newTitle": "新建筛选器",
+    "addConditions": "添加条件以预览",
+    "save": "保存筛选器",
+    "name": "筛选器名称",
+    "namePlaceholder": "例如：分配给小王的逾期任务",
+    "color": "颜色",
+    "sharing": "共享",
+    "shared": "与你的圈子共享",
+    "private": "仅自己可见",
+    "conditions": "筛选条件",
+    "conditionsHint": "展开分类以细化筛选。任务必须符合所有已设置的分类条件；同一分类中有多个选项时，符合其中任意一项即可。",
+    "anyValue": "不限"
+  },
+  "nameExists": "已存在同名筛选器",
+  "tasks_one": "{{count}} 个任务",
+  "tasks_other": "{{count}} 个任务",
+  "overdue": "{{count}} 个已逾期",
+  "noConditions": "无条件",
+  "condition_one": "{{count}} 个条件",
+  "condition_other": "{{count}} 个条件",
+  "usedCount": "已使用 {{count}} 次",
+  "delete": {
+    "title": "删除筛选器",
+    "message": "确定要删除“{{name}}”吗？此操作无法撤销。"
+  },
+  "empty": {
+    "title": "暂无已保存的筛选器",
+    "description": "保存一组条件，例如“逾期且分配给我”，就能随时快速返回相应的任务列表。",
+    "createFilter": "创建筛选器",
+    "noResultsTitle": "没有匹配的筛选器",
+    "noResultsWithSearch": "没有与“{{search}}”匹配的已保存筛选器。",
+    "noResultsDefault": "没有符合当前筛选条件的已保存筛选器。",
+    "clearSearch": "清除搜索",
+    "showAllFilters": "显示所有筛选器"
+  },
+  "header": {
+    "title": "筛选器",
+    "subtitle": "保存常用的筛选组合以便快速访问。创建自定义视图，更轻松地整理和查找任务。"
+  },
+  "searchPlaceholder": "搜索筛选器",
+  "sort": {
+    "smart": "智能",
+    "name": "名称",
+    "usage": "使用次数",
+    "lastUsed": "上次使用",
+    "created": "创建日期"
+  },
+  "show": {
+    "title": "显示",
+    "all": "所有筛选器",
+    "pinned": "已置顶",
+    "unpinned": "未置顶"
+  },
+  "pin": "置顶",
+  "unpin": "取消置顶"
+}

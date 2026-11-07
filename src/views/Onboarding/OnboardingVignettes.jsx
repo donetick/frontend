@@ -490,72 +490,78 @@ const CameraFrame = ({ delay = 0 }) => (
   </Box>
 )
 
-const TYPE_TEXT = 'change ac filter friday @ryan'
-
 /** The "before": a live-typed line, revealed a character at a time. */
-const TypingField = ({ delay = 0 }) => (
-  <Box
-    sx={{
-      ...cardSx,
-      height: 68,
-      px: 1.5,
-      display: 'flex',
-      alignItems: 'center',
-      gap: 1,
-    }}
-  >
-    <KeyboardRounded
-      sx={{ fontSize: 18, color: 'text.tertiary', flex: '0 0 auto' }}
-    />
-    <Box sx={{ display: 'flex', alignItems: 'center', minWidth: 0 }}>
-      <Box
-        sx={{
-          overflow: 'hidden',
-          whiteSpace: 'nowrap',
-          width: 0,
-          // One pass per appearance, not a fast standalone loop: the reveal
-          // itself only takes the first 40% of the visible window (steps()
-          // applies to that first segment), then holds at full width for the
-          // rest so it doesn't replay mid-view before the morph hands off.
-          animation: `typeReveal ${CAPTURE_STEP_MS}ms ${EASE} ${delay}ms infinite`,
-          '@keyframes typeReveal': {
-            '0%': {
-              width: 0,
-              animationTimingFunction: `steps(${TYPE_TEXT.length}, end)`,
-            },
-            '40%': { width: `${TYPE_TEXT.length}ch` },
-            '100%': { width: `${TYPE_TEXT.length}ch` },
-          },
-        }}
-      >
-        <Typography
-          level='body-sm'
-          noWrap
+const TypingField = ({ delay = 0 }) => {
+  const { t } = useTranslation('common')
+  const typeText = t('common:ui.remaining.typingExample')
+  const typeWidth = [...typeText].reduce(
+    (width, character) => width + (character.codePointAt(0) > 255 ? 2 : 1),
+    0,
+  )
+  return (
+    <Box
+      sx={{
+        ...cardSx,
+        height: 68,
+        px: 1.5,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 1,
+      }}
+    >
+      <KeyboardRounded
+        sx={{ fontSize: 18, color: 'text.tertiary', flex: '0 0 auto' }}
+      />
+      <Box sx={{ display: 'flex', alignItems: 'center', minWidth: 0 }}>
+        <Box
           sx={{
-            fontFamily:
-              'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
-            fontSize: '0.8125rem',
+            overflow: 'hidden',
+            whiteSpace: 'nowrap',
+            width: 0,
+            // One pass per appearance, not a fast standalone loop: the reveal
+            // itself only takes the first 40% of the visible window (steps()
+            // applies to that first segment), then holds at full width for the
+            // rest so it doesn't replay mid-view before the morph hands off.
+            animation: `typeReveal ${CAPTURE_STEP_MS}ms ${EASE} ${delay}ms infinite`,
+            '@keyframes typeReveal': {
+              '0%': {
+                width: 0,
+                animationTimingFunction: `steps(${typeText.length}, end)`,
+              },
+              '40%': { width: `${typeWidth}ch` },
+              '100%': { width: `${typeWidth}ch` },
+            },
           }}
         >
-          {TYPE_TEXT}
-        </Typography>
+          <Typography
+            level='body-sm'
+            noWrap
+            sx={{
+              fontFamily:
+                'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
+              fontSize: '0.8125rem',
+            }}
+          >
+            {typeText}
+          </Typography>
+        </Box>
+        <Box
+          sx={{
+            width: '2px',
+            height: '1.1em',
+            ml: 0.25,
+            bgcolor: 'primary.500',
+            animation: 'caretBlink 500ms step-end infinite',
+            '@keyframes caretBlink': {
+              '0%, 100%': { opacity: 1 },
+              '50%': { opacity: 0 },
+            },
+          }}
+        />
       </Box>
-      <Box
-        sx={{
-          width: '2px',
-          height: '1.1em',
-          ml: 0.25,
-          bgcolor: 'primary.500',
-          animation: 'caretBlink 500ms step-end infinite',
-          '@keyframes caretBlink': {
-            '0%, 100%': { opacity: 1 },
-            '50%': { opacity: 0 },
-          },
-        }}
-      />
     </Box>
-  </Box>
-)
+  )
+}
 
 export const CaptureVignette = () => {
   const { t } = useTranslation('common')

@@ -6,7 +6,15 @@ import { URL } from 'node:url'
 const source = path =>
   readFileSync(new URL(`../src/${path}`, import.meta.url), 'utf8')
 
-test('task detail actions use the theme accent rather than success green', () => {
+const assertCompletionColor = component => {
+  assert.match(component, /const \{ skin \} = useThemeSkin\(\)/)
+  assert.match(
+    component,
+    /const completionColor = skin === 'default' \? 'success' : 'primary'/,
+  )
+}
+
+test('task detail actions retain their accent and timers follow the selected skin', () => {
   const view = source('views/ChoreEdit/ChoreView.jsx')
   assert.doesNotMatch(view, /color='success'/)
   for (const handler of [
@@ -16,24 +24,24 @@ test('task detail actions use the theme accent rather than success green', () =>
   ]) {
     assert.ok(view.includes(handler))
   }
+  const splitButton = source('views/ChoreEdit/TimerSplitButton.jsx')
+  assertCompletionColor(splitButton)
   assert.match(
-    source('views/ChoreEdit/TimerSplitButton.jsx'),
-    /'warning' : 'primary'/,
+    splitButton,
+    /color=\{chore.status === 1 \? 'warning' : completionColor\}/,
   )
+  const timePassed = source('views/ChoreEdit/TimePassedCard.jsx')
+  assertCompletionColor(timePassed)
   assert.match(
-    source('views/ChoreEdit/TimePassedCard.jsx'),
-    /color='primary'[\s\S]*?handleAction\('resume'\)/,
+    timePassed,
+    /color=\{completionColor\}[\s\S]*?handleAction\('resume'\)/,
   )
 })
 
 test('cards preserve default green completion actions and custom theme accents', () => {
   for (const file of ['ChoreCard', 'CompactChoreCard']) {
     const card = source(`views/Chores/${file}.jsx`)
-    assert.match(card, /const \{ skin \} = useThemeSkin\(\)/)
-    assert.match(
-      card,
-      /const completionColor = skin === 'default' \? 'success' : 'primary'/,
-    )
+    assertCompletionColor(card)
     assert.match(
       card,
       /color=\{chore.status === 0 \? completionColor : 'warning'\}/,
@@ -47,10 +55,9 @@ test('cards preserve default green completion actions and custom theme accents',
     source('views/Chores/ChoreCard.jsx'),
     /color='success'[\s\S]*?chore.points/,
   )
-  assert.match(
-    source('views/Chores/components/MultiSelectToolbar.jsx'),
-    /color='primary'\s+onClick=\{onComplete\}/,
-  )
+  const toolbar = source('views/Chores/components/MultiSelectToolbar.jsx')
+  assertCompletionColor(toolbar)
+  assert.match(toolbar, /color=\{completionColor\}\s+onClick=\{onComplete\}/)
   assert.match(
     source('views/Chores/ArchivedTasks.jsx'),
     /color='primary'\s+onClick=\{handleBulkRestore\}/,

@@ -38,6 +38,7 @@ import { useChores } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { consumePendingShare } from '../../service/ShareTargetService'
+import { getChoreGroupLabel } from '../../utils/ChoreGroupLabels'
 import {
   ChoreFilters,
   ChoresGrouper,
@@ -119,6 +120,19 @@ const sortChores = (a, b, sortBy, direction) => {
   if (!dateA) return 1
   if (!dateB) return -1
   return (new Date(dateA).getTime() - new Date(dateB).getTime()) * multiplier
+}
+
+const INSIGHT_FILTER_NAME_KEYS = {
+  overdue: 'group.overdue',
+  'due-today': 'group.dueToday',
+  'due-next-two-days': 'insights.dueTodayAndTomorrow',
+  'pending-approval': 'group.pendingApproval',
+  unplanned: 'group.noDueDate',
+  'due-this-week': 'group.dueThisWeek',
+  'coming-up': 'insights.comingUp',
+  'due-this-week-overdue': 'insights.dueThisWeekAndOverdue',
+  'high-priority': 'insights.highPriority',
+  'no-due-date': 'group.noDueDate',
 }
 
 const MyChores = () => {
@@ -312,8 +326,16 @@ const MyChores = () => {
     [applyTempFilter, clearActiveFilter, setSearchTerm],
   )
 
+  const tempFilterName = INSIGHT_FILTER_NAME_KEYS[tempFilterMeta?.id]
+    ? t(INSIGHT_FILTER_NAME_KEYS[tempFilterMeta.id])
+    : typeof tempFilterMeta?.id === 'string' &&
+        tempFilterMeta.id.startsWith('assignedTo:')
+      ? tempFilterMeta.assigneeName
+        ? t('insights.assignedToMember', { name: tempFilterMeta.assigneeName })
+        : t('assignedTo')
+      : tempFilterMeta?.name
   const choreViewTitle = tempFilter
-    ? tempFilterMeta?.name || t('common:navigation.filters')
+    ? tempFilterName || t('common:navigation.filters')
     : activeFilterId
       ? activeFilter?.name || t('common:navigation.filters')
       : !isDefaultProject
@@ -554,6 +576,7 @@ const MyChores = () => {
     selectedProject,
     impersonatedUser?.userId,
     userProfile?.id,
+    t,
   ])
 
   useEffect(() => {
@@ -684,7 +707,10 @@ const MyChores = () => {
     ) {
       const def = INSIGHT_FILTER_DEFS[filterId]
       applyingUrlFilterIdRef.current = rawFilterId
-      applyTempFilter(def.filter, { id: filterId, name: def.name })
+      applyTempFilter(def.filter, {
+        id: filterId,
+        name: t(INSIGHT_FILTER_NAME_KEYS[filterId]),
+      })
       return
     }
 
@@ -719,7 +745,10 @@ const MyChores = () => {
         },
         {
           id: filterId,
-          name: memberName ? `Assigned to ${memberName}` : 'Assigned to',
+          name: memberName
+            ? t('insights.assignedToMember', { name: memberName })
+            : t('assignedTo'),
+          assigneeName: memberName,
           icon: <Person sx={{ fontSize: '2rem', color: 'primary.main' }} />,
         },
       )
@@ -774,6 +803,7 @@ const MyChores = () => {
     projectFilteredChores,
     setQuickFilter,
     setSelectedCalendarDate,
+    t,
   ])
 
   // Sync tempFilterMeta (smart insight) → URL using filterId param
@@ -1631,7 +1661,11 @@ const MyChores = () => {
                               </Chip>
                             }
                           >
-                            {section.name}
+                            {getChoreGroupLabel(
+                              section.name,
+                              selectedChoreSection,
+                              t,
+                            )}
                           </Chip>
                         </Box>
                       )

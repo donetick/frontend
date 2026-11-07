@@ -534,19 +534,19 @@ const ProjectView = () => {
         />
         <SortAndFilterMenu
           sortOptions={[
-            { name: 'Name', value: 'name' },
-            { name: 'Task count', value: 'tasks' },
-            { name: 'Recently created', value: 'created' },
+            { name: t('common:ui.remaining.sortName'), value: 'name' },
+            { name: t('common:ui.remaining.taskCount'), value: 'tasks' },
+            { name: t('common:ui.remaining.recentCreated'), value: 'created' },
           ]}
           selectedSort={sortBy}
           onSortChange={setSortBy}
           sortDirection={sortDirection}
           onSortDirectionChange={setSortDirection}
-          filterTitle='Show'
+          filterTitle={t('common:ui.remaining.show')}
           filterOptions={[
-            { name: 'All projects', value: 'all' },
-            { name: 'Created by me', value: 'mine' },
-            { name: 'Shared with me', value: 'shared' },
+            { name: t('common:ui.remaining.allProjects'), value: 'all' },
+            { name: t('common:ui.remaining.createdByMe'), value: 'mine' },
+            { name: t('common:ui.remaining.sharedWithMe'), value: 'shared' },
           ]}
           selectedFilter={ownershipFilter}
           onFilterChange={value => {

@@ -75,10 +75,10 @@ const ThingsHistory = () => {
       const frequency = totalDuration / (thingsHistory.length - 1)
       avgUpdateFrequency =
         frequency < 1
-          ? `${Math.round(frequency * 60)} minutes`
+          ? t('common:ui.things.minutes', { count: Math.round(frequency * 60) })
           : frequency < 24
-            ? `${Math.round(frequency)} hours`
-            : `${Math.round(frequency / 24)} days`
+            ? t('common:ui.things.hours', { count: Math.round(frequency) })
+            : t('common:calendar.days', { count: Math.round(frequency / 24) })
     }
 
     const lastUpdated = thingsHistory[0]
@@ -97,30 +97,33 @@ const ThingsHistory = () => {
         .filter(d => d !== null)
       const last = diffs[0]
       const prev = diffs[1]
-      if (last > prev) updateTrend = 'Interval increasing'
-      else if (last < prev) updateTrend = 'Interval decreasing'
-      else updateTrend = 'Interval stable'
+      if (last > prev) updateTrend = t('common:ui.things.intervalIncreasing')
+      else if (last < prev)
+        updateTrend = t('common:ui.things.intervalDecreasing')
+      else updateTrend = t('common:ui.things.intervalStable')
     }
 
     return [
       {
         icon: <Speed />,
-        text: 'Update Frequency',
-        subtext: `Every ${avgUpdateFrequency}`,
+        text: t('common:ui.things.updateFrequency'),
+        subtext: t('common:ui.things.everyInterval', {
+          interval: avgUpdateFrequency,
+        }),
       },
       {
         icon: <Update />,
-        text: 'Last Updated',
+        text: t('common:ui.things.lastUpdated'),
         subtext: lastUpdated,
       },
       {
         icon: <CallReceived />,
-        text: 'Last Value',
+        text: t('common:ui.things.lastValue'),
         subtext: thingsHistory[0]?.state ?? '--',
       },
       {
         icon: <TrendingUp />,
-        text: 'Update Trend',
+        text: t('common:ui.things.updateTrend'),
         subtext: updateTrend,
       },
     ]
@@ -149,7 +152,14 @@ const ThingsHistory = () => {
       }
     }
 
-    return `${timeValue} ${unit}${timeValue !== 1 ? 's' : ''}`
+    return t(
+      {
+        minute: 'common:ui.things.minutes',
+        hour: 'common:ui.things.hours',
+        day: 'common:calendar.days',
+      }[unit],
+      { count: timeValue },
+    )
   }
   // if loading show loading spinner:
   if (isLoading) {
@@ -163,16 +173,21 @@ const ThingsHistory = () => {
           variant={error ? 'error' : 'empty'}
           fullHeight
           icon={error ? <CloudOff /> : <EventBusy />}
-          title={error ? "Couldn't load this history" : 'No history yet'}
+          title={
+            error ? t('common:ui.things.loadFailed') : t('history:empty.title')
+          }
           description={
             error
-              ? 'We could not reach the server. Check your connection and try again.'
-              : "Each time this thing's value changes, the change is recorded here."
+              ? t('common:ui.things.connectionError')
+              : t('common:ui.things.historyDescription')
           }
           primaryAction={
             error
-              ? { label: 'Try again', onClick: () => refetch() }
-              : { label: 'Back to things', to: '/things' }
+              ? {
+                  label: t('common:errorScreen.tryAgain'),
+                  onClick: () => refetch(),
+                }
+              : { label: t('common:ui.things.backToThings'), to: '/things' }
           }
         />
       </Container>
@@ -303,6 +318,7 @@ const ThingsHistory = () => {
 
                 <Line
                   type='monotone'
+                  name={t('value')}
                   dataKey='state'
                   stroke={theme.palette.primary[500]}
                   activeDot={{

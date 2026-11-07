@@ -15,7 +15,7 @@ const getAssigneeColor = (assignee, userProfile) => {
 }
 const CalendarDual = ({ chores, onDateChange }) => {
   const { data: userProfile } = useUserProfile()
-  const { firstDayOfWeek, fmt } = useLocalization()
+  const { firstDayOfWeek, fmt, language } = useLocalization()
   const calendarType =
     firstDayOfWeek === 1
       ? 'iso8601'
@@ -110,6 +110,7 @@ const CalendarDual = ({ chores, onDateChange }) => {
         </div>
       )}
       <Calendar
+        locale={language}
         className={styles.reactCalendar}
         tileContent={tileContent}
         calendarType={calendarType}
@@ -124,7 +125,7 @@ const CalendarDual = ({ chores, onDateChange }) => {
         showNavigation={!isSecondary}
         // format the days from MON, TUE, WED, THU, FRI, SAT, SUN to first three letters:
         formatShortWeekday={(locale, date) =>
-          ['S', 'M', 'T', 'W', 'T', 'F', 'S'][date.getDay()]
+          new Intl.DateTimeFormat(locale, { weekday: 'narrow' }).format(date)
         }
         onActiveStartDateChange={({ activeStartDate }) => {
           if (!isSecondary) {

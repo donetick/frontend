@@ -1,0 +1,71 @@
+{
+  "shared": "已共享",
+  "delete": {
+    "title": "删除标签",
+    "message": "确定要删除此标签吗？这将从所有任务中移除此标签。"
+  },
+  "loadError": "加载标签失败，请重试。",
+  "search": {
+    "placeholder": "搜索标签",
+    "noResultsTitle": "没有匹配的标签",
+    "noResultsDescription": "没有与“{{searchTerm}}”匹配的标签。",
+    "noFilterResultsDescription": "没有符合当前筛选条件的标签。",
+    "clear": "清除搜索",
+    "showAll": "显示所有标签"
+  },
+  "detail": {
+    "taskCount_one": "{{count}} 个任务",
+    "taskCount_other": "{{count}} 个任务",
+    "labelActions": "标签操作",
+    "filters": {
+      "all": "全部",
+      "overdue": "逾期",
+      "today": "今天",
+      "undated": "无日期"
+    },
+    "noMatchingStatus": "此标签中目前没有处于该状态的任务。",
+    "clearFilters": "显示所有任务",
+    "searchPlaceholder": "搜索此标签中的任务",
+    "emptyTitle": "此标签下暂无任务",
+    "emptyDescription": "尚未有任务添加“{{label}}”标签。为任务添加此标签后，任务就会显示在这里。",
+    "browseTasks": "浏览任务",
+    "noResultsTitle": "没有匹配的任务",
+    "noResultsDescription": "此标签中没有与“{{searchTerm}}”匹配的任务。",
+    "notFoundTitle": "未找到标签",
+    "notFoundDescription": "此标签可能已被删除或不再与你共享。",
+    "backToLabels": "返回标签"
+  },
+  "blurb": "管理标签，轻松整理任务。用于共享任务的标签会自动与你的圈子共享。",
+  "modal": {
+    "errorEmptyName": "名称不能为空",
+    "errorDuplicate": "已存在同名标签",
+    "errorNoColor": "请选择颜色",
+    "saveFailedTitle": "保存标签失败",
+    "saveFailedMessage": "无法保存标签，请重试。",
+    "name": "名称",
+    "editTitle": "编辑标签",
+    "addTitle": "添加标签",
+    "color": "颜色",
+    "saveChanges": "保存更改",
+    "addLabel": "添加标签",
+    "colorAriaSelect": "选择{{color}}"
+  },
+  "picker": {
+    "label": "标签",
+    "createLabel": "创建标签",
+    "labelsCount_one": "{{count}} 个标签",
+    "labelsCount_other": "{{count}} 个标签"
+  },
+  "view": {
+    "emptyTitle": "暂无标签",
+    "emptyDescription": "标签可以将圈子里的任务分组，例如“厨房”或“账单”，让你一键筛选相关任务。",
+    "createLabel": "创建标签",
+    "filterTitle": "显示",
+    "sortName": "名称",
+    "sortColor": "颜色",
+    "sortRecent": "最近创建",
+    "filterAll": "所有标签",
+    "filterMine": "我创建的",
+    "filterShared": "与我共享的"
+  }
+}

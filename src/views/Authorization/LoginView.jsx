@@ -3,10 +3,19 @@ import { Capacitor } from '@capacitor/core'
 import { Device } from '@capacitor/device'
 // import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth'
 import { SocialLogin } from '@capgo/capacitor-social-login'
-import { SettingsOutlined } from '@mui/icons-material'
+import { LanguageRounded, SettingsOutlined } from '@mui/icons-material'
 import AppleIcon from '@mui/icons-material/Apple'
 import GoogleIcon from '@mui/icons-material/Google'
-import { Avatar, Box, Button, IconButton, Link, Typography } from '@mui/joy'
+import {
+  Avatar,
+  Box,
+  Button,
+  IconButton,
+  Link,
+  Option,
+  Select,
+  Typography,
+} from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
 import Cookies from 'js-cookie'
 import { useEffect, useState } from 'react'
@@ -15,6 +24,7 @@ import { useNavigate } from 'react-router-dom'
 import { LoginSocialGoogle } from 'reactjs-social-login'
 
 import { GOOGLE_CLIENT_ID, REDIRECT_URL } from '../../Config'
+import { useLocalization } from '../../contexts/LocalizationContext'
 import { useAuth } from '../../hooks/useAuth.jsx'
 import { useResource } from '../../queries/ResourceQueries'
 import { useUserProfile } from '../../queries/UserQueries.jsx'
@@ -87,6 +97,7 @@ const SegmentedControl = ({ onChange, options, value }) => (
 
 const LoginView = () => {
   const { t } = useTranslation('auth')
+  const { availableLanguages, language, setLanguage } = useLocalization()
   // Use React Query client directly to invalidate the user profile query
   const queryClient = useQueryClient()
   const { data: userProfile } = useUserProfile()
@@ -460,7 +471,45 @@ const LoginView = () => {
             : t('signInToContinueSubtitle')
       }
       logoSize={0}
-      footer={<LegalLinks />}
+      footer={
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 1.5,
+          }}
+        >
+          <Select
+            size='sm'
+            variant='plain'
+            value={language}
+            startDecorator={<LanguageRounded fontSize='small' />}
+            slotProps={{
+              button: { 'aria-label': t('settings:localization.language') },
+              listbox: {
+                sx: { maxHeight: 320, maxWidth: 'calc(100vw - 32px)' },
+              },
+            }}
+            onChange={(_, value) => {
+              if (value) setLanguage(value)
+            }}
+            sx={{
+              maxWidth: '100%',
+              '& .MuiSelect-button': { whiteSpace: 'normal' },
+            }}
+          >
+            {availableLanguages.map(lang => (
+              <Option key={lang.code} value={lang.code}>
+                <span lang={lang.code} dir='auto'>
+                  {lang.nativeName}
+                </span>
+              </Option>
+            ))}
+          </Select>
+          <LegalLinks />
+        </Box>
+      }
       action={
         Capacitor.isNativePlatform() ? (
           <IconButton

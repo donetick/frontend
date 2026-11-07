@@ -34,7 +34,7 @@
   },
   "overview": {
     "title": "设置",
-    "subtitle": "定制你的使用体验并管理账户偏好",
+    "subtitle": "管理你的账户、圈子和 Donetick 使用偏好。",
     "upgrade": {
       "title": "升级到 Plus",
       "description": "解锁强大功能，提升你的效率",
@@ -48,27 +48,27 @@
     },
     "sections": {
       "profile": {
-        "title": "个人资料设置",
+        "title": "个人资料",
         "description": "更新你的个人资料、头像、显示名称和时区偏好。"
       },
       "circle": {
-        "title": "圈子设置",
-        "description": "管理你的圈子、邀请成员并处理加入请求。"
+        "title": "圈子",
+        "description": "管理成员、邀请、加入请求和子账户。"
       },
       "account": {
-        "title": "账户设置",
+        "title": "账户与订阅",
         "description": "管理订阅、修改密码以及删除账户。"
       },
       "subaccounts": {
-        "title": "受管账户",
-        "description": "创建和管理子账户，让他们登录并完成分配的任务。"
+        "title": "子账户",
+        "description": "为需要你协助登录的家庭成员创建和管理账户。"
       },
       "notifications": {
         "title": "通知",
-        "description": "配置推送通知、邮件提醒以及任务的通知目标。"
+        "description": "选择提醒时间、应用内提醒和推送通知，并管理已注册设备。"
       },
       "mfa": {
-        "title": "多重身份验证",
+        "title": "安全",
         "description": "通过身份验证器应用启用 MFA，为账户增加一层安全保护。"
       },
       "apitokens": {
@@ -76,7 +76,7 @@
         "description": "生成和管理用于第三方集成与 API 访问的访问令牌。"
       },
       "storage": {
-        "title": "存储设置",
+        "title": "存储与备份",
         "description": "备份和恢复数据，管理本地存储与同步偏好。"
       },
       "layout": {
@@ -84,23 +84,23 @@
         "description": "选择应用打开时显示的页面，以及围绕它的快捷方式和面板。"
       },
       "theme": {
-        "title": "主题偏好",
+        "title": "外观",
         "description": "选择你喜欢的主题并配置深色／浅色模式。"
       },
       "localization": {
-        "title": "本地化",
+        "title": "语言与区域",
         "description": "自定义语言、日期格式、时间格式和区域偏好。"
       },
       "advanced": {
         "title": "高级设置",
-        "description": "配置 Webhook、实时更新以及其他高级功能。"
+        "description": "管理离线使用、实时更新和开发者工具。"
       },
       "privacy": {
-        "title": "Privacy & Analytics",
-        "description": "Control anonymous usage analytics and crash reporting."
+        "title": "隐私与分析",
+        "description": "管理匿名使用情况分析和崩溃报告。"
       },
       "developer": {
-        "title": "开发者设置",
+        "title": "开发者工具",
         "description": "查看身份验证令牌、SSE 连接和调试数据等技术信息。"
       },
       "feedback": {
@@ -109,7 +109,7 @@
       },
       "bugReport": {
         "title": "报告问题",
-        "description": "有什么不对劲吗？把详情和技术快照一起发给我们。"
+        "description": "告诉我们哪些功能无法正常使用，我们会自动附上技术详情。"
       },
       "widgets": {
         "title": "主屏幕小组件",
@@ -118,7 +118,40 @@
       "sidepanel": {
         "title": "侧边栏自定义",
         "description": "自定义侧边栏中卡片的布局和显示状态。"
+      },
+      "integrations": {
+        "title": "集成",
+        "description": "连接日历、通知服务和其他应用。"
+      },
+      "webhooks": {
+        "title": "圈子 Webhook",
+        "description": "将圈子的任务和物品更新发送到外部服务。"
+      },
+      "notification-integrations": {
+        "title": "通知集成",
+        "description": "连接 Telegram、Pushover 或 Webhook 以接收任务通知。"
+      },
+      "bridge": {
+        "title": "Donetick Bridge",
+        "description": "连接 Donetick Bridge，从此自托管实例发送推送通知。"
+      },
+      "calendar": {
+        "title": "日历同步",
+        "description": "在 Apple 日历、Google 日历、Outlook 或其他日历应用中订阅你的任务。"
+      },
+      "home-sections": {
+        "title": "自定义概览",
+        "description": "显示、隐藏主屏幕上的各个版块，并调整其顺序。"
       }
+    },
+    "support": "帮助与反馈",
+    "groups": {
+      "account": "你的账户",
+      "circle": "你的圈子",
+      "preferences": "偏好设置",
+      "connections": "连接",
+      "data": "数据与隐私",
+      "advanced": "高级"
     }
   },
   "profile": {
@@ -194,7 +227,21 @@
     "joinedPending": "已成功加入圈子，请等待圈主接受你的请求。",
     "alreadyMember": "你已经是该圈子的成员",
     "joinFailed": "加入圈子失败",
-    "copyLink": "Copy Link"
+    "copyLink": "复制链接",
+    "pendingApprovalMessage": "你加入 {{name}} 的请求正在等待圈子管理员审批。",
+    "cancelRequest": "取消请求",
+    "cancelRequestTitle": "取消加入请求",
+    "cancelRequestMessage": "确定要取消加入此圈子的请求吗？",
+    "cancelRequestButton": "取消请求",
+    "requestCancelled": "请求已成功取消",
+    "cancelRequestFailed": "取消请求失败",
+    "noPendingRequests": "目前没有待处理的加入请求。",
+    "decline": "拒绝",
+    "declineRequestTitle": "拒绝加入请求",
+    "declineRequestMessage": "确定要拒绝 {{name}}（用户名：{{username}}）加入你的圈子的请求吗？",
+    "declineRequestButton": "拒绝",
+    "requestDeclined": "已成功拒绝请求",
+    "declineRequestFailed": "拒绝请求失败"
   },
   "accountSettings": {
     "title": "账户设置",
@@ -233,7 +280,7 @@
     }
   },
   "subaccounts": {
-    "title": "受管账户",
+    "title": "子账户",
     "description": "管理子账户。子账户用户可以登录并完成分配给他们的任务。",
     "notParentTitle": "子账户管理",
     "notParentMessage": "只有主账户才能管理子账户。",
@@ -259,11 +306,11 @@
     "deleted": "子账户“{{name}}”已成功删除",
     "deleteFailed": "删除子账户失败：{{error}}",
     "deleteFailedGeneric": "删除子账户失败",
-    "howItWorksTitle": "受管账户如何运作",
-    "howItWorks1": "受管账户由主账户创建，适用于你希望能够删除其账户并重置其密码的用户。",
+    "howItWorksTitle": "子账户如何运作",
+    "howItWorks1": "子账户由主账户创建，适用于需要由你管理账户删除和密码重置的用户。",
     "howItWorks2": "子账户可以使用自己的用户名和密码登录。",
-    "howItWorks3": "受管账户可以完成任务，但管理权限有限",
-    "howItWorks4": "受管账户会自动加入你的圈子"
+    "howItWorks3": "子账户可以完成任务，但管理权限有限",
+    "howItWorks4": "子账户会自动加入你的圈子"
   },
   "notifications": {
     "title": "通知设置",
@@ -292,9 +339,9 @@
     "deviceCreatedAt": "创建于：{{date}}",
     "noDevices": "尚无设备注册推送通知",
     "customSection": "自定义通知",
-    "customSectionDescription": "通过 Telegram、Pushover 等其他平台接收通知",
+    "customSectionDescription": "通过 Telegram、Pushover 或圈子的 Webhook 连接接收任务通知。",
     "customLabel": "自定义通知",
-    "customHelper": "在其他平台上接收通知",
+    "customHelper": "选择用于接收任务通知的外部服务。",
     "targetNone": "无",
     "targetTelegram": "Telegram",
     "targetPushover": "Pushover",
@@ -302,14 +349,14 @@
     "telegramBotHelpBefore": "你需要先向机器人发送一条消息，Telegram 通知才能生效",
     "telegramBotHelpAfter": "开始聊天",
     "clickHere": "点击这里",
-    "chatId": "Chat ID",
-    "chatIdPlaceholder": "用户 ID / Chat ID",
-    "telegramChatIdHelpBefore": "如果你不知道自己的 Chat ID，可以和 userinfobot 开始聊天，它会告诉你。",
+    "chatId": "聊天 ID",
+    "chatIdPlaceholder": "用户 ID / 聊天 ID",
+    "telegramChatIdHelpBefore": "如果你不知道自己的聊天 ID，可以与 userinfobot 开始聊天，它会将聊天 ID 发给你。",
     "telegramChatIdHelpAfter": "与 userinfobot 开始聊天",
     "userKey": "用户密钥",
     "userKeyPlaceholder": "用户 ID",
-    "chatIdRequired": "Chat ID 为必填项",
-    "chatIdInvalid": "Chat ID 无效",
+    "chatIdRequired": "请输入聊天 ID",
+    "chatIdInvalid": "聊天 ID 无效",
     "userKeyRequired": "用户密钥为必填项",
     "targetUpdated": "通知目标已更新",
     "targetUpdateFailed": "更新通知目标时出错：{{error}}",
@@ -327,7 +374,65 @@
     "permissionDeniedMessage": "你拒绝了通知权限。之后可以在设备设置中重新开启。",
     "pushPermissionDeniedTitle": "推送通知权限被拒绝",
     "pushPermissionDeniedMessage": "推送通知已关闭。如有需要，可在设备设置中重新开启。",
-    "unregisterFailed": "取消注册设备失败"
+    "unregisterFailed": "取消注册设备失败",
+    "description": "按你的偏好接收提醒。选择关注哪些消息，以及在哪里接收提醒。",
+    "taskReminders": "任务提醒",
+    "approvals": "审批与请求",
+    "summaries": "摘要",
+    "deliveryTitle": "通知接收方式",
+    "deliveryDescription": "为此设备开启通知，剩下的交给我们。",
+    "serviceLabel": "服务",
+    "thisDevice": "此设备",
+    "testFailed": "无法发送测试通知，请重试。",
+    "enableLabel": "启用通知",
+    "enableHelper": "在此设备上接收任务提醒，以及发送到你账户的提醒、公告和任务分配通知。",
+    "enableHelperLocal": "任务到期时在此设备上接收提醒。",
+    "pushOnlyFailed": "此设备的任务提醒已开启，但无法注册接收发送到你账户的通知。你可以在下方重试。",
+    "preferenceSection": "通知偏好",
+    "preferenceSectionDescription": "选择通知方案，再分别调整各项提醒，包括每日摘要和每周摘要。",
+    "profileLabel": "通知方案",
+    "profileSummary": "你将收到以下通知：{{list}}。",
+    "profileSummaryWithDigest": "你将收到以下通知：{{list}}，并在 {{time}} 收到摘要。",
+    "profileSummaryMuted": "你不会收到任何通知。请选择通知方案，或在下方开启提醒。",
+    "profileSummaryLoading": "正在加载当前通知设置…",
+    "profileCustomized_one": "与此方案相比有 {{count}} 处调整",
+    "profileCustomized_other": "与此方案相比有 {{count}} 处调整",
+    "resetToProfile": "恢复为{{profile}}方案",
+    "fineTune": "调整各项通知",
+    "profileBalanced": "均衡",
+    "profilePlanner": "提前规划",
+    "profileJustInTime": "到期提醒",
+    "profilePersistent": "持续提醒",
+    "profileQuiet": "安静",
+    "profileCustom": "自定义",
+    "eventOnAssignmentTitle": "任务分配",
+    "eventOnAssignmentLabel": "有新任务或现有任务分配给我时通知我",
+    "eventOnAssignmentShort": "新分配的任务",
+    "eventOnPendingApprovalTitle": "需要审批",
+    "eventOnPendingApprovalLabel": "已完成的任务等待我审批时通知我",
+    "eventOnPendingApprovalShort": "等待你审批的任务",
+    "eventOnRedemptionRequestTitle": "兑换请求",
+    "eventOnRedemptionRequestLabel": "有人申请兑换奖励时通知我",
+    "eventOnRedemptionRequestShort": "兑换请求",
+    "eventPreDueTitle": "到期前提醒",
+    "eventPreDueLabel": "任务到期前提醒我",
+    "eventPreDueShort": "任务到期前的提醒",
+    "eventDueTitle": "到期提醒",
+    "eventDueLabel": "任务到期时提醒我",
+    "eventDueShort": "到期的任务",
+    "eventOverdueFollowupTitle": "逾期跟进",
+    "eventOverdueFollowupLabel": "按我为任务设置的到期后提醒再次提醒我",
+    "eventOverdueFollowupShort": "逾期跟进提醒",
+    "eventDailyDigestTitle": "每日摘要",
+    "eventDailyDigestLabel": "每天汇总一次逾期和即将到期的任务",
+    "eventDailyDigestShort": "每日摘要",
+    "eventWeeklyDigestTitle": "每周摘要",
+    "eventWeeklyDigestLabel": "每周预览一次未来一周的安排",
+    "eventWeeklyDigestShort": "每周预览",
+    "digestHourLabel": "摘要发送时间",
+    "digestHourHelper": "发送摘要的时间（按个人资料中的时区）",
+    "preferenceUpdateFailed": "更新通知偏好失败，请重试。",
+    "targetUpdateFailedGeneric": "无法更新通知目标，请重试。"
   },
   "mfa": {
     "title": "多重身份验证",
@@ -379,12 +484,12 @@
       "title": "新的备用代码",
       "warning": "你之前的备用代码已失效。请将这些新代码保存在安全的地方。每个代码只能使用一次。"
     },
-    "generateCodes": "Generate New Codes"
+    "generateCodes": "生成新代码"
   },
   "apiTokens": {
     "title": "API 令牌",
     "accessToken": "访问令牌",
-    "description": "创建令牌，通过 API 更新可触发任务的物件",
+    "description": "创建令牌，通过 API 更新可触发任务的物品",
     "plusNotice": "基础套餐不支持 API 令牌。升级到 Plus 即可生成 API 令牌，用于对接外部系统并实现任务自动化。",
     "showToken": "显示令牌",
     "hideToken": "隐藏令牌",
@@ -395,7 +500,10 @@
     "tokenCopied": "令牌已复制到剪贴板",
     "generateNew": "生成新令牌",
     "nameModalTitle": "给新令牌起个名字，方便你日后识别。",
-    "generateToken": "生成令牌"
+    "generateToken": "生成令牌",
+    "tokenCreatedTitle": "令牌已创建",
+    "tokenCreatedWarning": "请立即复制此令牌。为保障安全，之后将无法再次查看。",
+    "copyToken": "复制令牌"
   },
   "storage": {
     "title": "存储设置",
@@ -452,49 +560,57 @@
     "heading": "侧边栏设置"
   },
   "homeSections": {
-    "title": "Overview Customization",
-    "description": "Customize which sections appear on the Home screen and their order. Drag and drop to reorder, or toggle visibility for each section.",
-    "resetToDefaults": "Reset to Defaults",
-    "resetHelper": "This will restore all sections to their default visibility and order.",
+    "title": "自定义概览",
+    "description": "按你的需求设置主屏幕。选择要显示的版块，并将常用版块排在前面。",
+    "resetToDefaults": "恢复默认",
+    "resetHelper": "这会将所有版块的显示状态和顺序恢复为默认值。",
     "sections": {
       "greeting": {
-        "name": "Greeting",
-        "description": "The headline at the top that sums up your day"
+        "name": "问候语",
+        "description": "顶部概括你一天安排的标题"
       },
       "glance": {
-        "name": "At a Glance",
-        "description": "Overdue / due today / needs review / unplanned counts"
+        "name": "一览",
+        "description": "逾期、今日到期、待审核和未安排的任务数量"
       },
       "circle": {
-        "name": "Your Circle",
-        "description": "Shows what everyone in your circle is carrying this week"
+        "name": "你的圈子",
+        "description": "显示圈子中每个人本周承担的任务"
       },
       "review": {
-        "name": "Needs Review",
-        "description": "Finished tasks waiting to be signed off"
+        "name": "待审核",
+        "description": "已完成、等待确认的任务"
       },
       "overdue": {
-        "name": "Overdue",
-        "description": "Tasks that have slipped past their due date"
+        "name": "已逾期",
+        "description": "已过截止日期的任务"
       },
       "nextUp": {
-        "name": "Coming Up",
-        "description": "What's due today and tomorrow"
+        "name": "即将到期",
+        "description": "今天和明天到期的任务"
       },
       "filters": {
-        "name": "Filters",
-        "description": "Quick access to your pinned and most useful filters"
+        "name": "筛选",
+        "description": "快速访问已置顶和常用的筛选"
       },
       "projects": {
-        "name": "Projects",
-        "description": "Where the work is piling up, by project"
+        "name": "项目",
+        "description": "按项目查看任务积压情况"
       }
     },
-    "detailedDescription": "Customize the layout and visibility of sections on the Home screen."
+    "detailedDescription": "自定义主屏幕各版块的布局和显示状态。",
+    "taskScope": {
+      "title": "任务显示范围",
+      "label": "显示的任务",
+      "description": "选择在概览列表和摘要中显示谁的任务。“你的圈子”始终显示圈子动态。",
+      "myTasks": "仅我的任务",
+      "allCircleTasks": "圈子的所有任务"
+    },
+    "sectionsTitle": "主屏幕版块"
   },
   "layout": {
     "title": "布局与导航",
-    "detailedDescription": "选择应用打开时显示的页面，以及围绕它的快捷方式和面板。",
+    "detailedDescription": "根据你的使用习惯安排布局。选择启动页面，让常用工具触手可及。",
     "defaultView": {
       "title": "默认视图",
       "description": "选择应用打开时显示的页面。",
@@ -517,19 +633,47 @@
       "hideLabels": {
         "title": "隐藏文字标签",
         "description": "底部导航栏只显示图标，使其更小巧。"
-      }
+      },
+      "selectedCount": "已选择 {{count}} / {{max}} 个快捷方式",
+      "limitHint": "快捷方式位置已用完。请先关闭一个，再选择其他快捷方式。"
     },
     "sidepanel": {
-      "title": "侧边栏"
+      "title": "桌面端侧边栏"
+    },
+    "savedOnDevice": "更改会自动保存在此设备或浏览器上。",
+    "preview": "预览",
+    "reorderItem": "调整{{name}}的顺序",
+    "reorderHint": "拖动手柄可调整顺序。使用键盘时，先将焦点移到手柄上，按空格键，再使用方向键。",
+    "taskEditor": {
+      "title": "任务编辑器",
+      "description": "选择任务设置的浏览方式。",
+      "singlePage": "在同一页面显示所有设置",
+      "helper": "在一个可滚动的页面中显示所有任务设置，无需分步操作。"
     }
   },
   "theme": {
     "title": "主题偏好",
-    "description": "选择站点的外观。可以固定使用某个主题，也可以与系统同步，在日间和夜间主题之间自动切换。",
-    "themeMode": "主题模式",
+    "description": "选择配色主题，以及浅色、深色或跟随系统模式，让 Donetick 更合你的心意。",
+    "themeMode": "显示模式",
     "light": "浅色",
     "dark": "深色",
-    "system": "跟随系统"
+    "system": "跟随系统",
+    "skin": "配色主题",
+    "skinDescription": "每个主题均支持浅色和深色模式。你的选择会保存在此设备上。",
+    "skins": {
+      "default": "默认",
+      "forest": "森林",
+      "lavender": "薰衣草",
+      "sand": "沙色",
+      "ocean": "海洋",
+      "rose": "玫瑰",
+      "sunset": "日落",
+      "bubblegum": "亮粉",
+      "mint": "薄荷",
+      "graphite": "石墨"
+    },
+    "modeDescription": "选择让你全天都感觉舒适的外观。",
+    "systemHint": "“跟随系统”会自动采用设备的浅色或深色外观。"
   },
   "widgets": {
     "title": "主屏幕小组件",
@@ -553,12 +697,12 @@
   },
   "localization": {
     "title": "本地化",
-    "description": "自定义账户的语言、日期格式和区域偏好。",
+    "description": "选择语言、日期样式和每周安排，让 Donetick 更符合你的习惯。",
     "language": "语言",
-    "languageDescription": "选择你偏好的语言",
+    "languageDescription": "选择你在 Donetick 中使用的语言。",
     "rtlNotice": "该语言使用从右到左（RTL）的书写方向",
     "dateFormat": "日期格式",
-    "dateFormatDescription": "选择应用中日期的显示方式",
+    "dateFormatDescription": "选择日期的显示方式。各选项使用相同的示例日期。",
     "timeFormat": "时间格式",
     "timeFormatDescription": "选择 12 小时制或 24 小时制",
     "preview": "预览：{{value}}",
@@ -569,19 +713,20 @@
     "sunday": "星期日",
     "monday": "星期一",
     "saturday": "星期六",
-    "helpTranslate": "Help improve this translation",
+    "helpTranslate": "帮助改进此翻译",
     "formats": {
-      "mdy": "MM/DD/YYYY（美国）",
-      "dmy": "DD/MM/YYYY（欧洲）",
-      "ymd": "YYYY-MM-DD（ISO）",
-      "long": "长格式（例如：2024年1月1日）",
-      "short": "短格式（例如：2024年1月1日）"
+      "mdy": "月 / 日 / 年",
+      "dmy": "日 / 月 / 年",
+      "ymd": "年 / 月 / 日",
+      "long": "完整月份名称",
+      "short": "缩写月份名称"
     },
-    "descriptionLong": "Customize language, date format, and regional preferences for your account. These settings will apply throughout the application."
+    "descriptionLong": "为你的账户自定义语言、日期格式和区域偏好。这些设置将应用到整个应用。",
+    "languageDefaultsHint": "更改语言也会设置日期、时间和每周第一天的区域默认值。你可以在下方调整。"
   },
   "advanced": {
     "title": "高级设置",
-    "description": "配置 Webhook、实时更新等高级功能，进一步提升效率。",
+    "description": "管理离线访问和圈子同步方式。",
     "offlineTitle": "离线支持",
     "offlineDescription": "在此设备／浏览器上离线时也能继续使用 Donetick。你的更改会保存在本地，恢复联网后自动同步。",
     "offlineToggle": "启用离线支持",
@@ -596,126 +741,135 @@
     "webhookDescription": "Webhook 可以在你的圈子中发生事件时，向其他服务实时发送通知。配置 Webhook URL 即可接收实时更新。",
     "webhookPlusNotice": "基础套餐不支持 Webhook 通知。升级到 Plus 即可通过 Webhook 接收实时更新。",
     "webhookToggle": "启用 Webhook",
-    "webhookHelper": "为任务和物件的更新启用 Webhook 通知。",
+    "webhookHelper": "为任务和物品更新启用 Webhook 通知。",
     "webhookURL": "Webhook URL",
     "webhookUpdated": "Webhook URL 更新成功",
     "webhookUpdateFailed": "更新 Webhook URL 失败",
     "realtimeTitle": "实时更新",
-    "realtimeDescription": "设置当圈子中的任务和动态发生变化时，你如何接收实时更新。",
+    "realtimeDescription": "与圈子中的成员保持同步。",
     "realtime": {
       "toggleLabel": "启用实时更新",
       "title": "实时更新",
-      "subtitle": "任务更新时立即收到通知",
-      "statusLabel": "状态：",
+      "subtitle": "无需刷新即可查看任务变化。",
+      "statusLabel": "连接",
       "basicPlan": "基础套餐不支持实时更新。升级到 Plus 即可在任务更新时立即收到通知。",
-      "disabled": "实时更新已关闭。开启后，当你或其他圈子成员完成、跳过或修改任务时，即可看到实时变化。",
-      "connected": "实时更新运行正常。当你或其他圈子成员完成、跳过或修改任务时，你会看到实时变化。",
+      "disabled": "实时更新已关闭，刷新即可查看最新变化。",
+      "connected": "圈子中的变化会自动显示。",
       "connecting": "正在连接实时更新…",
       "errored": "实时更新已开启但未正常工作：{{error}}",
       "notConnected": "实时更新已开启，但当前未连接。",
-      "basicPlanNotice": "基础套餐不支持实时更新。升级到 Plus，当你或其他圈子成员完成、跳过或修改任务时即可立即收到通知。"
-    }
+      "basicPlanNotice": "Donetick Plus 专享功能。开启实时更新以了解升级选项。",
+      "status": {
+        "off": "已关闭",
+        "connected": "已连接",
+        "connecting": "正在连接…",
+        "error": "连接异常",
+        "disconnected": "已断开"
+      }
+    },
+    "clearingOffline": "正在清除离线数据…"
   },
   "privacyAnalytics": {
-    "title": "Privacy & Analytics",
-    "description": "Donetick never sends task names, descriptions, notes, or other task content. Session recording is never enabled.",
-    "analyticsToggle": "Anonymous analytics",
-    "analyticsHelper": "Help improve Donetick by sharing anonymous usage statistics.",
-    "crashToggle": "Crash reports",
-    "crashHelper": "Send us the error and what led to it when Donetick crashes no task content.",
-    "footnote": "You can change these choices at any time."
+    "title": "隐私与分析",
+    "description": "Donetick 绝不会发送任务名称、描述、备注或其他任务内容，也绝不会启用会话录制。",
+    "analyticsToggle": "匿名分析",
+    "analyticsHelper": "分享匿名使用情况统计，帮助改进 Donetick。",
+    "crashToggle": "崩溃报告",
+    "crashHelper": "Donetick 崩溃时，向我们发送错误及其发生前的操作信息，不含任务内容。",
+    "footnote": "你可以随时更改这些选项。"
   },
   "subscription": {
-    "sessionFailed": "Failed to create subscription session",
-    "errorTitle": "Subscription Error",
-    "errorMessage": "Failed to start subscription process. Please try again.",
-    "subscribe": "Subscribe",
-    "cancelAnytime": "Cancel anytime. No hidden fees. Secure payment powered by Stripe.",
-    "description": "Unlock reminders, rich task details, and advanced automation.",
-    "whatsIncluded": "What's included:",
-    "mostPopular": "Most Popular",
-    "featureNotifications": "Task notifications and reminders",
-    "featureRichText": "Rich text descriptions with images uploads",
-    "featureThingTriggers": "Thing-based task triggers",
-    "featureApiTokens": "API tokens for integrations",
-    "featureImageUploads": "Image uploads in descriptions",
-    "featureAutomation": "Advanced task automation",
-    "planYearly": "Yearly",
+    "sessionFailed": "创建订阅会话失败",
+    "errorTitle": "订阅错误",
+    "errorMessage": "无法开始订阅流程，请重试。",
+    "subscribe": "订阅",
+    "cancelAnytime": "随时取消，无隐藏费用。由 Stripe 提供安全支付服务。",
+    "description": "解锁提醒、丰富的任务详情和高级自动化。",
+    "whatsIncluded": "包含以下功能：",
+    "mostPopular": "最受欢迎",
+    "featureNotifications": "任务通知与提醒",
+    "featureRichText": "支持上传图片的富文本描述",
+    "featureThingTriggers": "根据物品状态触发任务",
+    "featureApiTokens": "用于集成的 API 令牌",
+    "featureImageUploads": "在描述中上传图片",
+    "featureAutomation": "高级任务自动化",
+    "planYearly": "按年订阅",
     "reasonAdvancedReminders": "到期前的提醒和到期后的跟进是 Plus 功能。你当前的套餐只会在到期当天提醒。",
     "reasonReminderChannels": "将任务提醒发送到 Telegram 群组是 Plus 功能。",
     "reasonHistoryWindow": "你当前的套餐显示最近 30 天。升级到 Plus 可查看完整历史和长期趋势。",
-    "reasonThingTriggers": "根据设备状态变化自动触发任务是 Plus 功能。",
+    "reasonThingTriggers": "根据物品状态变化自动触发任务是 Plus 功能。",
     "reasonProjectLimit": "你当前的套餐包含 {{projectLimit}} 个项目。升级到 Plus 可创建任意数量的项目。",
     "reasonQuickFilterLimit": "你当前的套餐包含 {{filterLimit}} 个已保存的快速筛选。升级到 Plus 可获得无限筛选。",
-    "reasonFileUpload": "附加文件和图片是 Plus 功能。升级到 Plus 可向任务添加照片、扫描件和文档。"
+    "reasonFileUpload": "附加文件和图片是 Plus 功能。升级到 Plus 可向任务添加照片、扫描件和文档。",
+    "reasonCalendarSync": "在 Apple 日历、Google 日历、Outlook 或其他日历应用中订阅任务是 Plus 功能。"
   },
   "childUsers": {
-    "errNameRequired": "Sub account name is required",
-    "errNameMin": "Sub account name must be at least 2 characters",
-    "errNameMax": "Sub account name must be less than 20 characters",
-    "errNameChars": "Sub account name can only contain lowercase letters, dot and dash",
-    "errPasswordRequired": "Password is required",
-    "errPasswordLength": "Password must be between 8 and 64 characters",
-    "errPasswordMatch": "Passwords do not match",
-    "errDisplayNameMax": "Display name must be less than 50 characters",
-    "createTitle": "Create Sub Account",
-    "createDescription": "Create a login that can complete tasks assigned to this account.",
-    "createButton": "Create Account",
-    "nameLabel": "Sub Account Name *",
-    "namePlaceholder": "Enter sub account name (e.g., sarah)",
-    "displayNameLabel": "Display Name",
-    "displayNamePlaceholder": "Display name (optional, defaults to sub account name)",
-    "passwordLabel": "Password *",
-    "passwordPlaceholder": "Enter password (8-64 characters)",
-    "confirmPasswordLabel": "Confirm Password *",
-    "confirmPasswordPlaceholder": "Confirm password"
+    "errNameRequired": "请输入子账户名称",
+    "errNameMin": "子账户名称至少需要 2 个字符",
+    "errNameMax": "子账户名称必须少于 20 个字符",
+    "errNameChars": "子账户名称只能包含小写字母、点和连字符",
+    "errPasswordRequired": "请输入密码",
+    "errPasswordLength": "密码长度必须为 8 到 64 个字符",
+    "errPasswordMatch": "两次输入的密码不一致",
+    "errDisplayNameMax": "显示名称必须少于 50 个字符",
+    "createTitle": "创建子账户",
+    "createDescription": "创建可登录的账户，用于完成分配给它的任务。",
+    "createButton": "创建账户",
+    "nameLabel": "子账户名称 *",
+    "namePlaceholder": "输入子账户名称（例如：sarah）",
+    "displayNameLabel": "显示名称",
+    "displayNamePlaceholder": "显示名称（可选，默认为子账户名称）",
+    "passwordLabel": "密码 *",
+    "passwordPlaceholder": "输入密码（8–64 个字符）",
+    "confirmPasswordLabel": "确认密码 *",
+    "confirmPasswordPlaceholder": "再次输入密码"
   },
   "passwordChange": {
-    "minLength": "Password must be at least 8 characters",
-    "maxLength": "Password must be less than 64 characters",
-    "description": "Choose a password between 8 and 64 characters.",
-    "mismatch": "Passwords do not match",
-    "newPassword": "New password",
-    "newPasswordPlaceholder": "Enter password",
-    "confirmPassword": "Confirm password",
-    "confirmPasswordPlaceholder": "Repeat password"
+    "minLength": "密码至少需要 8 个字符",
+    "maxLength": "密码必须少于 64 个字符",
+    "description": "请设置长度为 8 到 64 个字符的密码。",
+    "mismatch": "两次输入的密码不一致",
+    "newPassword": "新密码",
+    "newPasswordPlaceholder": "输入密码",
+    "confirmPassword": "确认密码",
+    "confirmPasswordPlaceholder": "再次输入密码"
   },
   "payment": {
-    "cancelledTitle": "Payment has been cancelled",
-    "cancelledRedirect": "You will be redirected to the main page shortly.",
-    "successTitle": "Payment Successful!",
-    "successRedirect": "You will be redirected to the settings page shortly."
+    "cancelledTitle": "付款已取消",
+    "cancelledRedirect": "即将返回主页。",
+    "successTitle": "付款成功！",
+    "successRedirect": "即将返回设置页面。"
   },
   "developer": {
-    "tokenRefreshed": "Token refreshed successfully",
-    "endpointCalled": "Refresh token endpoint called successfully",
-    "clearDbCleared": "Local offline database cleared. Starting full sync...",
-    "clearDbDone": "Full sync completed from the beginning",
-    "intro": "View technical information about your authentication tokens and session",
-    "refreshCookieNote": "Refresh tokens are managed via HTTP-only cookies on web platform",
-    "noReconnectInfo": "No reconnection information available",
-    "noTimeoutInfo": "No timeout information available",
-    "noDebugInfo": "No debug information available"
+    "tokenRefreshed": "令牌已成功刷新",
+    "endpointCalled": "已成功调用刷新令牌接口",
+    "clearDbCleared": "本地离线数据库已清除，正在开始完整同步…",
+    "clearDbDone": "已从头完成完整同步",
+    "intro": "查看身份验证令牌和会话的技术信息",
+    "refreshCookieNote": "网页端通过 HTTP-only Cookie 管理刷新令牌",
+    "noReconnectInfo": "暂无重连信息",
+    "noTimeoutInfo": "暂无超时信息",
+    "noDebugInfo": "暂无调试信息"
   },
   "backup": {
-    "keyRequired": "Encryption key is required",
-    "created": "Backup created and downloaded successfully",
-    "createFailed": "Failed to create backup",
-    "selectFile": "Please select a backup file",
-    "restored": "Backup restored successfully. Please refresh the page.",
-    "restoreFailed": "Failed to restore backup",
-    "readFailed": "Failed to read backup file",
-    "createIntro": "Create an encrypted backup of your data. This backup will include all your chores, history, settings, and optionally your uploaded files.",
-    "keyPlaceholder": "Enter a strong encryption key",
-    "includeAssets": "Include uploaded files and assets",
-    "warningLabel": "Warning:",
-    "restoreWarning": "Restoring a backup will replace all your current data. This action cannot be undone.",
-    "restoreKeyPlaceholder": "Enter the encryption key used for this backup",
-    "title": "Backup & Restore",
-    "createTab": "Create Backup",
-    "restoreTab": "Restore Backup",
-    "creating": "Creating backup...",
-    "restoring": "Restoring backup...",
+    "keyRequired": "请输入加密密钥",
+    "created": "备份已成功创建并下载",
+    "createFailed": "创建备份失败",
+    "selectFile": "请选择备份文件",
+    "restored": "备份已成功恢复，请刷新页面。",
+    "restoreFailed": "恢复备份失败",
+    "readFailed": "读取备份文件失败",
+    "createIntro": "创建数据的加密备份。备份将包含你的所有任务、历史记录和设置，也可以选择包含已上传的文件。",
+    "keyPlaceholder": "输入强度较高的加密密钥",
+    "includeAssets": "包含已上传的文件和资源",
+    "warningLabel": "警告：",
+    "restoreWarning": "恢复备份会替换你当前的所有数据，此操作无法撤销。",
+    "restoreKeyPlaceholder": "输入此备份使用的加密密钥",
+    "title": "备份与恢复",
+    "createTab": "创建备份",
+    "restoreTab": "恢复备份",
+    "creating": "正在创建备份…",
+    "restoring": "正在恢复备份…",
     "encryptionKeyRequired": "加密密钥 *",
     "keySafetyNotice": "请妥善保管此密钥——恢复备份时需要用到它",
     "nameOptional": "备份名称（可选）",
@@ -724,65 +878,195 @@
     "selectedFile": "已选择：{{name}}"
   },
   "deletion": {
-    "passwordRequired": "Please enter your password to continue",
-    "passwordAndDelete": "Please enter your password and type DELETE to confirm",
-    "failed": "Failed to delete account",
-    "passwordPlaceholder": "Enter your password",
-    "transferIntro": "You own circles that require ownership transfer before deletion. Please select new owners:",
-    "selectOwner": "Select new owner",
-    "confirmPrompt": "Please enter your password and type DELETE to confirm",
+    "passwordRequired": "请输入密码以继续",
+    "passwordAndDelete": "请输入密码，并输入 DELETE 以确认",
+    "failed": "删除账户失败",
+    "passwordPlaceholder": "输入你的密码",
+    "transferIntro": "你拥有的圈子需要先转让所有权，才能删除账户。请选择新圈主：",
+    "selectOwner": "选择新圈主",
+    "confirmPrompt": "请输入密码，并输入 DELETE 以确认",
     "typeDelete": "DELETE",
-    "warningLead": "This action cannot be undone.",
-    "warningIntro": "Deleting your account will permanently remove:",
-    "removesProfile": "Your user profile and authentication data",
-    "removesChores": "All your chores, chore history, and time tracking sessions",
-    "removesTokens": "API tokens, MFA sessions, and password reset tokens",
-    "removesStorage": "Storage files and usage data",
-    "removesPoints": "Points history and notifications",
-    "removesCircles": "Circle memberships and relationships",
-    "passwordToContinue": "Enter your password to continue",
-    "circleLabel": "Circle: {{name}}",
-    "newOwner": "New Owner",
-    "logoutNotice": "On successful deletion, you will be logged out and redirected to the login page.",
-    "passwordLabel": "Password",
-    "typeToConfirm": "Type \"{{word}}\" to confirm"
+    "warningLead": "此操作无法撤销。",
+    "warningIntro": "删除账户将永久移除以下内容：",
+    "removesProfile": "你的个人资料和身份验证数据",
+    "removesChores": "你的所有任务、任务历史和计时记录",
+    "removesTokens": "API 令牌、MFA 会话和密码重置令牌",
+    "removesStorage": "存储文件和使用数据",
+    "removesPoints": "积分历史和通知",
+    "removesCircles": "圈子成员身份和关联关系",
+    "passwordToContinue": "输入密码以继续",
+    "circleLabel": "圈子：{{name}}",
+    "newOwner": "新圈主",
+    "logoutNotice": "成功删除后，你将退出登录并返回登录页面。",
+    "passwordLabel": "密码",
+    "typeToConfirm": "输入“{{word}}”以确认",
+    "passwordResetHelp": "如果你通过 Apple 或 Google 登录，需要先设置密码，再在此输入该密码以验证身份。",
+    "sendPasswordReset": "发送密码重置邮件",
+    "passwordResetSent": "我们已向 {{email}} 发送密码重置链接。请通过链接设置密码，然后返回此处验证身份并继续删除账户。",
+    "passwordResetFailed": "无法发送密码重置邮件，请重试。"
   },
   "realtime": {
-    "titleSse": "Real-time Updates (SSE)",
-    "subtitleSse": "Get instant notifications via Server-Sent Events",
-    "basicPlanDescription": "Real-time updates (SSE) are not available in the Basic plan. Upgrade to Plus to receive instant notifications when chores are updated.",
-    "disabledDescription": "Real-time updates (SSE) are disabled. Enable to see live changes when you or other circle members complete, skip, or modify chores.",
-    "connectedDescription": "Real-time updates (SSE) are working. You'll see live changes when you or other circle members complete, skip, or modify chores.",
-    "connectingDescription": "Connecting to real-time updates (SSE)...",
-    "errorDescription": "Real-time updates (SSE) are enabled but not working: {{error}}",
-    "disconnectedDescription": "Real-time updates (SSE) are enabled but not currently connected.",
-    "enableLabel": "Enable Real-time Updates (SSE)",
-    "statusLabel": "Status:"
+    "titleSse": "实时更新（SSE）",
+    "subtitleSse": "通过 Server-Sent Events 接收即时通知",
+    "basicPlanDescription": "基础套餐不支持实时更新（SSE）。升级到 Plus 即可在任务更新时收到即时通知。",
+    "disabledDescription": "实时更新（SSE）已关闭。开启后，当你或其他圈子成员完成、跳过或修改任务时，即可看到实时变化。",
+    "connectedDescription": "实时更新（SSE）运行正常。当你或其他圈子成员完成、跳过或修改任务时，你会看到实时变化。",
+    "connectingDescription": "正在连接实时更新（SSE）…",
+    "errorDescription": "实时更新（SSE）已开启但未正常工作：{{error}}",
+    "disconnectedDescription": "实时更新（SSE）已开启，但当前未连接。",
+    "enableLabel": "启用实时更新（SSE）",
+    "statusLabel": "状态："
   },
   "nativeCancel": {
-    "title": "Cancel Subscription",
-    "dismiss": "Dismiss",
-    "cancelViaStore": "I'll cancel from my app store",
-    "cancelDesktop": "Cancel desktop subscription",
-    "intro": "To cancel your subscription, please follow the instructions for your platform (you should cancel through the same platform you used to subscribe).",
-    "iosHeading": "For iOS (iPhone/iPad):",
-    "iosStep1": "1. Open the <b>Settings</b> app on your device",
-    "iosStep2": "2. Tap your name at the top of the screen",
-    "iosStep3": "3. Tap <b>Subscriptions</b>",
-    "iosStep4": "4. Find and tap <b>Donetick</b>",
-    "iosStep5": "5. Tap <b>Cancel Subscription</b>",
-    "iosNote": "<b>Note:</b> If you subscribed through iOS and are using the web/desktop version, you must cancel through iOS Settings as described above.",
-    "androidHeading": "For Android:",
-    "androidStep1": "1. Open the <b>Google Play Store</b> app",
-    "androidStep2": "2. Tap the profile icon in the top right",
-    "androidStep3": "3. Tap <b>Payments & subscriptions</b>",
-    "androidStep4": "4. Tap <b>Subscriptions</b>",
-    "androidStep5": "5. Find and tap <b>Donetick</b>",
-    "androidStep6": "6. Tap <b>Cancel subscription</b>",
-    "androidNote": "<b>Note:</b> If you subscribed through Google Play and are using the web/desktop version, you must cancel through Google Play as described above.",
-    "webHeading": "For Web/Desktop Subscriptions:",
-    "webBody": "If you originally subscribed through our website or desktop app, you can cancel your subscription by going to the Account Settings section on our website. using a web browser",
-    "webNote": "<b>Important:</b> You must cancel your subscription through the same platform where you originally subscribed. If you subscribed through the iOS App Store or Google Play Store (even if you're now using the web/desktop version), you must cancel through that original platform using the instructions above.",
-    "footer": "Your subscription will remain active until the end of your current billing period."
+    "title": "取消订阅",
+    "dismiss": "关闭",
+    "cancelViaStore": "我会在应用商店取消订阅",
+    "cancelDesktop": "取消桌面端订阅",
+    "intro": "如需取消订阅，请按照相应平台的说明操作（应通过最初订阅时使用的平台取消）。",
+    "iosHeading": "iOS（iPhone/iPad）：",
+    "iosStep1": "1. 打开设备上的<b>设置</b>应用",
+    "iosStep2": "2. 轻点屏幕顶部你的姓名",
+    "iosStep3": "3. 轻点<b>订阅</b>",
+    "iosStep4": "4. 找到并轻点 <b>Donetick</b>",
+    "iosStep5": "5. 轻点<b>取消订阅</b>",
+    "iosNote": "<b>注意：</b>如果你通过 iOS 订阅，即使目前使用的是网页端或桌面端，也必须按照上述说明在 iOS 设置中取消。",
+    "androidHeading": "Android：",
+    "androidStep1": "1. 打开 <b>Google Play 商店</b>应用",
+    "androidStep2": "2. 点按右上角的个人资料图标",
+    "androidStep3": "3. 点按<b>付款和订阅</b>",
+    "androidStep4": "4. 点按<b>订阅</b>",
+    "androidStep5": "5. 找到并点按 <b>Donetick</b>",
+    "androidStep6": "6. 点按<b>取消订阅</b>",
+    "androidNote": "<b>注意：</b>如果你通过 Google Play 订阅，即使目前使用的是网页端或桌面端，也必须按照上述说明在 Google Play 中取消。",
+    "webHeading": "网页端或桌面端订阅：",
+    "webBody": "如果你最初通过我们的网站或桌面应用订阅，可以使用浏览器访问我们的网站，在“账户设置”中取消订阅。",
+    "webNote": "<b>重要：</b>必须通过最初订阅时使用的平台取消订阅。如果你通过 iOS App Store 或 Google Play 商店订阅（即使现在使用的是网页端或桌面端），也必须按照上述说明在原平台取消。",
+    "footer": "你的订阅将持续有效至当前计费周期结束。"
+  },
+  "navigation": {
+    "breadcrumbs": "设置导航"
+  },
+  "integrations": {
+    "adminOnly": "只有圈子管理员可以管理 Webhook 连接。",
+    "loadFailed": "无法加载你的圈子，请重试。",
+    "hint": "将 Donetick 连接到你使用的服务。通知时间和提醒偏好仍在“通知”中管理。"
+  },
+  "calendar": {
+    "title": "日历同步",
+    "description": "通过私密的 iCalendar 订阅，在你常用的日历应用中查看 Donetick 任务。",
+    "plusTitle": "日历同步是 Plus 功能",
+    "plusNotice": "升级到 Plus，即可在 Apple 日历、Google 日历、Outlook 等日历应用中订阅你的任务。",
+    "upgrade": "升级到 Plus",
+    "activeTitle": "日历订阅",
+    "activeStatus": "已启用",
+    "urlLabel": "私密日历订阅 URL",
+    "copy": "复制 URL",
+    "copied": "日历 URL 已复制到剪贴板",
+    "copyFailed": "无法复制日历 URL，请从输入框中手动复制。",
+    "createdAt": "创建于 {{date}}",
+    "lastUsedAt": "上次获取于 {{date}}",
+    "neverUsed": "此日历尚未被获取过。",
+    "keepPrivateTitle": "请妥善保管此 URL",
+    "keepPrivateDescription": "任何持有此 URL 的人都能在不登录的情况下查看你的任务日历。如不慎泄露，请立即更换或撤销。",
+    "manageTitle": "管理订阅",
+    "rotate": "更换 URL",
+    "rotateTitle": "更换日历 URL？",
+    "rotateMessage": "当前 URL 将立即失效。你需要在每个日历应用中重新添加新 URL。",
+    "rotated": "日历 URL 已成功更换",
+    "revoke": "撤销 URL",
+    "revokeTitle": "撤销日历 URL？",
+    "revokeMessage": "当前 URL 将立即失效，已订阅的日历应用将不再收到更新。",
+    "revoked": "日历 URL 已成功撤销",
+    "inactiveTitle": "尚无日历订阅",
+    "inactiveDescription": "生成私密 URL，然后在日历应用中将其添加为订阅日历。应用会自动获取更新。",
+    "generate": "生成日历 URL",
+    "generated": "日历 URL 已成功生成",
+    "howToTitle": "添加到你的日历",
+    "howToDescription": "复制 URL，并在日历应用中选择“通过 URL 添加日历”或“订阅日历”。刷新时间由日历应用决定，更改可能不会立即显示。",
+    "errorTitle": "日历同步错误",
+    "actionFailed": "无法更新日历订阅，请重试。",
+    "loadFailed": "无法加载日历订阅。此服务器可能尚不支持日历同步。"
+  },
+  "bridge": {
+    "title": "Donetick Bridge",
+    "description": "将你的自托管实例连接到 Donetick 官方应用，可靠地发送原生推送通知，无需自行维护推送服务",
+    "heroEyebrow": "为自托管用户打造",
+    "freeToStart": "免费开始使用",
+    "heroTitle": "自主掌控，保持连接。",
+    "pricingSummary": "先使用免费套餐。需要更多通知或设备，或想支持 Donetick 时，可升级到 Plus！",
+    "connectedBadge": "Bridge 已启用",
+    "benefits": {
+      "native": {
+        "title": "原生通知",
+        "description": "通过 iOS 和 Android 官方应用向家人发送通知。"
+      },
+      "support": {
+        "title": "支持 Donetick",
+        "description": "你的订阅将支持持续开发与维护。"
+      },
+      "simple": {
+        "title": "无需配置 Firebase",
+        "description": "无需配置服务商凭据，让自托管设置更简单。"
+      }
+    },
+    "privacyTitle": "注重隐私的设计",
+    "privacyNotice": "通知内容（标题、正文和数据）仅在处理请求时转发，绝不会被存储或记录到日志。Bridge 只保留账户、设备和发送次数信息。",
+    "adminOnly": "只有 Donetick 管理员可以配置 Bridge。",
+    "notConnected": "尚未连接",
+    "checkingStatus": "正在检查 Bridge 连接…",
+    "connectionTitle": "你的连接",
+    "connectTitle": "连接 Bridge",
+    "credentialsTitle": "输入实例凭据",
+    "steps": {
+      "1": "创建 Bridge 账户",
+      "2": "添加此 Donetick 实例",
+      "3": "粘贴获得的凭据"
+    },
+    "unnamedInstance": "已连接的实例",
+    "connectedAs": "Bridge 账户：{{email}}",
+    "planFree": "免费套餐",
+    "planPlus": "Plus 套餐",
+    "emailUnverified": "邮箱未验证",
+    "getStarted": "创建 Bridge 账户",
+    "getStartedHint": "还没有 Bridge 账户？创建账户并添加实例，即可获取实例 ID 和令牌。",
+    "connectIntro": "输入在 Bridge 账户中创建或选择此实例时仅显示一次的实例 ID 和实例令牌。",
+    "connect": "连接",
+    "connectedTitle": "已连接到 Bridge",
+    "rotateCredential": "更换凭据",
+    "rotateInstructions": "在 Bridge 账户中生成新的实例令牌，然后粘贴到下方以更换凭据。旧令牌将立即失效。",
+    "rotatedTitle": "凭据已更换",
+    "disconnect": "断开连接",
+    "disconnectTitle": "断开 Bridge 连接",
+    "disconnectMessage": "此实例将停止通过 Bridge 发送推送通知。本地设备令牌会保留，你可以随时重新连接。此操作不会删除你的 Bridge 账户或使用记录。",
+    "disconnectedTitle": "已断开连接",
+    "refresh": "刷新状态",
+    "upgrade": "升级到 Plus",
+    "manageBilling": "管理账单",
+    "upgradeBillingNote": "请在 Bridge 账户中管理升级和账单。",
+    "connectForm": {
+      "baseUrl": "Bridge URL",
+      "instanceId": "实例 ID",
+      "instanceIdPlaceholder": "Bridge 账户中的实例 ID",
+      "instanceToken": "实例令牌",
+      "instanceTokenPlaceholder": "仅在创建实例或更换令牌时显示一次",
+      "instanceTokenHint": "此令牌只会发送到本服务器，离开此页面后将无法再次查看。",
+      "required": "Bridge URL、实例 ID 和实例令牌均为必填项。"
+    },
+    "usage": {
+      "notifications": "本期通知：{{used}} / {{limit}}",
+      "devices": "活跃设备：{{used}} / {{limit}}",
+      "notificationsLabel": "本期通知",
+      "devicesLabel": "活跃设备"
+    },
+    "errors": {
+      "title": "Bridge 错误",
+      "generic": "与 Bridge 通信时出错，请重试。",
+      "revokedToken": "此实例的凭据被拒绝。可能已在 Bridge 账户中更换或撤销，请使用有效的实例令牌重新连接。",
+      "serviceUnavailable": "Bridge 暂时不可用。服务恢复后通知会自动恢复，无需操作。",
+      "rateLimited": "当前请求过于频繁，请稍后重试。",
+      "quotaExceeded": "此 Bridge 账户已达到每月通知配额。请升级到 Plus 或等待下一周期。",
+      "deviceLimitReached": "此 Bridge 账户已达到活跃设备数量上限。请移除不使用的设备或升级到 Plus。",
+      "validationError": "请检查输入的值后重试。"
+    }
   }
 }

@@ -458,7 +458,15 @@ const TaskInput = ({
           ...assignableMembers,
         ],
       },
-      '*': POINTS_SUGGESTIONS,
+      '*': {
+        ...POINTS_SUGGESTIONS,
+        options: POINTS_SUGGESTIONS.options.map(option => ({
+          ...option,
+          name: t('common:ui.remaining.pointCount', {
+            count: Number(option.id),
+          }),
+        })),
+      },
     }),
     [userLabels, assignableMembers, handleCreateLabel, t],
   )
@@ -1516,7 +1524,9 @@ const TaskInput = ({
                     }
                     sx={{ color: 'text.secondary' }}
                   >
-                    {selectedProject.name}
+                    {selectedProject.id === 'default'
+                      ? t('addTask.defaultProject')
+                      : selectedProject.name}
                   </Typography>
                   {sections.length > 0 && (
                     <Dropdown>

@@ -36,6 +36,8 @@ import { syncEngine } from '../../utils/SyncEngine'
 
 const COMMAND_LABEL_KEYS = {
   create_chore: 'createChore',
+  move_project_chore: 'moveProjectChore',
+  move_project_section: 'moveProjectSection',
   update_chore: 'updateChore',
   update_chore_history: 'updateChoreHistory',
   complete_chore: 'completeChore',

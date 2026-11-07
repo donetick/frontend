@@ -12,6 +12,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import ModalActions from '../../components/common/ModalActions'
+import { useLocalization } from '../../contexts/LocalizationContext'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 import { commandQueue } from '../../utils/CommandQueue'
 
@@ -31,6 +32,12 @@ const LABEL_KEYS = {
 }
 
 const formatCommandLabel = (commandType, t) => {
+  if (commandType === 'move_project_chore') {
+    return t('sync.commandLabels.moveProjectChore')
+  }
+  if (commandType === 'move_project_section') {
+    return t('sync.commandLabels.moveProjectSection')
+  }
   const key = LABEL_KEYS[commandType]
   if (key) return t(`pendingBadge.${key}`)
   return (
@@ -43,6 +50,7 @@ const formatCommandLabel = (commandType, t) => {
 
 function PendingBadge({ commands, size = 'sm', sx = {} }) {
   const { t } = useTranslation('common')
+  const { fmt } = useLocalization()
   const { ResponsiveModal } = useResponsiveModal()
   const queryClient = useQueryClient()
   const [isOpen, setIsOpen] = useState(false)
@@ -184,7 +192,7 @@ function PendingBadge({ commands, size = 'sm', sx = {} }) {
                   {formatCommandLabel(cmd.commandType, t)}
                 </Typography>
                 <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                  {new Date(cmd.createdAt).toLocaleString()}
+                  {fmt.dateTime(cmd.createdAt)}
                 </Typography>
               </ListItemContent>
 

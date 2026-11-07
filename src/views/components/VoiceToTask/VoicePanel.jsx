@@ -13,6 +13,7 @@ import moment from 'moment'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { useLocalization } from '../../../contexts/LocalizationContext'
 import AssigneePickerField from '../AssigneePickerField'
 import DueDatePickerField from '../DueDatePickerField'
 import LabelsPickerField from '../LabelsPickerField'
@@ -69,6 +70,7 @@ const TaskPreviewCard = ({
   segment,
 }) => {
   const { t } = useTranslation()
+  const { fmt } = useLocalization()
   const [expanded, setExpanded] = useState(false)
   const [draft, setDraft] = useState(segment.text)
   const dueEditRef = useRef(null)
@@ -91,13 +93,14 @@ const TaskPreviewCard = ({
     [parsed, overrides, parseCtx.defaultNotificationTemplates],
   )
 
-  const frequencyLabel =
-    'frequency' in overrides
-      ? describeFrequency(effective.frequency, t)
-      : parsed.frequencyName
+  const frequencyLabel = describeFrequency(
+    effective.frequency,
+    t,
+    'frequency' in overrides ? null : parsed.frequencyName,
+  )
   const chips = useMemo(
-    () => buildChips(effective, frequencyLabel, parseCtx, t),
-    [effective, frequencyLabel, parseCtx, t],
+    () => buildChips(effective, frequencyLabel, { ...parseCtx, fmt }, t),
+    [effective, frequencyLabel, parseCtx, fmt, t],
   )
 
   const due = effective.dueDate ? moment(effective.dueDate) : null

@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+import i18n from '../i18n/config'
 import { apiClient } from '../utils/ApiClient'
 import { offlineDB } from '../utils/OfflineDB'
 import { clearAllTokens, saveTokens } from '../utils/TokenStorage'
@@ -65,7 +66,7 @@ export const AuthProvider = ({ children }) => {
         return {
           success: false,
           status: response.status,
-          error: res?.error || 'Login failed',
+          error: res?.error || i18n.t('auth:loginFailed'),
         }
       }
 
@@ -94,7 +95,7 @@ export const AuthProvider = ({ children }) => {
       return { success: true, data }
     } catch (error) {
       setIsLoading(false)
-      return { success: false, error: 'Network error' }
+      return { success: false, error: i18n.t('auth:networkError') }
     }
   }
 

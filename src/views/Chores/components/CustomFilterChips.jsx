@@ -32,6 +32,21 @@ const CustomFilterChips = ({
   onFilterPin,
 }) => {
   const { t } = useTranslation('chores')
+  const formatIssue = issue => {
+    if (issue === 'Filter has no conditions')
+      return t('common:ui.remaining.noConditions')
+    const match =
+      /^Condition (\d+): (User\(s\)|Label\(s\)|Project\(s\)) no longer exist$/.exec(
+        issue,
+      )
+    if (!match) return issue
+    const issueKeys = {
+      'User(s)': 'common:ui.remaining.missingUser',
+      'Label(s)': 'common:ui.remaining.missingLabel',
+      'Project(s)': 'common:ui.remaining.missingProject',
+    }
+    return t(issueKeys[match[2]], { index: match[1] })
+  }
   const navigate = useNavigate()
   const { data: userProfile } = useUserProfile()
   const [menuAnchor, setMenuAnchor] = useState(null)
@@ -108,8 +123,23 @@ const CustomFilterChips = ({
               key={filter.id}
               title={
                 hasWarning
-                  ? `Filter has issues: ${filter.validationIssues?.join(', ')}`
-                  : `${filter.description ? filter.description + ' - ' : ''}${filter.count} tasks${filter.overdueCount > 0 ? ` (${filter.overdueCount} overdue)` : ''}`
+                  ? t('common:ui.remaining.filterIssues', {
+                      issues: filter.validationIssues
+                        ?.map(formatIssue)
+                        .join('，'),
+                    })
+                  : t('common:ui.remaining.filterSummary', {
+                      description: filter.description
+                        ? filter.description + ' - '
+                        : '',
+                      count: filter.count,
+                      overdue:
+                        filter.overdueCount > 0
+                          ? t('common:ui.remaining.overdueCount', {
+                              count: filter.overdueCount,
+                            })
+                          : '',
+                    })
               }
               placement='bottom'
             >

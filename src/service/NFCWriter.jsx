@@ -1,5 +1,7 @@
 import { CapacitorNfc } from '@capgo/capacitor-nfc'
 
+import i18n from '../i18n/config'
+
 // Encodes a URL into an NDEF URI record (TNF=0x01, type='U')
 const buildUriRecord = url => {
   const encoder = new TextEncoder()
@@ -82,7 +84,7 @@ export const startNativeNFCWrite = async (
     return cleanup
   } catch (err) {
     await cleanup()
-    onError(err.message || 'Failed to start NFC session')
+    onError(err.message || i18n.t('common:ui.remaining.nfcStartFailed'))
     return async () => {}
   }
 }
@@ -123,7 +125,7 @@ export const startNativeScan = async ({ onError, onTag }) => {
     return cleanup
   } catch (err) {
     await cleanup()
-    onError(err.message || 'Failed to start NFC session')
+    onError(err.message || i18n.t('common:ui.remaining.nfcStartFailed'))
     return async () => {}
   }
 }
@@ -136,10 +138,10 @@ const writeToNFC = async url => {
       await ndef.write({ records: [{ recordType: 'url', data: url }] })
     } catch (error) {
       console.error('Error writing to NFC tag:', error)
-      alert('Error writing to NFC tag. Please try again.')
+      alert(i18n.t('common:ui.remaining.nfcWriteError'))
     }
   } else {
-    alert('NFC is not supported by this browser.')
+    alert(i18n.t('common:ui.remaining.nfcUnsupported'))
   }
 }
 

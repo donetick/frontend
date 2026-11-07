@@ -222,3 +222,43 @@
   box-shadow: none;
   padding: 8px;
 }
+.quill-root .ql-snow .ql-picker.ql-header .ql-picker-label::before,
+.quill-root .ql-snow .ql-picker.ql-header .ql-picker-item::before {
+  content: var(--quill-normal);
+}
+
+.quill-root .ql-snow .ql-picker.ql-header [data-value='1']::before {
+  content: var(--quill-heading-1);
+}
+
+.quill-root .ql-snow .ql-picker.ql-header [data-value='2']::before {
+  content: var(--quill-heading-2);
+}
+
+.quill-root .ql-snow .ql-picker.ql-header [data-value='3']::before {
+  content: var(--quill-heading-3);
+}
+
+.quill-root .ql-snow .ql-picker.ql-header [data-value='4']::before {
+  content: var(--quill-heading-4);
+}
+
+.quill-root .ql-snow .ql-tooltip::before {
+  content: var(--quill-visit-link);
+}
+
+.quill-root .ql-snow .ql-tooltip[data-mode='link']::before {
+  content: var(--quill-enter-link);
+}
+
+.quill-root .ql-snow .ql-tooltip a.ql-action::after {
+  content: var(--quill-edit);
+}
+
+.quill-root .ql-snow .ql-tooltip.ql-editing a.ql-action::after {
+  content: var(--quill-save);
+}
+
+.quill-root .ql-snow .ql-tooltip a.ql-remove::before {
+  content: var(--quill-remove);
+}

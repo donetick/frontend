@@ -61,19 +61,18 @@ const NotificationIntegrationsSettings = () => {
         target: disable ? '' : chatID.trim(),
         type: disable ? 0 : Number(target),
       })
-      if (!response.ok) throw new Error(response.statusText)
+      if (!response.ok) {
+        showError({ message: t('notifications.targetUpdateFailedGeneric') })
+        return
+      }
       await refetch()
       if (disable) {
         setTarget('0')
         setChatID('')
       }
       showSuccess({ message: t('notifications.targetUpdated') })
-    } catch (error) {
-      showError({
-        message: t('notifications.targetUpdateFailed', {
-          error: error.message,
-        }),
-      })
+    } catch {
+      showError({ message: t('notifications.targetUpdateFailedGeneric') })
     } finally {
       setSaving(false)
     }

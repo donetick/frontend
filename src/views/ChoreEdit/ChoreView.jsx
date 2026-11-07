@@ -1557,9 +1557,12 @@ const ChoreView = () => {
                   sx={{ color: 'text.secondary', textAlign: 'center', mb: 1 }}
                 >
                   {t('choreView.availableToCompleteStarting', {
-                    date: moment(chore.nextDueDate)
-                      .subtract(chore.completionWindow, 'hours')
-                      .format('MM/DD/YYYY hh:mm A'),
+                    date: fmt.dateTime(
+                      moment(chore.nextDueDate).subtract(
+                        chore.completionWindow,
+                        'hours',
+                      ),
+                    ),
                   })}
                 </Typography>
               )}

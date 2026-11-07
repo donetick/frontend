@@ -152,6 +152,10 @@ export const GlobalSearchProvider = ({ children }) => {
   const closeSearch = useCallback(() => setIsOpen(false), [])
 
   useEffect(() => {
+    if (isOpen || location.pathname === '/search') loadDocuments()
+  }, [isOpen, loadDocuments, location.pathname])
+
+  useEffect(() => {
     const onKeyDown = event => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
         event.preventDefault()
