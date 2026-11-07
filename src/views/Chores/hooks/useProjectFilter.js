@@ -17,9 +17,7 @@ export const useProjectFilter = (projects, projectsLoaded = false) => {
       icon: 'FolderOpen',
     }
 
-    const hasDefault = projects.some(
-      p => p.id === 'default' || p.name === 'Default Project',
-    )
+    const hasDefault = projects.some(p => p.id === 'default')
 
     return hasDefault ? projects : [defaultProject, ...projects]
   }, [projects])
