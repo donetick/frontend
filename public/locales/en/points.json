@@ -25,7 +25,9 @@
     "tasksAndAvg": "{{tasks}} tasks • {{avg}} avg per task",
     "available": "{{count}} available",
     "points_one": "{{count}} point",
-    "points_other": "{{count}} points"
+    "points_other": "{{count}} points",
+    "tasks_one": "{{count}} task",
+    "tasks_other": "{{count}} tasks"
   },
   "tabs": {
     "short7d": "7D",
@@ -75,6 +77,7 @@
     "lastDays_other": "Last {{count}} Days"
   },
   "trend": {
-    "title": "Points Trend"
+    "title": "Points Trend",
+    "titleTasks": "Tasks Trend"
   }
 }
