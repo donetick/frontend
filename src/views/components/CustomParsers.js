@@ -207,6 +207,14 @@ export const parseRepeatV2 = inputSentence => {
       regex: /every (morning|noon|afternoon|evening|night)/i,
       name: 'Every {time} daily',
     },
+    // Match the more specific two-week aliases before "weekly" can consume
+    // the suffix of "biweekly" or "bi-weekly".
+    {
+      frequencyType: 'interval:2week',
+      regex: /(bi-?weekly|every other week)/i,
+      value: 2,
+      name: 'Bi Weekly',
+    },
     {
       frequencyType: 'weekly',
       regex: /(every week|weekly)/i,
@@ -227,12 +235,6 @@ export const parseRepeatV2 = inputSentence => {
       regex: /every (?:other )?month/i,
       name: 'Bi Monthly',
       value: 2,
-    },
-    {
-      frequencyType: 'interval:2week',
-      regex: /(bi-?weekly|every other week)/i,
-      value: 2,
-      name: 'Bi Weekly',
     },
     {
       frequencyType: 'interval',
