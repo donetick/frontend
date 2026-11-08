@@ -12,6 +12,7 @@ import {
   parsePriority,
   parseRepeatV2,
 } from '../CustomParsers'
+import { scheduleTimeFromDueDate } from '../DueDatePickerModal'
 
 // Pure equivalent of AddTaskModal.processText — parses one sentence into a
 // structured task (no state setters), preserving the same parser order and
@@ -202,7 +203,10 @@ export const buildChorePayload = (
 
   if (parsed.frequency) {
     chore.frequencyType = parsed.frequency.frequencyType
-    chore.frequencyMetadata = parsed.frequency.frequencyMetadata
+    chore.frequencyMetadata = {
+      ...parsed.frequency.frequencyMetadata,
+      time: scheduleTimeFromDueDate(parsed.dueDate),
+    }
     chore.frequency = parsed.frequency.frequency
   }
   if (!parsed.frequency && parsed.dueDate) {

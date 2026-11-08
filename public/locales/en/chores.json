@@ -971,6 +971,8 @@
     "triggerHelp": "Is this something that should be done when a thing state changes?",
     "previewEvery": "Every {{days}} at {{time}}",
     "previewOccurrence": "Every {{occurrences}} {{days}} of the month at {{time}}",
+    "previewEveryNoTime": "Every {{days}}",
+    "previewOccurrenceNoTime": "Every {{occurrences}} {{days}} of the month",
     "defaultTime": "6:00 PM",
     "daysShort": {
       "monday": "Mon",
