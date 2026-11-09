@@ -1085,5 +1085,67 @@
     "noteTitle": "ملاحظة - {{choreName}}"
   },
   "tasksForDate": "المهام ليوم {{date}}",
-  "createSuggestion": "إنشاء \"{{value}}\""
+  "createSuggestion": "إنشاء \"{{value}}\"",
+  "dueChip": {
+    "noDueDate": "بلا تاريخ استحقاق",
+    "days_zero": "{{count}} يوم",
+    "days_one": "{{count}} يوم",
+    "days_two": "يومان",
+    "days_few": "{{count}} أيام",
+    "days_many": "{{count}} يومًا",
+    "days_other": "{{count}} يوم"
+  },
+  "repeatChip": {
+    "once": "مرة واحدة",
+    "always": "دائمًا",
+    "trigger": "مشغّل",
+    "daily": "يوميًا",
+    "adaptive": "تكيّفي",
+    "weekly": "أسبوعيًا",
+    "monthly": "شهريًا",
+    "yearly": "سنويًا",
+    "dailyExcept": "يوميًا ما عدا {{days}}",
+    "monthlyOn": "شهريًا في اليوم {{day}}",
+    "monthlyOnExcept": "شهريًا في اليوم {{day}} ما عدا {{months}}",
+    "dayOfMonths": "اليوم {{day}} من {{months}}",
+    "everyUnit": {
+      "hours": "كل ساعة",
+      "days": "كل يوم",
+      "weeks": "كل أسبوع",
+      "months": "كل شهر",
+      "years": "كل سنة"
+    },
+    "every": {
+      "hours_zero": "كل {{count}} ساعة",
+      "hours_one": "كل {{count}} ساعة",
+      "hours_two": "كل ساعتين",
+      "hours_few": "كل {{count}} ساعات",
+      "hours_many": "كل {{count}} ساعة",
+      "hours_other": "كل {{count}} ساعة",
+      "days_zero": "كل {{count}} يوم",
+      "days_one": "كل {{count}} يوم",
+      "days_two": "كل يومين",
+      "days_few": "كل {{count}} أيام",
+      "days_many": "كل {{count}} يومًا",
+      "days_other": "كل {{count}} يوم",
+      "weeks_zero": "كل {{count}} أسبوع",
+      "weeks_one": "كل {{count}} أسبوع",
+      "weeks_two": "كل أسبوعين",
+      "weeks_few": "كل {{count}} أسابيع",
+      "weeks_many": "كل {{count}} أسبوعًا",
+      "weeks_other": "كل {{count}} أسبوع",
+      "months_zero": "كل {{count}} شهر",
+      "months_one": "كل {{count}} شهر",
+      "months_two": "كل شهرين",
+      "months_few": "كل {{count}} أشهر",
+      "months_many": "كل {{count}} شهرًا",
+      "months_other": "كل {{count}} شهر",
+      "years_zero": "كل {{count}} سنة",
+      "years_one": "كل {{count}} سنة",
+      "years_two": "كل سنتين",
+      "years_few": "كل {{count}} سنوات",
+      "years_many": "كل {{count}} سنة",
+      "years_other": "كل {{count}} سنة"
+    }
+  }
 }

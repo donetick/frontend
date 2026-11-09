@@ -1085,5 +1085,55 @@
     "noteTitle": "Примечание - {{choreName}}"
   },
   "tasksForDate": "Задачи на {{date}}",
-  "createSuggestion": "Создать «{{value}}»"
+  "createSuggestion": "Создать «{{value}}»",
+  "dueChip": {
+    "noDueDate": "Без срока",
+    "days_one": "{{count}} день",
+    "days_few": "{{count}} дня",
+    "days_many": "{{count}} дней",
+    "days_other": "{{count}} дня"
+  },
+  "repeatChip": {
+    "once": "Однократно",
+    "always": "Всегда",
+    "trigger": "Триггер",
+    "daily": "Ежедневно",
+    "adaptive": "Адаптивно",
+    "weekly": "Еженедельно",
+    "monthly": "Ежемесячно",
+    "yearly": "Ежегодно",
+    "dailyExcept": "Ежедневно, кроме {{days}}",
+    "monthlyOn": "Ежемесячно {{day}}-го числа",
+    "monthlyOnExcept": "Ежемесячно {{day}}-го числа, кроме {{months}}",
+    "dayOfMonths": "{{day}}-го числа: {{months}}",
+    "everyUnit": {
+      "hours": "Каждый час",
+      "days": "Каждый день",
+      "weeks": "Каждую неделю",
+      "months": "Каждый месяц",
+      "years": "Каждый год"
+    },
+    "every": {
+      "hours_one": "Каждый {{count}} час",
+      "hours_few": "Каждые {{count}} часа",
+      "hours_many": "Каждые {{count}} часов",
+      "hours_other": "Каждые {{count}} часа",
+      "days_one": "Каждый {{count}} день",
+      "days_few": "Каждые {{count}} дня",
+      "days_many": "Каждые {{count}} дней",
+      "days_other": "Каждые {{count}} дня",
+      "weeks_one": "Каждую {{count}} неделю",
+      "weeks_few": "Каждые {{count}} недели",
+      "weeks_many": "Каждые {{count}} недель",
+      "weeks_other": "Каждые {{count}} недели",
+      "months_one": "Каждый {{count}} месяц",
+      "months_few": "Каждые {{count}} месяца",
+      "months_many": "Каждые {{count}} месяцев",
+      "months_other": "Каждые {{count}} месяца",
+      "years_one": "Каждый {{count}} год",
+      "years_few": "Каждые {{count}} года",
+      "years_many": "Каждые {{count}} лет",
+      "years_other": "Каждые {{count}} года"
+    }
+  }
 }

@@ -1176,5 +1176,43 @@
     "inheritedFromSharedProject": "Overgenomen van het project: alleen de leden ervan zien de taken erin",
     "onlyProjectAudienceAssignable": "Alleen mensen die het project “{{project}}” kunnen zien, kunnen worden toegewezen.",
     "followsProjectName": "Volgt het project “{{project}}”"
+  },
+  "dueChip": {
+    "noDueDate": "Geen vervaldatum",
+    "days_one": "{{count}} dag",
+    "days_other": "{{count}} dagen"
+  },
+  "repeatChip": {
+    "once": "Eenmalig",
+    "always": "Altijd",
+    "trigger": "Trigger",
+    "daily": "Dagelijks",
+    "adaptive": "Adaptief",
+    "weekly": "Wekelijks",
+    "monthly": "Maandelijks",
+    "yearly": "Jaarlijks",
+    "dailyExcept": "Dagelijks behalve {{days}}",
+    "monthlyOn": "Maandelijks op de {{day}}",
+    "monthlyOnExcept": "Maandelijks op de {{day}} behalve {{months}}",
+    "dayOfMonths": "De {{day}} van {{months}}",
+    "everyUnit": {
+      "hours": "Elk uur",
+      "days": "Elke dag",
+      "weeks": "Elke week",
+      "months": "Elke maand",
+      "years": "Elk jaar"
+    },
+    "every": {
+      "hours_one": "Elke {{count}} uur",
+      "hours_other": "Elke {{count}} uur",
+      "days_one": "Elke {{count}} dag",
+      "days_other": "Elke {{count}} dagen",
+      "weeks_one": "Elke {{count}} week",
+      "weeks_other": "Elke {{count}} weken",
+      "months_one": "Elke {{count}} maand",
+      "months_other": "Elke {{count}} maanden",
+      "years_one": "Elk {{count}} jaar",
+      "years_other": "Elke {{count}} jaar"
+    }
   }
 }

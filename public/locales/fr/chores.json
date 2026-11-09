@@ -1085,5 +1085,49 @@
     "noteTitle": "Note - {{choreName}}"
   },
   "tasksForDate": "Tâches pour le {{date}}",
-  "createSuggestion": "Créer \"{{value}}\""
+  "createSuggestion": "Créer \"{{value}}\"",
+  "dueChip": {
+    "noDueDate": "Pas d'échéance",
+    "days_one": "{{count}} jour",
+    "days_many": "{{count}} jours",
+    "days_other": "{{count}} jours"
+  },
+  "repeatChip": {
+    "once": "Une fois",
+    "always": "Toujours",
+    "trigger": "Déclencheur",
+    "daily": "Tous les jours",
+    "adaptive": "Adaptatif",
+    "weekly": "Hebdomadaire",
+    "monthly": "Mensuel",
+    "yearly": "Annuel",
+    "dailyExcept": "Tous les jours sauf {{days}}",
+    "monthlyOn": "Le {{day}} de chaque mois",
+    "monthlyOnExcept": "Le {{day}} de chaque mois sauf {{months}}",
+    "dayOfMonths": "Le {{day}} en {{months}}",
+    "everyUnit": {
+      "hours": "Toutes les heures",
+      "days": "Tous les jours",
+      "weeks": "Toutes les semaines",
+      "months": "Tous les mois",
+      "years": "Tous les ans"
+    },
+    "every": {
+      "hours_one": "Toutes les {{count}} heure",
+      "hours_many": "Toutes les {{count}} heures",
+      "hours_other": "Toutes les {{count}} heures",
+      "days_one": "Tous les {{count}} jour",
+      "days_many": "Tous les {{count}} jours",
+      "days_other": "Tous les {{count}} jours",
+      "weeks_one": "Toutes les {{count}} semaine",
+      "weeks_many": "Toutes les {{count}} semaines",
+      "weeks_other": "Toutes les {{count}} semaines",
+      "months_one": "Tous les {{count}} mois",
+      "months_many": "Tous les {{count}} mois",
+      "months_other": "Tous les {{count}} mois",
+      "years_one": "Tous les {{count}} an",
+      "years_many": "Tous les {{count}} ans",
+      "years_other": "Tous les {{count}} ans"
+    }
+  }
 }

@@ -703,5 +703,11 @@
       "voice": "Vastleggen met spraak",
       "scan": "Scannen naar taak"
     }
+  },
+  "calendar": {
+    "today": "Vandaag",
+    "tomorrow": "Morgen",
+    "yesterday": "Gisteren",
+    "lastWeekday": "Afgelopen {{day}}"
   }
 }

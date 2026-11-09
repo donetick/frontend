@@ -1105,5 +1105,49 @@
     "noteTitle": "Nota - {{choreName}}"
   },
   "tasksForDate": "Attività per {{date}}",
-  "createSuggestion": "Crea \"{{value}}\""
+  "createSuggestion": "Crea \"{{value}}\"",
+  "dueChip": {
+    "noDueDate": "Nessuna scadenza",
+    "days_one": "{{count}} giorno",
+    "days_many": "{{count}} giorni",
+    "days_other": "{{count}} giorni"
+  },
+  "repeatChip": {
+    "once": "Una volta",
+    "always": "Sempre",
+    "trigger": "Attivatore",
+    "daily": "Giornaliera",
+    "adaptive": "Adattiva",
+    "weekly": "Settimanale",
+    "monthly": "Mensile",
+    "yearly": "Annuale",
+    "dailyExcept": "Ogni giorno tranne {{days}}",
+    "monthlyOn": "Ogni mese il {{day}}",
+    "monthlyOnExcept": "Ogni mese il {{day}} tranne {{months}}",
+    "dayOfMonths": "Il {{day}} di {{months}}",
+    "everyUnit": {
+      "hours": "Ogni ora",
+      "days": "Ogni giorno",
+      "weeks": "Ogni settimana",
+      "months": "Ogni mese",
+      "years": "Ogni anno"
+    },
+    "every": {
+      "hours_one": "Ogni {{count}} ora",
+      "hours_many": "Ogni {{count}} ore",
+      "hours_other": "Ogni {{count}} ore",
+      "days_one": "Ogni {{count}} giorno",
+      "days_many": "Ogni {{count}} giorni",
+      "days_other": "Ogni {{count}} giorni",
+      "weeks_one": "Ogni {{count}} settimana",
+      "weeks_many": "Ogni {{count}} settimane",
+      "weeks_other": "Ogni {{count}} settimane",
+      "months_one": "Ogni {{count}} mese",
+      "months_many": "Ogni {{count}} mesi",
+      "months_other": "Ogni {{count}} mesi",
+      "years_one": "Ogni {{count}} anno",
+      "years_many": "Ogni {{count}} anni",
+      "years_other": "Ogni {{count}} anni"
+    }
+  }
 }

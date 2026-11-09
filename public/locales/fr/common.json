@@ -702,5 +702,11 @@
       "voice": "Saisir à la voix",
       "scan": "Scanner pour créer une tâche"
     }
+  },
+  "calendar": {
+    "today": "Aujourd'hui",
+    "tomorrow": "Demain",
+    "yesterday": "Hier",
+    "lastWeekday": "{{day}} dernier"
   }
 }

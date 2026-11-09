@@ -1171,5 +1171,43 @@
     "followsProjectName": "Folgt dem Projekt „{{project}}“"
   },
   "tasksForDate": "Aufgaben für {{date}}",
-  "createSuggestion": "\"{{value}}\" erstellen"
+  "createSuggestion": "\"{{value}}\" erstellen",
+  "dueChip": {
+    "noDueDate": "Kein Fälligkeitsdatum",
+    "days_one": "{{count}} Tag",
+    "days_other": "{{count}} Tage"
+  },
+  "repeatChip": {
+    "once": "Einmalig",
+    "always": "Immer",
+    "trigger": "Auslöser",
+    "daily": "Täglich",
+    "adaptive": "Adaptiv",
+    "weekly": "Wöchentlich",
+    "monthly": "Monatlich",
+    "yearly": "Jährlich",
+    "dailyExcept": "Täglich außer {{days}}",
+    "monthlyOn": "Monatlich am {{day}}",
+    "monthlyOnExcept": "Monatlich am {{day}} außer {{months}}",
+    "dayOfMonths": "Am {{day}} im {{months}}",
+    "everyUnit": {
+      "hours": "Jede Stunde",
+      "days": "Jeden Tag",
+      "weeks": "Jede Woche",
+      "months": "Jeden Monat",
+      "years": "Jedes Jahr"
+    },
+    "every": {
+      "hours_one": "Jede {{count}} Stunde",
+      "hours_other": "Alle {{count}} Stunden",
+      "days_one": "Jeden {{count}} Tag",
+      "days_other": "Alle {{count}} Tage",
+      "weeks_one": "Jede {{count}} Woche",
+      "weeks_other": "Alle {{count}} Wochen",
+      "months_one": "Jeden {{count}} Monat",
+      "months_other": "Alle {{count}} Monate",
+      "years_one": "Jedes {{count}} Jahr",
+      "years_other": "Alle {{count}} Jahre"
+    }
+  }
 }

@@ -1085,5 +1085,55 @@
     "noteTitle": "Notatka — {{choreName}}"
   },
   "tasksForDate": "Zadania na {{date}}",
-  "createSuggestion": "Utwórz \"{{value}}\""
+  "createSuggestion": "Utwórz \"{{value}}\"",
+  "dueChip": {
+    "noDueDate": "Brak terminu",
+    "days_one": "{{count}} dzień",
+    "days_few": "{{count}} dni",
+    "days_many": "{{count}} dni",
+    "days_other": "{{count}} dnia"
+  },
+  "repeatChip": {
+    "once": "Jednorazowo",
+    "always": "Zawsze",
+    "trigger": "Wyzwalacz",
+    "daily": "Codziennie",
+    "adaptive": "Adaptacyjnie",
+    "weekly": "Co tydzień",
+    "monthly": "Co miesiąc",
+    "yearly": "Co roku",
+    "dailyExcept": "Codziennie oprócz {{days}}",
+    "monthlyOn": "Co miesiąc {{day}} dnia",
+    "monthlyOnExcept": "Co miesiąc {{day}} dnia oprócz {{months}}",
+    "dayOfMonths": "{{day}} dnia w: {{months}}",
+    "everyUnit": {
+      "hours": "Co godzinę",
+      "days": "Codziennie",
+      "weeks": "Co tydzień",
+      "months": "Co miesiąc",
+      "years": "Co rok"
+    },
+    "every": {
+      "hours_one": "Co {{count}} godzinę",
+      "hours_few": "Co {{count}} godziny",
+      "hours_many": "Co {{count}} godzin",
+      "hours_other": "Co {{count}} godziny",
+      "days_one": "Co {{count}} dzień",
+      "days_few": "Co {{count}} dni",
+      "days_many": "Co {{count}} dni",
+      "days_other": "Co {{count}} dnia",
+      "weeks_one": "Co {{count}} tydzień",
+      "weeks_few": "Co {{count}} tygodnie",
+      "weeks_many": "Co {{count}} tygodni",
+      "weeks_other": "Co {{count}} tygodnia",
+      "months_one": "Co {{count}} miesiąc",
+      "months_few": "Co {{count}} miesiące",
+      "months_many": "Co {{count}} miesięcy",
+      "months_other": "Co {{count}} miesiąca",
+      "years_one": "Co {{count}} rok",
+      "years_few": "Co {{count}} lata",
+      "years_many": "Co {{count}} lat",
+      "years_other": "Co {{count}} roku"
+    }
+  }
 }
