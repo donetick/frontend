@@ -14,7 +14,6 @@ import {
   Input,
   Option,
   Select,
-  Sheet,
   Stack,
   Typography,
 } from '@mui/joy'
@@ -104,11 +103,15 @@ export default function TemplatePersonalization({
     )
     .join(', ')
   return (
-    <Sheet
-      variant='outlined'
+    <Box
       sx={{
-        borderRadius: 'md',
-        overflow: 'hidden',
+        // Match the modal body gutters so sections span its full width while
+        // EditorSection keeps the controls aligned with the rest of the content.
+        alignSelf: 'center',
+        width: {
+          xs: 'calc(100% + 32px)',
+          sm: 'calc(100% + 48px)',
+        },
         '& > :last-child': { borderBottom: 0 },
       }}
     >
@@ -236,7 +239,7 @@ export default function TemplatePersonalization({
           </Stack>
         </EditorSection>
       )}
-    </Sheet>
+    </Box>
   )
 }
 TemplatePersonalization.propTypes = {

@@ -77,6 +77,7 @@ export const SETTINGS_SECTIONS = [
     id: 'templates',
     icon: AutoAwesomeMotion,
     group: 'advanced',
+    isBeta: true,
     to: `/templates?from=${TEMPLATE_ENTRY_POINT.SETTINGS}`,
   },
   { id: 'developer', icon: Code, parent: 'advanced' },
