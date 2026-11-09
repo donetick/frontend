@@ -188,10 +188,10 @@ function AddCustomTaskForm({ onAdd }) {
 AddCustomTaskForm.propTypes = { onAdd: PropTypes.func.isRequired }
 
 export default function TemplateLibraryModal({
-  onClose,
   entryPoint = 'unknown',
-  initialQuery = '',
   initialCategory = 'all',
+  initialQuery = '',
+  onClose,
 }) {
   const { t } = useTranslation('chores')
   const { ResponsiveModal } = useResponsiveModal()

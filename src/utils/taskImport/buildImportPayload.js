@@ -1,4 +1,5 @@
 import { generateUUID } from '../UUID.js'
+import { resolveImportAssignment } from './importAssignment.js'
 
 // Descriptions in the portable format are plain text, not executable HTML.
 const escapeHtml = text =>
@@ -19,6 +20,7 @@ const escapeHtml = text =>
 export function buildImportPayload(
   task,
   {
+    assignment,
     labelIds,
     projectId,
     sectionId,
@@ -43,9 +45,7 @@ export function buildImportPayload(
           ...(task.dueDate ? { time: task.dueDate } : {}),
         }
       : {},
-    assignees: [{ userId }],
-    assignedTo: userId,
-    assignStrategy: 'keep_last_assigned',
+    ...resolveImportAssignment(assignment, userId),
     labelsV2: labelIds.map(id => ({ id: Number(id) })),
     projectId: projectId === 'default' ? null : projectId,
     sectionId: projectId === 'default' ? null : (sectionId ?? null),

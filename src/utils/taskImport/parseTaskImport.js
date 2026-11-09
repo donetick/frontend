@@ -1,9 +1,23 @@
 import { JSON_SCHEMA, load } from 'js-yaml'
 
 import { parseRepeatExpression } from './parseRepeatExpression.js'
+import {
+  missingInputValues,
+  parseInputs,
+  substituteLabels,
+  substituteRow,
+} from './templateInputs.js'
 
 export const MAX_IMPORT_TASKS = 200
 export const MAX_IMPORT_BYTES = 256 * 1024
+const DOCUMENT_FIELDS = new Set([
+  'format',
+  'version',
+  'title',
+  'labels',
+  'inputs',
+  'tasks',
+])
 const TASK_FIELDS = new Set([
   'title',
   'description',
@@ -83,7 +97,7 @@ function parseSubtasks(task) {
   return value.map(name => name.trim())
 }
 
-function parseTask(task, index, referenceDate) {
+function parseTask(task, key, referenceDate) {
   if (!object(task)) throw new Error('Each task must be an object.')
   assertFields(task, TASK_FIELDS)
   if (typeof task.title !== 'string' || !task.title.trim())
@@ -152,7 +166,7 @@ function parseTask(task, index, referenceDate) {
     }
   }
   return {
-    key: index,
+    key,
     title: task.title.trim(),
     description: task.description ?? null,
     priority: parsePriority(task.priority),
@@ -164,20 +178,23 @@ function parseTask(task, index, referenceDate) {
   }
 }
 
-// Pure ingestion: no network calls, IDs, account defaults, or task creation.
-export function parseTaskImport(
-  text,
-  { format = 'template', referenceDate = new Date() } = {},
-) {
-  const errors = []
-  const tasks = []
+// Structure only: reads the envelope and the declared inputs so the importer
+// can collect values before any task is validated. No substitution happens
+// here, so the document stays reusable across instances.
+export function parseTaskImportDocument(text, { format = 'template' } = {}) {
+  const document = {
+    title: '',
+    inputs: [],
+    globalLabels: [],
+    rows: [],
+    interpolate: false,
+    errors: [],
+  }
   try {
     if (new TextEncoder().encode(text).length > MAX_IMPORT_BYTES)
       throw new Error('Import is too large (maximum 256 KB).')
-    let rows
-    let globalLabels = []
     if (format === 'lines') {
-      rows = text
+      document.rows = text
         .split(/\r?\n/)
         .map(title =>
           title.trim().replace(/^(?:[-*+]\s+(?:\[[ xX]\]\s*)?|\d+[.)]\s+)/, ''),
@@ -185,45 +202,96 @@ export function parseTaskImport(
         .filter(Boolean)
         .map(title => ({ title }))
     } else if (format === 'template') {
-      const document = load(text, { schema: JSON_SCHEMA })
-      if (!object(document))
+      const parsed = load(text, { schema: JSON_SCHEMA })
+      if (!object(parsed))
         throw new Error('Expected a DoneTick YAML or JSON document.')
-      assertFields(
-        document,
-        new Set(['format', 'version', 'title', 'labels', 'tasks']),
-      )
-      if (document.format !== 'donetick' || document.version !== 1)
-        throw new Error('Expected format: donetick and version: 1.')
-      if (!absent(document.labels)) {
+      assertFields(parsed, DOCUMENT_FIELDS)
+      if (parsed.format !== 'donetick' || ![1, 2].includes(parsed.version))
+        throw new Error('Expected format: donetick and version: 1 or 2.')
+      if (parsed.version === 1 && !absent(parsed.inputs))
+        throw new Error('Inputs require version: 2.')
+      if (!absent(parsed.title) && typeof parsed.title !== 'string')
+        throw new Error('Template title must be text.')
+      document.title = parsed.title?.trim() || ''
+      document.interpolate = parsed.version === 2
+      document.inputs = parseInputs(parsed.inputs)
+      if (!absent(parsed.labels)) {
         if (
-          !Array.isArray(document.labels) ||
-          document.labels.some(
+          !Array.isArray(parsed.labels) ||
+          parsed.labels.some(
             label => typeof label !== 'string' || !label.trim(),
           )
         )
           throw new Error('Global labels must be a list of nonempty names.')
-        globalLabels = document.labels.map(label => label.trim())
+        document.globalLabels = parsed.labels.map(label => label.trim())
       }
-      rows = document.tasks
+      document.rows = parsed.tasks
     } else {
       throw new Error('Unknown import format.')
     }
-    if (!Array.isArray(rows) || !rows.length)
+    if (!Array.isArray(document.rows) || !document.rows.length)
       throw new Error('Add at least one task.')
-    if (rows.length > MAX_IMPORT_TASKS)
+    if (document.rows.length > MAX_IMPORT_TASKS)
       throw new Error(`Import at most ${MAX_IMPORT_TASKS} tasks at a time.`)
-    rows.forEach((row, index) => {
+  } catch (error) {
+    document.rows = []
+    document.errors.push({ row: null, instance: null, message: error.message })
+  }
+  return document
+}
+
+// Pure resolution: no network calls, IDs, account defaults, or task creation.
+// One value set per instance; every row is expanded once per instance so the
+// same template can cover several devices, rooms, or people in one import.
+export function resolveTaskImport(
+  document,
+  { instances = [{}], referenceDate = new Date() } = {},
+) {
+  const errors = [...document.errors]
+  const tasks = []
+  const sets = instances.length ? instances : [{}]
+  const names = new Set(document.inputs.map(input => input.name))
+  if (document.rows.length * sets.length > MAX_IMPORT_TASKS) {
+    errors.push({
+      row: null,
+      instance: null,
+      message: `Import at most ${MAX_IMPORT_TASKS} tasks at a time.`,
+    })
+    return { tasks, errors, warnings: [] }
+  }
+  sets.forEach((values, instance) => {
+    const missing = missingInputValues(document.inputs, values)
+    if (missing.length) {
+      errors.push({
+        row: null,
+        instance,
+        message: `Provide a value for: ${missing.join(', ')}.`,
+      })
+      return
+    }
+    let globalLabels
+    try {
+      globalLabels = document.interpolate
+        ? substituteLabels(document.globalLabels, values, names)
+        : document.globalLabels
+    } catch (error) {
+      errors.push({ row: null, instance, message: error.message })
+      return
+    }
+    document.rows.forEach((row, index) => {
       try {
-        const task = parseTask(row, index, referenceDate)
+        const resolved = document.interpolate
+          ? substituteRow(row, values, names)
+          : row
+        const task = parseTask(resolved, `${instance}:${index}`, referenceDate)
+        task.instance = instance
         task.labels = [...globalLabels, ...task.labels]
         tasks.push(task)
       } catch (error) {
-        errors.push({ row: index + 1, message: error.message })
+        errors.push({ row: index + 1, instance, message: error.message })
       }
     })
-  } catch (error) {
-    errors.push({ row: null, message: error.message })
-  }
+  })
   // Label identity is case-insensitive throughout review and creation. Keep
   // the first spelling so templates cannot create both "Home" and "home".
   const labelNames = new Map()

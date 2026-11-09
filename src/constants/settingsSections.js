@@ -1,6 +1,7 @@
 import {
   AccountCircle,
   Api,
+  AutoAwesomeMotion,
   CalendarMonth,
   Circle,
   CloudQueue,
@@ -21,6 +22,8 @@ import {
   Webhook,
   Widgets,
 } from '@mui/icons-material'
+
+import { TEMPLATE_ENTRY_POINT } from '../data/taskTemplates'
 
 // Routes stay stable; parent identifies the destination's home in settings.
 // Shared by the overview, contextual navigation, and global search.
@@ -66,6 +69,16 @@ export const SETTINGS_SECTIONS = [
   { id: 'storage', icon: Storage, group: 'data' },
   { id: 'privacy', icon: PrivacyTip, group: 'data' },
   { id: 'advanced', icon: Settings, group: 'advanced' },
+  // Not a settings page: `to` sends this row to the library's own route.
+  // It lives here because Settings is where people look for a feature they
+  // remember existing, and it sits with storage because both are about
+  // getting tasks into and out of the app.
+  {
+    id: 'templates',
+    icon: AutoAwesomeMotion,
+    group: 'advanced',
+    to: `/templates?from=${TEMPLATE_ENTRY_POINT.SETTINGS}`,
+  },
   { id: 'developer', icon: Code, parent: 'advanced' },
 ]
 
