@@ -1,11 +1,15 @@
 import moment from 'moment'
 
 export const createDateFormatter = (dateFormat, timeFormat, firstDayOfWeek) => {
+  // updateLocale also switches the global locale, so put the user's language
+  // back or every date in the app turns English after this runs.
+  const activeLocale = moment.locale()
   moment.updateLocale('en', {
     week: {
       dow: firstDayOfWeek,
     },
   })
+  moment.locale(activeLocale)
 
   return {
     formatDate: (date, customFormat) => {

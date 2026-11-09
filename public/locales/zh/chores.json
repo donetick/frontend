@@ -1085,5 +1085,37 @@
     "noteTitle": ""
   },
   "tasksForDate": "{{date}} 的任务",
-  "createSuggestion": "创建“{{value}}”"
+  "createSuggestion": "创建“{{value}}”",
+  "dueChip": {
+    "noDueDate": "无截止日期",
+    "days_other": "{{count}} 天"
+  },
+  "repeatChip": {
+    "once": "一次",
+    "always": "始终",
+    "trigger": "触发",
+    "daily": "每天",
+    "adaptive": "自适应",
+    "weekly": "每周",
+    "monthly": "每月",
+    "yearly": "每年",
+    "dailyExcept": "每天（{{days}}除外）",
+    "monthlyOn": "每月{{day}}日",
+    "monthlyOnExcept": "每月{{day}}日（{{months}}除外）",
+    "dayOfMonths": "{{months}}的{{day}}日",
+    "everyUnit": {
+      "hours": "每小时",
+      "days": "每天",
+      "weeks": "每周",
+      "months": "每月",
+      "years": "每年"
+    },
+    "every": {
+      "hours_other": "每 {{count}} 小时",
+      "days_other": "每 {{count}} 天",
+      "weeks_other": "每 {{count}} 周",
+      "months_other": "每 {{count}} 个月",
+      "years_other": "每 {{count}} 年"
+    }
+  }
 }

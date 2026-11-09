@@ -121,6 +121,10 @@ export const AVAILABLE_LANGUAGES = [
   { code: 'zh-CN', name: 'Chinese (Simplified)', nativeName: '简体中文' },
 ]
 
+// App language codes that moment names differently. 'pt' is offered as
+// Portuguese (Brazil), and moment's plain 'pt' is the European variant.
+const MOMENT_LOCALES = { pt: 'pt-br' }
+
 export const LocalizationProvider = ({ children }) => {
   const { i18n } = useTranslation()
   const [dateFormat, setDateFormat] = useStickyState(
@@ -150,7 +154,7 @@ export const LocalizationProvider = ({ children }) => {
 
   useEffect(() => {
     i18n.changeLanguage(language)
-    moment.locale(language)
+    moment.locale(MOMENT_LOCALES[language] || language)
   }, [language, i18n])
 
   useEffect(() => {
@@ -185,12 +189,19 @@ export const LocalizationProvider = ({ children }) => {
 
   const formatCalendar = date => {
     if (!date) return ''
+    // Translations go in as escaped literals so moment does not read their
+    // letters as format tokens.
+    const literal = text => `[${text.replace(/]/g, '')}] ${timeFormat}`
     return moment(date).calendar(null, {
-      sameDay: `[Today] ${timeFormat}`,
-      nextDay: `[Tomorrow] ${timeFormat}`,
+      sameDay: literal(i18n.t('calendar.today')),
+      nextDay: literal(i18n.t('calendar.tomorrow')),
       nextWeek: `dddd ${timeFormat}`,
-      lastDay: `[Yesterday] ${timeFormat}`,
-      lastWeek: `[Last] dddd ${timeFormat}`,
+      lastDay: literal(i18n.t('calendar.yesterday')),
+      lastWeek: function () {
+        return literal(
+          i18n.t('calendar.lastWeekday', { day: this.format('dddd') }),
+        )
+      },
       sameElse: `${dateFormat} ${timeFormat}`,
     })
   }

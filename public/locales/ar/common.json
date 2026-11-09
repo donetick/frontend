@@ -702,5 +702,11 @@
       "voice": "التقط بصوت",
       "scan": "مسح للمهمة"
     }
+  },
+  "calendar": {
+    "today": "اليوم",
+    "tomorrow": "غدًا",
+    "yesterday": "أمس",
+    "lastWeekday": "{{day}} من الأسبوع الماضي"
   }
 }
