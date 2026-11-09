@@ -1084,6 +1084,8 @@
     "yesterday": "Вчера",
     "noteTitle": "Примечание - {{choreName}}"
   },
+  "selectTaskNamed": "Выбрать {{name}}",
+  "filterByLabel": "Фильтровать по метке {{name}}",
   "tasksForDate": "Задачи на {{date}}",
   "createSuggestion": "Создать «{{value}}»"
 }

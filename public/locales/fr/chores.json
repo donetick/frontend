@@ -1084,6 +1084,8 @@
     "yesterday": "Hier",
     "noteTitle": "Note - {{choreName}}"
   },
+  "selectTaskNamed": "Sélectionner {{name}}",
+  "filterByLabel": "Filtrer par l'étiquette {{name}}",
   "tasksForDate": "Tâches pour le {{date}}",
   "createSuggestion": "Créer \"{{value}}\""
 }

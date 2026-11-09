@@ -1170,6 +1170,8 @@
     "onlyProjectAudienceAssignable": "Nur Personen, die das Projekt „{{project}}“ sehen können, können zugewiesen werden.",
     "followsProjectName": "Folgt dem Projekt „{{project}}“"
   },
+  "selectTaskNamed": "{{name}} auswählen",
+  "filterByLabel": "Nach Beschriftung {{name}} filtern",
   "tasksForDate": "Aufgaben für {{date}}",
   "createSuggestion": "\"{{value}}\" erstellen"
 }

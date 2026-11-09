@@ -1241,5 +1241,7 @@
     "inheritedFromSharedProject": "Inherited from the project: only its members can see tasks in it",
     "onlyProjectAudienceAssignable": "Only people who can see the project “{{project}}” can be assigned.",
     "followsProjectName": "Follows the project “{{project}}”"
-  }
+  },
+  "selectTaskNamed": "Select {{name}}",
+  "filterByLabel": "Filter by label {{name}}"
 }

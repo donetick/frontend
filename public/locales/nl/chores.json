@@ -1176,5 +1176,7 @@
     "inheritedFromSharedProject": "Overgenomen van het project: alleen de leden ervan zien de taken erin",
     "onlyProjectAudienceAssignable": "Alleen mensen die het project “{{project}}” kunnen zien, kunnen worden toegewezen.",
     "followsProjectName": "Volgt het project “{{project}}”"
-  }
+  },
+  "selectTaskNamed": "{{name}} selecteren",
+  "filterByLabel": "Filteren op label {{name}}"
 }

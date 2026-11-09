@@ -1084,6 +1084,8 @@
     "yesterday": "أمس",
     "noteTitle": "ملاحظة - {{choreName}}"
   },
+  "selectTaskNamed": "تحديد {{name}}",
+  "filterByLabel": "تصفية حسب التسمية {{name}}",
   "tasksForDate": "المهام ليوم {{date}}",
   "createSuggestion": "إنشاء \"{{value}}\""
 }
