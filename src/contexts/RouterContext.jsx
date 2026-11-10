@@ -94,6 +94,7 @@ const ProfileSettings = lazy(() => import('../views/Settings/ProfileSettings'))
 const StorageSettings = lazy(() => import('../views/Settings/StorageSettings'))
 const WebhookSettings = lazy(() => import('../views/Settings/WebhookSettings'))
 const WidgetSettings = lazy(() => import('../views/Settings/WidgetSettings'))
+import TemplatesView from '../views/Templates/TemplatesView'
 const TermsView = lazy(() => import('../views/Terms/TermsView'))
 const TestView = lazy(() => import('../views/TestView/Test'))
 const ThingsHistory = lazy(() => import('../views/Things/ThingsHistory'))
@@ -220,6 +221,10 @@ const Router = createBrowserRouter([
       {
         path: '/search',
         element: <GlobalSearchPage />,
+      },
+      {
+        path: '/templates',
+        element: <TemplatesView />,
       },
       {
         path: '/archived',
