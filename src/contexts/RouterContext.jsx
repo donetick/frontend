@@ -1,69 +1,107 @@
+import { lazy } from 'react'
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom'
 
 import App from '@/App'
-import ChoreEdit from '@/views/ChoreEdit/ChoreEdit'
 import Error from '@/views/Error'
-import AccountSettings from '@/views/Settings/AccountSettings'
-import AdvancedSettings from '@/views/Settings/AdvancedSettings'
-import BridgeSettings from '@/views/Settings/BridgeSettings'
-import ChildUserSettings from '@/views/Settings/ChildUserSettings'
-import CircleSettings from '@/views/Settings/CircleSettings'
-import DeveloperSettings from '@/views/Settings/DeveloperSettings'
-import Settings from '@/views/Settings/Settings'
-import SettingsOverview from '@/views/Settings/SettingsOverview'
 import SettingsRoutes from '@/views/Settings/SettingsRoutes'
-import ThemeSettings from '@/views/Settings/ThemeSettings'
 
-import GlobalSearchPage from '../search/GlobalSearchPage'
-import AuthenticationLoading from '../views/Authorization/Authenticating'
-import ForgotPasswordView from '../views/Authorization/ForgotPasswordView'
-import LoginSettings from '../views/Authorization/LoginSettings'
-import LoginView from '../views/Authorization/LoginView'
-import SignupView from '../views/Authorization/Signup'
-import UpdatePasswordView from '../views/Authorization/UpdatePasswordView'
-import ChoreView from '../views/ChoreEdit/ChoreView'
-import ArchivedTasks from '../views/Chores/ArchivedTasks'
-import MyChores from '../views/Chores/MyChores'
-import JoinCircleView from '../views/Circles/JoinCircle'
-import NotFound from '../views/components/NotFound'
-import FilterView from '../views/Filters/FilterView'
-import ChoreHistory from '../views/History/ChoreHistory'
-import DefaultViewRoute from '../views/Home/DefaultViewRoute'
-import HomeView from '../views/Home/HomeView'
-import LabelDetailView from '../views/Labels/LabelDetailView'
-import LabelView from '../views/Labels/LabelView'
-import Landing from '../views/Landing/Landing'
-import CircleSetupView from '../views/Onboarding/CircleSetupView'
-import GetStartedView from '../views/Onboarding/GetStartedView'
-import HeardAboutView from '../views/Onboarding/HeardAboutView'
-import OnboardingView from '../views/Onboarding/OnboardingView'
-import WorkspaceReadyView from '../views/Onboarding/WorkspaceReadyView'
-import PaymentCancelledView from '../views/Payments/PaymentFailView'
-import PaymentSuccessView from '../views/Payments/PaymentSuccessView'
-import PrivacyPolicyView from '../views/PrivacyPolicy/PrivacyPolicyView'
-import ProjectView from '../views/Projects/ProjectView'
-import APITokenSettings from '../views/Settings/APITokenSettings'
-import CalendarSettings from '../views/Settings/CalendarSettings'
-import HomeSectionsSettings from '../views/Settings/HomeSectionsSettings'
-import IntegrationsSettings from '../views/Settings/IntegrationsSettings'
-import LayoutSettings from '../views/Settings/LayoutSettings'
-import LocalizationSettings from '../views/Settings/LocalizationSettings'
-import MFASettings from '../views/Settings/MFASettings'
-import NotificationIntegrationsSettings from '../views/Settings/NotificationIntegrationsSettings'
-import NotificationSetting from '../views/Settings/NotificationSetting'
-import PrivacyAnalyticsSettings from '../views/Settings/PrivacyAnalyticsSettings'
-import ProfileSettings from '../views/Settings/ProfileSettings'
-import StorageSettings from '../views/Settings/StorageSettings'
-import WebhookSettings from '../views/Settings/WebhookSettings'
-import WidgetSettings from '../views/Settings/WidgetSettings'
+const ChoreEdit = lazy(() => import('@/views/ChoreEdit/ChoreEdit'))
+const AccountSettings = lazy(() => import('@/views/Settings/AccountSettings'))
+const AdvancedSettings = lazy(() => import('@/views/Settings/AdvancedSettings'))
+const BridgeSettings = lazy(() => import('@/views/Settings/BridgeSettings'))
+const ChildUserSettings = lazy(
+  () => import('@/views/Settings/ChildUserSettings'),
+)
+const CircleSettings = lazy(() => import('@/views/Settings/CircleSettings'))
+const DeveloperSettings = lazy(
+  () => import('@/views/Settings/DeveloperSettings'),
+)
+const Settings = lazy(() => import('@/views/Settings/Settings'))
+const SettingsOverview = lazy(() => import('@/views/Settings/SettingsOverview'))
+const ThemeSettings = lazy(() => import('@/views/Settings/ThemeSettings'))
+
+const GlobalSearchPage = lazy(() => import('../search/GlobalSearchPage'))
+const AuthenticationLoading = lazy(
+  () => import('../views/Authorization/Authenticating'),
+)
+const ForgotPasswordView = lazy(
+  () => import('../views/Authorization/ForgotPasswordView'),
+)
+const LoginSettings = lazy(() => import('../views/Authorization/LoginSettings'))
+const LoginView = lazy(() => import('../views/Authorization/LoginView'))
+const SignupView = lazy(() => import('../views/Authorization/Signup'))
+const UpdatePasswordView = lazy(
+  () => import('../views/Authorization/UpdatePasswordView'),
+)
+const ChoreView = lazy(() => import('../views/ChoreEdit/ChoreView'))
+const ArchivedTasks = lazy(() => import('../views/Chores/ArchivedTasks'))
+const MyChores = lazy(() => import('../views/Chores/MyChores'))
+const JoinCircleView = lazy(() => import('../views/Circles/JoinCircle'))
+const NotFound = lazy(() => import('../views/components/NotFound'))
+const FilterView = lazy(() => import('../views/Filters/FilterView'))
+const ChoreHistory = lazy(() => import('../views/History/ChoreHistory'))
+const DefaultViewRoute = lazy(() => import('../views/Home/DefaultViewRoute'))
+const HomeView = lazy(() => import('../views/Home/HomeView'))
+const LabelDetailView = lazy(() => import('../views/Labels/LabelDetailView'))
+const LabelView = lazy(() => import('../views/Labels/LabelView'))
+const Landing = lazy(() => import('../views/Landing/Landing'))
+const CircleSetupView = lazy(
+  () => import('../views/Onboarding/CircleSetupView'),
+)
+const GetStartedView = lazy(() => import('../views/Onboarding/GetStartedView'))
+const HeardAboutView = lazy(() => import('../views/Onboarding/HeardAboutView'))
+const OnboardingView = lazy(() => import('../views/Onboarding/OnboardingView'))
+const WorkspaceReadyView = lazy(
+  () => import('../views/Onboarding/WorkspaceReadyView'),
+)
+const PaymentCancelledView = lazy(
+  () => import('../views/Payments/PaymentFailView'),
+)
+const PaymentSuccessView = lazy(
+  () => import('../views/Payments/PaymentSuccessView'),
+)
+const PrivacyPolicyView = lazy(
+  () => import('../views/PrivacyPolicy/PrivacyPolicyView'),
+)
+const ProjectView = lazy(() => import('../views/Projects/ProjectView'))
+const APITokenSettings = lazy(
+  () => import('../views/Settings/APITokenSettings'),
+)
+const CalendarSettings = lazy(
+  () => import('../views/Settings/CalendarSettings'),
+)
+const HomeSectionsSettings = lazy(
+  () => import('../views/Settings/HomeSectionsSettings'),
+)
+const IntegrationsSettings = lazy(
+  () => import('../views/Settings/IntegrationsSettings'),
+)
+const LayoutSettings = lazy(() => import('../views/Settings/LayoutSettings'))
+const LocalizationSettings = lazy(
+  () => import('../views/Settings/LocalizationSettings'),
+)
+const MFASettings = lazy(() => import('../views/Settings/MFASettings'))
+const NotificationIntegrationsSettings = lazy(
+  () => import('../views/Settings/NotificationIntegrationsSettings'),
+)
+const NotificationSetting = lazy(
+  () => import('../views/Settings/NotificationSetting'),
+)
+const PrivacyAnalyticsSettings = lazy(
+  () => import('../views/Settings/PrivacyAnalyticsSettings'),
+)
+const ProfileSettings = lazy(() => import('../views/Settings/ProfileSettings'))
+const StorageSettings = lazy(() => import('../views/Settings/StorageSettings'))
+const WebhookSettings = lazy(() => import('../views/Settings/WebhookSettings'))
+const WidgetSettings = lazy(() => import('../views/Settings/WidgetSettings'))
 import TemplatesView from '../views/Templates/TemplatesView'
-import TermsView from '../views/Terms/TermsView'
-import TestView from '../views/TestView/Test'
-import ThingsHistory from '../views/Things/ThingsHistory'
-import ThingsView from '../views/Things/ThingsView'
-import TimerDetails from '../views/Timer/TimerDetails'
-import UserActivities from '../views/User/UserActivities'
-import UserPoints from '../views/User/UserPoints'
+const TermsView = lazy(() => import('../views/Terms/TermsView'))
+const TestView = lazy(() => import('../views/TestView/Test'))
+const ThingsHistory = lazy(() => import('../views/Things/ThingsHistory'))
+const ThingsView = lazy(() => import('../views/Things/ThingsView'))
+const TimerDetails = lazy(() => import('../views/Timer/TimerDetails'))
+const UserActivities = lazy(() => import('../views/User/UserActivities'))
+const UserPoints = lazy(() => import('../views/User/UserPoints'))
 const Router = createBrowserRouter([
   {
     path: '/',

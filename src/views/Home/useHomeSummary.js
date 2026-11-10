@@ -339,8 +339,7 @@ const useHomeSummary = (
     ...summary,
     circle,
     filterPulse,
-    isLoading:
-      profileLoading || membersLoading || projectsLoading || filtersLoading,
+    isLoading: profileLoading,
     membersData,
     projectPulse,
     userProfile,

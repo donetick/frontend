@@ -3,7 +3,7 @@ import { Box, Button, Container, IconButton, Sheet, Typography } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
 import moment from 'moment'
 import PropTypes from 'prop-types'
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
@@ -20,7 +20,7 @@ import { getSafeBottomPadding } from '../../utils/SafeAreaUtils'
 import ChoreModals from '../Chores/components/ChoreModals'
 import { useChoreActions } from '../Chores/hooks/useChoreActions'
 import { useChoreModals } from '../Chores/hooks/useChoreModals'
-import TaskInput from '../components/AddTaskModal'
+const TaskInput = lazy(() => import('../components/AddTaskModal'))
 import LoadingComponent from '../components/Loading'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import CaptureBar from './components/CaptureBar'
@@ -478,18 +478,20 @@ const HomeView = () => {
       <CaptureBar onCapture={openCapture} />
 
       {captureOpen && (
-        <TaskInput
-          isModalOpen={captureOpen}
-          initialMode={captureMode}
-          onChoreUpdate={() =>
-            queryClient.invalidateQueries({ queryKey: ['chores'] })
-          }
-          onClose={() => {
-            setCaptureOpen(false)
-            setCaptureMode(null)
-            queryClient.invalidateQueries({ queryKey: ['chores'] })
-          }}
-        />
+        <Suspense fallback={null}>
+          <TaskInput
+            isModalOpen={captureOpen}
+            initialMode={captureMode}
+            onChoreUpdate={() =>
+              queryClient.invalidateQueries({ queryKey: ['chores'] })
+            }
+            onClose={() => {
+              setCaptureOpen(false)
+              setCaptureMode(null)
+              queryClient.invalidateQueries({ queryKey: ['chores'] })
+            }}
+          />
+        </Suspense>
       )}
 
       {/* The action menu's reschedule / reassign / complete-with-note flows all
