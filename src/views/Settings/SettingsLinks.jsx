@@ -55,7 +55,7 @@ const SettingsLinks = ({ ids }) => {
         bgcolor: 'background.surface',
       }}
     >
-      {sections.map(({ icon: Icon, id, isBeta }, index) => (
+      {sections.map(({ icon: Icon, id, isBeta, to }, index) => (
         <ListItem
           key={id}
           sx={{
@@ -70,7 +70,9 @@ const SettingsLinks = ({ ids }) => {
         >
           <ListItemButton
             component={Link}
-            to={`/settings/${id}`}
+            // Most rows are settings pages; a section may override `to` to
+            // point somewhere else in the app.
+            to={to ?? `/settings/${id}`}
             sx={{
               m: 0,
               borderRadius: 0,
