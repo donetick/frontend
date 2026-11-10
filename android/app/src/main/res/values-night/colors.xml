@@ -9,4 +9,6 @@
     <color name="widget_warning">#F3C896</color>
     <color name="widget_ring_neutral">#555E68</color>
     <color name="widget_divider">#252B31</color>
+
+    <color name="startup_bg">#101216</color>
 </resources>

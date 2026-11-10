@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Android 12+ draws its own splash (launcher icon on a solid colour) and
+         ignores the android:background drawable the pre-31 theme uses. We can't
+         show the full startup artwork there, but matching the background colour
+         keeps the handover to the webview's startup screen flash-free. -->
+    <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
+        <item name="android:windowSplashScreenBackground">@color/startup_bg</item>
+    </style>
+</resources>
