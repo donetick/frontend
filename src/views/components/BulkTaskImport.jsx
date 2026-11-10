@@ -437,7 +437,7 @@ export default function BulkTaskImport({
               hidden
               ref={fileInput}
               type='file'
-              accept='.yaml,.yml,.json,.txt,text/plain,application/json'
+              accept='.json,.txt,text/plain,application/json'
               onChange={readFile}
             />
             <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
