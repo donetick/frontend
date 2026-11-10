@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext'
+import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { getChorePermissions } from '../../utils/ChoreAccess'
 import ChoreActionMenu from '../components/ChoreActionMenu'
 import ArchivedChoreCard from './ArchivedChoreCard'
@@ -38,6 +39,15 @@ const ChoreListView = ({
   viewMode,
 }) => {
   const { impersonatedUser } = useImpersonateUser()
+  // Permissions must not depend on callers remembering to pass the profile —
+  // a missing userId reads as "no permission" and replaces every swipe tray
+  // with the restriction button. Props stay as an override for views that
+  // already have the data loaded.
+  const { data: fetchedProfile } = useUserProfile()
+  const { data: fetchedMembers } = useCircleMembers()
+  const permissionUserId =
+    impersonatedUser?.userId || userProfile?.id || fetchedProfile?.id
+  const permissionMembers = membersData?.res || fetchedMembers?.res || []
   const navigate = useNavigate()
   const { t } = useTranslation('chores')
 
@@ -94,8 +104,8 @@ const ChoreListView = ({
     usesCompactCard,
     permissions: getChorePermissions(
       chore,
-      impersonatedUser?.userId || userProfile?.id,
-      membersData?.res || [],
+      permissionUserId,
+      permissionMembers,
     ),
   })
 

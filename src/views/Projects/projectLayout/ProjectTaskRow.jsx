@@ -31,7 +31,7 @@ import ChoreStatusChip from '../../components/ChoreStatusChip'
 import PendingBadge from '../../components/PendingBadge'
 
 // The board and Home use cards. Project lists deliberately have their own
-// visual: one baseline, an unfilled completion box, and no card decoration.
+// visual: wrapping task names, an unfilled completion box, and no card decoration.
 const ProjectTaskRow = memo(function ProjectTaskRow({
   chore,
   isMultiSelectMode,
@@ -175,7 +175,6 @@ const ProjectTaskRow = memo(function ProjectTaskRow({
           tabIndex={0}
           title={chore.name}
           level='body-sm'
-          noWrap
           onKeyDown={event => {
             if (event.key !== 'Enter' && event.key !== ' ') return
             event.preventDefault()
@@ -189,6 +188,8 @@ const ProjectTaskRow = memo(function ProjectTaskRow({
             fontWeight: 450,
             color: 'text.primary',
             lineHeight: 1.5,
+            whiteSpace: 'normal',
+            overflowWrap: 'anywhere',
             '&:focus-visible': {
               outline: '2px solid',
               outlineColor: 'primary.400',

@@ -56,7 +56,6 @@ import { useNavigate } from 'react-router-dom'
 
 import { networkManager } from '../../../hooks/NetworkManager'
 import { useChorePermissions } from '../../../hooks/useChorePermissions'
-import useLongPress from '../../../hooks/useLongPress'
 import { useCreateChore } from '../../../queries/ChoreQueries'
 import { useUserProfile } from '../../../queries/UserQueries'
 import { useNotification } from '../../../service/NotificationProvider'
@@ -89,8 +88,8 @@ const taskMutationId = id => (String(id).startsWith('temp_') ? id : Number(id))
 const interactiveControlSelector =
   'button, input, textarea, select, a, [role="button"], [role="checkbox"], [role="menuitem"], [contenteditable="true"]'
 
-// List rows and section headers use explicit handles. Board cards instead
-// use their whole non-interactive surface as the drag activator.
+// Section headers use explicit handles. Tasks use their whole non-interactive
+// surface as the drag activator in both list and board views.
 const DragHandle = memo(function DragHandle({
   attributes,
   className,
@@ -238,7 +237,6 @@ const TaskCard = memo(function TaskCard({
   membersData,
   onAction,
   onChipClick,
-  onLongPress,
   onOpenActionMenu,
   onSelectionToggle,
   onSubtasksExpandedChange,
@@ -251,21 +249,11 @@ const TaskCard = memo(function TaskCard({
   const { showError } = useNotification()
   const [subtasks, setSubtasks] = useState(chore.subTasks || [])
   const navigate = useNavigate()
-  const { cancel: cancelLongPress, handlers: longPressHandlers } = useLongPress(
-    () => onLongPress?.(chore.id),
-    {
-      enabled:
-        displayMode === 'list' && Boolean(onLongPress) && !isMultiSelectMode,
-    },
-  )
   const showSubtasks =
     displayMode === 'list' && subtasks.length > 0 && !isMultiSelectMode
   const TaskContent = displayMode === 'list' ? ProjectTaskRow : ProjectBoardCard
 
   useEffect(() => setSubtasks(chore.subTasks || []), [chore.subTasks])
-  useEffect(() => {
-    if (isDragging) cancelLongPress()
-  }, [cancelLongPress, isDragging])
 
   const toggleSubtask = async subtask => {
     if (!permissions.complete || chore.isActive === false) return
@@ -291,32 +279,19 @@ const TaskCard = memo(function TaskCard({
 
   return (
     <Sheet
-      {...(displayMode === 'list'
-        ? longPressHandlers
-        : {
-            ...(!isMultiSelectMode && !isOverlay ? dragAttributes : {}),
-            ...boardCardInteractions({
-              isDragging,
-              isMultiSelectMode,
-              listeners: isOverlay ? undefined : dragListeners,
-              onOpen: () => navigate(`/chores/${chore.id}`),
-              onSelectionToggle,
-            }),
-            ref:
-              isMultiSelectMode || isOverlay ? undefined : setActivatorNodeRef,
-            role: 'button',
-            tabIndex: isOverlay ? -1 : 0,
-            'aria-label': chore.name,
-            'aria-pressed': isMultiSelectMode ? Boolean(isSelected) : undefined,
-          })}
-      onPointerDown={event => {
-        if (
-          displayMode !== 'list' ||
-          event.target.closest(interactiveControlSelector)
-        )
-          return
-        longPressHandlers.onPointerDown(event)
-      }}
+      {...(!isMultiSelectMode && !isOverlay ? dragAttributes : {})}
+      {...boardCardInteractions({
+        isDragging,
+        isMultiSelectMode,
+        listeners: isOverlay ? undefined : dragListeners,
+        onOpen: () => navigate(`/chores/${chore.id}`),
+        onSelectionToggle,
+      })}
+      ref={isMultiSelectMode || isOverlay ? undefined : setActivatorNodeRef}
+      role='button'
+      tabIndex={isOverlay ? -1 : 0}
+      aria-label={chore.name}
+      aria-pressed={isMultiSelectMode ? Boolean(isSelected) : undefined}
       aria-hidden={isOverlay || undefined}
       className={
         displayMode === 'list'
@@ -325,12 +300,6 @@ const TaskCard = memo(function TaskCard({
       }
       data-dragging={isDragging || undefined}
       variant={displayMode === 'list' ? 'plain' : 'outlined'}
-      {...(displayMode === 'list' && {
-        onClick: () => {
-          if (isMultiSelectMode) onSelectionToggle()
-          else navigate(`/chores/${chore.id}`)
-        },
-      })}
       sx={{
         borderRadius: displayMode === 'list' ? 0 : 'md',
         ...(displayMode !== 'list' && {
@@ -355,19 +324,15 @@ const TaskCard = memo(function TaskCard({
         opacity: isDragging && !isOverlay ? 0 : 1,
         pointerEvents: isOverlay ? 'none' : undefined,
         touchAction: 'auto',
-        cursor:
-          displayMode === 'list' || isMultiSelectMode
-            ? 'pointer'
-            : isDragging
-              ? 'grabbing'
-              : 'grab',
-        ...(displayMode !== 'list' && { userSelect: 'none' }),
+        cursor: isMultiSelectMode
+          ? 'pointer'
+          : isDragging
+            ? 'grabbing'
+            : 'grab',
+        userSelect: 'none',
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'stretch' }}>
-        {displayMode === 'list' && !showSubtasks && !isMultiSelectMode && (
-          <Box sx={{ width: 24, flexShrink: 0 }} />
-        )}
         {showSubtasks && (
           <IconButton
             aria-label={t(
@@ -401,21 +366,6 @@ const TaskCard = memo(function TaskCard({
             showDivider={false}
           />
         </Box>
-        {displayMode === 'list' && !isMultiSelectMode && (
-          <DragHandle
-            className={
-              displayMode === 'list'
-                ? 'project-task-secondary-action'
-                : undefined
-            }
-            attributes={dragAttributes}
-            listeners={dragListeners}
-            label={`${t('board.dragTask')}: ${chore.name}`}
-            setActivatorNodeRef={setActivatorNodeRef}
-            isDragging={isDragging}
-            isOverlay={isOverlay}
-          />
-        )}
       </Box>
       {showSubtasks && subtasksExpanded && (
         <Box
@@ -510,7 +460,6 @@ const BoardColumn = ({
   onAddTask,
   onChipClick,
   onDelete,
-  onLongPressChore,
   onOpenActionMenu,
   onQuickAdd,
   onRename,
@@ -761,7 +710,6 @@ const BoardColumn = ({
                 membersData={membersData}
                 onAction={onAction}
                 onChipClick={onChipClick}
-                onLongPress={onLongPressChore}
                 onOpenActionMenu={onOpenActionMenu}
                 onSelectionToggle={() => toggleChoreSelection(chore.id)}
                 sections={sections}
@@ -792,7 +740,6 @@ const ProjectBoard = ({
   isMultiSelectMode = false,
   membersData,
   onAddTask,
-  onLongPressChore,
   onTaskCreated,
   projectId,
   selectedChores = new Set(),
@@ -1098,7 +1045,6 @@ const ProjectBoard = ({
                 onAction={handleAction}
                 onAddTask={text => onAddTask?.(section.id, text)}
                 onChipClick={handleLabelFiltering}
-                onLongPressChore={onLongPressChore}
                 onOpenActionMenu={openActionMenu}
                 onQuickAdd={effective => quickAddTask(section.id, effective)}
                 sections={sections}
