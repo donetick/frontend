@@ -1,0 +1,1063 @@
+{
+  "title": "Setări",
+  "timezonePrompt": {
+    "ignore": "Nu mai întreba",
+    "ignoreHint": "Oprește solicitările privind fusul orar pentru contul tău pe acest dispozitiv sau în acest browser.",
+    "title": "Un fus orar nou?",
+    "missingTitle": "Hai să setăm ora corectă",
+    "description": "Fusul orar al dispozitivului diferă de cel din profil. Vrei să îl actualizezi pentru a menține sincronizate programările și memento-urile?",
+    "missingDescription": "Profilul tău nu are încă un fus orar. Am selectat fusul orar al dispozitivului pentru a menține sincronizate programările și memento-urile.",
+    "current": "Fusul orar din profil: {{timezone}}",
+    "detected": "Detectat pe acest dispozitiv: {{timezone}}",
+    "update": "Actualizează fusul orar",
+    "confirm": "Folosește acest fus orar",
+    "later": "Nu acum",
+    "settingsHint": "Poți schimba oricând această setare din setările profilului.",
+    "error": "Nu am putut salva fusul orar. Verifică conexiunea și încearcă din nou.",
+    "success": "Fus orar actualizat",
+    "successMessage": "Preferința privind fusul orar a fost salvată."
+  },
+  "common": {
+    "save": "Salvează",
+    "cancel": "Anulează",
+    "confirm": "Confirmă",
+    "remove": "Elimină",
+    "delete": "Șterge",
+    "refresh": "Reîmprospătează",
+    "loading": "Se încarcă...",
+    "on": "Activat",
+    "off": "Dezactivat",
+    "error": "Eroare",
+    "success": "Succes",
+    "plusFeature": "Funcție Plus",
+    "earlyAccess": "Acces anticipat"
+  },
+  "navigation": {
+    "breadcrumbs": "Navigare în setări"
+  },
+  "integrations": {
+    "adminOnly": "Doar administratorii grupului pot gestiona conexiunile webhook.",
+    "loadFailed": "Grupul tău nu a putut fi încărcat. Încearcă din nou.",
+    "hint": "Conectează Donetick la serviciile pe care le folosești. Momentele de trimitere a notificărilor și preferințele pentru memento-uri se gestionează în continuare în secțiunea Notificări."
+  },
+  "overview": {
+    "title": "Setări",
+    "subtitle": "Contul tău, grupul tău și modul în care Donetick lucrează pentru tine.",
+    "support": "Ajutor și feedback",
+    "groups": {
+      "account": "Contul tău",
+      "circle": "Grupul tău",
+      "preferences": "Preferințe",
+      "connections": "Conexiuni",
+      "data": "Date și confidențialitate",
+      "advanced": "Avansat"
+    },
+    "upgrade": {
+      "title": "Treci la Plus",
+      "description": "Deblochează funcții avansate pentru a-ți crește productivitatea",
+      "button": "Treci acum la Plus",
+      "features": {
+        "richText": "Descrieri cu text formatat",
+        "notifications": "Notificări pentru sarcini",
+        "apiIntegrations": "Integrări API",
+        "advancedAutomation": "Automatizare avansată"
+      }
+    },
+    "sections": {
+      "integrations": {
+        "title": "Integrări",
+        "description": "Conectează calendare, servicii de notificare și alte aplicații."
+      },
+      "webhooks": {
+        "title": "Webhook-uri ale grupului",
+        "description": "Trimite actualizările sarcinilor și elementelor din grup către un serviciu extern."
+      },
+      "notification-integrations": {
+        "title": "Integrări pentru notificări",
+        "description": "Conectează Telegram, Pushover sau webhook-uri pentru notificările sarcinilor."
+      },
+      "profile": {
+        "title": "Profil",
+        "description": "Actualizează informațiile din profil, fotografia, numele afișat și preferințele privind fusul orar."
+      },
+      "circle": {
+        "title": "Grup",
+        "description": "Membri, invitații, cereri de alăturare și conturi gestionate."
+      },
+      "account": {
+        "title": "Cont și abonament",
+        "description": "Gestionează planul, parola și ștergerea contului."
+      },
+      "subaccounts": {
+        "title": "Conturi gestionate",
+        "description": "Creează și gestionează conturi pentru membrii gospodăriei care au nevoie de ajutorul tău pentru autentificare."
+      },
+      "notifications": {
+        "title": "Notificări",
+        "description": "Alege momentele de trimitere a memento-urilor, alertele în aplicație și push, precum și dispozitivele înregistrate."
+      },
+      "mfa": {
+        "title": "Securitate",
+        "description": "Adaugă un nivel suplimentar de securitate prin MFA, folosind aplicații de autentificare."
+      },
+      "apitokens": {
+        "title": "Tokenuri API",
+        "description": "Generează și gestionează tokenuri de acces pentru integrări cu terți și acces la API."
+      },
+      "bridge": {
+        "title": "Donetick Bridge",
+        "description": "Conectează-te la Donetick Bridge pentru a trimite notificări push de la această instanță găzduită de tine."
+      },
+      "calendar": {
+        "title": "Sincronizarea calendarului",
+        "description": "Abonează-te la sarcinile tale din Apple Calendar, Google Calendar, Outlook sau altă aplicație de calendar."
+      },
+      "templates": {
+        "title": "Șabloane",
+        "description": "Seturi gata pregătite de sarcini recurente pentru lucrurile pe care le deții. Alege unul, personalizează-l și adaugă toate sarcinile dintr-o dată."
+      },
+      "storage": {
+        "title": "Stocare și copii de siguranță",
+        "description": "Creează copii de siguranță și restaurează datele, gestionează stocarea locală și preferințele de sincronizare."
+      },
+      "layout": {
+        "title": "Aspect și navigare",
+        "description": "Alege ecranul care se deschide la pornirea aplicației, precum și comenzile rapide și panourile din jurul său."
+      },
+      "theme": {
+        "title": "Aspect",
+        "description": "Alege tema preferată și configurează modul întunecat sau deschis."
+      },
+      "localization": {
+        "title": "Limbă și regiune",
+        "description": "Personalizează limba, formatul datei, formatul orei și preferințele regionale."
+      },
+      "advanced": {
+        "title": "Opțiuni avansate",
+        "description": "Comportament offline, actualizări în timp real și instrumente pentru dezvoltatori."
+      },
+      "privacy": {
+        "title": "Confidențialitate și analiză",
+        "description": "Controlează statisticile anonime de utilizare și raportarea erorilor fatale."
+      },
+      "developer": {
+        "title": "Instrumente pentru dezvoltatori",
+        "description": "Vezi informații tehnice despre tokenurile de autentificare, conexiunile SSE și datele de depanare."
+      },
+      "feedback": {
+        "title": "Trimite feedback",
+        "description": "Spune-ne cum funcționează Donetick pentru tine sau solicită o funcție."
+      },
+      "bugReport": {
+        "title": "Raportează o problemă",
+        "description": "Spune-ne ce nu funcționează, iar noi vom atașa detaliile tehnice."
+      },
+      "home-sections": {
+        "title": "Personalizarea prezentării generale",
+        "description": "Afișează, ascunde și reordonează secțiunile de pe ecranul principal."
+      },
+      "widgets": {
+        "title": "Widgeturi pe ecranul principal",
+        "description": "Controlează aspectul widgeturilor Donetick de pe ecranul principal al acestui dispozitiv."
+      }
+    }
+  },
+  "profile": {
+    "title": "Setările profilului",
+    "description": "Actualizează numele afișat și fotografia de profil.",
+    "photoUpdated": "Fotografie actualizată",
+    "photoUpdatedMessage": "Fotografia de profil a fost actualizată cu succes!",
+    "uploadFailed": "Încărcarea a eșuat",
+    "uploadFailedMessage": "Fotografia nu a putut fi încărcată. Încearcă din nou.",
+    "profileUpdated": "Profil actualizat",
+    "profileUpdatedMessage": "Informațiile din profil au fost salvate cu succes!",
+    "updateFailed": "Actualizarea a eșuat",
+    "updateFailedMessage": "Profilul nu a putut fi actualizat. Verifică conexiunea și încearcă din nou.",
+    "changePhoto": "Schimbă fotografia",
+    "editPhoto": "Editează fotografia de profil",
+    "displayName": "Nume afișat",
+    "displayNamePlaceholder": "Introdu numele afișat",
+    "timezone": "Fus orar",
+    "timezonePlaceholder": "Selectează fusul orar",
+    "save": "Salvează",
+    "cancel": "Anulează"
+  },
+  "circleSettings": {
+    "title": "Setările grupului",
+    "description": "Contul tău este conectat automat la un grup atunci când creezi unul sau te alături unuia. Poți invita cu ușurință prieteni distribuind codul unic al grupului sau linkul de mai jos. Vei primi o notificare mai jos când cineva solicită să se alăture grupului tău.",
+    "memberOf": "Faci parte din {{name}}",
+    "yourCircleCode": "Codul grupului tău este:",
+    "pendingApprovalMessage": "Cererea ta de alăturare la {{name}} așteaptă aprobarea unui administrator al grupului.",
+    "cancelRequest": "Anulează cererea",
+    "cancelRequestTitle": "Anulează cererea de alăturare",
+    "cancelRequestMessage": "Sigur vrei să anulezi cererea de alăturare la acest grup?",
+    "cancelRequestButton": "Anulează cererea",
+    "requestCancelled": "Cererea a fost anulată cu succes",
+    "cancelRequestFailed": "Anularea cererii a eșuat",
+    "copyCode": "Copiază codul",
+    "shareInvite": "Distribuie invitația",
+    "codeCopied": "Cod copiat în clipboard",
+    "linkCopied": "Linkul de invitație a fost copiat în clipboard",
+    "myCircle": "grupul meu",
+    "shareTitle": "Alătură-te grupului {{name}} pe Donetick",
+    "shareText": "Te invit să te alături grupului {{name}} pe Donetick.",
+    "shareDialogTitle": "Distribuie invitația în grup",
+    "leave": "Părăsește grupul",
+    "leaveConfirmTitle": "Părăsește grupul",
+    "leaveConfirmMessage": "Sigur vrei să părăsești grupul?",
+    "leaveConfirmButton": "Părăsește",
+    "leftCircle": "Ai părăsit grupul cu succes",
+    "leaveFailed": "Părăsirea grupului a eșuat",
+    "circleMembers": "Membrii grupului",
+    "you": "(Tu)",
+    "pendingApproval": "În așteptarea aprobării",
+    "joinedOn": "S-a alăturat la {{date}}",
+    "requestedToJoin": "Cerere de alăturare la {{date}}",
+    "roles": {
+      "member": "Membru",
+      "memberDescription": "Membru obișnuit al grupului",
+      "manager": "Manager",
+      "managerDescription": "Poate impersona utilizatori și poate efectua acțiuni în numele lor",
+      "admin": "Administrator",
+      "adminDescription": "Acces complet la grup"
+    },
+    "roleUpdateFailed": "Actualizarea rolului a eșuat",
+    "removeMemberTitle": "Elimină membrul",
+    "removeMemberMessage": "Sigur vrei să elimini {{name}} din grupul tău?",
+    "memberRemoved": "Membrul a fost eliminat cu succes",
+    "circleMemberRequests": "Cereri de alăturare la grup",
+    "lastUpdated": "Ultima actualizare: {{time}}",
+    "refreshing": "Se reîmprospătează...",
+    "refreshFailed": "Reîmprospătarea cererilor de alăturare a eșuat",
+    "wantsToJoin": "{{name}} dorește să se alăture grupului tău.",
+    "noPendingRequests": "Momentan, nimeni nu așteaptă să se alăture.",
+    "accept": "Acceptă",
+    "acceptRequestTitle": "Acceptă cererea de alăturare",
+    "acceptRequestMessage": "Sigur vrei să accepți alăturarea lui {{name}} (nume de utilizator: {{username}}) la grupul tău?",
+    "requestAccepted": "Cererea a fost acceptată cu succes",
+    "decline": "Respinge",
+    "declineRequestTitle": "Respinge cererea de alăturare",
+    "declineRequestMessage": "Sigur vrei să respingi cererea lui {{name}} (nume de utilizator: {{username}}) de alăturare la grupul tău?",
+    "declineRequestButton": "Respinge",
+    "requestDeclined": "Cererea a fost respinsă cu succes",
+    "declineRequestFailed": "Respingerea cererii a eșuat",
+    "or": "sau",
+    "joinOtherDescription": "Vrei să te alături grupului altcuiva? Cere-i codul unic al grupului sau linkul de alăturare. Introdu codul mai jos pentru a te alătura grupului respectiv.",
+    "enterCircleCode": "Introdu codul grupului:",
+    "enterCodePlaceholder": "Introdu codul",
+    "joinCircle": "Alătură-te grupului",
+    "joinedPending": "Cererea de alăturare a fost trimisă cu succes. Așteaptă ca proprietarul grupului să o accepte.",
+    "alreadyMember": "Ești deja membru al acestui grup",
+    "joinFailed": "Alăturarea la grup a eșuat",
+    "copyLink": "Copiază linkul"
+  },
+  "accountSettings": {
+    "title": "Setările contului",
+    "description": "Schimbă setările sau tipul contului ori actualizează parola",
+    "accountType": "Tipul contului: {{type}}",
+    "free": "Gratuit",
+    "plus": "Plus",
+    "plusUntil": "Plus (până la {{date}})",
+    "activeDescription": "În prezent ai un abonament Plus. Abonamentul se va reînnoi la {{date}}.",
+    "cancelledDescription": "Ai anulat abonamentul. Contul tău va reveni la planul gratuit la {{date}}.",
+    "freeDescription": "În prezent folosești planul gratuit. Treci la Plus pentru a debloca mai multe funcții.",
+    "upgrade": "Treci la Plus",
+    "cancel": "Anulează",
+    "password": "Parolă:",
+    "changePassword": "Schimbă parola",
+    "passwordChanged": "Parola a fost schimbată cu succes",
+    "passwordChangeFailed": "Schimbarea parolei a eșuat",
+    "dangerZone": "Zonă de pericol",
+    "dangerZoneDescription": "Ștergerea contului este ireversibilă. Asigură-te că dorești acest lucru.",
+    "deleteAccount": "Șterge contul",
+    "accountDeleted": "Contul a fost șters cu succes",
+    "subscriptionCancelled": "Abonament anulat",
+    "subscriptionCancelFailed": "Anularea abonamentului a eșuat",
+    "purchase": {
+      "success": "Achiziție reușită! Repornește aplicația pentru a accesa funcțiile Plus.",
+      "storeConnection": "Problemă de conectare la magazin. Verifică rețeaua și încearcă din nou.",
+      "notAllowed": "Achizițiile nu sunt permise pe acest dispozitiv. Verifică restricțiile dispozitivului.",
+      "unavailable": "Acest abonament nu este disponibil. Încearcă din nou mai târziu.",
+      "alreadyProcessed": "Această achiziție a fost deja procesată. Dacă crezi că este o eroare, contactează echipa de asistență.",
+      "receiptMissing": "Lipsește dovada achiziției. Încearcă să efectuezi din nou achiziția.",
+      "networkError": "Eroare de rețea. Verifică conexiunea și încearcă din nou.",
+      "invalidReceipt": "Dovadă de achiziție nevalidă. Contactează echipa de asistență dacă problema persistă.",
+      "pending": "Plata așteaptă aprobarea. Vei primi acces după aprobare.",
+      "failed": "Achiziția a eșuat: {{error}}. Încearcă din nou sau contactează echipa de asistență.",
+      "unknownError": "Eroare necunoscută"
+    }
+  },
+  "subaccounts": {
+    "title": "Conturi gestionate",
+    "description": "Gestionează conturile secundare. Utilizatorii acestora se pot autentifica și pot finaliza sarcinile atribuite.",
+    "notParentTitle": "Gestionarea conturilor secundare",
+    "notParentMessage": "Doar utilizatorii principali pot gestiona conturile secundare.",
+    "freePlanNotice": "Planul gratuit permite un singur cont secundar. Treci la Plus pentru a avea până la 5 conturi secundare.",
+    "count": "Conturi secundare ({{count}})",
+    "add": "Adaugă un cont secundar",
+    "loading": "Se încarcă conturile secundare...",
+    "emptyTitle": "Nu există conturi secundare",
+    "emptyDescription": "Creează conturi secundare, astfel încât membrii echipei să se poată autentifica și să își finalizeze sarcinile atribuite.",
+    "addFirst": "Adaugă primul cont secundar",
+    "username": "Nume de utilizator: {{username}}",
+    "created": "Creat la: {{date}}",
+    "changePassword": "Schimbă parola",
+    "deleteAccount": "Șterge contul",
+    "createdSuccess": "Contul secundar „{{name}}” a fost creat cu succes!",
+    "createFailed": "Crearea contului secundar a eșuat: {{error}}",
+    "createFailedGeneric": "Crearea utilizatorului secundar a eșuat",
+    "passwordUpdated": "Parola contului secundar a fost actualizată cu succes",
+    "passwordUpdateFailed": "Actualizarea parolei a eșuat: {{error}}",
+    "passwordUpdateFailedGeneric": "Actualizarea parolei a eșuat",
+    "deleteConfirmTitle": "Șterge contul secundar",
+    "deleteConfirmMessage": "Sigur vrei să ștergi contul secundar „{{name}}”? Această acțiune nu poate fi anulată.",
+    "deleted": "Contul secundar „{{name}}” a fost șters cu succes",
+    "deleteFailed": "Ștergerea contului secundar a eșuat: {{error}}",
+    "deleteFailedGeneric": "Ștergerea utilizatorului secundar a eșuat",
+    "howItWorksTitle": "Cum funcționează conturile gestionate",
+    "howItWorks1": "Conturile secundare create de utilizatorul principal sunt destinate persoanelor ale căror conturi dorești să le poți șterge și ale căror parole dorești să le poți reseta.",
+    "howItWorks2": "Utilizatorii conturilor secundare se pot autentifica folosind propriul nume de utilizator și propria parolă.",
+    "howItWorks3": "Utilizatorii conturilor secundare pot finaliza sarcini, dar au permisiuni administrative limitate",
+    "howItWorks4": "Conturile secundare sunt adăugate automat în grupul tău"
+  },
+  "notifications": {
+    "title": "Setările notificărilor",
+    "description": "Un mic memento, în condițiile tale. Alege despre ce vrei să fii informat și unde să primești memento-urile.",
+    "taskReminders": "Memento-uri pentru sarcini",
+    "approvals": "Aprobări și cereri",
+    "summaries": "Rezumate",
+    "deliveryTitle": "Unde primești notificările",
+    "deliveryDescription": "Activează notificările pentru acest dispozitiv, iar noi ne ocupăm de restul.",
+    "serviceLabel": "Serviciu",
+    "thisDevice": "Acest dispozitiv",
+    "testFailed": "Notificarea de test nu a putut fi trimisă. Încearcă din nou.",
+    "deviceSection": "Notificări pe dispozitiv",
+    "deviceSectionDescription": "Gestionează notificările pe dispozitiv",
+    "deviceLabel": "Notificări pe dispozitiv",
+    "deviceHelper": "Primește o notificare pe dispozitiv când o sarcină devine scadentă",
+    "enableLabel": "Activează notificările",
+    "enableHelper": "Primește memento-uri pentru sarcini pe acest dispozitiv, precum și atenționări, anunțuri și atribuiri trimise către contul tău.",
+    "enableHelperLocal": "Primește memento-uri pe acest dispozitiv când o sarcină devine scadentă.",
+    "pushOnlyFailed": "Memento-urile pe acest dispozitiv sunt activate, dar nu l-am putut înregistra pentru notificările trimise către contul tău. Poți reîncerca mai jos.",
+    "mobileOnly": "Această funcție este disponibilă doar pe dispozitive mobile",
+    "testNotification": "Notificare de test",
+    "testNotificationBody": "Ai o sarcină care devine scadentă în curând",
+    "pushLabel": "Notificări push",
+    "pushHelper": "Primește atenționări, anunțuri și atribuiri de sarcini prin notificări push",
+    "registeredDevices": "Dispozitive înregistrate ({{count}}/5)",
+    "registeredDevicesDescription": "Dispozitive înregistrate pentru a primi notificări push pentru contul tău",
+    "currentDevice": "Dispozitivul curent: {{platform}} {{model}}",
+    "currentDeviceNotRegistered": "Acest dispozitiv nu este înregistrat pentru notificări push",
+    "limitReached": "Limită atinsă",
+    "registerDevice": "Înregistrează dispozitivul",
+    "unknownDevice": "Dispozitiv necunoscut",
+    "deviceCreatedAt": "Creat la: {{date}}",
+    "noDevices": "Nu există dispozitive înregistrate pentru notificări push",
+    "customSection": "Notificări personalizate",
+    "customSectionDescription": "Primește notificări pentru sarcini prin Telegram, Pushover sau conexiunea webhook a grupului tău.",
+    "customLabel": "Notificări personalizate",
+    "customHelper": "Alege un serviciu extern pentru notificările sarcinilor tale.",
+    "targetNone": "Niciunul",
+    "targetTelegram": "Telegram",
+    "targetPushover": "Pushover",
+    "targetWebhooks": "Webhook-uri",
+    "telegramBotHelpBefore": "Trebuie să trimiți mai întâi un mesaj botului pentru ca notificările Telegram să funcționeze",
+    "telegramBotHelpAfter": "pentru a începe o conversație",
+    "clickHere": "Apasă aici",
+    "chatId": "ID conversație",
+    "chatIdPlaceholder": "ID utilizator / ID conversație",
+    "telegramChatIdHelpBefore": "Dacă nu știi ID-ul conversației, începe o conversație cu userinfobot, iar acesta îți va trimite ID-ul.",
+    "telegramChatIdHelpAfter": "pentru a începe o conversație cu userinfobot",
+    "userKey": "Cheie de utilizator",
+    "userKeyPlaceholder": "ID utilizator",
+    "chatIdRequired": "ID-ul conversației este obligatoriu",
+    "chatIdInvalid": "ID de conversație nevalid",
+    "userKeyRequired": "Cheia de utilizator este obligatorie",
+    "targetUpdated": "Destinația notificărilor a fost actualizată",
+    "targetUpdateFailed": "Eroare la actualizarea destinației notificărilor: {{error}}",
+    "deviceRegistered": "Dispozitivul a fost înregistrat cu succes pentru notificări push.",
+    "deviceLimitTitle": "Limita de dispozitive a fost atinsă",
+    "deviceLimitMessage": "Ai atins limita maximă de 5 dispozitive înregistrate. Elimină un dispozitiv înainte de a-l înregistra pe acesta.",
+    "registrationFailedTitle": "Înregistrarea a eșuat",
+    "registrationFailedMessage": "Înregistrarea automată a dispozitivului a eșuat. Încearcă din nou.",
+    "permissionRequiredTitle": "Este necesară permisiunea",
+    "permissionRequiredMessage": "Pentru înregistrarea acestui dispozitiv este necesară permisiunea pentru notificări push.",
+    "registrationInitiatedTitle": "Înregistrare inițiată",
+    "registrationInitiatedMessage": "Înregistrarea pentru notificări push a fost inițiată. Dispozitivul va fi înregistrat automat.",
+    "registerDeviceFailed": "Înregistrarea dispozitivului a eșuat. Încearcă din nou.",
+    "permissionDeniedTitle": "Permisiune pentru notificări refuzată",
+    "permissionDeniedMessage": "Ai refuzat permisiunea pentru notificări. O poți activa ulterior din setările dispozitivului.",
+    "pushPermissionDeniedTitle": "Permisiune pentru notificări push refuzată",
+    "pushPermissionDeniedMessage": "Notificările push au fost dezactivate. Le poți activa din setările dispozitivului dacă este necesar.",
+    "unregisterFailed": "Anularea înregistrării dispozitivului a eșuat",
+    "preferenceSection": "Preferințe pentru notificări",
+    "preferenceSectionDescription": "Alege un profil de notificare, apoi ajustează fiecare memento, inclusiv rezumatele zilnice și săptămânale.",
+    "profileLabel": "Profil de notificare",
+    "profileSummary": "Vei primi notificări despre {{list}}.",
+    "profileSummaryWithDigest": "Vei primi notificări despre {{list}}, cu rezumate la {{time}}.",
+    "profileSummaryMuted": "Nu vei primi nicio notificare. Alege un profil sau activează un memento mai jos.",
+    "profileSummaryLoading": "Se încarcă configurația curentă…",
+    "profileCustomized_one": "{{count}} modificare față de acest profil",
+    "profileCustomized_other": "{{count}} de modificări față de acest profil",
+    "resetToProfile": "Revino la {{profile}}",
+    "fineTune": "Ajustează notificările pe care le primești",
+    "profileBalanced": "Echilibrat",
+    "profilePlanner": "Planificator",
+    "profileJustInTime": "La momentul potrivit",
+    "profilePersistent": "Insistent",
+    "profileQuiet": "Silențios",
+    "profileCustom": "Personalizat",
+    "eventOnAssignmentTitle": "La atribuire",
+    "eventOnAssignmentLabel": "Anunță-mă când îmi este atribuită o sarcină nouă sau existentă",
+    "eventOnAssignmentShort": "atribuiri noi",
+    "eventOnPendingApprovalTitle": "Este necesară aprobarea",
+    "eventOnPendingApprovalLabel": "Anunță-mă când o sarcină finalizată așteaptă aprobarea mea",
+    "eventOnPendingApprovalShort": "aprobări care te așteaptă",
+    "eventOnRedemptionRequestTitle": "Cerere de recompensă",
+    "eventOnRedemptionRequestLabel": "Anunță-mă când cineva solicită o recompensă",
+    "eventOnRedemptionRequestShort": "cereri de recompense",
+    "eventPreDueTitle": "Memento înainte de scadență",
+    "eventPreDueLabel": "Amintește-mi înainte ca o sarcină să devină scadentă",
+    "eventPreDueShort": "memento-uri înainte de scadența unei sarcini",
+    "eventDueTitle": "Memento la scadență",
+    "eventDueLabel": "Amintește-mi când o sarcină devine scadentă",
+    "eventDueShort": "sarcini care devin scadente",
+    "eventOverdueFollowupTitle": "Memento ulterior scadenței",
+    "eventOverdueFollowupLabel": "Amintește-mi din nou folosind memento-urile de după scadență pe care le-am setat pentru o sarcină",
+    "eventOverdueFollowupShort": "memento-uri pentru sarcini restante",
+    "eventDailyDigestTitle": "Rezumat zilnic",
+    "eventDailyDigestLabel": "Un rezumat zilnic al sarcinilor restante și viitoare",
+    "eventDailyDigestShort": "un rezumat zilnic",
+    "eventWeeklyDigestTitle": "Rezumat săptămânal",
+    "eventWeeklyDigestLabel": "O prezentare săptămânală a săptămânii care urmează",
+    "eventWeeklyDigestShort": "o prezentare săptămânală",
+    "digestHourLabel": "Ora trimiterii rezumatelor",
+    "digestHourHelper": "Ora locală (în fusul orar din profil) la care sunt trimise rezumatele",
+    "preferenceUpdateFailed": "Actualizarea preferinței pentru notificări a eșuat. Încearcă din nou.",
+    "profileCustomized_few": "{{count}} modificări față de acest profil"
+  },
+  "mfa": {
+    "title": "Autentificare cu mai mulți factori",
+    "description": "Adaugă un nivel suplimentar de securitate contului tău prin autentificarea cu mai mulți factori (MFA). Dacă este activată, la autentificare va trebui să introduci, pe lângă parolă, un cod de verificare din aplicația de autentificare.",
+    "twoFactor": "Autentificare cu doi factori",
+    "enabledSubtitle": "Contul tău este protejat prin 2FA",
+    "disabledSubtitle": "Securizează-ți contul cu o aplicație de autentificare",
+    "enable": "Activează",
+    "disable": "Dezactivează",
+    "enabledSuccess": "MFA a fost activată cu succes!",
+    "disabledSuccess": "MFA a fost dezactivată cu succes!",
+    "errors": {
+      "qrGenerationFailed": "Generarea codului QR a eșuat",
+      "invalidResponse": "Răspuns nevalid de la server. Lipsește codul QR sau cheia secretă.",
+      "notFound": "Punctul de acces pentru configurarea MFA nu a fost găsit. Este posibil ca această funcție să nu fie încă disponibilă.",
+      "unauthorized": "Acces neautorizat. Autentifică-te din nou.",
+      "serverError": "Eroare de server. Încearcă din nou mai târziu.",
+      "setupFailed": "Configurarea MFA a eșuat ({{status}}). Încearcă din nou.",
+      "networkError": "Eroare de rețea. Verifică conexiunea și încearcă din nou.",
+      "invalidCode": "Cod de verificare nevalid. Încearcă din nou.",
+      "confirmFailed": "Confirmarea MFA a eșuat. Încearcă din nou.",
+      "disableFailed": "Dezactivarea MFA a eșuat. Încearcă din nou."
+    },
+    "setup": {
+      "title": "Configurează autentificarea cu mai mulți factori",
+      "addedAccount": "Am adăugat contul",
+      "back": "Înapoi",
+      "verifyAndEnable": "Verifică și activează",
+      "savedBackupCodes": "Am salvat codurile de rezervă",
+      "step1Label": "Pasul 1:",
+      "step1": "Scanează codul QR de mai jos cu aplicația de autentificare (Google Authenticator, Authy etc.)",
+      "qrAlt": "Cod QR pentru MFA",
+      "qrFailed": "Codul QR nu a putut fi generat. Încearcă din nou sau folosește cheia de introducere manuală de mai jos.",
+      "manualKey": "Cheie pentru introducere manuală:",
+      "step2Label": "Pasul 2:",
+      "step2": "Introdu codul de verificare de 6 cifre din aplicația de autentificare",
+      "codePlaceholder": "Introdu codul de 6 cifre",
+      "successTitle": "MFA a fost activată cu succes!",
+      "backupCodesTitle": "Salvează aceste coduri de rezervă într-un loc sigur",
+      "backupCodesDescription": "Poți folosi aceste coduri pentru a-ți accesa contul dacă pierzi dispozitivul de autentificare. Fiecare cod poate fi folosit o singură dată."
+    },
+    "disableModal": {
+      "title": "Dezactivează autentificarea cu mai mulți factori",
+      "warning": "Dezactivarea MFA va reduce securitatea contului tău. Sigur vrei să continui?",
+      "prompt": "Introdu un cod de verificare din aplicația de autentificare pentru a confirma:",
+      "confirm": "Dezactivează MFA"
+    },
+    "backupCodesModal": {
+      "title": "Coduri de rezervă noi",
+      "warning": "Codurile de rezervă anterioare nu mai sunt valide. Salvează aceste coduri noi într-un loc sigur. Fiecare cod poate fi folosit o singură dată."
+    },
+    "generateCodes": "Generează coduri noi"
+  },
+  "apiTokens": {
+    "title": "Tokenuri API",
+    "accessToken": "Token de acces",
+    "description": "Creează un token de folosit cu API-ul pentru a actualiza elementele care declanșează sarcini sau treburi casnice",
+    "plusNotice": "Tokenurile API nu sunt disponibile în planul Basic. Treci la Plus pentru a genera tokenuri API pentru integrarea cu sisteme externe și automatizarea sarcinilor.",
+    "tokenCreatedTitle": "Token creat",
+    "tokenCreatedWarning": "Copiază acum acest token. Din motive de securitate, nu îl vei mai putea vedea.",
+    "copyToken": "Copiază tokenul",
+    "removeTitle": "Elimină tokenul",
+    "removeMessage": "Sigur vrei să elimini {{name}}?",
+    "removedTitle": "Eliminat",
+    "removedMessage": "Tokenul API a fost eliminat",
+    "tokenCopied": "Token copiat în clipboard",
+    "generateNew": "Generează un token nou",
+    "nameModalTitle": "Dă un nume noului token, astfel încât să îl recunoști ușor.",
+    "generateToken": "Generează tokenul"
+  },
+  "calendar": {
+    "title": "Sincronizarea calendarului",
+    "description": "Păstrează sarcinile Donetick vizibile în aplicația de calendar preferată, printr-un abonament iCalendar privat.",
+    "plusTitle": "Sincronizarea calendarului este o funcție Plus",
+    "plusNotice": "Treci la Plus pentru a te abona la sarcinile tale din Apple Calendar, Google Calendar, Outlook și alte aplicații de calendar.",
+    "upgrade": "Treci la Plus",
+    "activeTitle": "Abonament la calendar",
+    "activeStatus": "Activ",
+    "urlLabel": "URL privat pentru abonarea la calendar",
+    "copy": "Copiază URL-ul",
+    "copied": "URL-ul calendarului a fost copiat în clipboard",
+    "copyFailed": "URL-ul calendarului nu a putut fi copiat. Copiază-l direct din câmp.",
+    "createdAt": "Creat la {{date}}",
+    "lastUsedAt": "Ultima preluare la {{date}}",
+    "neverUsed": "Acest calendar nu a fost încă preluat.",
+    "keepPrivateTitle": "Păstrează acest URL privat",
+    "keepPrivateDescription": "Oricine are acest URL poate vedea calendarul sarcinilor tale fără autentificare. Înlocuiește-l sau revocă-l imediat dacă este distribuit accidental.",
+    "manageTitle": "Gestionează abonamentul",
+    "rotate": "Înlocuiește URL-ul",
+    "rotateTitle": "Înlocuiești URL-ul calendarului?",
+    "rotateMessage": "URL-ul curent nu va mai funcționa imediat. Va trebui să adaugi din nou URL-ul nou în fiecare aplicație de calendar.",
+    "rotated": "URL-ul calendarului a fost înlocuit cu succes",
+    "revoke": "Revocă URL-ul",
+    "revokeTitle": "Revoci URL-ul calendarului?",
+    "revokeMessage": "URL-ul curent nu va mai funcționa imediat, iar aplicațiile de calendar abonate nu vor mai primi actualizări.",
+    "revoked": "URL-ul calendarului a fost revocat cu succes",
+    "inactiveTitle": "Nu există încă un abonament la calendar",
+    "inactiveDescription": "Generează un URL privat, apoi adaugă-l ca abonament la calendar în aplicația ta de calendar. Actualizările sunt preluate automat de aplicație.",
+    "generate": "Generează URL-ul calendarului",
+    "generated": "URL-ul calendarului a fost generat cu succes",
+    "howToTitle": "Adaugă-l în calendarul tău",
+    "howToDescription": "Copiază URL-ul și alege „Adaugă calendar prin URL” sau „Abonează-te la calendar” în aplicația de calendar. Frecvența de reîmprospătare este controlată de aplicația respectivă, astfel încât modificările pot să nu apară imediat.",
+    "errorTitle": "Eroare de sincronizare a calendarului",
+    "actionFailed": "Abonamentul la calendar nu a putut fi actualizat. Încearcă din nou.",
+    "loadFailed": "Abonamentul la calendar nu a putut fi încărcat. Este posibil ca acest server să nu accepte încă sincronizarea calendarului."
+  },
+  "bridge": {
+    "title": "Donetick Bridge",
+    "description": "Conectează instanța găzduită de tine la aplicația oficială Donetick și trimite notificări push native fiabile fără a întreține propria infrastructură pentru acestea",
+    "heroEyebrow": "Creat pentru cei care își găzduiesc propriile instanțe",
+    "freeToStart": "Gratuit la început",
+    "heroTitle": "Păstrează controlul. Rămâi conectat.",
+    "pricingSummary": "Începe cu planul gratuit. Treci la Plus când ai nevoie de mai multe notificări sau dispozitive ori pentru a susține Donetick!",
+    "connectedBadge": "Bridge este activ",
+    "benefits": {
+      "native": {
+        "title": "Notificări native",
+        "description": "Trimite notificări membrilor gospodăriei în aplicațiile oficiale pentru iOS și Android."
+      },
+      "support": {
+        "title": "Susține Donetick",
+        "description": "Abonamentul tău contribuie la finanțarea dezvoltării și întreținerii continue."
+      },
+      "simple": {
+        "title": "Fără configurare Firebase",
+        "description": "Nu mai ai nevoie de date de autentificare pentru furnizori, iar configurația găzduită de tine rămâne simplă."
+      }
+    },
+    "privacyTitle": "Confidențialitate din proiectare",
+    "privacyNotice": "Conținutul notificărilor (titlu, corp și date) este transmis doar în timpul procesării cererii și nu este niciodată stocat sau înregistrat în jurnale. Bridge păstrează doar informații despre cont, dispozitive și numărul de livrări.",
+    "adminOnly": "Doar un administrator Donetick poate configura Bridge.",
+    "notConnected": "Încă neconectat",
+    "checkingStatus": "Se verifică conexiunea la Bridge…",
+    "connectionTitle": "Conexiunea ta",
+    "connectTitle": "Conectează Bridge",
+    "credentialsTitle": "Introdu datele de autentificare ale instanței",
+    "steps": {
+      "1": "Creează contul Bridge",
+      "2": "Adaugă această instanță Donetick",
+      "3": "Lipește datele de autentificare emise"
+    },
+    "unnamedInstance": "Instanță conectată",
+    "connectedAs": "Cont Bridge: {{email}}",
+    "planFree": "Plan gratuit",
+    "planPlus": "Plan Plus",
+    "emailUnverified": "E-mail neverificat",
+    "getStarted": "Creează un cont Bridge",
+    "getStartedHint": "Nu ai încă un cont Bridge? Creează unul și adaugă o instanță pentru a obține ID-ul și tokenul acesteia.",
+    "connectIntro": "Introdu ID-ul și tokenul instanței, afișate o singură dată când ai creat sau selectat această instanță în contul Bridge.",
+    "connect": "Conectează",
+    "connectedTitle": "Conectat la Bridge",
+    "rotateCredential": "Înlocuiește datele de autentificare",
+    "rotateInstructions": "Generează un token nou al instanței din contul Bridge, apoi lipește-l mai jos pentru înlocuire. Tokenul vechi nu va mai funcționa imediat.",
+    "rotatedTitle": "Date de autentificare înlocuite",
+    "disconnect": "Deconectează",
+    "disconnectTitle": "Deconectează Bridge",
+    "disconnectMessage": "Această instanță nu va mai trimite notificări push prin Bridge. Tokenurile locale ale dispozitivelor sunt păstrate și te poți reconecta oricând. Aceasta nu șterge contul Bridge sau istoricul utilizării.",
+    "disconnectedTitle": "Deconectat",
+    "refresh": "Reîmprospătează starea",
+    "upgrade": "Treci la Plus",
+    "manageBilling": "Gestionează facturarea",
+    "upgradeBillingNote": "Trecerea la Plus și facturarea se gestionează în contul Bridge.",
+    "connectForm": {
+      "baseUrl": "URL Bridge",
+      "instanceId": "ID instanță",
+      "instanceIdPlaceholder": "ID-ul instanței din contul Bridge",
+      "instanceToken": "Tokenul instanței",
+      "instanceTokenPlaceholder": "Afișat o singură dată la crearea instanței sau înlocuirea tokenului",
+      "instanceTokenHint": "Acest token este trimis doar către acest server și nu va mai fi afișat după ce părăsești această pagină.",
+      "required": "URL-ul Bridge, ID-ul instanței și tokenul instanței sunt toate obligatorii."
+    },
+    "usage": {
+      "notifications": "Notificări în această perioadă: {{used}} / {{limit}}",
+      "devices": "Dispozitive active: {{used}} / {{limit}}",
+      "notificationsLabel": "Notificări în această perioadă",
+      "devicesLabel": "Dispozitive active"
+    },
+    "errors": {
+      "title": "Eroare Bridge",
+      "generic": "A apărut o problemă la comunicarea cu Bridge. Încearcă din nou.",
+      "revokedToken": "Datele de autentificare ale acestei instanțe au fost respinse. Este posibil să fi fost înlocuite sau revocate din contul Bridge — reconectează-te folosind un token valid al instanței.",
+      "serviceUnavailable": "Bridge este temporar indisponibil. Notificările vor fi reluate când serviciul devine din nou accesibil — nu este necesară nicio acțiune.",
+      "rateLimited": "Prea multe cereri în acest moment. Așteaptă puțin și încearcă din nou.",
+      "quotaExceeded": "A fost atinsă cota lunară de notificări a acestui cont Bridge. Treci la Plus sau așteaptă perioada următoare.",
+      "deviceLimitReached": "A fost atinsă limita de dispozitive active a acestui cont Bridge. Elimină un dispozitiv nefolosit sau treci la Plus.",
+      "validationError": "Verifică valorile introduse și încearcă din nou."
+    }
+  },
+  "storage": {
+    "title": "Setări de stocare",
+    "serverTitle": "Utilizarea spațiului de stocare pe server",
+    "serverDescription": "Acesta este spațiul folosit de contul tău pe serverele noastre (de exemplu, fișiere, imagini și date pe care le-ai încărcat).",
+    "usagePlaceholder": "-- MB utilizați / -- MB în total (--)",
+    "usage": "{{used}} MB utilizați / {{total}} MB în total ({{percent}}%)",
+    "basicPlanNotice": "Stocarea pe server nu este disponibilă în planul Basic. Treci la Plus pentru a urmări utilizarea spațiului de stocare pe server.",
+    "localTitleApp": "Stocarea locală și memoria cache ale aplicației",
+    "localTitleBrowser": "Stocarea locală și memoria cache ale browserului",
+    "localDescription": "Aceste date sunt stocate local în browser pentru acces mai rapid. Ștergerea lor nu va afecta datele de pe server, dar te poate deconecta.",
+    "clearLocal": "Șterge toate datele locale și memoria cache",
+    "clearLocalTitle": "Șterge toate datele locale",
+    "clearLocalMessage": "Sigur vrei să ștergi datele locale și memoria cache? Aceasta va elimina toate datele tale din acest browser și va necesita autentificarea.",
+    "clearAll": "Șterge tot",
+    "appPreferences": "Preferințele aplicației",
+    "deviceOnly": "Doar pe dispozitiv",
+    "appPreferencesDescription": "Acestea sunt preferințe și setări stocate local pe dispozitiv de către aplicație. Ștergerea lor va reseta setările specifice aplicației și te poate deconecta, dar nu va afecta datele de pe server.",
+    "clearPreferences": "Șterge preferințele aplicației",
+    "clearPreferencesTitle": "Șterge preferințele aplicației",
+    "clearPreferencesMessage": "Sigur vrei să ștergi toate preferințele aplicației? Aceasta va reseta setările aplicației și poate necesita o nouă autentificare."
+  },
+  "sidepanel": {
+    "title": "Personalizarea panoului lateral",
+    "description": "Personalizează cardurile afișate în panoul lateral și ordinea lor. Trage și plasează pentru reordonare sau schimbă vizibilitatea fiecărui card.",
+    "resetToDefaults": "Revino la valorile implicite",
+    "resetHelper": "Aceasta va restabili vizibilitatea și ordinea implicite ale tuturor cardurilor.",
+    "cards": {
+      "welcome": {
+        "name": "Comutare între utilizatori",
+        "description": "Permite administratorilor și managerilor să vadă sarcinile din perspectiva altor utilizatori"
+      },
+      "smartInsights": {
+        "name": "Informații inteligente",
+        "description": "Acțiuni rapide bazate pe sarcinile tale"
+      },
+      "assignees": {
+        "name": "Sarcini după responsabil",
+        "description": "Grupează sarcinile după persoana căreia îi sunt atribuite"
+      },
+      "calendar": {
+        "name": "Vizualizare calendar",
+        "description": "Afișează sarcinile în format calendar"
+      },
+      "activities": {
+        "name": "Activități recente",
+        "description": "Afișează finalizările de sarcini și activitățile recente"
+      },
+      "weeklyGoals": {
+        "name": "Obiective săptămânale",
+        "description": "Afișează progresul săptămânal și statisticile finalizărilor din familie"
+      }
+    }
+  },
+  "homeSections": {
+    "title": "Personalizarea prezentării generale",
+    "description": "Adaptează ecranul principal la nevoile tale. Alege secțiunile de afișat și pune-le pe primele locuri pe cele folosite cel mai des.",
+    "taskScope": {
+      "title": "Vizibilitatea sarcinilor",
+      "label": "Sarcini de afișat",
+      "description": "Alege ale cui sarcini apar în listele și rezumatele din prezentarea generală. Secțiunea Grupul tău afișează întotdeauna activitatea grupului.",
+      "myTasks": "Doar sarcinile mele",
+      "allCircleTasks": "Toate sarcinile grupului"
+    },
+    "sectionsTitle": "Secțiunile ecranului principal",
+    "resetToDefaults": "Revino la valorile implicite",
+    "resetHelper": "Aceasta va restabili vizibilitatea și ordinea implicite ale tuturor secțiunilor.",
+    "sections": {
+      "greeting": {
+        "name": "Salut",
+        "description": "Titlul din partea de sus care îți rezumă ziua"
+      },
+      "glance": {
+        "name": "Dintr-o privire",
+        "description": "Numărul sarcinilor restante / scadente astăzi / de verificat / neplanificate"
+      },
+      "circle": {
+        "name": "Grupul tău",
+        "description": "Afișează sarcinile de care se ocupă fiecare membru al grupului în această săptămână"
+      },
+      "review": {
+        "name": "De verificat",
+        "description": "Sarcini finalizate care așteaptă aprobarea"
+      },
+      "overdue": {
+        "name": "Restante",
+        "description": "Sarcini care au depășit data scadentă"
+      },
+      "nextUp": {
+        "name": "În curând",
+        "description": "Ce este scadent astăzi și mâine"
+      },
+      "filters": {
+        "name": "Filtre",
+        "description": "Acces rapid la filtrele fixate și la cele mai utile filtre"
+      },
+      "projects": {
+        "name": "Proiecte",
+        "description": "Unde se acumulează sarcinile, pe proiecte"
+      }
+    },
+    "detailedDescription": "Personalizează aspectul și vizibilitatea secțiunilor de pe ecranul principal."
+  },
+  "layout": {
+    "title": "Aspect și navigare",
+    "detailedDescription": "Adaptează interfața la modul tău de lucru. Alege ecranul de pornire și păstrează la îndemână instrumentele preferate.",
+    "savedOnDevice": "Modificările sunt salvate automat pe acest dispozitiv sau în acest browser.",
+    "preview": "Previzualizare",
+    "reorderItem": "Reordonează {{name}}",
+    "reorderHint": "Trage mânerele pentru a reordona. Cu tastatura, focalizează un mâner, apasă Spațiu, apoi folosește tastele săgeți.",
+    "taskEditor": {
+      "title": "Editor de sarcini",
+      "description": "Alege cum navighezi prin setările sarcinilor.",
+      "singlePage": "Păstrează totul pe o singură pagină",
+      "helper": "Afișează toate setările sarcinii pe o singură pagină derulabilă, în loc de pași separați."
+    },
+    "defaultView": {
+      "title": "Vizualizare implicită",
+      "description": "Alege ecranul care se deschide la pornirea aplicației.",
+      "options": {
+        "home": {
+          "name": "Prezentare generală",
+          "description": "Un rezumat al lucrurilor care necesită atenția ta astăzi, cu adăugare rapidă"
+        },
+        "tasks": {
+          "name": "Lista de sarcini",
+          "description": "Lista completă de sarcini, cu filtre, căutare și grupare"
+        }
+      }
+    },
+    "bottomNav": {
+      "title": "Bara de navigare de jos",
+      "selectedCount": "{{count}} din {{max}} comenzi rapide selectate",
+      "limitHint": "Toate locurile pentru comenzi rapide sunt ocupate. Dezactivează una pentru a alege alta.",
+      "description": "Alege până la {{max}} comenzi rapide pentru bara de navigare de jos de pe mobil și trage-le pentru a le reordona. „Mai multe” rămâne întotdeauna ultimul element și deschide meniul complet.",
+      "resetToDefaults": "Revino la valorile implicite",
+      "resetHelper": "Aceasta va restabili comenzile rapide și ordinea implicite ale barei de navigare de jos.",
+      "hideLabels": {
+        "title": "Ascunde etichetele",
+        "description": "Afișează doar pictograme în bara de navigare de jos pentru a o face mai mică."
+      }
+    },
+    "sidepanel": {
+      "title": "Panoul lateral pe desktop"
+    }
+  },
+  "theme": {
+    "title": "Preferințe pentru temă",
+    "description": "Personalizează Donetick cu o temă de culori și alege modul deschis, întunecat sau cel al sistemului.",
+    "skin": "Temă de culori",
+    "skinDescription": "Fiecare temă acceptă modul deschis și întunecat. Selecția este salvată pe acest dispozitiv.",
+    "skins": {
+      "default": "Implicită",
+      "forest": "Pădure",
+      "lavender": "Lavandă",
+      "sand": "Nisip",
+      "ocean": "Ocean",
+      "rose": "Trandafir",
+      "sunset": "Apus",
+      "bubblegum": "Roz intens",
+      "mint": "Mentă",
+      "graphite": "Grafit"
+    },
+    "themeMode": "Mod de afișare",
+    "modeDescription": "Alege un aspect confortabil pe tot parcursul zilei.",
+    "systemHint": "Modul Sistem urmează automat aspectul deschis sau întunecat al dispozitivului.",
+    "light": "Deschis",
+    "dark": "Întunecat",
+    "system": "Sistem"
+  },
+  "widgets": {
+    "title": "Widgeturi pe ecranul principal",
+    "opacity": {
+      "title": "Opacitatea fundalului",
+      "description": "Cât de opac este fundalul widgeturilor. Valorile mai mici lasă imaginea de fundal să se vadă.",
+      "preview": "Scoate pubelele",
+      "perWidgetHint": "Aceasta este valoarea implicită pentru toate widgeturile. Pentru a modifica un singur widget, apasă lung pe el pe ecranul principal și deschide opțiunile acestuia (Android) sau Editează widgetul (iOS).",
+      "webHint": "Widgeturile de pe ecranul principal fac parte din aplicațiile iOS și Android — această setare are efect doar acolo."
+    },
+    "theme": {
+      "title": "Culori",
+      "description": "Paleta folosită de widgeturi. Modul Automat urmează modul deschis sau întunecat al telefonului.",
+      "options": {
+        "auto": "Automat",
+        "light": "Întotdeauna deschis",
+        "dark": "Întotdeauna întunecat"
+      },
+      "perWidgetHint": "Aceasta este valoarea implicită pentru toate widgeturile. Pentru a modifica un singur widget, apasă lung pe el pe ecranul principal și deschide opțiunile acestuia (Android) sau Editează widgetul (iOS)."
+    }
+  },
+  "localization": {
+    "title": "Localizare",
+    "description": "Adaptează Donetick la limba ta, la stilul de afișare a datelor și la ritmul tău săptămânal.",
+    "language": "Limbă",
+    "languageDescription": "Alege limba pe care o folosești în Donetick.",
+    "languageDefaultsHint": "Schimbarea limbii stabilește și valorile regionale implicite pentru date, ore și începutul săptămânii. Le poți ajusta mai jos.",
+    "rtlNotice": "Această limbă folosește scrierea de la dreapta la stânga (RTL)",
+    "dateFormat": "Formatul datei",
+    "dateFormatDescription": "Alege cum sunt afișate datele. Fiecare opțiune afișează aceeași dată ca exemplu.",
+    "timeFormat": "Formatul orei",
+    "timeFormatDescription": "Alege formatul de 12 sau 24 de ore.",
+    "preview": "Previzualizare: {{value}}",
+    "12hour": "12 ore (AM/PM)",
+    "24hour": "24 de ore",
+    "firstDayOfWeek": "Începutul săptămânii",
+    "firstDayOfWeekDescription": "Alege prima zi afișată în calendar.",
+    "sunday": "Duminică",
+    "monday": "Luni",
+    "saturday": "Sâmbătă",
+    "helpTranslate": "Ajută la îmbunătățirea acestei traduceri",
+    "formats": {
+      "mdy": "Lună / zi / an",
+      "dmy": "Zi / lună / an",
+      "ymd": "An / lună / zi",
+      "long": "Numele complet al lunii",
+      "short": "Numele prescurtat al lunii"
+    },
+    "descriptionLong": "Personalizează limba, formatul datei și preferințele regionale pentru contul tău. Aceste setări se vor aplica în întreaga aplicație."
+  },
+  "advanced": {
+    "title": "Setări avansate",
+    "description": "Controlează accesul offline și modul în care grupul tău rămâne sincronizat.",
+    "offlineTitle": "Suport offline",
+    "offlineDescription": "Continuă să folosești Donetick când ești offline pe acest dispozitiv sau în acest browser. Modificările sunt salvate local și sincronizate când revii online.",
+    "offlineToggle": "Folosește suportul offline",
+    "clearingOffline": "Se șterg datele offline…",
+    "offlineHelper": "Dezactivarea elimină modificările offline nesincronizate și datele offline salvate de pe acest dispozitiv sau din acest browser.",
+    "offlineEnabled": "Modul offline a fost activat pentru acest dispozitiv sau browser",
+    "offlineDisabled": "Modul offline a fost dezactivat, iar datele locale au fost șterse",
+    "offlineDisabledPartial": "Modul offline a fost dezactivat, dar este posibil ca unele date locale să fie încă stocate",
+    "offlineDisableTitle": "Dezactivează modul offline",
+    "offlineDisableMessage": "Dezactivarea modului offline va elimina modificările offline nesincronizate și datele offline salvate pe acest dispozitiv sau în acest browser. Vrei să continui?",
+    "offlineDisableConfirm": "Dezactivează și șterge datele",
+    "webhookTitle": "Integrare webhook",
+    "webhookDescription": "Webhook-urile permit trimiterea de notificări în timp real către alte servicii atunci când au loc evenimente în grupul tău. Configurează un URL webhook pentru a primi actualizări în timp real.",
+    "webhookPlusNotice": "Notificările webhook nu sunt disponibile în planul Basic. Treci la Plus pentru a primi actualizări în timp real prin webhook-uri.",
+    "webhookToggle": "Activează webhook-ul",
+    "webhookHelper": "Activează notificările webhook pentru actualizările sarcinilor și elementelor.",
+    "webhookURL": "URL webhook",
+    "webhookUpdated": "URL-ul webhook a fost actualizat cu succes",
+    "webhookUpdateFailed": "Actualizarea URL-ului webhook a eșuat",
+    "realtimeTitle": "Actualizări în timp real",
+    "realtimeDescription": "Rămâi sincronizat cu persoanele din grupul tău.",
+    "realtime": {
+      "toggleLabel": "Actualizări în direct",
+      "title": "Actualizări în timp real",
+      "subtitle": "Vezi modificările sarcinilor fără reîmprospătare.",
+      "statusLabel": "Conexiune",
+      "status": {
+        "off": "Dezactivat",
+        "connected": "Conectat",
+        "connecting": "Se conectează…",
+        "error": "Problemă de conexiune",
+        "disconnected": "Deconectat"
+      },
+      "basicPlan": "Actualizările în timp real nu sunt disponibile în planul Basic. Treci la Plus pentru a primi notificări instantanee când sarcinile sunt actualizate.",
+      "disabled": "Actualizările în direct sunt dezactivate. Reîmprospătează pentru a vedea cele mai recente modificări.",
+      "connected": "Modificările din grupul tău apar automat.",
+      "connecting": "Se conectează la actualizările în timp real...",
+      "errored": "Actualizările în timp real sunt activate, dar nu funcționează: {{error}}",
+      "notConnected": "Actualizările în timp real sunt activate, dar conexiunea nu este stabilită în acest moment.",
+      "basicPlanNotice": "Disponibil cu Donetick Plus. Activează actualizările în direct pentru a vedea opțiunea de trecere la Plus."
+    }
+  },
+  "privacyAnalytics": {
+    "title": "Confidențialitate și analiză",
+    "description": "Donetick nu trimite niciodată numele sarcinilor, descrieri, note sau alt conținut al sarcinilor. Înregistrarea sesiunilor nu este niciodată activată.",
+    "analyticsToggle": "Statistici anonime",
+    "analyticsHelper": "Ajută la îmbunătățirea Donetick prin trimiterea de statistici anonime de utilizare.",
+    "crashToggle": "Rapoarte de erori fatale",
+    "crashHelper": "Trimite-ne eroarea și evenimentele care au precedat-o atunci când Donetick se închide neașteptat, fără conținutul sarcinilor.",
+    "footnote": "Poți schimba oricând aceste opțiuni."
+  },
+  "subscription": {
+    "sessionFailed": "Crearea sesiunii de abonare a eșuat",
+    "errorTitle": "Eroare de abonare",
+    "errorMessage": "Procesul de abonare nu a putut fi pornit. Încearcă din nou.",
+    "subscribe": "Abonează-te",
+    "cancelAnytime": "Anulează oricând. Fără taxe ascunse. Plată securizată prin Stripe.",
+    "description": "Deblochează memento-uri, detalii extinse pentru sarcini și automatizare avansată.",
+    "whatsIncluded": "Ce este inclus:",
+    "mostPopular": "Cel mai popular",
+    "featureNotifications": "Notificări și memento-uri pentru sarcini",
+    "featureRichText": "Descrieri cu text formatat și încărcare de imagini",
+    "featureThingTriggers": "Declanșarea sarcinilor pe baza elementelor",
+    "featureApiTokens": "Tokenuri API pentru integrări",
+    "featureImageUploads": "Încărcare de imagini în descrieri",
+    "featureAutomation": "Automatizare avansată a sarcinilor",
+    "planYearly": "Anual",
+    "reasonAdvancedReminders": "Memento-urile înainte de scadență și cele ulterioare sunt o funcție Plus. Planul tău actual trimite memento-uri la data scadentă.",
+    "reasonReminderChannels": "Trimiterea memento-urilor pentru sarcini către un grup Telegram este o funcție Plus.",
+    "reasonHistoryWindow": "Planul tău actual afișează ultimele 30 de zile. Treci la Plus pentru istoricul complet și tendințele pe termen lung.",
+    "reasonThingTriggers": "Declanșarea automată a sarcinilor atunci când starea unui element se schimbă este o funcție Plus.",
+    "reasonProjectLimit": "Planul tău actual include {{projectLimit}} proiecte. Treci la Plus pentru a crea câte ai nevoie.",
+    "reasonQuickFilterLimit": "Planul tău actual include {{filterLimit}} filtre rapide salvate. Treci la Plus pentru un număr nelimitat de filtre.",
+    "reasonFileUpload": "Atașarea fișierelor și imaginilor este o funcție Plus. Treci la Plus pentru a adăuga fotografii, scanări și documente la sarcinile tale.",
+    "reasonCalendarSync": "Abonarea la sarcinile tale din Apple Calendar, Google Calendar, Outlook sau altă aplicație de calendar este o funcție Plus."
+  },
+  "childUsers": {
+    "errNameRequired": "Numele contului secundar este obligatoriu",
+    "errNameMin": "Numele contului secundar trebuie să aibă cel puțin 2 caractere",
+    "errNameMax": "Numele contului secundar trebuie să aibă mai puțin de 20 de caractere",
+    "errNameChars": "Numele contului secundar poate conține doar litere mici, punct și cratimă",
+    "errPasswordRequired": "Parola este obligatorie",
+    "errPasswordLength": "Parola trebuie să aibă între 8 și 64 de caractere",
+    "errPasswordMatch": "Parolele nu coincid",
+    "errDisplayNameMax": "Numele afișat trebuie să aibă mai puțin de 50 de caractere",
+    "createTitle": "Creează un cont secundar",
+    "createDescription": "Creează un cont de autentificare care poate finaliza sarcinile atribuite acestuia.",
+    "createButton": "Creează contul",
+    "nameLabel": "Numele contului secundar *",
+    "namePlaceholder": "Introdu numele contului secundar (de ex., ana)",
+    "displayNameLabel": "Nume afișat",
+    "displayNamePlaceholder": "Nume afișat (opțional; implicit, numele contului secundar)",
+    "passwordLabel": "Parolă *",
+    "passwordPlaceholder": "Introdu parola (8–64 de caractere)",
+    "confirmPasswordLabel": "Confirmă parola *",
+    "confirmPasswordPlaceholder": "Confirmă parola"
+  },
+  "passwordChange": {
+    "minLength": "Parola trebuie să aibă cel puțin 8 caractere",
+    "maxLength": "Parola trebuie să aibă mai puțin de 64 de caractere",
+    "description": "Alege o parolă cu o lungime între 8 și 64 de caractere.",
+    "mismatch": "Parolele nu coincid",
+    "newPassword": "Parolă nouă",
+    "newPasswordPlaceholder": "Introdu parola",
+    "confirmPassword": "Confirmă parola",
+    "confirmPasswordPlaceholder": "Repetă parola"
+  },
+  "payment": {
+    "cancelledTitle": "Plata a fost anulată",
+    "cancelledRedirect": "Vei fi redirecționat în curând către pagina principală.",
+    "successTitle": "Plată reușită!",
+    "successRedirect": "Vei fi redirecționat în curând către pagina de setări."
+  },
+  "developer": {
+    "tokenRefreshed": "Tokenul a fost reîmprospătat cu succes",
+    "endpointCalled": "Punctul de acces pentru reîmprospătarea tokenului a fost apelat cu succes",
+    "clearDbCleared": "Baza de date locală offline a fost ștearsă. Se pornește sincronizarea completă...",
+    "clearDbDone": "Sincronizarea completă de la început s-a încheiat",
+    "intro": "Vezi informații tehnice despre tokenurile de autentificare și sesiunea ta",
+    "refreshCookieNote": "Pe platforma web, tokenurile de reîmprospătare sunt gestionate prin cookie-uri HttpOnly",
+    "noReconnectInfo": "Nu există informații disponibile despre reconectare",
+    "noTimeoutInfo": "Nu există informații disponibile despre expirarea conexiunii",
+    "noDebugInfo": "Nu există informații disponibile de depanare"
+  },
+  "backup": {
+    "keyRequired": "Cheia de criptare este obligatorie",
+    "created": "Copia de siguranță a fost creată și descărcată cu succes",
+    "createFailed": "Crearea copiei de siguranță a eșuat",
+    "selectFile": "Selectează un fișier de copie de siguranță",
+    "restored": "Copia de siguranță a fost restaurată cu succes. Reîmprospătează pagina.",
+    "restoreFailed": "Restaurarea copiei de siguranță a eșuat",
+    "readFailed": "Citirea fișierului de copie de siguranță a eșuat",
+    "createIntro": "Creează o copie de siguranță criptată a datelor tale. Aceasta va include toate sarcinile, istoricul, setările și, opțional, fișierele încărcate.",
+    "keyPlaceholder": "Introdu o cheie de criptare puternică",
+    "includeAssets": "Include fișierele și resursele încărcate",
+    "warningLabel": "Avertisment:",
+    "restoreWarning": "Restaurarea unei copii de siguranță va înlocui toate datele curente. Această acțiune nu poate fi anulată.",
+    "restoreKeyPlaceholder": "Introdu cheia de criptare folosită pentru această copie de siguranță",
+    "title": "Copii de siguranță și restaurare",
+    "createTab": "Creează o copie de siguranță",
+    "restoreTab": "Restaurează o copie de siguranță",
+    "creating": "Se creează copia de siguranță...",
+    "restoring": "Se restaurează copia de siguranță...",
+    "encryptionKeyRequired": "Cheie de criptare *",
+    "keySafetyNotice": "Păstrează această cheie în siguranță — vei avea nevoie de ea pentru a restaura copia de siguranță",
+    "nameOptional": "Numele copiei de siguranță (opțional)",
+    "namePlaceholder": "de ex., copie-săptămânală",
+    "fileRequired": "Fișierul copiei de siguranță *",
+    "selectedFile": "Selectat: {{name}}"
+  },
+  "deletion": {
+    "passwordResetHelp": "Dacă te-ai autentificat cu Apple sau Google, trebuie mai întâi să setezi o parolă. Apoi introdu parola aici pentru a-ți verifica identitatea.",
+    "sendPasswordReset": "Trimite e-mailul de resetare a parolei",
+    "passwordResetSent": "Am trimis un link de resetare a parolei la {{email}}. Urmează linkul pentru a seta parola, apoi revino aici pentru a-ți confirma identitatea și a continua ștergerea contului.",
+    "passwordResetFailed": "E-mailul de resetare a parolei nu a putut fi trimis. Încearcă din nou.",
+    "passwordRequired": "Introdu parola pentru a continua",
+    "passwordAndDelete": "Introdu parola și scrie DELETE pentru a confirma",
+    "failed": "Ștergerea contului a eșuat",
+    "passwordPlaceholder": "Introdu parola",
+    "transferIntro": "Deții grupuri a căror proprietate trebuie transferată înainte de ștergere. Selectează noii proprietari:",
+    "selectOwner": "Selectează noul proprietar",
+    "confirmPrompt": "Introdu parola și scrie DELETE pentru a confirma",
+    "typeDelete": "DELETE",
+    "warningLead": "Această acțiune nu poate fi anulată.",
+    "warningIntro": "Ștergerea contului va elimina definitiv:",
+    "removesProfile": "Profilul de utilizator și datele de autentificare",
+    "removesChores": "Toate sarcinile, istoricul sarcinilor și sesiunile de cronometrare",
+    "removesTokens": "Tokenurile API, sesiunile MFA și tokenurile de resetare a parolei",
+    "removesStorage": "Fișierele stocate și datele de utilizare",
+    "removesPoints": "Istoricul punctelor și notificările",
+    "removesCircles": "Apartenența la grupuri și relațiile dintre conturi",
+    "passwordToContinue": "Introdu parola pentru a continua",
+    "circleLabel": "Grup: {{name}}",
+    "newOwner": "Noul proprietar",
+    "logoutNotice": "După ștergerea reușită, vei fi deconectat și redirecționat către pagina de autentificare.",
+    "passwordLabel": "Parolă",
+    "typeToConfirm": "Scrie „{{word}}” pentru a confirma"
+  },
+  "realtime": {
+    "titleSse": "Actualizări în timp real (SSE)",
+    "subtitleSse": "Primește notificări instantanee prin Server-Sent Events",
+    "basicPlanDescription": "Actualizările în timp real (SSE) nu sunt disponibile în planul Basic. Treci la Plus pentru a primi notificări instantanee când sarcinile sunt actualizate.",
+    "disabledDescription": "Actualizările în timp real (SSE) sunt dezactivate. Activează-le pentru a vedea în direct modificările atunci când tu sau alți membri ai grupului finalizați, omiteți sau modificați sarcini.",
+    "connectedDescription": "Actualizările în timp real (SSE) funcționează. Vei vedea în direct modificările atunci când tu sau alți membri ai grupului finalizați, omiteți sau modificați sarcini.",
+    "connectingDescription": "Se conectează la actualizările în timp real (SSE)...",
+    "errorDescription": "Actualizările în timp real (SSE) sunt activate, dar nu funcționează: {{error}}",
+    "disconnectedDescription": "Actualizările în timp real (SSE) sunt activate, dar conexiunea nu este stabilită în acest moment.",
+    "enableLabel": "Activează actualizările în timp real (SSE)",
+    "statusLabel": "Stare:"
+  },
+  "nativeCancel": {
+    "title": "Anulează abonamentul",
+    "dismiss": "Închide",
+    "cancelViaStore": "Voi anula din magazinul de aplicații",
+    "cancelDesktop": "Anulează abonamentul pentru desktop",
+    "intro": "Pentru a anula abonamentul, urmează instrucțiunile pentru platforma ta (trebuie să anulezi prin aceeași platformă pe care ai folosit-o pentru abonare).",
+    "iosHeading": "Pentru iOS (iPhone/iPad):",
+    "iosStep1": "1. Deschide aplicația <b>Configurări</b> pe dispozitiv",
+    "iosStep2": "2. Apasă pe numele tău din partea de sus a ecranului",
+    "iosStep3": "3. Apasă pe <b>Abonamente</b>",
+    "iosStep4": "4. Găsește și apasă pe <b>Donetick</b>",
+    "iosStep5": "5. Apasă pe <b>Anulați abonamentul</b>",
+    "iosNote": "<b>Notă:</b> Dacă te-ai abonat prin iOS și folosești versiunea web sau desktop, trebuie să anulezi prin Configurările iOS, conform instrucțiunilor de mai sus.",
+    "androidHeading": "Pentru Android:",
+    "androidStep1": "1. Deschide aplicația <b>Magazin Google Play</b>",
+    "androidStep2": "2. Apasă pe pictograma profilului din dreapta sus",
+    "androidStep3": "3. Apasă pe <b>Plăți și abonamente</b>",
+    "androidStep4": "4. Apasă pe <b>Abonamente</b>",
+    "androidStep5": "5. Găsește și apasă pe <b>Donetick</b>",
+    "androidStep6": "6. Apasă pe <b>Anulează abonamentul</b>",
+    "androidNote": "<b>Notă:</b> Dacă te-ai abonat prin Google Play și folosești versiunea web sau desktop, trebuie să anulezi prin Google Play, conform instrucțiunilor de mai sus.",
+    "webHeading": "Pentru abonamentele web sau desktop:",
+    "webBody": "Dacă te-ai abonat inițial prin site-ul nostru sau prin aplicația desktop, poți anula abonamentul accesând secțiunea Setările contului de pe site-ul nostru, folosind un browser web.",
+    "webNote": "<b>Important:</b> Trebuie să anulezi abonamentul prin aceeași platformă pe care te-ai abonat inițial. Dacă te-ai abonat prin App Store pentru iOS sau Magazin Google Play (chiar dacă acum folosești versiunea web sau desktop), trebuie să anulezi prin platforma inițială, folosind instrucțiunile de mai sus.",
+    "footer": "Abonamentul tău va rămâne activ până la sfârșitul perioadei de facturare curente."
+  }
+}

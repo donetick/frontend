@@ -1,0 +1,133 @@
+{
+  "iconPicker": {
+    "chooseIcon": "Alege pictograma proiectului",
+    "availableIcons": "Pictograme disponibile"
+  },
+  "icons": {
+    "FolderOpen": "Dosar",
+    "Work": "Muncă",
+    "Home": "Acasă",
+    "School": "Școală",
+    "BusinessCenter": "Afaceri",
+    "Code": "Cod",
+    "Build": "Construcție",
+    "Palette": "Design",
+    "SportsSoccer": "Sport",
+    "FitnessCenter": "Fitness",
+    "ShoppingCart": "Cumpărături",
+    "Restaurant": "Mâncare",
+    "Flight": "Călătorii",
+    "Book": "Studiu",
+    "MusicNote": "Muzică",
+    "PhotoCamera": "Fotografie",
+    "Games": "Jocuri",
+    "Science": "Știință",
+    "AccountBalance": "Finanțe",
+    "LocalHospital": "Sănătate",
+    "DirectionsCar": "Auto",
+    "Pets": "Animale de companie",
+    "Garden": "Grădină",
+    "Computer": "Tehnologie"
+  },
+  "defaultChip": "Implicit",
+  "tasks_one": "{{count}} sarcină",
+  "tasks_other": "{{count}} de sarcini",
+  "delete": {
+    "title": "Șterge proiectul",
+    "message": "Sigur vrei să ștergi „{{name}}”? Proiectul va fi șters, dar toate sarcinile vor fi păstrate și mutate în proiectul implicit."
+  },
+  "loadError": "Proiectele nu au putut fi încărcate. Încearcă din nou.",
+  "search": {
+    "placeholder": "Caută proiecte",
+    "noResultsTitle": "Niciun proiect nu corespunde",
+    "noResultsDescription": "Niciun proiect nu corespunde căutării „{{searchTerm}}”.",
+    "noFilterResultsDescription": "Niciun proiect nu corespunde filtrului curent.",
+    "clear": "Șterge căutarea",
+    "showAll": "Afișează toate proiectele"
+  },
+  "blurb": "Organizează sarcinile în proiecte. Creează spații de lucru personalizate pentru a păstra sarcinile organizate și ușor accesibile.",
+  "defaultDescription": "Toate sarcinile fără un proiect anume",
+  "selector": {
+    "title": "Proiecte",
+    "createNew": "Creează un proiect nou",
+    "createNewDescription": "Adaugă un spațiu de lucru personalizat pentru proiect",
+    "manage": "Gestionează proiectele",
+    "manageDescription": "Vezi, editează și organizează toate proiectele",
+    "currentProjectTitle": "Proiect curent: {{project}} (Ctrl+E)",
+    "builtInWorkspace": "Spațiu de lucru integrat pentru proiect"
+  },
+  "modal": {
+    "errorNameRequired": "Numele proiectului este obligatoriu",
+    "errorUpdate": "Actualizarea proiectului a eșuat",
+    "errorCreate": "Crearea proiectului a eșuat",
+    "namePlaceholder": "Introdu numele proiectului...",
+    "descriptionPlaceholder": "Descriere opțională a proiectului...",
+    "nameLabel": "Numele proiectului",
+    "descriptionLabel": "Descriere",
+    "iconLabel": "Pictograma proiectului",
+    "selectIcon": "Selectează pictograma",
+    "colorLabel": "Culoarea proiectului",
+    "displayLabel": "Vizualizare implicită",
+    "displayHint": "Modul implicit de afișare a sarcinilor acestui proiect. Îl poți schimba oricând din meniul de vizualizare.",
+    "displayBoard": "Panou",
+    "displayList": "Listă",
+    "editTitle": "Editează proiectul",
+    "createTitle": "Creează un proiect nou",
+    "update": "Actualizează",
+    "create": "Creează"
+  },
+  "visibility": {
+    "label": "Cine poate vedea acest proiect?",
+    "ownerOnly": "Doar proprietarul proiectului poate schimba cine îl poate vedea.",
+    "changeHint": "Schimbarea persoanelor care pot vedea acest proiect afectează și sarcinile sale. Vei vedea exact ce se schimbă înainte de salvare.",
+    "private": {
+      "title": "Doar eu",
+      "description": "Ascuns pentru toți ceilalți membri ai grupului, inclusiv pentru administratori. Sarcinile sale sunt și ele private."
+    },
+    "members": {
+      "title": "Membri selectați",
+      "description": "Doar tu și persoanele selectate mai jos puteți vedea proiectul și toate sarcinile sale.",
+      "pickerTitle": "Partajează cu",
+      "noCandidates": "Nu mai există alte persoane în grupul tău. Invită mai întâi persoane în grup.",
+      "emptyHint": "Nu ai selectat pe nimeni: deocamdată, doar tu poți vedea proiectul. Poți adăuga persoane oricând.",
+      "hint_one": "Partajat cu {{count}} persoană. Eliminarea ulterioară a unei persoane păstrează toate sarcinile și istoricul.",
+      "hint_other": "Partajat cu {{count}} de persoane. Eliminarea ulterioară a unei persoane păstrează toate sarcinile și istoricul.",
+      "hint_few": "Partajat cu {{count}} persoane. Eliminarea ulterioară a unei persoane păstrează toate sarcinile și istoricul."
+    },
+    "circle": {
+      "title": "Întregul grup",
+      "description": "Toți membrii grupului pot vedea proiectul: {{names}}"
+    },
+    "chip": {
+      "private": "Doar tu",
+      "members_one": "{{count}} membru",
+      "members_other": "{{count}} de membri",
+      "everyone": "Toată lumea",
+      "members_few": "{{count}} membri"
+    },
+    "review": {
+      "title": "Verifică înainte de salvare",
+      "back": "Înapoi",
+      "confirm": "Salvează modificarea",
+      "you": "tu",
+      "audienceMembers": "Membri selectați: {{names}}",
+      "audienceMembersNone": "Membri selectați: încă nimeni",
+      "loseAccess": "Vor pierde accesul",
+      "loseAccessHint_one": "Nu vor mai vedea proiectul și sarcina sa ({{count}}). Dispozitivele deja sincronizate vor elimina datele la următoarea sincronizare.",
+      "loseAccessHint_other": "Nu vor mai vedea proiectul și cele {{count}} de sarcini ale sale. Dispozitivele deja sincronizate vor elimina datele la următoarea sincronizare.",
+      "gainAccess": "Vor primi acces",
+      "opensToCircle": "Toți membrii grupului, inclusiv cei care se alătură ulterior, vor vedea acest proiect și toate sarcinile sale.",
+      "assignmentChanges_one": "Modificări ale atribuirii pentru {{count}} sarcină",
+      "assignmentChanges_other": "Modificări ale atribuirii pentru {{count}} de sarcini",
+      "removedAssignees": "Nu mai sunt responsabili: {{names}}.",
+      "addedAssignees": "Adăugați: {{names}}.",
+      "nowAssigned": "Responsabil acum: {{name}}.",
+      "nowUnassigned": "Acum nu mai este atribuită.",
+      "keepsHistory": "Sarcinile, istoricul finalizărilor și punctele rămân neschimbate. Dacă partajezi din nou proiectul ulterior, sarcinile și istoricul redevin vizibile; atribuirile eliminate trebuie configurate din nou.",
+      "previewFailed": "Efectul acestei modificări nu a putut fi verificat. Încearcă din nou.",
+      "loseAccessHint_few": "Nu vor mai vedea proiectul și cele {{count}} sarcini ale sale. Dispozitivele deja sincronizate vor elimina datele la următoarea sincronizare.",
+      "assignmentChanges_few": "Modificări ale atribuirii pentru {{count}} sarcini"
+    }
+  },
+  "tasks_few": "{{count}} sarcini"
+}
