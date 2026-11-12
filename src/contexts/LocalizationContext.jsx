@@ -14,6 +14,22 @@ export const DATE_FORMATS = {
   SHORT: 'MMM D, YYYY',
 }
 
+const MOMENT_LOCALE_LOADERS = {
+  ar: () => import('moment/locale/ar'),
+  cs: () => import('moment/locale/cs'),
+  de: () => import('moment/locale/de'),
+  es: () => import('moment/locale/es'),
+  fr: () => import('moment/locale/fr'),
+  he: () => import('moment/locale/he'),
+  it: () => import('moment/locale/it'),
+  ja: () => import('moment/locale/ja'),
+  nl: () => import('moment/locale/nl'),
+  pl: () => import('moment/locale/pl'),
+  'pt-br': () => import('moment/locale/pt-br'),
+  ru: () => import('moment/locale/ru'),
+  'zh-cn': () => import('moment/locale/zh-cn'),
+}
+
 export const TIME_FORMATS = {
   HOUR_12: 'h:mm A',
   HOUR_24: 'HH:mm',
@@ -143,8 +159,32 @@ export const LocalizationProvider = ({ children }) => {
   }
 
   useEffect(() => {
+    let cancelled = false
+
     i18n.changeLanguage(language)
-    moment.locale(language)
+
+    const locale =
+      language.toLowerCase() === 'pt'
+        ? 'pt-br'
+        : language.toLowerCase().split('-')[0]
+
+    const loadLocale = async () => {
+      const loadMomentLocale = MOMENT_LOCALE_LOADERS[locale]
+
+      if (loadMomentLocale) {
+        await loadMomentLocale()
+      }
+
+      if (!cancelled) {
+        moment.locale(loadMomentLocale ? locale : 'en')
+      }
+    }
+
+    loadLocale()
+
+    return () => {
+      cancelled = true
+    }
   }, [language, i18n])
 
   useEffect(() => {

@@ -1,11 +1,3 @@
-import 'moment/locale/cs'
-import 'moment/locale/he'
-import 'moment/locale/ru'
-import 'moment/locale/ja'
-import 'moment/locale/es'
-import 'moment/locale/pl'
-import 'moment/locale/it'
-
 import i18n from 'i18next'
 import LanguageDetector from 'i18next-browser-languagedetector'
 import HttpBackend from 'i18next-http-backend'
@@ -27,20 +19,7 @@ i18n
       loadPath: '/locales/{{lng}}/{{ns}}.json',
     },
 
-    ns: [
-      'auth',
-      'common',
-      'settings',
-      'chores',
-      'labels',
-      'history',
-      'filters',
-      'things',
-      'projects',
-      'timer',
-      'points',
-      'rewards',
-    ],
+    ns: ['common'],
     defaultNS: 'common',
 
     detection: {
