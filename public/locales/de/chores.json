@@ -1,5 +1,21 @@
 {
   "title": "Aufgaben",
+  "swipeActionsLabel": "Aktionen anzeigen",
+  "swipeNoPermission": "Keine Berechtigung",
+  "swipePermissionTitle": "Du hast keine Berechtigung für diese Aktionen",
+  "swipeUnavailable": "Noch nicht verfügbar",
+  "swipeHistoryPermission": "Nur die im Eintrag zugewiesene Person, die Person, die die Aufgabe erledigt hat, oder ein Administrator oder Verwalter des Kreises kann diesen Eintrag bearbeiten. Löschen können nur der Besitzer der Aufgabe, die im Eintrag zugewiesene Person, die Person, die die Aufgabe erledigt hat, oder ein Administrator des Kreises.",
+  "swipeReviewPermission": "Nur Administratoren und Verwalter des Kreises können diesen Abschluss genehmigen oder ablehnen. Bearbeiten oder löschen können die Aufgabe nur ihr Besitzer oder ein Administrator des Kreises.",
+  "permissions": {
+    "complete": "Du kannst diese Aufgabe nicht abschließen und ihren Timer nicht verwenden.",
+    "subtasks": "Diese Unteraufgaben sind schreibgeschützt, weil du diese Aufgabe nicht abschließen kannst.",
+    "approval": "Ein Administrator oder Verwalter des Kreises muss diesen Abschluss genehmigen.",
+    "archive": "Nur der Besitzer der Aufgabe kann sie wiederherstellen.",
+    "archived": "Stelle diese Aufgabe wieder her, bevor du daran arbeitest.",
+    "window": "Diese Aufgabe kann noch nicht abgeschlossen werden.",
+    "failed": "Diese Aktion konnte nicht ausgeführt werden. Bitte lade die Seite neu und versuche es noch einmal.",
+    "editTime": "Nur der Besitzer der Aufgabe oder eine berechtigte zugewiesene Person kann Zeiteinträge bearbeiten."
+  },
   "myChores": "Meine Aufgaben",
   "allChores": "Alle Aufgaben",
   "addChore": "Aufgabe hinzufügen",

@@ -56,6 +56,7 @@ import ProfileSettings from '../views/Settings/ProfileSettings'
 import StorageSettings from '../views/Settings/StorageSettings'
 import WebhookSettings from '../views/Settings/WebhookSettings'
 import WidgetSettings from '../views/Settings/WidgetSettings'
+import TemplatesView from '../views/Templates/TemplatesView'
 import TermsView from '../views/Terms/TermsView'
 import TestView from '../views/TestView/Test'
 import ThingsHistory from '../views/Things/ThingsHistory'
@@ -182,6 +183,10 @@ const Router = createBrowserRouter([
       {
         path: '/search',
         element: <GlobalSearchPage />,
+      },
+      {
+        path: '/templates',
+        element: <TemplatesView />,
       },
       {
         path: '/archived',
