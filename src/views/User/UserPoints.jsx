@@ -361,6 +361,11 @@ const UserPoints = () => {
     (sum, bucket) => sum + bucket.points,
     0,
   )
+  const isTasksMode = leaderboardMode === 'tasks'
+  const periodTasks = selectedHistory.reduce(
+    (sum, bucket) => sum + bucket.tasks,
+    0,
+  )
   const isAdmin = currentMembership?.role === 'admin'
   const periodLabel = getPeriodLabel(period, t)
 
@@ -600,7 +605,7 @@ const UserPoints = () => {
         >
           <Box>
             <Typography level='title-md' sx={{ fontWeight: 650 }}>
-              {t('trend.title')}
+              {t(isTasksMode ? 'trend.titleTasks' : 'trend.title')}
             </Typography>
             <Typography level='body-xs' textColor='text.tertiary'>
               {periodLabel}
@@ -612,7 +617,9 @@ const UserPoints = () => {
             color='primary'
             startDecorator={<TrendingUpRounded />}
           >
-            {t('leaderboard.points', { count: periodPoints })}
+            {isTasksMode
+              ? t('leaderboard.tasks', { count: periodTasks })
+              : t('leaderboard.points', { count: periodPoints })}
           </Chip>
         </Box>
         <Sheet sx={{ ...surfaceSx, height: 260, p: { xs: 1, sm: 2 } }}>
@@ -655,7 +662,12 @@ const UserPoints = () => {
                 }}
               />
               <Bar
-                dataKey='points'
+                dataKey={isTasksMode ? 'tasks' : 'points'}
+                name={t(
+                  isTasksMode
+                    ? 'leaderboard.modeTasks'
+                    : 'leaderboard.modePoints',
+                )}
                 fill='var(--joy-palette-primary-500)'
                 maxBarSize={32}
                 radius={[6, 6, 2, 2]}
