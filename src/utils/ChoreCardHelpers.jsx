@@ -137,31 +137,33 @@ export const getRecurrentChipText = chore => {
   } else if (chore.frequencyType === 'yearly') {
     return 'Yearly'
   } else if (chore.frequencyType === 'days_of_the_week') {
+    // Pass moment an index, not the stored English name: moment parses names
+    // in the active locale. moment counts 0 = Sunday, DAYS starts on Monday.
+    const shortDay = d =>
+      moment()
+        .day((DAYS.indexOf(d) + 1) % 7)
+        .format('ddd')
     let days = sortWeekdays(metadata.days)
     if (days.length > 4) {
-      const allDays = DAYS.map(
-        day => day.charAt(0).toUpperCase() + day.slice(1),
-      )
-      const selectedDays = days.map(d => moment().day(d).format('dddd'))
-      const notSelectedDay = allDays.filter(day => !selectedDays.includes(day))
-      const notSelectedShortdays = notSelectedDay.map(d =>
-        moment().day(d).format('ddd'),
-      )
+      const notSelectedDay = DAYS.filter(day => !days.includes(day))
+      const notSelectedShortdays = notSelectedDay.map(shortDay)
       return `Daily except ${notSelectedShortdays.join(', ')}`
     } else {
-      days = days.map(d => moment().day(d).format('ddd'))
+      days = days.map(shortDay)
       return days.join(', ')
     }
   } else if (chore.frequencyType === 'day_of_the_month') {
+    // Stored months are lowercase, the allMonths fallback is capitalized.
+    const monthIndex = m =>
+      allMonths.findIndex(month => month.toLowerCase() === m.toLowerCase())
+    const shortMonth = index => moment().month(index).format('MMM')
     let months = metadata?.months ? metadata.months : allMonths
     if (months.length > 6) {
-      const selectedMonths = months.map(m => moment().month(m).format('MMMM'))
-      const notSelectedMonth = allMonths.filter(
-        month => !selectedMonths.includes(month),
-      )
-      const notSelectedShortMonths = notSelectedMonth.map(m =>
-        moment().month(m).format('MMM'),
-      )
+      const selectedMonths = months.map(monthIndex)
+      const notSelectedMonth = allMonths
+        .map((_, index) => index)
+        .filter(index => !selectedMonths.includes(index))
+      const notSelectedShortMonths = notSelectedMonth.map(shortMonth)
       let result = `Monthly ${chore.frequency}${dayOfMonthSuffix(
         chore.frequency,
       )}`
@@ -171,9 +173,10 @@ export const getRecurrentChipText = chore => {
       return result
     } else {
       let freqData = metadata
-      const months = [...freqData.months]
-        .sort((a, b) => allMonths.indexOf(a) - allMonths.indexOf(b))
-        .map(m => moment().month(m).format('MMM'))
+      const months = freqData.months
+        .map(monthIndex)
+        .sort((a, b) => a - b)
+        .map(shortMonth)
       return `${chore.frequency}${dayOfMonthSuffix(
         chore.frequency,
       )} of ${months.join(', ')}`
