@@ -5,14 +5,12 @@ import {
   Checkbox,
   Divider,
   IconButton,
-  Input,
   List,
   ListItem,
   Radio,
   RadioGroup,
   Typography,
 } from '@mui/joy'
-import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -64,7 +62,7 @@ const occurrenceKey = value => (value === -1 ? 'last' : String(value))
 
 const defaultMetadata = () => ({
   unit: 'days',
-  time: moment(moment(new Date()).format('YYYY-MM-DD') + 'T18:00').format(),
+  time: '',
   timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
 })
 
@@ -118,31 +116,6 @@ const SectionLabel = ({ children }) => (
   </Typography>
 )
 
-// Shared time-of-day picker
-const TimeRow = ({ metadata, onUpdate }) => {
-  const { t } = useTranslation('chores')
-  return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mt: 2 }}>
-      <SectionLabel>{t('repeat.picker.timeOfDay')}</SectionLabel>
-      <Input
-        type='time'
-        size='sm'
-        value={moment(metadata?.time).format('HH:mm')}
-        onChange={e =>
-          onUpdate({
-            ...metadata,
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-            time: moment(
-              moment(new Date()).format('YYYY-MM-DD') + 'T' + e.target.value,
-            ).format(),
-          })
-        }
-        sx={{ width: 120 }}
-      />
-    </Box>
-  )
-}
-
 const pillListSx = {
   '--List-gap': '8px',
   '--ListItem-radius': '20px',
@@ -188,10 +161,6 @@ const IntervalSection = ({
           ))}
         </List>
       </Box>
-      <TimeRow
-        metadata={frequencyMetadata}
-        onUpdate={onFrequencyMetadataUpdate}
-      />
     </Box>
   )
 }
@@ -307,11 +276,6 @@ const DaysOfWeekSection = ({
           </List>
         </Box>
       )}
-
-      <TimeRow
-        metadata={frequencyMetadata}
-        onUpdate={onFrequencyMetadataUpdate}
-      />
     </Box>
   )
 }
@@ -363,11 +327,6 @@ const DayOfMonthSection = ({
           sx={{ width: 72 }}
         />
       </Box>
-
-      <TimeRow
-        metadata={frequencyMetadata}
-        onUpdate={onFrequencyMetadataUpdate}
-      />
     </Box>
   )
 }
