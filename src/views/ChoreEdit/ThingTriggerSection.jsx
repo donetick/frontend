@@ -83,7 +83,7 @@ const ThingTriggerSection = ({
       onTriggerUpdate({
         thing: selectedThing,
         condition: condition,
-        triggerState: triggerState,
+        triggerState: String(triggerState),
       })
     }
     if (isValidTrigger(selectedThing, condition, triggerState)) {

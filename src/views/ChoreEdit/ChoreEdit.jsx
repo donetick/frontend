@@ -27,6 +27,8 @@ import {
 } from '@mui/icons-material'
 import {
   Alert,
+  Autocomplete,
+  AutocompleteOption,
   Avatar,
   Box,
   Button,
@@ -34,6 +36,7 @@ import {
   Card,
   Checkbox,
   Chip,
+  ChipDelete,
   Container,
   Divider,
   Dropdown,
@@ -96,6 +99,7 @@ import {
 import { imageSourceToFile } from '../../utils/FileConvert'
 import { isPlusAccount, resolvePhotoURL } from '../../utils/Helpers'
 import { getImageSrc, removeCachedImage } from '../../utils/ImageCache'
+import { filterLabels, sortLabels } from '../../utils/LabelPickerOptions'
 import Priorities from '../../utils/Priorities.jsx'
 import {
   filterMembersForProject,
@@ -150,7 +154,7 @@ const NO_DUE_DATE_REQUIRED_TYPE = ['no_repeat', 'once']
 const NO_DUE_DATE_ALLOWED_TYPE = ['trigger', 'always']
 const NOTIFICATION_FORBIDDEN_TYPE = ['trigger', 'always']
 const ChoreEdit = () => {
-  const { t } = useTranslation('chores')
+  const { i18n, t } = useTranslation('chores')
   // Page-level shortcuts (save/cancel) must defer to whatever modal
   // currently owns the keyboard — see KeyboardShortcutScopeContext.
   const isPageShortcutActive = usePageShortcutScope()
@@ -2306,71 +2310,76 @@ const ChoreEdit = () => {
 
                 <Box mb={2}>
                   <Typography level='h4'>{t('choreEdit.labels')}</Typography>
-                  <Select
+                  <Autocomplete
                     multiple
-                    onChange={(event, newValue) => {
-                      setLabelsV2(
-                        userLabels.filter(l => newValue.indexOf(l.name) > -1),
-                      )
-                    }}
-                    placeholder={t('taskEditor.addLabels')}
-                    value={labelsV2?.map(l => l.name)}
-                    renderValue={selected => (
-                      <Box sx={{ display: 'flex', gap: '0.25rem' }}>
-                        {labelsV2.map(selectedOption => {
-                          return (
-                            <Chip
-                              variant='soft'
-                              color='primary'
-                              key={selectedOption.id}
-                              size='lg'
-                              sx={{
-                                background: selectedOption.color,
-                                color: getTextColorFromBackgroundColor(
-                                  selectedOption.color,
-                                ),
-                              }}
-                            >
-                              {selectedOption.name}
-                            </Chip>
-                          )
-                        })}
-                      </Box>
-                    )}
-                    sx={{ minWidth: 0, width: '100%' }}
+                    disableCloseOnSelect
+                    options={sortLabels(userLabels, i18n.resolvedLanguage)}
+                    value={labelsV2 || []}
+                    getOptionLabel={label => label.name}
+                    isOptionEqualToValue={(option, value) =>
+                      option.id === value.id
+                    }
+                    filterOptions={(options, { inputValue }) =>
+                      filterLabels(options, inputValue)
+                    }
+                    onChange={(event, newValue) => setLabelsV2(newValue)}
+                    placeholder={t('labels:search.placeholder')}
+                    noOptionsText={t('labels:search.noResultsTitle')}
                     slotProps={{
-                      listbox: {
-                        sx: {
-                          width: '100%',
-                        },
-                      },
+                      input: { 'aria-label': t('choreEdit.labels') },
+                      listbox: { sx: { maxHeight: 280 } },
                     }}
-                  >
-                    {userLabels &&
-                      userLabels.map(label => (
-                        <Option key={label.id + label.name} value={label.name}>
-                          <div
-                            style={{
-                              width: '20 px',
-                              height: '20 px',
-                              borderRadius: '50%',
+                    renderOption={(props, label, { selected }) => (
+                      <AutocompleteOption {...props} key={label.id}>
+                        <Box
+                          sx={{
+                            width: 16,
+                            height: 16,
+                            flexShrink: 0,
+                            borderRadius: '50%',
+                            bgcolor: label.color || 'text.secondary',
+                          }}
+                        />
+                        {label.name}
+                        {selected && (
+                          <Check sx={{ ml: 'auto', fontSize: 18 }} />
+                        )}
+                      </AutocompleteOption>
+                    )}
+                    renderTags={(selected, getTagProps) =>
+                      selected.map((label, index) => {
+                        const { key, ...tagProps } = getTagProps({ index })
+                        return (
+                          <Chip
+                            key={label.id}
+                            endDecorator={
+                              <ChipDelete key={key} {...tagProps} />
+                            }
+                            variant='soft'
+                            sx={{
                               background: label.color,
+                              color: getTextColorFromBackgroundColor(
+                                label.color,
+                              ),
                             }}
-                          />
-                          {label.name}
-                        </Option>
-                      ))}
-                    <MenuItem
-                      key={'addNewLabel'}
-                      value={' New Label'}
-                      onClick={() => {
-                        setAddLabelModalOpen(true)
-                      }}
-                    >
-                      <Add />
-                      {t('choreEdit.addNewLabel')}
-                    </MenuItem>
-                  </Select>
+                          >
+                            {label.name}
+                          </Chip>
+                        )
+                      })
+                    }
+                    sx={{ minWidth: 0, width: '100%' }}
+                  />
+                  <Button
+                    size='sm'
+                    variant='plain'
+                    color='neutral'
+                    startDecorator={<Add />}
+                    onClick={() => setAddLabelModalOpen(true)}
+                    sx={{ mt: 0.5 }}
+                  >
+                    {t('choreEdit.addNewLabel')}
+                  </Button>
                 </Box>
               </Box>
             </EditorSection>

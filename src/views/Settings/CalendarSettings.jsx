@@ -22,6 +22,7 @@ import { useTranslation } from 'react-i18next'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
 import { useNotification } from '../../service/NotificationProvider'
+import { copyText } from '../../utils/Clipboard'
 import {
   CreateCalendarURL,
   GetCalendarURL,
@@ -97,7 +98,7 @@ const CalendarSettings = () => {
 
   const copyURL = async () => {
     try {
-      await navigator.clipboard.writeText(calendar.url)
+      if (!(await copyText(calendar.url))) throw new Error('Copy failed')
       showNotification({
         type: 'success',
         message: t('calendar.copied'),

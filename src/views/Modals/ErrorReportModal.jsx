@@ -28,6 +28,7 @@ import {
   SUBMIT_RESULT,
   submitErrorReport,
 } from '../../service/ErrorReportService'
+import { copyText } from '../../utils/Clipboard'
 
 const EASE = 'cubic-bezier(0.22, 1, 0.36, 1)'
 
@@ -135,7 +136,8 @@ const ErrorReportModal = ({ error, errorInfo, onClose, open }) => {
   const reportText = report ? formatErrorReport(report) : ''
 
   const copyDetails = () => {
-    navigator.clipboard.writeText(reportText).then(() => {
+    copyText(reportText).then(copied => {
+      if (!copied) return
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     })
@@ -375,8 +377,8 @@ const ErrorReportModal = ({ error, errorInfo, onClose, open }) => {
             <Button
               variant='soft'
               color={copied ? 'success' : 'primary'}
-              onClick={() => {
-                navigator.clipboard.writeText(report?.reportId ?? '')
+              onClick={async () => {
+                if (!(await copyText(report?.reportId ?? ''))) return
                 setCopied(true)
                 setTimeout(() => setCopied(false), 2000)
               }}
