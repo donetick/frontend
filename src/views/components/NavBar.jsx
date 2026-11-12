@@ -637,6 +637,14 @@ const NavBar = () => {
             sx={{
               '--Drawer-horizontalSize': 'min(72vw, 248px)',
               '@media (min-width: 1024px)': { display: 'none' },
+              // iOS WebKit hides the panel on the next open if the blurred
+              // backdrop is still fading out when the route view transition
+              // snapshots the page, so drop the blur as soon as it closes.
+              '@supports (-webkit-touch-callout: none)': {
+                '&.MuiDrawer-hidden .MuiDrawer-backdrop': {
+                  backdropFilter: 'none',
+                },
+              },
               '& .MuiDrawer-content': {
                 bgcolor: 'background.body',
                 display: 'flex',
