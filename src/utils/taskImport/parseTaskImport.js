@@ -201,8 +201,7 @@ export function parseTaskImportDocument(text, { format = 'template' } = {}) {
         .map(title => ({ title }))
     } else if (format === 'template') {
       const parsed = JSON.parse(text)
-      if (!object(parsed))
-        throw new Error('Expected a DoneTick JSON document.')
+      if (!object(parsed)) throw new Error('Expected a DoneTick JSON document.')
       assertFields(parsed, DOCUMENT_FIELDS)
       if (parsed.format !== 'donetick' || ![1, 2].includes(parsed.version))
         throw new Error('Expected format: donetick and version: 1 or 2.')
