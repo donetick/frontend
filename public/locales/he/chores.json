@@ -1084,6 +1084,8 @@
     "yesterday": "",
     "noteTitle": ""
   },
+  "selectTaskNamed": "בחירת {{name}}",
+  "filterByLabel": "סינון לפי התווית {{name}}",
   "tasksForDate": "משימות ליום {{date}}",
   "createSuggestion": "צור \"{{value}}\""
 }

@@ -50,6 +50,41 @@ const ACTION_MENU_SX = {
   },
 }
 
+// PRODUCT.md: every animation needs a reduced-motion alternative that nulls
+// the transition and the transform.
+const REDUCED_MOTION_SX = {
+  '@media (prefers-reduced-motion: reduce)': {
+    transition: 'none',
+    transform: 'none',
+  },
+}
+
+// Round action button that looks `size` px wide but takes taps across 44px
+// (PRODUCT.md touch target): a transparent ::after reaches past the circle.
+const roundActionSx = size => ({
+  width: size,
+  height: size,
+  borderRadius: '50%',
+  position: 'relative',
+  transition: 'all 0.2s ease',
+  '&::after': {
+    content: '""',
+    position: 'absolute',
+    inset: `${(size - 44) / 2}px`,
+    borderRadius: '50%',
+  },
+  '&:hover': {
+    transform: 'scale(1.05)',
+  },
+  '&:active': {
+    transform: 'scale(0.95)',
+  },
+  '@media (prefers-reduced-motion: reduce)': {
+    transition: 'none',
+    '&:hover, &:active': { transform: 'none' },
+  },
+})
+
 const CompactChoreCard = ({
   chore,
   isDragging = false,
@@ -208,6 +243,12 @@ const CompactChoreCard = ({
           flexShrink: 0,
           overflow: 'hidden',
           transition: 'width 0.3s ease-in-out, margin 0.3s ease-in-out',
+          // Room for a 44px touch target (PRODUCT.md). The margin shrinks by
+          // the same 4px, so the task name stays where it was.
+          ...(showLeadingSlot && {
+            '@media (pointer: coarse)': { width: 44, height: 44, mr: 1 },
+          }),
+          '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
         }}
       >
         {isDragging && (
@@ -219,6 +260,9 @@ const CompactChoreCard = ({
         {/* Complete Button */}
         {showActions && !isDragging && (
           <Box
+            // Faded out in multi-select mode, so keep it out of the
+            // accessibility tree and the tab order too.
+            aria-hidden={isMultiSelectMode || undefined}
             sx={{
               position: 'absolute',
               top: 0,
@@ -235,6 +279,7 @@ const CompactChoreCard = ({
                 ? 'scale(0.8) rotate(45deg)'
                 : 'scale(1) rotate(0deg)',
               pointerEvents: isMultiSelectMode ? 'none' : 'auto',
+              ...REDUCED_MOTION_SX,
             }}
           >
             {chore.status === 3 ? (
@@ -247,22 +292,12 @@ const CompactChoreCard = ({
                     variant='soft'
                     color={completionColor}
                     size='sm'
+                    tabIndex={isMultiSelectMode ? -1 : undefined}
                     onClick={e => {
                       e.stopPropagation()
                       onAction('approve', chore)
                     }}
-                    sx={{
-                      width: 24,
-                      height: 24,
-                      borderRadius: '50%',
-                      transition: 'all 0.2s ease',
-                      '&:hover': {
-                        transform: 'scale(1.05)',
-                      },
-                      '&:active': {
-                        transform: 'scale(0.95)',
-                      },
-                    }}
+                    sx={roundActionSx(24)}
                   >
                     <ThumbUp sx={{ fontSize: 12 }} />
                   </IconButton>
@@ -302,6 +337,7 @@ const CompactChoreCard = ({
                 variant='soft'
                 color={chore.status === 0 ? completionColor : 'warning'}
                 size='sm'
+                tabIndex={isMultiSelectMode ? -1 : undefined}
                 onClick={e => {
                   e.stopPropagation()
                   if (chore.status === 0) {
@@ -318,17 +354,7 @@ const CompactChoreCard = ({
                   notInCompletionWindow(chore)
                 }
                 sx={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: '50%',
-                  transition: 'all 0.2s ease',
-                  '&:hover': {
-                    transform: 'scale(1.05)',
-                  },
-
-                  '&:active': {
-                    transform: 'scale(0.95)',
-                  },
+                  ...roundActionSx(32),
                   '&:disabled': {
                     opacity: 0.5,
                     transform: 'none',
@@ -348,6 +374,8 @@ const CompactChoreCard = ({
         )}
         {/* Multi-select Checkbox */}
         <Box
+          // Invisible outside multi-select mode: no focus, no screen reader.
+          aria-hidden={!isMultiSelectMode || undefined}
           sx={{
             position: 'absolute',
             top: 0,
@@ -363,11 +391,18 @@ const CompactChoreCard = ({
               ? 'scale(1) rotate(0deg)'
               : 'scale(0.8) rotate(-45deg)',
             pointerEvents: isMultiSelectMode ? 'auto' : 'none',
+            ...REDUCED_MOTION_SX,
           }}
         >
           <Checkbox
             checked={isSelected}
             onChange={onSelectionToggle}
+            slotProps={{
+              input: {
+                'aria-label': t('selectTaskNamed', { name: chore.name }),
+                tabIndex: isMultiSelectMode ? undefined : -1,
+              },
+            }}
             sx={{
               bgcolor: 'background.surface',
               borderRadius: 'md',
@@ -502,8 +537,14 @@ const CompactChoreCard = ({
           {/* Labels - show only a couple and summarize the rest with +N */}
           {visibleLabels.map(l => (
             <div
-              role='none'
-              tabIndex={0}
+              key={`compact-chorecard-${chore.id}-label-${l.id}`}
+              // Only a control when there is something to do with it; on Home
+              // the chips are plain text and must not add empty tab stops.
+              {...(onChipClick && {
+                role: 'button',
+                tabIndex: 0,
+                'aria-label': t('filterByLabel', { name: l.name }),
+              })}
               onClick={e => {
                 if (!onChipClick) return
                 e.stopPropagation()
@@ -511,6 +552,7 @@ const CompactChoreCard = ({
               }}
               onKeyDown={e => {
                 if (onChipClick && (e.key === 'Enter' || e.key === ' ')) {
+                  e.preventDefault()
                   e.stopPropagation()
                   onChipClick({ label: l })
                 }
@@ -522,7 +564,6 @@ const CompactChoreCard = ({
                 display: 'inline-flex',
                 alignItems: 'center',
               }}
-              key={`compact-chorecard-${chore.id}-label-${l.id}`}
             >
               <Chip
                 variant='solid'
