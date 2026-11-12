@@ -142,7 +142,7 @@ registerSearchProvider({
   id: 'settings',
   getDocuments: ({ isParent, t }) =>
     SETTINGS_SECTIONS.filter(({ parentOnly }) => !parentOnly || isParent).map(
-      ({ id }) =>
+      ({ id, to }) =>
         document('settings', {
           id: `setting:${id}`,
           entityId: id,
@@ -150,7 +150,7 @@ registerSearchProvider({
           subtitle: 'Settings',
           body: t(`overview.sections.${id}.description`),
           keywords: `preferences configuration ${id}`,
-          route: `/settings/${id}`,
+          route: to ?? `/settings/${id}`,
         }),
     ),
 })

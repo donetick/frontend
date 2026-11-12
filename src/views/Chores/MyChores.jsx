@@ -33,6 +33,7 @@ import EmptyState from '../../components/common/EmptyState'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useNavBarTitle } from '../../contexts/NavBarTitleContext'
+import { TEMPLATE_ENTRY_POINT } from '../../data/taskTemplates'
 import { useFilter } from '../../hooks/useFilter'
 import { useChores } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
@@ -1335,9 +1336,13 @@ const MyChores = () => {
                 startDecorator: <Add />,
                 onClick: () => setAddTaskModalOpen(true),
               }}
+              // An empty workspace is where a ready-made set of tasks is worth
+              // most, so this replaces the old "More options" link to the full
+              // create page: that was the same action with more fields, not a
+              // different way in.
               secondaryAction={{
-                label: t('chores:empty.moreOptions'),
-                onClick: () => Navigate('/chores/create'),
+                label: t('chores:empty.browseTemplates'),
+                to: `/templates?from=${TEMPLATE_ENTRY_POINT.EMPTY_STATE}`,
               }}
             />
           ) : isNarrowed &&
@@ -1380,9 +1385,16 @@ const MyChores = () => {
                 startDecorator: <Add />,
                 onClick: () => setAddTaskModalOpen(true),
               }}
+              // Someone who just made a project called "Car" and found it
+              // empty is the strongest intent signal the app gets, so the
+              // project name seeds the search. This takes the slot that led
+              // back out to unfiled tasks — the project switcher already does
+              // that, and leaving is the weaker thing to offer here.
               secondaryAction={{
-                label: t('chores:empty.seeOutsideProjects'),
-                onClick: () => setSelectedProjectWithCache(null),
+                label: t('chores:empty.browseTemplates'),
+                to:
+                  `/templates?from=${TEMPLATE_ENTRY_POINT.PROJECT_EMPTY_STATE}` +
+                  `&q=${encodeURIComponent(selectedProject.name)}`,
               }}
             />
           ) : (

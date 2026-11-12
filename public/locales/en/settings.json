@@ -112,6 +112,10 @@
         "title": "Calendar Sync",
         "description": "Subscribe to your tasks from Apple Calendar, Google Calendar, Outlook, or another calendar app."
       },
+      "templates": {
+        "title": "Templates",
+        "description": "Ready-made sets of recurring tasks for the things you own. Pick one, personalize it, and add them all at once."
+      },
       "storage": {
         "title": "Storage & backups",
         "description": "Backup and restore your data, manage local storage and sync preferences."
