@@ -530,7 +530,7 @@ export const useProjectView = projectId => {
   // undefined (not 'board') while projects haven't loaded yet or this one
   // isn't in the cache, so callers that only apply a saved view once it
   // actually arrives don't briefly stomp it with the default.
-return { data: project ? project.view || 'default' : undefined }
+  return { data: project ? project.view || 'default' : undefined }
 }
 
 export const useSetProjectView = () => {

@@ -1,0 +1,2101 @@
+[
+  {
+    "id": "home-reset",
+    "name": "Weekly home reset",
+    "category": "cleaning",
+    "description": "One cleaning job per weekday instead of a lost Saturday. The rotation most cleaning routines are built on.",
+    "capabilities": [
+      {
+        "id": "zones",
+        "label": "Monthly deep-clean zone",
+        "description": "Rotate one room or zone through a deeper clean each month."
+      },
+      {
+        "id": "paperwork",
+        "label": "Mail and paperwork",
+        "description": "Keep the paper pile from becoming a project."
+      }
+    ],
+    "document": {
+      "format": "donetick",
+      "version": 2,
+      "title": "Weekly home reset",
+      "inputs": [
+        {
+          "name": "item",
+          "label": "Which home",
+          "default": "Home"
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Reset the kitchen before bed — {{ item }}",
+          "description": "Counters clear, sink empty, dishwasher running.",
+          "repeat": "every day"
+        },
+        {
+          "title": "Laundry day: wash, dry, fold, put away — {{ item }}",
+          "repeat": "every monday"
+        },
+        {
+          "title": "Bathroom day: wipe, scrub, restock — {{ item }}",
+          "repeat": "every tuesday"
+        },
+        {
+          "title": "Dusting day: surfaces from the top down — {{ item }}",
+          "repeat": "every wednesday"
+        },
+        {
+          "title": "Floor day: vacuum and mop — {{ item }}",
+          "repeat": "every thursday"
+        },
+        {
+          "title": "Catch-all day: the one job you keep skipping — {{ item }}",
+          "repeat": "every friday"
+        },
+        {
+          "title": "Change the bed linens — {{ item }}",
+          "repeat": "every week"
+        },
+        {
+          "title": "Deep clean one zone from top to bottom — {{ item }}",
+          "description": "Pick a different room or zone each month so every space comes round.",
+          "repeat": "every month",
+          "capability": "zones"
+        },
+        {
+          "title": "Sort the mail and file what matters — {{ item }}",
+          "repeat": "every week",
+          "capability": "paperwork"
+        },
+        {
+          "title": "Clear the paper pile and shred the rest — {{ item }}",
+          "repeat": "every month",
+          "capability": "paperwork"
+        }
+      ]
+    }
+  },
+  {
+    "id": "room-cleaning",
+    "name": "Room cleaning",
+    "category": "cleaning",
+    "description": "Top to bottom, dry before wet. Name it once per room and reuse it for every room you have.",
+    "capabilities": [
+      {
+        "id": "hardFloors",
+        "label": "Hard floors",
+        "description": "Mopping and sealing for tile, wood, vinyl, or laminate."
+      },
+      {
+        "id": "carpet",
+        "label": "Carpet or rugs",
+        "description": "Deeper cycles that only soft floors need."
+      },
+      {
+        "id": "upholstery",
+        "label": "Upholstered furniture",
+        "description": "Sofas, armchairs, and cushion covers."
+      }
+    ],
+    "document": {
+      "format": "donetick",
+      "version": 2,
+      "title": "Room cleaning",
+      "inputs": [
+        {
+          "name": "item",
+          "label": "Which room",
+          "default": "Living room"
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Clear the surfaces and put things away — {{ item }}",
+          "repeat": "every day"
+        },
+        {
+          "title": "Dust from the top down — {{ item }}",
+          "description": "Shelves and frames before furniture, furniture before the floor.",
+          "repeat": "every week"
+        },
+        {
+          "title": "Wipe the high-touch spots — {{ item }}",
+          "description": "Switches, handles, remotes, door edges.",
+          "repeat": "every week"
+        },
+        {
+          "title": "Vacuum the floor and the edges — {{ item }}",
+          "repeat": "every week"
+        },
+        {
+          "title": "Empty and wipe out the bin — {{ item }}",
+          "repeat": "every week"
+        },
+        {
+          "title": "Wipe the skirting boards and door frames — {{ item }}",
+          "repeat": "every 3 months"
+        },
+        {
+          "title": "Clean the light fixtures and ceiling corners — {{ item }}",
+          "repeat": "every 3 months"
+        },
+        {
+          "title": "Move the furniture and clean underneath — {{ item }}",
+          "repeat": "every 6 months"
+        },
+        {
+          "title": "Mop the floor — {{ item }}",
+          "repeat": "every week",
+          "capability": "hardFloors"
+        },
+        {
+          "title": "Refresh the floor polish or sealer — {{ item }}",
+          "repeat": "every 12 months",
+          "capability": "hardFloors"
+        },
+        {
+          "title": "Lift the rugs and vacuum underneath — {{ item }}",
+          "repeat": "every 3 months",
+          "capability": "carpet"
+        },
+        {
+          "title": "Deep clean the carpet or rugs — {{ item }}",
+          "repeat": "every 12 months",
+          "capability": "carpet"
+        },
+        {
+          "title": "Vacuum the upholstery and under the cushions — {{ item }}",
+          "repeat": "every month",
+          "capability": "upholstery"
+        },
+        {
+          "title": "Wash the cushion covers and throws — {{ item }}",
+          "repeat": "every 3 months",
+          "capability": "upholstery"
+        }
+      ]
+    }
+  },
+  {
+    "id": "bedroom",
+    "name": "Bedroom",
+    "category": "cleaning",
+    "description": "The bedding and sleep-surface cycles no other room has. One entry per bedroom.",
+    "capabilities": [
+      {
+        "id": "wardrobe",
+        "label": "Wardrobe or closet",
+        "description": "Seasonal sorting and shelf cleaning."
+      },
+      {
+        "id": "curtains",
+        "label": "Curtains or blinds",
+        "description": "Window dressing that collects more dust than it looks like."
+      }
+    ],
+    "document": {
+      "format": "donetick",
+      "version": 2,
+      "title": "Bedroom",
+      "inputs": [
+        {
+          "name": "item",
+          "label": "Which bedroom",
+          "default": "Bedroom"
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Make the bed and air out the room — {{ item }}",
+          "repeat": "every day"
+        },
+        {
+          "title": "Change the bed sheets and pillowcases — {{ item }}",
+          "repeat": "every week"
+        },
+        {
+          "title": "Vacuum the floor, including under the bed — {{ item }}",
+          "repeat": "every week"
+        },
+        {
+          "title": "Dust the surfaces and the headboard — {{ item }}",
+          "repeat": "every week"
+        },
+        {
+          "title": "Wash the mattress protector — {{ item }}",
+          "repeat": "every month"
+        },
+        {
+          "title": "Vacuum the mattress — {{ item }}",
+          "repeat": "every 3 months"
+        },
+        {
+          "title": "Rotate the mattress — {{ item }}",
+          "repeat": "every 6 months"
+        },
+        {
+          "title": "Wash the duvet and the pillows — {{ item }}",
+          "repeat": "every 6 months",
+          "subtasks": [
+            "Wash the duvet or comforter",
+            "Wash the pillows",
+            "Dry both fully before making the bed"
+          ]
+        },
+        {
+          "title": "Sort the wardrobe and set aside what you never wear — {{ item }}",
+          "repeat": "every 6 months",
+          "capability": "wardrobe"
+        },
+        {
+          "title": "Wipe the wardrobe shelves and rails — {{ item }}",
+          "repeat": "every 6 months",
+          "capability": "wardrobe"
+        },
+        {
+          "title": "Dust the curtains or blinds — {{ item }}",
+          "repeat": "every month",
+          "capability": "curtains"
+        },
+        {
+          "title": "Wash the curtains — {{ item }}",
+          "repeat": "every 6 months",
+          "capability": "curtains"
+        }
+      ]
+    }
+  },
+  {
+    "id": "bathroom",
+    "name": "Bathroom",
+    "category": "cleaning",
+    "description": "Daily wipe-downs plus the descaling and grout work that gets skipped for years.",
+    "capabilities": [
+      {
+        "id": "showerCurtain",
+        "label": "Shower curtain",
+        "description": "Curtain and liner washing instead of a glass screen."
+      },
+      {
+        "id": "extractorFan",
+        "label": "Extractor fan",
+        "description": "The vent that quietly stops pulling moisture out."
+      }
+    ],
+    "document": {
+      "format": "donetick",
+      "version": 2,
+      "title": "Bathroom",
+      "inputs": [
+        {
+          "name": "item",
+          "label": "Which bathroom",
+          "default": "Bathroom"
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Wipe the sink, counter, and taps — {{ item }}",
+          "repeat": "every day"
+        },
+        {
+          "title": "Clean the toilet, inside and out — {{ item }}",
+          "repeat": "every week"
+        },
+        {
+          "title": "Scrub the shower and the tub — {{ item }}",
+          "repeat": "every week"
+        },
+        {
+          "title": "Clean the mirror and the glass — {{ item }}",
+          "repeat": "every week"
+        },
+        {
+          "title": "Swap the towels and wash the bath mat — {{ item }}",
+          "repeat": "every week"
+        },
+        {
+          "title": "Mop the floor and behind the toilet — {{ item }}",
+          "repeat": "every week"
+        },
+        {
+          "title": "Clear the sink and shower drains — {{ item }}",
+          "repeat": "every month"
+        },
+        {
+          "title": "Descale the shower head and the taps — {{ item }}",
+          "repeat": "every 3 months"
+        },
+        {
+          "title": "Restock the paper, soap, and cleaning supplies — {{ item }}",
+          "repeat": "every month"
+        },
+        {
+          "title": "Scrub the grout and reseal what has cracked — {{ item }}",
+          "repeat": "every 12 months"
+        },
+        {
+          "title": "Wash the shower curtain and liner — {{ item }}",
+          "repeat": "every month",
+          "capability": "showerCurtain"
+        },
+        {
+          "title": "Clean the extractor fan cover and grille — {{ item }}",
+          "repeat": "every 3 months",
+          "capability": "extractorFan"
+        }
+      ]
+    }
+  },
+  {
+    "id": "windows",
+    "name": "Windows & glass",
+    "category": "cleaning",
+    "description": "Seasonal glass, plus the tracks and screens that cause the draughts and the mould.",
+    "capabilities": [
+      {
+        "id": "exterior",
+        "label": "Reachable outside glass",
+        "description": "Outside faces you can wash without climbing."
+      },
+      {
+        "id": "screens",
+        "label": "Insect screens",
+        "description": "Screens that need rinsing and checking for tears."
+      },
+      {
+        "id": "blinds",
+        "label": "Blinds or shades",
+        "description": "Slats and fabric shades at the window."
+      }
+    ],
+    "document": {
+      "format": "donetick",
+      "version": 2,
+      "title": "Windows & glass",
+      "inputs": [
+        {
+          "name": "item",
+          "label": "Which windows",
+          "default": "Windows"
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Wipe the sills and the frames — {{ item }}",
+          "repeat": "every month"
+        },
+        {
+          "title": "Wash the inside of the glass — {{ item }}",
+          "description": "Overcast days only. Direct sun dries the solution into streaks.",
+          "repeat": "every 3 months"
+        },
+        {
+          "title": "Clean the tracks and clear the drainage holes — {{ item }}",
+          "repeat": "every 6 months"
+        },
+        {
+          "title": "Check the seals and the condensation — {{ item }}",
+          "repeat": "every 6 months"
+        },
+        {
+          "title": "Wash the outside of the glass — {{ item }}",
+          "repeat": "every 6 months",
+          "capability": "exterior"
+        },
+        {
+          "title": "Rinse and wipe the screens — {{ item }}",
+          "repeat": "every 6 months",
+          "capability": "screens"
+        },
+        {
+          "title": "Check the screens for tears and loose frames — {{ item }}",
+          "repeat": "every 12 months",
+          "capability": "screens"
+        },
+        {
+          "title": "Dust the blinds or shades — {{ item }}",
+          "repeat": "every month",
+          "capability": "blinds"
+        },
+        {
+          "title": "Deep clean the blinds or shades — {{ item }}",
+          "repeat": "every 12 months",
+          "capability": "blinds"
+        }
+      ]
+    }
+  },
+  {
+    "id": "refrigerator",
+    "name": "Refrigerator",
+    "category": "kitchen",
+    "description": "Coil cleaning and seal checks. Add the parts your model has.",
+    "capabilities": [
+      {
+        "id": "waterDispenser",
+        "label": "Water or ice dispenser",
+        "description": "Water filter replacement."
+      },
+      {
+        "id": "manualDefrost",
+        "label": "Manual-defrost freezer",
+        "description": "Skip this if your freezer is frost-free."
+      }
+    ],
+    "document": {
+      "format": "donetick",
+      "version": 2,
+      "title": "Refrigerator",
+      "inputs": [
+        {
+          "name": "item",
+          "label": "Name or location",
+          "default": "Refrigerator"
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Clean condenser coils — {{ item }}",
+          "repeat": "every 12 months"
+        },
+        {
+          "title": "Check door seals — {{ item }}",
+          "repeat": "every 6 months"
+        },
+        {
+          "title": "Replace the water filter — {{ item }}",
+          "repeat": "every 6 months",
+          "capability": "waterDispenser"
+        },
+        {
+          "title": "Defrost the freezer — {{ item }}",
+          "repeat": "every 12 months",
+          "capability": "manualDefrost"
+        }
+      ]
+    }
+  },
+  {
+    "id": "dishwasher",
+    "name": "Dishwasher",
+    "category": "kitchen",
+    "description": "Keep filters, spray arms, and the wash system clean.",
+    "document": {
+      "format": "donetick",
+      "version": 2,
+      "title": "Dishwasher",
+      "inputs": [
+        {
+          "name": "item",
+          "label": "Name or location",
+          "default": "Dishwasher"
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Clean the filter — {{ item }}",
+          "repeat": "every month"
+        },
+        {
+          "title": "Inspect spray arms — {{ item }}",
+          "repeat": "every 6 months"
+        },
+        {
+          "title": "Run a descaling cycle — {{ item }}",
+          "repeat": "every 6 months"
+        }
+      ]
+    }
+  },
+  {
+    "id": "oven",
+    "name": "Oven",
+    "category": "kitchen",
+    "description": "Interior cleaning and routine seal and burner checks.",
+    "capabilities": [
+      {
+        "id": "rangeHood",
+        "label": "Range hood or extractor",
+        "description": "Grease filter cleaning and charcoal filter replacement."
+      }
+    ],
+    "document": {
+      "format": "donetick",
+      "version": 2,
+      "title": "Oven",
+      "inputs": [
+        {
+          "name": "item",
+          "label": "Name or location",
+          "default": "Oven"
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Clean the oven interior — {{ item }}",
+          "repeat": "every 3 months"
+        },
+        {
+          "title": "Inspect door seals — {{ item }}",
+          "repeat": "every 6 months"
+        },
+        {
+          "title": "Check and clean burners — {{ item }}",
+          "repeat": "every 6 months"
+        },
+        {
+          "title": "Degrease the range hood filter — {{ item }}",
+          "repeat": "every 3 months",
+          "capability": "rangeHood"
+        },
+        {
+          "title": "Replace the range hood charcoal filter — {{ item }}",
+          "repeat": "every 6 months",
+          "capability": "rangeHood"
+        }
+      ]
+    }
+  },
+  {
+    "id": "microwave",
+    "name": "Microwave",
+    "category": "kitchen",
+    "description": "A simple routine for a clean interior and turntable.",
+    "document": {
+      "format": "donetick",
+      "version": 2,
+      "title": "Microwave",
+      "inputs": [
+        {
+          "name": "item",
+          "label": "Name or location",
+          "default": "Microwave"
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Clean the interior — {{ item }}",
+          "repeat": "every month"
+        },
+        {
+          "title": "Inspect door seals — {{ item }}",
+          "repeat": "every 6 months"
+        },
+        {
+          "title": "Check and clean the turntable — {{ item }}",
+          "repeat": "every 6 months"
+        }
+      ]
+    }
+  },
+  {
+    "id": "coffee-maker",
+    "name": "Coffee maker",
+    "category": "kitchen",
+    "description": "Cleaning, descaling, and water filter reminders.",
+    "capabilities": [
+      {
+        "id": "grinder",
+        "label": "Built-in grinder",
+        "description": "Grinder cleaning to keep oils from going stale."
+      }
+    ],
+    "document": {
+      "format": "donetick",
+      "version": 2,
+      "title": "Coffee maker",
+      "inputs": [
+        {
+          "name": "item",
+          "label": "Name or location",
+          "default": "Coffee maker"
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Clean the coffee maker — {{ item }}",
+          "repeat": "every month"
+        },
+        {
+          "title": "Descale the coffee maker — {{ item }}",
+          "repeat": "every 3 months"
+        },
+        {
+          "title": "Replace the water filter — {{ item }}",
+          "repeat": "every 6 months"
+        },
+        {
+          "title": "Clean the grinder — {{ item }}",
+          "repeat": "every 3 months",
+          "capability": "grinder"
+        }
+      ]
+    }
+  },
+  {
+    "id": "washing-machine",
+    "name": "Washing machine",
+    "category": "homeAppliances",
+    "description": "Routine cleaning cycles and filter care.",
+    "document": {
+      "format": "donetick",
+      "version": 2,
+      "title": "Washing machine",
+      "inputs": [
+        {
+          "name": "item",
+          "label": "Name or location",
+          "default": "Washing machine"
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Run a cleaning cycle — {{ item }}",
+          "repeat": "every 3 months"
+        },
+        {
+          "title": "Clean the filter — {{ item }}",
+          "repeat": "every 3 months"
+        }
+      ]
+    }
+  },
+  {
+    "id": "dryer",
+    "name": "Dryer",
+    "category": "homeAppliances",
+    "description": "Lint trap and vent maintenance. Clean the lint filter after every load as well.",
+    "document": {
+      "format": "donetick",
+      "version": 2,
+      "title": "Dryer",
+      "inputs": [
+        {
+          "name": "item",
+          "label": "Name or location",
+          "default": "Dryer"
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Inspect and clean the lint filter — {{ item }}",
+          "repeat": "every week"
+        },
+        {
+          "title": "Deep clean the lint trap — {{ item }}",
+          "repeat": "every 3 months"
+        },
+        {
+          "title": "Clean the dryer vent — {{ item }}",
+          "repeat": "every 12 months"
+        }
+      ]
+    }
+  },
+  {
+    "id": "robot-vacuum",
+    "name": "Robot vacuum",
+    "category": "homeAppliances",
+    "description": "Filter and brush care for any robot vacuum. Add the parts your model has.",
+    "capabilities": [
+      {
+        "id": "baseStation",
+        "label": "Self-emptying base",
+        "description": "Dust bag replacement. Adjust the interval to your model."
+      },
+      {
+        "id": "mop",
+        "label": "Mopping pad and tank",
+        "description": "Water tank refills and mopping pad care."
+      }
+    ],
+    "document": {
+      "format": "donetick",
+      "version": 2,
+      "title": "Robot vacuum",
+      "inputs": [
+        {
+          "name": "item",
+          "label": "Name or location",
+          "default": "Robot vacuum"
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Clean the filter — {{ item }}",
+          "repeat": "every month"
+        },
+        {
+          "title": "Change the brush roller — {{ item }}",
+          "repeat": "every 4 months"
+        },
+        {
+          "title": "Deep clean the filter — {{ item }}",
+          "repeat": "every 3 months"
+        },
+        {
+          "title": "Replace the filter — {{ item }}",
+          "repeat": "every 6 months"
+        },
+        {
+          "title": "Replace the base station dust bag — {{ item }}",
+          "repeat": "every month",
+          "capability": "baseStation"
+        },
+        {
+          "title": "Clean the mopping pad — {{ item }}",
+          "repeat": "every month",
+          "capability": "mop"
+        },
+        {
+          "title": "Refill the water tank — {{ item }}",
+          "repeat": "every 2 weeks",
+          "subtasks": ["Empty the water tank", "Refill the water tank"],
+          "capability": "mop"
+        },
+        {
+          "title": "Change the mopping pad — {{ item }}",
+          "repeat": "every 6 months",
+          "capability": "mop"
+        }
+      ]
+    }
+  },
+  {
+    "id": "vacuum-cleaner",
+    "name": "Vacuum cleaner",
+    "category": "homeAppliances",
+    "description": "Filter, bin, and brush care for an upright, canister, or stick vacuum.",
+    "capabilities": [
+      {
+        "id": "bagged",
+        "label": "Bagged model",
+        "description": "Dust bag replacement instead of emptying a bin."
+      },
+      {
+        "id": "beaterBar",
+        "label": "Motorized brush roll",
+        "description": "Hair and thread removal from the brush."
+      }
+    ],
+    "document": {
+      "format": "donetick",
+      "version": 2,
+      "title": "Vacuum cleaner",
+      "inputs": [
+        {
+          "name": "item",
+          "label": "Name or location",
+          "default": "Vacuum cleaner"
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Empty the dust bin — {{ item }}",
+          "repeat": "every week"
+        },
+        {
+          "title": "Rinse or tap out the filter — {{ item }}",
+          "repeat": "every month"
+        },
+        {
+          "title": "Replace the filter — {{ item }}",
+          "repeat": "every 12 months"
+        },
+        {
+          "title": "Check the hose and seals for blockages — {{ item }}",
+          "repeat": "every 6 months"
+        },
+        {
+          "title": "Replace the dust bag — {{ item }}",
+          "repeat": "every 2 months",
+          "capability": "bagged"
+        },
+        {
+          "title": "Clear hair from the brush roll — {{ item }}",
+          "repeat": "every month",
+          "capability": "beaterBar"
+        }
+      ]
+    }
+  },
+  {
+    "id": "air-purifier",
+    "name": "Air purifier",
+    "category": "homeAppliances",
+    "description": "Filter replacements and intake cleaning so airflow stays effective.",
+    "capabilities": [
+      {
+        "id": "airQualitySensor",
+        "label": "Air quality sensor",
+        "description": "Sensor cleaning so readings stay accurate."
+      }
+    ],
+    "document": {
+      "format": "donetick",
+      "version": 2,
+      "title": "Air purifier",
+      "inputs": [
+        {
+          "name": "item",
+          "label": "Name or location",
+          "default": "Air purifier"
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Check the filter indicator — {{ item }}",
+          "repeat": "every month"
+        },
+        {
+          "title": "Vacuum the pre-filter — {{ item }}",
+          "repeat": "every month"
+        },
+        {
+          "title": "Replace the carbon filter — {{ item }}",
+          "repeat": "every 6 months"
+        },
+        {
+          "title": "Replace the HEPA filter — {{ item }}",
+          "repeat": "every 12 months"
+        },
+        {
+          "title": "Wipe the intake grille — {{ item }}",
+          "repeat": "every 3 months"
+        },
+        {
+          "title": "Clean the air quality sensor — {{ item }}",
+          "repeat": "every 3 months",
+          "capability": "airQualitySensor"
+        }
+      ]
+    }
+  },
+  {
+    "id": "hvac",
+    "name": "HVAC system",
+    "category": "homeSystems",
+    "description": "Recurring filter care and professional system inspections.",
+    "document": {
+      "format": "donetick",
+      "version": 2,
+      "title": "HVAC system",
+      "inputs": [
+        {
+          "name": "item",
+          "label": "Name or location",
+          "default": "HVAC system"
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Replace the air filter — {{ item }}",
+          "repeat": "every 3 months"
+        },
+        {
+          "title": "Inspect ductwork — {{ item }}",
+          "repeat": "every 6 months"
+        },
+        {
+          "title": "Clean condenser coils — {{ item }}",
+          "repeat": "every 24 months"
+        },
+        {
+          "title": "Have refrigerant levels checked by a qualified technician — {{ item }}",
+          "repeat": "every 24 months"
+        }
+      ]
+    }
+  },
+  {
+    "id": "water-heater",
+    "name": "Water heater",
+    "category": "homeSystems",
+    "description": "Annual tank and safety checks. Follow your manual and use a professional where needed.",
+    "document": {
+      "format": "donetick",
+      "version": 2,
+      "title": "Water heater",
+      "inputs": [
+        {
+          "name": "item",
+          "label": "Name or location",
+          "default": "Water heater"
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Inspect the anode rod — {{ item }}",
+          "repeat": "every 12 months"
+        },
+        {
+          "title": "Flush the tank — {{ item }}",
+          "repeat": "every 12 months"
+        },
+        {
+          "title": "Check the temperature and pressure relief valve — {{ item }}",
+          "repeat": "every 12 months"
+        }
+      ]
+    }
+  },
+  {
+    "id": "home-safety-devices",
+    "name": "Home safety devices",
+    "category": "homeSystems",
+    "description": "Alarm tests, batteries, and expiry checks. Add the devices your home has.",
+    "capabilities": [
+      {
+        "id": "coAlarm",
+        "label": "Carbon monoxide alarm",
+        "description": "Monthly test for a separate or combined CO alarm."
+      },
+      {
+        "id": "fireExtinguisher",
+        "label": "Fire extinguisher",
+        "description": "Gauge, seal, and service-date checks."
+      },
+      {
+        "id": "leakSensors",
+        "label": "Water leak sensors",
+        "description": "Sensor tests and battery replacement."
+      }
+    ],
+    "document": {
+      "format": "donetick",
+      "version": 2,
+      "title": "Home safety devices",
+      "inputs": [
+        {
+          "name": "item",
+          "label": "Name or location",
+          "default": "Home"
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Test the smoke alarms — {{ item }}",
+          "repeat": "every month"
+        },
+        {
+          "title": "Vacuum dust from the alarms — {{ item }}",
+          "repeat": "every 6 months"
+        },
+        {
+          "title": "Replace the smoke alarm batteries — {{ item }}",
+          "repeat": "every 12 months"
+        },
+        {
+          "title": "Check the alarm expiry dates — {{ item }}",
+          "repeat": "every 12 months"
+        },
+        {
+          "title": "Test the carbon monoxide alarm — {{ item }}",
+          "repeat": "every month",
+          "capability": "coAlarm"
+        },
+        {
+          "title": "Check the fire extinguisher gauge and seal — {{ item }}",
+          "repeat": "every 6 months",
+          "capability": "fireExtinguisher"
+        },
+        {
+          "title": "Test the water leak sensors — {{ item }}",
+          "repeat": "every 6 months",
+          "subtasks": ["Trigger each sensor", "Replace low batteries"],
+          "capability": "leakSensors"
+        }
+      ]
+    }
+  },
+  {
+    "id": "water-filtration",
+    "name": "Water filtration",
+    "category": "homeSystems",
+    "description": "Cartridge changes and leak checks for a whole-home or under-sink system.",
+    "capabilities": [
+      {
+        "id": "softener",
+        "label": "Water softener",
+        "description": "Salt refills and brine tank checks."
+      },
+      {
+        "id": "reverseOsmosis",
+        "label": "Reverse osmosis",
+        "description": "Membrane replacement and tank sanitizing."
+      }
+    ],
+    "document": {
+      "format": "donetick",
+      "version": 2,
+      "title": "Water filtration",
+      "inputs": [
+        {
+          "name": "item",
+          "label": "Name or location",
+          "default": "Water filtration"
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Replace the sediment filter — {{ item }}",
+          "repeat": "every 6 months"
+        },
+        {
+          "title": "Replace the carbon filter — {{ item }}",
+          "repeat": "every 6 months"
+        },
+        {
+          "title": "Check the fittings for leaks — {{ item }}",
+          "repeat": "every 3 months"
+        },
+        {
+          "title": "Test the water quality — {{ item }}",
+          "repeat": "every 12 months"
+        },
+        {
+          "title": "Refill the softener salt — {{ item }}",
+          "repeat": "every 2 months",
+          "capability": "softener"
+        },
+        {
+          "title": "Check the brine tank for salt bridges — {{ item }}",
+          "repeat": "every 6 months",
+          "capability": "softener"
+        },
+        {
+          "title": "Sanitize the storage tank — {{ item }}",
+          "repeat": "every 12 months",
+          "capability": "reverseOsmosis"
+        },
+        {
+          "title": "Replace the RO membrane — {{ item }}",
+          "repeat": "every 24 months",
+          "capability": "reverseOsmosis"
+        }
+      ]
+    }
+  },
+  {
+    "id": "car",
+    "name": "Car",
+    "category": "vehicles",
+    "description": "Tires, fluids, and renewals. Add the drivetrain and tires yours uses.",
+    "capabilities": [
+      {
+        "id": "combustion",
+        "label": "Petrol or diesel engine",
+        "description": "Oil, engine air filter, and fluid level checks."
+      },
+      {
+        "id": "ev",
+        "label": "Electric or hybrid",
+        "description": "Battery health and charging equipment checks."
+      },
+      {
+        "id": "winterTires",
+        "label": "Seasonal tire swap",
+        "description": "Two reminders a year for changing tire sets."
+      }
+    ],
+    "document": {
+      "format": "donetick",
+      "version": 2,
+      "title": "Car",
+      "inputs": [
+        {
+          "name": "item",
+          "label": "Name or plate",
+          "default": "Car"
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Check the tire pressure — {{ item }}",
+          "repeat": "every month"
+        },
+        {
+          "title": "Rotate the tires — {{ item }}",
+          "repeat": "every 6 months",
+          "subtasks": ["Rotate front to rear", "Check the tread depth"]
+        },
+        {
+          "title": "Top up the washer fluid — {{ item }}",
+          "repeat": "every 3 months"
+        },
+        {
+          "title": "Check the 12V battery terminals — {{ item }}",
+          "repeat": "every 6 months"
+        },
+        {
+          "title": "Have the brakes inspected — {{ item }}",
+          "repeat": "every 12 months"
+        },
+        {
+          "title": "Replace the cabin air filter — {{ item }}",
+          "repeat": "every 12 months"
+        },
+        {
+          "title": "Replace the wiper blades — {{ item }}",
+          "repeat": "every 12 months"
+        },
+        {
+          "title": "Renew the registration and insurance — {{ item }}",
+          "repeat": "every 12 months"
+        },
+        {
+          "title": "Check the coolant and brake fluid levels — {{ item }}",
+          "repeat": "every 3 months",
+          "capability": "combustion"
+        },
+        {
+          "title": "Change the oil and filter — {{ item }}",
+          "repeat": "every 6 months",
+          "capability": "combustion"
+        },
+        {
+          "title": "Replace the engine air filter — {{ item }}",
+          "repeat": "every 12 months",
+          "capability": "combustion"
+        },
+        {
+          "title": "Inspect the charging cable and port — {{ item }}",
+          "repeat": "every 3 months",
+          "capability": "ev"
+        },
+        {
+          "title": "Check the high-voltage battery health — {{ item }}",
+          "repeat": "every 6 months",
+          "capability": "ev"
+        },
+        {
+          "title": "Swap the tire set for the season — {{ item }}",
+          "repeat": "every 6 months",
+          "subtasks": ["Store the other set clean and dry"],
+          "capability": "winterTires"
+        }
+      ]
+    }
+  },
+  {
+    "id": "bicycle",
+    "name": "Bicycle",
+    "category": "vehicles",
+    "description": "Drivetrain, brake, and bolt checks. Add what your bike has.",
+    "capabilities": [
+      {
+        "id": "ebike",
+        "label": "Electric assist",
+        "description": "Battery care and motor firmware checks."
+      },
+      {
+        "id": "hydraulicBrakes",
+        "label": "Hydraulic disc brakes",
+        "description": "Annual bleed and rotor checks."
+      }
+    ],
+    "document": {
+      "format": "donetick",
+      "version": 2,
+      "title": "Bicycle",
+      "inputs": [
+        {
+          "name": "item",
+          "label": "Name or location",
+          "default": "Bicycle"
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Check the tire pressure — {{ item }}",
+          "repeat": "every week"
+        },
+        {
+          "title": "Clean and lubricate the chain — {{ item }}",
+          "repeat": "every month"
+        },
+        {
+          "title": "Check the brake pads — {{ item }}",
+          "repeat": "every 3 months"
+        },
+        {
+          "title": "Check that the bolts are torqued — {{ item }}",
+          "repeat": "every 3 months"
+        },
+        {
+          "title": "Measure the chain wear — {{ item }}",
+          "repeat": "every 6 months"
+        },
+        {
+          "title": "Deep clean the drivetrain — {{ item }}",
+          "repeat": "every 6 months"
+        },
+        {
+          "title": "Book an annual service — {{ item }}",
+          "repeat": "every 12 months"
+        },
+        {
+          "title": "Charge the battery to its storage level — {{ item }}",
+          "repeat": "every month",
+          "capability": "ebike"
+        },
+        {
+          "title": "Check the motor firmware and connections — {{ item }}",
+          "repeat": "every 6 months",
+          "capability": "ebike"
+        },
+        {
+          "title": "Bleed the hydraulic brakes — {{ item }}",
+          "repeat": "every 12 months",
+          "capability": "hydraulicBrakes"
+        }
+      ]
+    }
+  },
+  {
+    "id": "motorcycle",
+    "name": "Motorcycle",
+    "category": "vehicles",
+    "description": "Fluids, tires, and renewals, plus chain and storage care if you need them.",
+    "capabilities": [
+      {
+        "id": "chainDrive",
+        "label": "Chain drive",
+        "description": "Skip this if yours is belt or shaft driven."
+      },
+      {
+        "id": "winterStorage",
+        "label": "Seasonal storage",
+        "description": "End-of-season storage prep and battery tending."
+      }
+    ],
+    "document": {
+      "format": "donetick",
+      "version": 2,
+      "title": "Motorcycle",
+      "inputs": [
+        {
+          "name": "item",
+          "label": "Name or plate",
+          "default": "Motorcycle"
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Check the tire pressure and tread — {{ item }}",
+          "repeat": "every week"
+        },
+        {
+          "title": "Check the brake pads and fluid — {{ item }}",
+          "repeat": "every 6 months"
+        },
+        {
+          "title": "Check the coolant level — {{ item }}",
+          "repeat": "every 6 months"
+        },
+        {
+          "title": "Change the oil and filter — {{ item }}",
+          "repeat": "every 6 months"
+        },
+        {
+          "title": "Replace the air filter — {{ item }}",
+          "repeat": "every 12 months"
+        },
+        {
+          "title": "Renew the registration and insurance — {{ item }}",
+          "repeat": "every 12 months"
+        },
+        {
+          "title": "Clean, lubricate, and check the chain slack — {{ item }}",
+          "repeat": "every month",
+          "capability": "chainDrive"
+        },
+        {
+          "title": "Prepare for storage — {{ item }}",
+          "repeat": "every 12 months",
+          "subtasks": [
+            "Add fuel stabilizer",
+            "Connect the battery tender",
+            "Cover and raise the tires off the ground"
+          ],
+          "capability": "winterStorage"
+        }
+      ]
+    }
+  },
+  {
+    "id": "backup-system",
+    "name": "Backup system",
+    "category": "technology",
+    "description": "Backups fail quietly. These checks confirm yours still restores.",
+    "capabilities": [
+      {
+        "id": "offsite",
+        "label": "Offsite drive rotation",
+        "description": "Swapping a drive kept outside the house."
+      }
+    ],
+    "document": {
+      "format": "donetick",
+      "version": 2,
+      "title": "Backup system",
+      "inputs": [
+        {
+          "name": "item",
+          "label": "Name",
+          "default": "Home backup"
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Verify the local backup completed — {{ item }}",
+          "repeat": "every month"
+        },
+        {
+          "title": "Verify the cloud backup completed — {{ item }}",
+          "repeat": "every month"
+        },
+        {
+          "title": "Test restoring a file — {{ item }}",
+          "repeat": "every 3 months"
+        },
+        {
+          "title": "Check the backup drive health — {{ item }}",
+          "repeat": "every 6 months"
+        },
+        {
+          "title": "Review the backup storage capacity — {{ item }}",
+          "repeat": "every 6 months"
+        },
+        {
+          "title": "Review what the backup includes — {{ item }}",
+          "repeat": "every 12 months"
+        },
+        {
+          "title": "Rotate the offsite drive — {{ item }}",
+          "repeat": "every 3 months",
+          "capability": "offsite"
+        }
+      ]
+    }
+  },
+  {
+    "id": "computer",
+    "name": "Computer",
+    "category": "technology",
+    "description": "Updates, storage, and dust. Add whether yours is a laptop or a tower.",
+    "capabilities": [
+      {
+        "id": "laptop",
+        "label": "Laptop",
+        "description": "Battery health and charging port care."
+      },
+      {
+        "id": "desktopTower",
+        "label": "Desktop tower",
+        "description": "Dust filter and case fan cleaning."
+      }
+    ],
+    "document": {
+      "format": "donetick",
+      "version": 2,
+      "title": "Computer",
+      "inputs": [
+        {
+          "name": "item",
+          "label": "Name or location",
+          "default": "Computer"
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Install pending system updates — {{ item }}",
+          "repeat": "every month"
+        },
+        {
+          "title": "Clean the keyboard and screen — {{ item }}",
+          "repeat": "every month"
+        },
+        {
+          "title": "Review storage and clear large files — {{ item }}",
+          "repeat": "every 3 months"
+        },
+        {
+          "title": "Confirm the backups are running — {{ item }}",
+          "repeat": "every 3 months"
+        },
+        {
+          "title": "Blow dust from the vents — {{ item }}",
+          "repeat": "every 6 months"
+        },
+        {
+          "title": "Check the battery health — {{ item }}",
+          "repeat": "every 6 months",
+          "capability": "laptop"
+        },
+        {
+          "title": "Clean the charging port — {{ item }}",
+          "repeat": "every 6 months",
+          "capability": "laptop"
+        },
+        {
+          "title": "Clean the dust filters — {{ item }}",
+          "repeat": "every 3 months",
+          "capability": "desktopTower"
+        },
+        {
+          "title": "Check the case and CPU fans — {{ item }}",
+          "repeat": "every 12 months",
+          "capability": "desktopTower"
+        }
+      ]
+    }
+  },
+  {
+    "id": "home-network",
+    "name": "Home network",
+    "category": "technology",
+    "description": "Router upkeep and device reviews. Add a NAS or mesh nodes if you run them.",
+    "capabilities": [
+      {
+        "id": "nas",
+        "label": "NAS or home server",
+        "description": "Drive health, scrubs, and updates."
+      },
+      {
+        "id": "meshNodes",
+        "label": "Mesh nodes",
+        "description": "Placement and signal checks for extra nodes."
+      }
+    ],
+    "document": {
+      "format": "donetick",
+      "version": 2,
+      "title": "Home network",
+      "inputs": [
+        {
+          "name": "item",
+          "label": "Name or location",
+          "default": "Home network"
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Check for router firmware updates — {{ item }}",
+          "repeat": "every 3 months"
+        },
+        {
+          "title": "Review the connected devices — {{ item }}",
+          "repeat": "every 3 months"
+        },
+        {
+          "title": "Restart the router and modem — {{ item }}",
+          "repeat": "every 3 months"
+        },
+        {
+          "title": "Dust the router and switch vents — {{ item }}",
+          "repeat": "every 6 months"
+        },
+        {
+          "title": "Rotate the guest Wi-Fi password — {{ item }}",
+          "repeat": "every 12 months"
+        },
+        {
+          "title": "Check the drive health and SMART status — {{ item }}",
+          "repeat": "every month",
+          "capability": "nas"
+        },
+        {
+          "title": "Run a scrub or parity check — {{ item }}",
+          "repeat": "every 3 months",
+          "capability": "nas"
+        },
+        {
+          "title": "Install NAS and container updates — {{ item }}",
+          "repeat": "every 3 months",
+          "capability": "nas"
+        },
+        {
+          "title": "Check each mesh node's placement and signal — {{ item }}",
+          "repeat": "every 12 months",
+          "capability": "meshNodes"
+        }
+      ]
+    }
+  },
+  {
+    "id": "pet-care",
+    "name": "Pet care",
+    "category": "outdoors",
+    "description": "Grooming, bowls, and bedding for one pet. Add a litter box or crate if you have them.",
+    "capabilities": [
+      {
+        "id": "litterBox",
+        "label": "Litter box",
+        "description": "Daily scooping and full litter changes."
+      },
+      {
+        "id": "grooming",
+        "label": "Professional grooming",
+        "description": "Recurring appointment reminders."
+      },
+      {
+        "id": "crate",
+        "label": "Crate or carrier",
+        "description": "Cleaning the crate, carrier, or travel bag."
+      }
+    ],
+    "document": {
+      "format": "donetick",
+      "version": 2,
+      "title": "Pet care",
+      "inputs": [
+        {
+          "name": "item",
+          "label": "Pet name",
+          "default": "Pet"
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Wash the food and water bowls — {{ item }}",
+          "repeat": "every week"
+        },
+        {
+          "title": "Brush the coat — {{ item }}",
+          "repeat": "every week"
+        },
+        {
+          "title": "Wash the bedding — {{ item }}",
+          "repeat": "every 2 weeks"
+        },
+        {
+          "title": "Trim the nails — {{ item }}",
+          "repeat": "every month"
+        },
+        {
+          "title": "Check the ears, teeth, skin, and weight — {{ item }}",
+          "repeat": "every month"
+        },
+        {
+          "title": "Clean the toys — {{ item }}",
+          "repeat": "every month"
+        },
+        {
+          "title": "Check the food and treat expiry dates — {{ item }}",
+          "repeat": "every 3 months"
+        },
+        {
+          "title": "Check the ID tag and microchip details — {{ item }}",
+          "repeat": "every 12 months"
+        },
+        {
+          "title": "Scoop the litter box — {{ item }}",
+          "repeat": "every day",
+          "capability": "litterBox"
+        },
+        {
+          "title": "Replace all the litter and wash the tray — {{ item }}",
+          "repeat": "every month",
+          "capability": "litterBox"
+        },
+        {
+          "title": "Book a grooming appointment — {{ item }}",
+          "repeat": "every 2 months",
+          "capability": "grooming"
+        },
+        {
+          "title": "Clean the crate or carrier — {{ item }}",
+          "repeat": "every 3 months",
+          "capability": "crate"
+        }
+      ]
+    }
+  },
+  {
+    "id": "aquarium",
+    "name": "Aquarium",
+    "category": "outdoors",
+    "description": "Water testing, changes, and filter care on a steady cycle.",
+    "capabilities": [
+      {
+        "id": "saltwater",
+        "label": "Saltwater or reef",
+        "description": "Salinity top-offs and test kit calibration."
+      }
+    ],
+    "document": {
+      "format": "donetick",
+      "version": 2,
+      "title": "Aquarium",
+      "inputs": [
+        {
+          "name": "item",
+          "label": "Name or location",
+          "default": "Aquarium"
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Test the water parameters — {{ item }}",
+          "repeat": "every week"
+        },
+        {
+          "title": "Clean the glass and scrape algae — {{ item }}",
+          "repeat": "every week"
+        },
+        {
+          "title": "Change part of the water — {{ item }}",
+          "repeat": "every 2 weeks",
+          "subtasks": ["Siphon the substrate", "Refill with treated water"]
+        },
+        {
+          "title": "Rinse the filter media in tank water — {{ item }}",
+          "repeat": "every month"
+        },
+        {
+          "title": "Replace the filter cartridge or floss — {{ item }}",
+          "repeat": "every month"
+        },
+        {
+          "title": "Check the heater and thermometer — {{ item }}",
+          "repeat": "every month"
+        },
+        {
+          "title": "Trim the plants and clean the decor — {{ item }}",
+          "repeat": "every month"
+        },
+        {
+          "title": "Check the salinity and top off — {{ item }}",
+          "repeat": "every week",
+          "capability": "saltwater"
+        },
+        {
+          "title": "Calibrate the test equipment — {{ item }}",
+          "repeat": "every 6 months",
+          "capability": "saltwater"
+        }
+      ]
+    }
+  },
+  {
+    "id": "grill",
+    "name": "Grill",
+    "category": "outdoors",
+    "description": "Grate, grease, and burner care. Add your fuel type for the right checks.",
+    "capabilities": [
+      {
+        "id": "gas",
+        "label": "Gas or propane",
+        "description": "Gas line leak checks and tank level reminders."
+      },
+      {
+        "id": "charcoal",
+        "label": "Charcoal",
+        "description": "Ash catcher emptying."
+      },
+      {
+        "id": "pellet",
+        "label": "Pellet",
+        "description": "Firepot cleaning and pellet rotation."
+      }
+    ],
+    "document": {
+      "format": "donetick",
+      "version": 2,
+      "title": "Grill",
+      "inputs": [
+        {
+          "name": "item",
+          "label": "Name or location",
+          "default": "Grill"
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Burn off and brush the grates — {{ item }}",
+          "repeat": "every week"
+        },
+        {
+          "title": "Empty the grease tray — {{ item }}",
+          "repeat": "every month"
+        },
+        {
+          "title": "Wipe the exterior and check the cover — {{ item }}",
+          "repeat": "every 3 months"
+        },
+        {
+          "title": "Check the burners for blockages — {{ item }}",
+          "repeat": "every 6 months"
+        },
+        {
+          "title": "Deep clean the interior — {{ item }}",
+          "repeat": "every 6 months"
+        },
+        {
+          "title": "Check the propane level — {{ item }}",
+          "repeat": "every month",
+          "capability": "gas"
+        },
+        {
+          "title": "Check the gas hose and connections for leaks — {{ item }}",
+          "repeat": "every 6 months",
+          "capability": "gas"
+        },
+        {
+          "title": "Empty the ash catcher — {{ item }}",
+          "repeat": "every week",
+          "capability": "charcoal"
+        },
+        {
+          "title": "Vacuum the firepot and clear old pellets — {{ item }}",
+          "repeat": "every 3 months",
+          "capability": "pellet"
+        }
+      ]
+    }
+  },
+  {
+    "id": "lawn-mower",
+    "name": "Lawn mower",
+    "category": "outdoors",
+    "description": "Deck, blade, and engine care. Add whether yours is petrol or battery.",
+    "capabilities": [
+      {
+        "id": "gasEngine",
+        "label": "Petrol engine",
+        "description": "Oil, air filter, spark plug, and fuel storage."
+      },
+      {
+        "id": "batteryMower",
+        "label": "Battery powered",
+        "description": "Battery charging and off-season storage."
+      }
+    ],
+    "document": {
+      "format": "donetick",
+      "version": 2,
+      "title": "Lawn mower",
+      "inputs": [
+        {
+          "name": "item",
+          "label": "Name or location",
+          "default": "Lawn mower"
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Clear clippings from the deck — {{ item }}",
+          "repeat": "every week"
+        },
+        {
+          "title": "Check the blade bolt and hardware — {{ item }}",
+          "repeat": "every 3 months"
+        },
+        {
+          "title": "Check the wheels and cutting height settings — {{ item }}",
+          "repeat": "every 6 months"
+        },
+        {
+          "title": "Sharpen or replace the blade — {{ item }}",
+          "repeat": "every 12 months"
+        },
+        {
+          "title": "Change the engine oil — {{ item }}",
+          "repeat": "every 12 months",
+          "capability": "gasEngine"
+        },
+        {
+          "title": "Replace the air filter and spark plug — {{ item }}",
+          "repeat": "every 12 months",
+          "capability": "gasEngine"
+        },
+        {
+          "title": "Add fuel stabilizer before storage — {{ item }}",
+          "repeat": "every 12 months",
+          "capability": "gasEngine"
+        },
+        {
+          "title": "Charge the battery for storage — {{ item }}",
+          "repeat": "every 3 months",
+          "capability": "batteryMower"
+        }
+      ]
+    }
+  },
+  {
+    "id": "camping-gear",
+    "name": "Camping gear",
+    "category": "outdoors",
+    "description": "Off-season care and pre-trip checks so nothing fails in the field.",
+    "capabilities": [
+      {
+        "id": "waterFilter",
+        "label": "Water filter",
+        "description": "Backflushing and sanitizing."
+      },
+      {
+        "id": "inflatables",
+        "label": "Inflatable pads",
+        "description": "Leak checks for sleeping pads."
+      }
+    ],
+    "document": {
+      "format": "donetick",
+      "version": 2,
+      "title": "Camping gear",
+      "inputs": [
+        {
+          "name": "item",
+          "label": "Name or location",
+          "default": "Camping gear"
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Run a pre-trip gear check — {{ item }}",
+          "repeat": "every 3 months"
+        },
+        {
+          "title": "Air out and inspect the tent — {{ item }}",
+          "repeat": "every 6 months"
+        },
+        {
+          "title": "Loft the sleeping bags and store them unstuffed — {{ item }}",
+          "repeat": "every 6 months"
+        },
+        {
+          "title": "Test the stove and check the fuel — {{ item }}",
+          "repeat": "every 6 months"
+        },
+        {
+          "title": "Restock the first aid and repair kit — {{ item }}",
+          "repeat": "every 6 months"
+        },
+        {
+          "title": "Replace the headlamp batteries — {{ item }}",
+          "repeat": "every 12 months"
+        },
+        {
+          "title": "Reproof the tent fly and seams — {{ item }}",
+          "repeat": "every 12 months"
+        },
+        {
+          "title": "Backflush and sanitize the water filter — {{ item }}",
+          "repeat": "every 6 months",
+          "capability": "waterFilter"
+        },
+        {
+          "title": "Check the sleeping pads for leaks — {{ item }}",
+          "repeat": "every 12 months",
+          "capability": "inflatables"
+        }
+      ]
+    }
+  },
+  {
+    "id": "documents-renewals",
+    "name": "Documents & renewals",
+    "category": "personal",
+    "description": "Expiry dates and renewals that only bite when you have forgotten them.",
+    "capabilities": [
+      {
+        "id": "vehicleDocuments",
+        "label": "Vehicle documents",
+        "description": "Registration and roadworthiness renewals."
+      },
+      {
+        "id": "property",
+        "label": "Home or property",
+        "description": "Policy reviews and utility contract checks."
+      }
+    ],
+    "document": {
+      "format": "donetick",
+      "version": 2,
+      "title": "Documents & renewals",
+      "inputs": [
+        {
+          "name": "item",
+          "label": "Who or what",
+          "default": "Household"
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Shred documents you no longer need — {{ item }}",
+          "repeat": "every 6 months"
+        },
+        {
+          "title": "Check the passport expiry dates — {{ item }}",
+          "repeat": "every 12 months"
+        },
+        {
+          "title": "Check the driver's license expiry — {{ item }}",
+          "repeat": "every 12 months"
+        },
+        {
+          "title": "Review the insurance coverage and renewal dates — {{ item }}",
+          "repeat": "every 12 months"
+        },
+        {
+          "title": "Back up copies of the important documents — {{ item }}",
+          "repeat": "every 12 months"
+        },
+        {
+          "title": "Review the beneficiaries and emergency contacts — {{ item }}",
+          "repeat": "every 12 months"
+        },
+        {
+          "title": "Renew the vehicle registration — {{ item }}",
+          "repeat": "every 12 months",
+          "capability": "vehicleDocuments"
+        },
+        {
+          "title": "Review the home or renters policy — {{ item }}",
+          "repeat": "every 12 months",
+          "capability": "property"
+        },
+        {
+          "title": "Review the utility and internet contracts — {{ item }}",
+          "repeat": "every 12 months",
+          "capability": "property"
+        }
+      ]
+    }
+  },
+  {
+    "id": "money-review",
+    "name": "Money review",
+    "category": "personal",
+    "description": "A standing pass over subscriptions, statements, and what the budget actually did.",
+    "capabilities": [
+      {
+        "id": "investments",
+        "label": "Investments",
+        "description": "Allocation and contribution reviews."
+      },
+      {
+        "id": "taxes",
+        "label": "Tax records",
+        "description": "Receipt organizing through to the annual filing."
+      }
+    ],
+    "document": {
+      "format": "donetick",
+      "version": 2,
+      "title": "Money review",
+      "inputs": [
+        {
+          "name": "item",
+          "label": "Who or what",
+          "default": "Household"
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Review the recurring charges on statements — {{ item }}",
+          "repeat": "every month"
+        },
+        {
+          "title": "Reconcile the accounts — {{ item }}",
+          "repeat": "every month"
+        },
+        {
+          "title": "Compare the budget against actual spending — {{ item }}",
+          "repeat": "every month"
+        },
+        {
+          "title": "Audit the active subscriptions — {{ item }}",
+          "repeat": "every 3 months"
+        },
+        {
+          "title": "Review the savings and recurring transfers — {{ item }}",
+          "repeat": "every 6 months"
+        },
+        {
+          "title": "Check the credit report — {{ item }}",
+          "repeat": "every 12 months"
+        },
+        {
+          "title": "Review the portfolio allocation — {{ item }}",
+          "repeat": "every 6 months",
+          "capability": "investments"
+        },
+        {
+          "title": "Review the retirement contributions — {{ item }}",
+          "repeat": "every 12 months",
+          "capability": "investments"
+        },
+        {
+          "title": "Organize the receipts and tax documents — {{ item }}",
+          "repeat": "every 3 months",
+          "capability": "taxes"
+        },
+        {
+          "title": "Prepare the annual tax records — {{ item }}",
+          "repeat": "every 12 months",
+          "capability": "taxes"
+        }
+      ]
+    }
+  },
+  {
+    "id": "digital-security",
+    "name": "Digital security",
+    "category": "personal",
+    "description": "Password, recovery, and account access reviews on a schedule you will keep.",
+    "capabilities": [
+      {
+        "id": "domains",
+        "label": "Domains and certificates",
+        "description": "Expiry checks if you run your own domains."
+      }
+    ],
+    "document": {
+      "format": "donetick",
+      "version": 2,
+      "title": "Digital security",
+      "inputs": [
+        {
+          "name": "item",
+          "label": "Who or what",
+          "default": "Household"
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Check the accounts for breach exposure — {{ item }}",
+          "repeat": "every 3 months"
+        },
+        {
+          "title": "Review the password manager for weak or reused passwords — {{ item }}",
+          "repeat": "every 6 months"
+        },
+        {
+          "title": "Review the third-party app access — {{ item }}",
+          "repeat": "every 6 months"
+        },
+        {
+          "title": "Rotate the critical passwords — {{ item }}",
+          "repeat": "every 12 months"
+        },
+        {
+          "title": "Verify the two-factor recovery codes — {{ item }}",
+          "repeat": "every 12 months"
+        },
+        {
+          "title": "Review the account recovery email and phone — {{ item }}",
+          "repeat": "every 12 months"
+        },
+        {
+          "title": "Check the domain and certificate expiry — {{ item }}",
+          "repeat": "every 3 months",
+          "capability": "domains"
+        }
+      ]
+    }
+  }
+]
