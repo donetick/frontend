@@ -569,6 +569,8 @@
     "filterSavedMsg": "\"{{name}}\" has been saved",
     "nothingScheduled": "Nothing scheduled",
     "createChore": "Create new chore (Cmd+C)",
+    "createTaskFullEditor": "Create task — full editor",
+    "quickAddTask": "Quick add task",
     "filterUpdated": "Filter Updated",
     "filterUpdatedMsg": "\"{{name}}\" has been updated successfully",
     "advancedFilterCreated": "Advanced Filter Created",

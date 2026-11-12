@@ -1148,10 +1148,7 @@ const UserActivites = () => {
   }
   // Calculate activities analytics
   return (
-    <Container
-      maxWidth='md'
-      sx={{ px: { xs: 2, sm: 3 }, pb: 6, pt: { xs: 1, sm: 2 } }}
-    >
+    <Container maxWidth='md' sx={{ px: { xs: 2, sm: 3 } }}>
       <Box
         sx={{
           alignItems: { xs: 'flex-start', sm: 'center' },
@@ -1267,7 +1264,7 @@ const UserActivites = () => {
             alignItems: 'baseline',
             display: 'flex',
             justifyContent: 'space-between',
-            mb: 1.25,
+            mb: 2,
           }}
         >
           <Typography level='title-md' sx={{ fontWeight: 650 }}>

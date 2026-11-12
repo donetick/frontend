@@ -150,7 +150,7 @@ const ProfileContent = ({ refetchUserProfile, userProfile }) => {
 
   return (
     <SettingsLayout title={t('profile.title')}>
-      <Box id='profile' sx={{ maxWidth: 680, pb: 4 }}>
+      <Box id='profile' sx={{ maxWidth: 680 }}>
         <Typography
           level='body-md'
           textColor='text.secondary'

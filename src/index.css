@@ -15,6 +15,8 @@
 /* Smooth scrolling for better UX */
 html {
   scroll-behavior: smooth;
+  /* Keep centered pages aligned when only some routes need a scrollbar. */
+  scrollbar-gutter: stable;
 }
 
 /* Prevent accidental horizontal overflow from ever creating a scrollable

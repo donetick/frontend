@@ -21,6 +21,7 @@ import {
   Container,
   Divider,
   IconButton,
+  Tooltip,
   Typography,
 } from '@mui/joy'
 import { useMediaQuery } from '@mui/material'
@@ -30,7 +31,6 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import EmptyState from '../../components/common/EmptyState'
-import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useNavBarTitle } from '../../contexts/NavBarTitleContext'
 import { TEMPLATE_ENTRY_POINT } from '../../data/taskTemplates'
@@ -45,6 +45,7 @@ import {
   ChoreSorter,
   filterByProject,
 } from '../../utils/Chores'
+import { getKeyboardShortcut } from '../../utils/PlatformUtils'
 import Priorities from '../../utils/Priorities'
 import { getSafeBottom } from '../../utils/SafeAreaUtils.js'
 import TaskInput from '../components/AddTaskModal'
@@ -1170,13 +1171,15 @@ const MyChores = () => {
       style={{
         display: 'flex',
         flexDirection: 'row',
+        alignItems: 'flex-start',
+        gap: 'var(--page-spacing)',
       }}
     >
       <Container
         maxWidth={
           viewMode === 'board' && isCustomProjectSelected ? false : 'md'
         }
-        sx={{ px: 1, pt: { xs: 1, md: 3 }, minWidth: 0 }}
+        sx={{ px: 1, pb: 10, minWidth: 0, flex: 1 }}
       >
         <ChoreToolbar
           enableBoard={isCustomProjectSelected}
@@ -1684,71 +1687,66 @@ const MyChores = () => {
         <ScrollHideFab
           sx={{
             bottom: getSafeBottom(10, 10),
-            display: isMultiSelectMode ? 'none' : undefined,
+            alignItems: 'center',
+            gap: 2,
+            display: isMultiSelectMode ? 'none' : 'flex',
             '@media (max-width: 768px)': {
               bottom: getSafeBottom(66, 10),
             },
           }}
         >
-          <IconButton
-            color='primary'
-            variant='solid'
-            sx={{
-              borderRadius: '50%',
-              width: 50,
-              height: 50,
-              zIndex: 101,
-              position: 'relative',
-            }}
-            onClick={() => {
-              Navigate(`/chores/create`)
-            }}
-            title={t('chores:list.createChore')}
+          <Tooltip
+            title={`${t('list.createTaskFullEditor', { defaultValue: 'Create task — full editor' })} (${getKeyboardShortcut('J', true, true)})`}
+            placement='top'
           >
-            <Add />
-            <KeyboardShortcutHint
+            <IconButton
+              aria-label={t('list.createTaskFullEditor', {
+                defaultValue: 'Create task — full editor',
+              })}
+              color='primary'
+              variant='solid'
               sx={{
-                position: 'absolute',
-                top: -12,
-                // Anchored left so the wider "⌘ + Shift + J" label grows to the
-                // right instead of off the left edge of the viewport.
-                left: 2,
-                whiteSpace: 'nowrap',
-                zIndex: 1000,
+                borderRadius: '50%',
+                width: 50,
+                height: 50,
+                zIndex: 101,
+                position: 'relative',
               }}
-              show={showKeyboardShortcuts}
-              shortcut='J'
-              withShift
-            />
-          </IconButton>
-          <IconButton
-            data-testid='open-add-task-modal'
-            color='primary'
-            variant='soft'
-            sx={{
-              borderRadius: '50%',
-              width: 25,
-              height: 25,
-              position: 'relative',
-              left: -25,
-              top: 22,
-            }}
-            onClick={() => {
-              setAddTaskModalOpen(true)
-            }}
+              onClick={() => {
+                Navigate(`/chores/create`)
+              }}
+            >
+              <Add />
+            </IconButton>
+          </Tooltip>
+          <Tooltip
+            title={`${t('list.quickAddTask', { defaultValue: 'Quick add task' })} (${getKeyboardShortcut('J', true, false)})`}
+            placement='top'
           >
-            <Bolt
-              style={{
-                rotate: '20deg',
+            <IconButton
+              aria-label={t('list.quickAddTask', {
+                defaultValue: 'Quick add task',
+              })}
+              data-testid='open-add-task-modal'
+              color='primary'
+              variant='soft'
+              sx={{
+                borderRadius: '50%',
+                width: 44,
+                height: 44,
+                position: 'relative',
               }}
-            />
-          </IconButton>
-
-          <KeyboardShortcutHint
-            sx={{ position: 'relative', left: -40, top: 30 }}
-            show={showKeyboardShortcuts}
-            shortcut='J'
-          />
+              onClick={() => {
+                setAddTaskModalOpen(true)
+              }}
+            >
+              <Bolt
+                style={{
+                  rotate: '20deg',
+                }}
+              />
+            </IconButton>
+          </Tooltip>
         </ScrollHideFab>
         <NotificationAccessSnackbar />
         <PolicyUpdatePrompt />

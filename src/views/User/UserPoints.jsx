@@ -334,10 +334,7 @@ const UserPoints = () => {
 
   if (activeSection === 'rewards' || activeSection === 'requests') {
     return (
-      <Container
-        maxWidth='md'
-        sx={{ px: { xs: 2, sm: 3 }, pb: 6, pt: { xs: 1, sm: 2 } }}
-      >
+      <Container maxWidth='md' sx={{ px: { xs: 2, sm: 3 } }}>
         {pageTabs}
         <RewardsView
           embedded
@@ -365,10 +362,7 @@ const UserPoints = () => {
   const periodLabel = getPeriodLabel(period, t)
 
   return (
-    <Container
-      maxWidth='md'
-      sx={{ px: { xs: 2, sm: 3 }, pb: 6, pt: { xs: 1, sm: 2 } }}
-    >
+    <Container maxWidth='md' sx={{ px: { xs: 2, sm: 3 } }}>
       {pageTabs}
 
       <Box
@@ -589,13 +583,13 @@ const UserPoints = () => {
         </Box>
       </Sheet>
 
-      <Box component='section' sx={{ mb: 3.5 }}>
+      <Box component='section' sx={{ mb: 3 }}>
         <Box
           sx={{
             alignItems: 'flex-end',
             display: 'flex',
             justifyContent: 'space-between',
-            mb: 1.25,
+            mb: 2,
           }}
         >
           <Box>
@@ -672,7 +666,7 @@ const UserPoints = () => {
             display: 'flex',
             gap: 1.5,
             justifyContent: 'space-between',
-            mb: 1.25,
+            mb: 2,
           }}
         >
           <Typography level='title-md' sx={{ fontWeight: 650 }}>

@@ -4,7 +4,7 @@ const PrivacyPolicyView = () => {
       style={{
         maxWidth: '800px',
         margin: '0 auto',
-        padding: '20px',
+        paddingInline: 'var(--page-spacing)',
         lineHeight: '1.6',
       }}
     >
