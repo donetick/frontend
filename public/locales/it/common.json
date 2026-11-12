@@ -716,5 +716,11 @@
       "voice": "Acquisisci con la voce",
       "scan": "Scansiona e crea attività"
     }
+  },
+  "calendar": {
+    "today": "Oggi",
+    "tomorrow": "Domani",
+    "yesterday": "Ieri",
+    "lastWeekday": "{{day}} della settimana scorsa"
   }
 }

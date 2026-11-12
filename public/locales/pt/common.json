@@ -702,5 +702,11 @@
       "voice": "",
       "scan": ""
     }
+  },
+  "calendar": {
+    "today": "Hoje",
+    "tomorrow": "Amanhã",
+    "yesterday": "Ontem",
+    "lastWeekday": "{{day}} da semana passada"
   }
 }

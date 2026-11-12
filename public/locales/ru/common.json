@@ -702,5 +702,11 @@
       "voice": "",
       "scan": ""
     }
+  },
+  "calendar": {
+    "today": "Сегодня",
+    "tomorrow": "Завтра",
+    "yesterday": "Вчера",
+    "lastWeekday": "{{day}} на прошлой неделе"
   }
 }

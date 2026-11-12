@@ -1402,5 +1402,43 @@
     "inheritedFromSharedProject": "Inherited from the project: only its members can see tasks in it",
     "onlyProjectAudienceAssignable": "Only people who can see the project “{{project}}” can be assigned.",
     "followsProjectName": "Follows the project “{{project}}”"
+  },
+  "dueChip": {
+    "noDueDate": "No Due Date",
+    "days_one": "{{count}} day",
+    "days_other": "{{count}} days"
+  },
+  "repeatChip": {
+    "once": "Once",
+    "always": "Always",
+    "trigger": "Trigger",
+    "daily": "Daily",
+    "adaptive": "Adaptive",
+    "weekly": "Weekly",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "dailyExcept": "Daily except {{days}}",
+    "monthlyOn": "Monthly {{day}}",
+    "monthlyOnExcept": "Monthly {{day}} except {{months}}",
+    "dayOfMonths": "{{day}} of {{months}}",
+    "everyUnit": {
+      "hours": "Every hour",
+      "days": "Every day",
+      "weeks": "Every week",
+      "months": "Every month",
+      "years": "Every year"
+    },
+    "every": {
+      "hours_one": "Every {{count}} hour",
+      "hours_other": "Every {{count}} hours",
+      "days_one": "Every {{count}} day",
+      "days_other": "Every {{count}} days",
+      "weeks_one": "Every {{count}} week",
+      "weeks_other": "Every {{count}} weeks",
+      "months_one": "Every {{count}} month",
+      "months_other": "Every {{count}} months",
+      "years_one": "Every {{count}} year",
+      "years_other": "Every {{count}} years"
+    }
   }
 }

@@ -702,5 +702,11 @@
       "voice": "",
       "scan": ""
     }
+  },
+  "calendar": {
+    "today": "היום",
+    "tomorrow": "מחר",
+    "yesterday": "אתמול",
+    "lastWeekday": "{{day}} בשבוע שעבר"
   }
 }
