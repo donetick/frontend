@@ -18,6 +18,7 @@ import {
   collectErrorReport,
   formatErrorReport,
 } from '../service/ErrorReportService'
+import { copyText } from '../utils/Clipboard'
 import ErrorReportModal from './Modals/ErrorReportModal'
 
 const getErrorKind = error => {
@@ -79,7 +80,8 @@ const Error = () => {
   }, [error])
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(reportText).then(() => {
+    copyText(reportText).then(copied => {
+      if (!copied) return
       setCopied(true)
     })
   }

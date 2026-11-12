@@ -1,11 +1,12 @@
-import { Close } from '@mui/icons-material'
-import { Box, Button, IconButton, Sheet, Typography } from '@mui/joy'
+import { Close, Search } from '@mui/icons-material'
+import { Box, Button, IconButton, Input, Sheet, Typography } from '@mui/joy'
 import { ClickAwayListener, Popper } from '@mui/material'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 const BaseOptionPicker = ({
   emptyDisplay = 'icon',
   emptyLabel = 'Select',
+  filterItems,
   getItemColor,
   getItemLabel = item => item.label,
   getItemValue = item => item.id,
@@ -15,6 +16,7 @@ const BaseOptionPicker = ({
   menuMaxHeight = 280,
   menuMinWidth = 180,
   multiple = false,
+  noResultsText,
   onChange,
   onClear,
   onOpenChange,
@@ -24,15 +26,19 @@ const BaseOptionPicker = ({
   renderItemEnd,
   renderItemStart,
   renderTriggerIcon,
+  searchPlaceholder,
   value = null,
   values = [],
 }) => {
   const [internalOpen, setInternalOpen] = useState(false)
+  const [query, setQuery] = useState('')
+  const visibleItems = filterItems ? filterItems(items, query) : items
   const isControlled = openProp !== undefined
   const isOpen = isControlled ? openProp : internalOpen
   const setIsOpen = value => {
     if (!isControlled) setInternalOpen(value)
     const nextValue = typeof value === 'function' ? value(isOpen) : value
+    setQuery('')
     onOpenChange?.(nextValue)
   }
   const buttonRef = useRef(null)
@@ -43,6 +49,7 @@ const BaseOptionPicker = ({
     const handleEscape = event => {
       if (event.key === 'Escape') {
         setIsOpen(false)
+        buttonRef.current?.focus()
       }
     }
 
@@ -120,6 +127,8 @@ const BaseOptionPicker = ({
           size={'sm'}
           variant={isEmpty ? 'outlined' : 'soft'}
           color='neutral'
+          aria-label={emptyLabel}
+          aria-expanded={isOpen}
           onClick={() => setIsOpen(prev => !prev)}
           sx={{
             borderRadius: '128px',
@@ -198,16 +207,47 @@ const BaseOptionPicker = ({
                 fallbackPlacements: ['bottom-start', 'top-start'],
               },
             },
+            {
+              name: 'preventOverflow',
+              options: {
+                rootBoundary: 'viewport',
+                padding: 12,
+                // Also constrain the vertical axis for top/bottom placements.
+                altAxis: true,
+                tether: false,
+              },
+            },
           ]}
           sx={{ zIndex: 'calc(var(--joy-zIndex-modal) + 1)' }}
         >
           <ClickAwayListener onClickAway={() => setIsOpen(false)}>
             <Sheet
               variant='outlined'
+              onKeyDown={event => {
+                if (
+                  !filterItems ||
+                  !['ArrowDown', 'ArrowUp'].includes(event.key)
+                )
+                  return
+                const targets = Array.from(
+                  event.currentTarget.querySelectorAll(
+                    'input, button:not([disabled])',
+                  ),
+                )
+                const index = targets.indexOf(document.activeElement)
+                const direction = event.key === 'ArrowDown' ? 1 : -1
+                event.preventDefault()
+                targets[
+                  (index + direction + targets.length) % targets.length
+                ]?.focus()
+              }}
               sx={{
                 minWidth: menuMinWidth,
-                maxHeight: menuMaxHeight,
-                overflowY: 'auto',
+                maxWidth: 'calc(100vw - 24px)',
+                display: 'flex',
+                flexDirection: 'column',
+                maxHeight: filterItems ? 'min(420px, 70dvh)' : menuMaxHeight,
+                overflowY: filterItems ? 'hidden' : 'auto',
                 overflowX: 'hidden',
                 p: 0.75,
                 borderRadius: 'md',
@@ -215,46 +255,67 @@ const BaseOptionPicker = ({
                 bgcolor: 'background.popup',
               }}
             >
-              {items.map((item, index) => {
-                const optionValue = getItemValue(item)
-                const selected = isSelected(item)
-                const itemColor = getItemColor ? getItemColor(item) : undefined
+              {filterItems && (
+                <Input
+                  size='sm'
+                  placeholder={searchPlaceholder}
+                  startDecorator={<Search sx={{ fontSize: 18 }} />}
+                  value={query}
+                  onChange={event => setQuery(event.target.value)}
+                  slotProps={{ input: { 'aria-label': searchPlaceholder } }}
+                  sx={{ mb: 0.75, flexShrink: 0 }}
+                />
+              )}
+              <Box sx={{ overflowY: 'auto', minHeight: 0 }}>
+                {visibleItems.length === 0 && noResultsText && (
+                  <Typography level='body-sm' role='status' sx={{ p: 1 }}>
+                    {noResultsText}
+                  </Typography>
+                )}
+                {visibleItems.map((item, index) => {
+                  const optionValue = getItemValue(item)
+                  const selected = isSelected(item)
+                  const itemColor = getItemColor
+                    ? getItemColor(item)
+                    : undefined
 
-                return (
-                  <Button
-                    key={optionValue ?? index}
-                    variant={selected ? 'soft' : 'plain'}
-                    color='neutral'
-                    onClick={() => handleSelect(optionValue)}
-                    sx={{
-                      width: '100%',
-                      display: 'flex',
-                      justifyContent: 'flex-start',
-                      gap: 1,
-                      whiteSpace: 'nowrap',
-                      mb: index === items.length - 1 ? 0 : 0.5,
-                      color: selected
-                        ? itemColor || 'text.primary'
-                        : 'text.primary',
-                    }}
-                  >
-                    {renderItemStart?.({ item, selected })}
-                    <Typography
-                      level='body-sm'
+                  return (
+                    <Button
+                      key={optionValue ?? index}
+                      aria-pressed={multiple ? selected : undefined}
+                      variant={selected ? 'soft' : 'plain'}
+                      color='neutral'
+                      onClick={() => handleSelect(optionValue)}
                       sx={{
+                        width: '100%',
+                        display: 'flex',
+                        justifyContent: 'flex-start',
+                        gap: 1,
                         whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
+                        mb: index === visibleItems.length - 1 ? 0 : 0.5,
+                        color: selected
+                          ? itemColor || 'text.primary'
+                          : 'text.primary',
                       }}
                     >
-                      {getItemLabel(item)}
-                    </Typography>
-                    {renderItemEnd?.({ item, selected })}
-                  </Button>
-                )
-              })}
+                      {renderItemStart?.({ item, selected })}
+                      <Typography
+                        level='body-sm'
+                        sx={{
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                        }}
+                      >
+                        {getItemLabel(item)}
+                      </Typography>
+                      {renderItemEnd?.({ item, selected })}
+                    </Button>
+                  )
+                })}
+              </Box>
               {menuFooter && (
-                <Box sx={{ mt: items.length > 0 ? 0.5 : 0 }}>{menuFooter}</Box>
+                <Box sx={{ mt: 0.5, flexShrink: 0 }}>{menuFooter}</Box>
               )}
             </Sheet>
           </ClickAwayListener>

@@ -1,4 +1,20 @@
 {
+  "permissionDenied": {
+    "title": "Von jemand anderem verwaltet",
+    "itemDescription": "Du kannst dieses Element ansehen, aber nur die Person, die es erstellt hat, kann es bearbeiten oder löschen. Frag sie, wenn sich etwas ändern soll.",
+    "labelDescription": "Diese Beschriftung wurde mit dir geteilt. Nur die Person, die sie erstellt hat, kann sie bearbeiten oder löschen. Du kannst sie trotzdem verwenden, um Aufgaben zu ordnen.",
+    "projectDescription": "Dieses Projekt wurde mit dir geteilt. Nur die Person, die es erstellt hat, kann seine Einstellungen ändern oder es löschen. Du kannst es trotzdem öffnen und die Aufgaben sehen, auf die du Zugriff hast.",
+    "historyManageTitle": "Dieser Verlaufseintrag ist schreibgeschützt",
+    "historyManageDescription": "Du kannst diesen Eintrag ansehen, hast aber keine Berechtigung, ihn zu bearbeiten oder zu löschen. Frag einen Administrator des Kreises, wenn sich etwas ändern soll.",
+    "historyDeleteTitle": "Du kannst diesen Verlaufseintrag nicht löschen",
+    "historyDeleteDescription": "Du hast keine Berechtigung, diesen Eintrag zu löschen. Frag die Person, die die Aufgabe erstellt hat, oder einen Administrator des Kreises, wenn er entfernt werden soll.",
+    "historyTitle": "Du kannst diesen Verlaufseintrag nicht bearbeiten",
+    "historyDescription": "Nur die Person, die die Aufgabe erledigt hat, die damals zugewiesene Person oder ein Administrator oder Verwalter des Kreises kann diesen Eintrag bearbeiten. Frag eine dieser Personen, wenn sich etwas ändern soll.",
+    "taskTitle": "Du kannst diese Aufgabe nicht bearbeiten",
+    "taskDescription": "Nur die Person, die die Aufgabe erstellt hat, oder ein Administrator des Kreises kann sie bearbeiten. Frag eine dieser Personen, wenn sich etwas ändern soll.",
+    "dismiss": "Verstanden",
+    "moreActions": "Weitere Aktionen für {{name}}"
+  },
   "save": "Speichern",
   "cancel": "Abbrechen",
   "delete": "Löschen",
