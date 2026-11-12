@@ -85,6 +85,11 @@ export const LANGUAGE_DEFAULTS = {
     timeFormat: TIME_FORMATS.HOUR_24,
     firstDayOfWeek: 0,
   },
+  ro: {
+    dateFormat: DATE_FORMATS.DMY,
+    timeFormat: TIME_FORMATS.HOUR_24,
+    firstDayOfWeek: 1,
+  },
   ru: {
     dateFormat: DATE_FORMATS.DMY,
     timeFormat: TIME_FORMATS.HOUR_24,

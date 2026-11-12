@@ -1,0 +1,73 @@
+{
+  "shared": "Partajată",
+  "delete": {
+    "title": "Șterge eticheta",
+    "message": "Sigur vrei să ștergi această etichetă? Eticheta va fi eliminată de pe toate sarcinile."
+  },
+  "loadError": "Etichetele nu au putut fi încărcate. Încearcă din nou.",
+  "search": {
+    "placeholder": "Caută etichete",
+    "noResultsTitle": "Nicio etichetă nu corespunde",
+    "noResultsDescription": "Nicio etichetă nu corespunde căutării „{{searchTerm}}”.",
+    "noFilterResultsDescription": "Nicio etichetă nu corespunde filtrului curent.",
+    "clear": "Șterge căutarea",
+    "showAll": "Afișează toate etichetele"
+  },
+  "detail": {
+    "taskCount_one": "{{count}} sarcină",
+    "taskCount_other": "{{count}} de sarcini",
+    "labelActions": "Acțiuni pentru etichetă",
+    "filters": {
+      "all": "Toate",
+      "overdue": "Restante",
+      "today": "Astăzi",
+      "undated": "Fără dată"
+    },
+    "noMatchingStatus": "Momentan, nicio sarcină cu această etichetă nu are starea respectivă.",
+    "clearFilters": "Afișează toate sarcinile",
+    "searchPlaceholder": "Caută sarcini cu această etichetă",
+    "emptyTitle": "Nu există sarcini cu această etichetă",
+    "emptyDescription": "Nicio sarcină nu are încă eticheta „{{label}}”. Adaugă eticheta la o sarcină și aceasta va apărea aici.",
+    "browseTasks": "Răsfoiește sarcinile",
+    "noResultsTitle": "Nicio sarcină nu corespunde",
+    "noResultsDescription": "Nicio sarcină cu această etichetă nu corespunde căutării „{{searchTerm}}”.",
+    "notFoundTitle": "Eticheta nu a fost găsită",
+    "notFoundDescription": "Este posibil ca această etichetă să fi fost ștearsă sau să nu mai fie partajată cu tine.",
+    "backToLabels": "Înapoi la etichete",
+    "taskCount_few": "{{count}} sarcini"
+  },
+  "blurb": "Gestionează etichetele și organizează eficient sarcinile. Etichetele vor fi partajate automat cu grupul tău dacă sunt folosite pentru o sarcină partajată.",
+  "modal": {
+    "errorEmptyName": "Numele nu poate fi gol",
+    "errorDuplicate": "Există deja o etichetă cu acest nume",
+    "errorNoColor": "Selectează o culoare",
+    "saveFailedTitle": "Salvarea etichetei a eșuat",
+    "saveFailedMessage": "Eticheta nu a putut fi salvată. Încearcă din nou.",
+    "name": "Nume",
+    "editTitle": "Editează eticheta",
+    "addTitle": "Adaugă o etichetă",
+    "color": "Culoare",
+    "saveChanges": "Salvează modificările",
+    "addLabel": "Adaugă eticheta",
+    "colorAriaSelect": "Selectează {{color}}"
+  },
+  "picker": {
+    "label": "Etichete",
+    "createLabel": "Creează o etichetă",
+    "labelsCount_one": "{{count}} etichetă",
+    "labelsCount_other": "{{count}} de etichete",
+    "labelsCount_few": "{{count}} etichete"
+  },
+  "view": {
+    "emptyTitle": "Nu există încă etichete",
+    "emptyDescription": "Etichetele grupează sarcinile din grupul tău, de exemplu „bucătărie” sau „facturi”, astfel încât să le poți filtra printr-o singură atingere.",
+    "createLabel": "Creează o etichetă",
+    "filterTitle": "Afișează",
+    "sortName": "Nume",
+    "sortColor": "Culoare",
+    "sortRecent": "Create recent",
+    "filterAll": "Toate etichetele",
+    "filterMine": "Create de mine",
+    "filterShared": "Partajate cu mine"
+  }
+}

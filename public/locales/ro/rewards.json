@@ -1,0 +1,57 @@
+{
+  "blurb": "Folosește punctele pentru recompense sau gestionează catalogul de recompense dacă ești administrator. Disponibile: {{points}} de puncte.",
+  "redeem": "Solicită recompensa",
+  "notEnoughPoints": "Puncte insuficiente",
+  "approve": "Aprobă",
+  "reject": "Respinge",
+  "actions": {
+    "menu": "Acțiuni pentru {{name}}"
+  },
+  "pointsCost_one": "{{count}} punct",
+  "pointsCost_other": "{{count}} de puncte",
+  "tabs": {
+    "store": "Magazin",
+    "requests": "Cereri"
+  },
+  "status": {
+    "pending": "În așteptare",
+    "approved": "Aprobată",
+    "rejected": "Respinsă"
+  },
+  "delete": {
+    "title": "Șterge recompensa",
+    "message": "Sigur vrei să ștergi această recompensă? Nu va mai putea fi obținută în schimbul punctelor."
+  },
+  "redeemConfirm": {
+    "title": "Solicită recompensa",
+    "message": "Soliciți „{{name}}” pentru {{cost}} de puncte? Va fi necesară aprobarea unui administrator."
+  },
+  "requests": {
+    "emptyTitle": "Nu există cereri de recompense",
+    "emptyDescription": "Cererile vor apărea aici după ce cineva solicită o recompensă."
+  },
+  "modal": {
+    "errorEmptyName": "Numele nu poate fi gol",
+    "errorInvalidCost": "Costul în puncte trebuie să fie un număr mai mare decât 0",
+    "saveFailedTitle": "Salvarea recompensei a eșuat",
+    "saveFailedMessage": "Recompensa nu a putut fi salvată. Încearcă din nou.",
+    "name": "Nume",
+    "description": "Descriere",
+    "pointsCost": "Cost în puncte",
+    "active": "Activă",
+    "editTitle": "Editează recompensa",
+    "addTitle": "Adaugă o recompensă",
+    "saveChanges": "Salvează modificările",
+    "addReward": "Adaugă recompensa"
+  },
+  "view": {
+    "subtitle": "Folosește punctele câștigate pentru a alege ceva deosebit.",
+    "availableBalance": "Sold disponibil",
+    "pointsLabel": "puncte",
+    "rewardFallbackDescription": "Un mic motiv de bucurie.",
+    "emptyTitle": "Nu există încă recompense",
+    "emptyDescription": "Adaugă o recompensă, cum ar fi o seară de film sau ceva bun, pe care membrii grupului să o poată obține în schimbul punctelor.",
+    "createReward": "Creează o recompensă"
+  },
+  "pointsCost_few": "{{count}} puncte"
+}
