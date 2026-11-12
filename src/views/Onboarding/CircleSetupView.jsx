@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom'
 
 import useAcknowledgmentModal from '../../hooks/useAcknowledgmentModal'
 import { useNotification } from '../../service/NotificationProvider'
+import { copyText } from '../../utils/Clipboard'
 import { GetUserCircle, JoinCircle } from '../../utils/Fetcher'
 import { haptic } from '../../utils/Onboarding'
 import { clearPendingInvite, getPendingInvite } from '../../utils/PendingInvite'
@@ -101,18 +102,21 @@ const CircleSetupView = () => {
 
   const finish = () => navigate('/ready', { replace: true })
 
-  const copyCode = () => {
-    navigator.clipboard.writeText(inviteCode)
+  const copyCode = async () => {
+    if (!(await copyText(inviteCode))) return
     showNotification({
       type: 'success',
       message: t('circleSetup.codeCopied'),
     })
   }
 
-  const copyLink = () => {
-    navigator.clipboard.writeText(
-      `${window.location.protocol}//${window.location.host}/circle/join?code=${inviteCode}`,
+  const copyLink = async () => {
+    if (
+      !(await copyText(
+        `${window.location.protocol}//${window.location.host}/circle/join?code=${inviteCode}`,
+      ))
     )
+      return
     showNotification({
       type: 'success',
       message: t('circleSetup.linkCopied'),

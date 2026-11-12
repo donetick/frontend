@@ -19,6 +19,10 @@ const PAYWALL_INVOKER_SCHEMA =
   'quick_filter_limit,file_upload,calendar_sync,realtime_sync,webhooks,' +
   'api_tokens,child_accounts,unknown'
 
+// Keep synchronized with TEMPLATE_ENTRY_POINT in src/data/taskTemplates.js.
+const TEMPLATE_ENTRY_POINT_SCHEMA =
+  'enum:empty_state,project_empty_state,settings,direct_link,developer,unknown'
+
 export const EVENT_SCHEMAS = {
   onboarding_started: withCommon({}),
   onboarding_completed: withCommon({}),
@@ -42,7 +46,7 @@ export const EVENT_SCHEMAS = {
     priority: 'number',
     // quick_add/voice/scan/share = the AddTaskModal popup; full_page/clone =
     // the dedicated create page (ChoreEdit.jsx with no existing chore id).
-    source: 'enum:quick_add,voice,scan,share,full_page,clone',
+    source: 'enum:quick_add,voice,scan,share,full_page,clone,bulk_import',
   }),
   chore_updated: withCommon({
     has_due_date: 'boolean',
@@ -57,6 +61,27 @@ export const EVENT_SCHEMAS = {
   thing_created: withCommon({}),
   project_created: withCommon({}),
   filter_created: withCommon({}),
+
+  // The template library funnel. `entry_point` is the surface that opened it,
+  // and it rides along to the later events so each placement can be judged on
+  // what it actually produced rather than on how many times it was tapped.
+  // Task creation itself is already covered by chore_created source=bulk_import.
+  // `template_id` and `category` are catalog identifiers from
+  // src/data/taskTemplates.json, never user-generated text.
+  template_library_opened: withCommon({
+    entry_point: TEMPLATE_ENTRY_POINT_SCHEMA,
+  }),
+  template_selected: withCommon({
+    entry_point: TEMPLATE_ENTRY_POINT_SCHEMA,
+    template_id: 'string',
+    category: 'string',
+  }),
+  template_import_started: withCommon({
+    entry_point: TEMPLATE_ENTRY_POINT_SCHEMA,
+    template_id: 'string',
+    task_count: 'number',
+    custom_task_count: 'number',
+  }),
 
   localization_setting_changed: withCommon({
     setting: 'enum:language,date_format,time_format,first_day_of_week',

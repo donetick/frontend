@@ -1,8 +1,9 @@
-import { Add, Label } from '@mui/icons-material'
+import { Add, Check, Label } from '@mui/icons-material'
 import { Button } from '@mui/joy'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { filterLabels, sortLabels } from '../../utils/LabelPickerOptions'
 import LabelModal from '../Modals/Inputs/LabelModal'
 import BaseOptionPicker from './BaseOptionPicker'
 
@@ -13,20 +14,19 @@ const LabelsPickerField = ({
   onClear,
   values = [],
 }) => {
-  const { t } = useTranslation('labels')
+  const { i18n, t } = useTranslation('labels')
   const [createOpen, setCreateOpen] = useState(false)
   const [pickerOpen, setPickerOpen] = useState(false)
 
-  const options = labels.map(label => ({
-    id: label.id,
-    name: label.name,
-    color: label.color,
-  }))
+  const options = sortLabels(labels, i18n.resolvedLanguage)
 
   return (
     <>
       <BaseOptionPicker
         items={options}
+        filterItems={filterLabels}
+        searchPlaceholder={t('search.placeholder')}
+        noResultsText={t('search.noResultsTitle')}
         multiple
         values={values}
         onValuesChange={onChange}
@@ -47,6 +47,9 @@ const LabelsPickerField = ({
             }}
           />
         )}
+        renderItemEnd={({ selected }) =>
+          selected ? <Check sx={{ fontSize: 18, ml: 'auto' }} /> : null
+        }
         getTriggerText={({ isEmpty, selectedItems }) => {
           if (isEmpty) return t('picker.label')
           if (selectedItems.length === 1) return selectedItems[0].name
