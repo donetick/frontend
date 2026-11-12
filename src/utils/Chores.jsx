@@ -164,6 +164,8 @@ export const ChoresGrouper = (groupBy, chores, filter, direction = 'asc') => {
         Overdue: [],
         Anytime: [],
       }
+      const tomorrow = new Date()
+      tomorrow.setDate(tomorrow.getDate() + 1)
       chores.forEach(chore => {
         if (chore.status === 1 || chore.status === 2) {
           groupRaw['Started'].push(chore)
@@ -179,15 +181,12 @@ export const ChoresGrouper = (groupBy, chores, filter, direction = 'asc') => {
         ) {
           groupRaw['Today'].push(chore)
         } else if (
-          new Date(chore.nextDueDate).toDateString() ===
-          new Date(Date.now() + 24 * 60 * 60 * 1000).toDateString()
+          new Date(chore.nextDueDate).toDateString() === tomorrow.toDateString()
         ) {
           groupRaw['Tomorrow'].push(chore)
         } else if (
           new Date(chore.nextDueDate) <
-            new Date(Date.now() + 8 * 24 * 60 * 60 * 1000) &&
-          new Date(chore.nextDueDate) >
-            new Date(Date.now() + 24 * 60 * 60 * 1000)
+          new Date(Date.now() + 8 * 24 * 60 * 60 * 1000)
         ) {
           groupRaw['Next 7 Days'].push(chore)
         } else if (
