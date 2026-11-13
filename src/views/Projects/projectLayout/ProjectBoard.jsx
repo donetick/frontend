@@ -682,7 +682,7 @@ const BoardColumn = ({
               </MenuItem>
             </Menu>
           </Dropdown>
-        </Box>
+        </ColumnDragSurface>
       </Box>
 
       <Box id={`project-section-${section.id}`} hidden={!isExpanded}>
