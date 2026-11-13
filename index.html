@@ -402,6 +402,29 @@
         </div>
       </div>
     </div>
+    <script>
+      // Keep the pre-JavaScript screen in sync with StartupScreen without
+      // waiting for language resources or application providers.
+      ;(function () {
+        try {
+          var stored = localStorage.getItem('language')
+          var language = stored
+            ? JSON.parse(stored)
+            : localStorage.getItem('i18nextLng')
+          if (
+            typeof language === 'string' &&
+            language.toLowerCase().startsWith('zh')
+          ) {
+            document.documentElement.lang = 'zh-CN'
+            document
+              .querySelector('.startup-screen')
+              .setAttribute('aria-label', '正在加载 Donetick')
+            document.querySelector('.startup-screen__caption').textContent =
+              '正在准备'
+          }
+        } catch (_) {}
+      })()
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

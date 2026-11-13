@@ -1,8 +1,10 @@
 import { Box, Sheet } from '@mui/joy'
 import { useMediaQuery } from '@mui/material'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { useChoresHistory } from '../../queries/ChoreQueries'
+import { getChoreGroupLabel } from '../../utils/ChoreGroupLabels'
 import { ChoresGrouper } from '../../utils/Chores'
 import { getSidepanelConfig } from '../../utils/SidepanelConfig'
 import CalendarCard from '../components/CalendarCard'
@@ -18,6 +20,7 @@ const Sidepanel = ({
   clearTempFilter,
   tempFilter,
 }) => {
+  const { t } = useTranslation()
   const isLargeScreen = useMediaQuery(theme => theme.breakpoints.up('lg'))
   const [dueDatePieChartData, setDueDatePieChartData] = useState([])
   const [sidepanelConfig, setSidepanelConfig] = useState([])
@@ -30,7 +33,7 @@ const Sidepanel = ({
   useEffect(() => {
     setDueDatePieChartData(generateChoreDuePieChartData(chores))
     setSidepanelConfig(getSidepanelConfig())
-  }, [])
+  }, [chores, t])
 
   useEffect(() => {
     const handleConfigChange = () => {
@@ -48,7 +51,7 @@ const Sidepanel = ({
     return groups
       .map(group => {
         return {
-          label: group.name,
+          label: getChoreGroupLabel(group.name, 'due_date', t),
           value: group.content.length,
           color: group.color,
           id: group.name,

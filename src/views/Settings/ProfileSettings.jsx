@@ -42,7 +42,7 @@ const surfaceSx = {
 }
 
 const ProfileContent = ({ refetchUserProfile, userProfile }) => {
-  const { t } = useTranslation('settings')
+  const { i18n, t } = useTranslation('settings')
   const queryClient = useQueryClient()
   const { showError, showSuccess } = useNotification()
   const [displayName, setDisplayName] = useState(userProfile.displayName || '')
@@ -257,10 +257,10 @@ const ProfileContent = ({ refetchUserProfile, userProfile }) => {
                 getOptionLabel={tz => {
                   if (!tz) return ''
                   const formattedTimezone = tz.replace(/_/g, ' ')
-                  const currentTime = new Date().toLocaleString(undefined, {
-                    timeZone: tz,
-                    timeStyle: 'short',
-                  })
+                  const currentTime = new Date().toLocaleString(
+                    i18n.resolvedLanguage || i18n.language,
+                    { timeZone: tz, timeStyle: 'short' },
+                  )
                   return `${formattedTimezone} (${currentTime})`
                 }}
                 filterOptions={(options, { inputValue }) => {

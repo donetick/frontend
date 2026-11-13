@@ -1,15 +1,18 @@
 import { Pause, PlayArrow, Stop, WatchLater } from '@mui/icons-material'
 import { Box, Card, CardContent, IconButton, Typography } from '@mui/joy'
 import { useEffect, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import useTimer from '../../hooks/useTimer'
 
 const TimerCard = ({
   onTimeUpdate = () => {}, // 'standalone' | 'infoCard' | 'floating'
   sx = {},
-  title = 'Timer',
+  title,
   variant = 'standalone',
 }) => {
+  const { t } = useTranslation('common')
+  const displayTitle = title ?? t('common:ui.timer.title')
   // Use the custom timer hook
   const {
     isPaused,
@@ -97,7 +100,7 @@ const TimerCard = ({
                 color: 'text.primary',
               }}
             >
-              {title}
+              {displayTitle}
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -118,8 +121,8 @@ const TimerCard = ({
                 size='sm'
                 onClick={startTimer}
                 sx={{ width: 24, height: 24 }}
-                aria-label='Start timer'
-                title='Start timer (Spacebar)'
+                aria-label={t('common:ui.timer.start')}
+                title={t('common:ui.timer.startShortcut')}
               >
                 <PlayArrow sx={{ fontSize: '1rem' }} />
               </IconButton>
@@ -131,11 +134,15 @@ const TimerCard = ({
                   size='sm'
                   onClick={isPaused ? resumeTimer : pauseTimer}
                   sx={{ width: 24, height: 24 }}
-                  aria-label={isPaused ? 'Resume timer' : 'Pause timer'}
+                  aria-label={
+                    isPaused
+                      ? t('common:ui.timer.resume')
+                      : t('common:ui.timer.pause')
+                  }
                   title={
                     isPaused
-                      ? 'Resume timer (Spacebar)'
-                      : 'Pause timer (Spacebar)'
+                      ? t('common:ui.timer.resumeShortcut')
+                      : t('common:ui.timer.pauseShortcut')
                   }
                 >
                   {isPaused ? (
@@ -150,8 +157,8 @@ const TimerCard = ({
                   size='sm'
                   onClick={stopTimer}
                   sx={{ width: 24, height: 24 }}
-                  aria-label='Stop timer'
-                  title='Stop timer (Escape)'
+                  aria-label={t('common:ui.timer.stop')}
+                  title={t('common:ui.timer.stopShortcut')}
                 >
                   <Stop sx={{ fontSize: '1rem' }} />
                 </IconButton>
@@ -160,7 +167,10 @@ const TimerCard = ({
           </Box>
           {time > 0 && (
             <Typography level='body-xs' color='text.secondary'>
-              {Math.floor(time / 60)}m {time % 60}s
+              {t('common:ui.timer.duration', {
+                minutes: Math.floor(time / 60),
+                seconds: time % 60,
+              })}
             </Typography>
           )}
         </CardContent>
@@ -196,7 +206,7 @@ const TimerCard = ({
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
           <WatchLater sx={{ color: 'primary.600', fontSize: '1rem' }} />
           <Typography level='title-sm' sx={{ fontWeight: 600 }}>
-            {title}
+            {displayTitle}
           </Typography>
         </Box>
 
@@ -212,7 +222,11 @@ const TimerCard = ({
             {formattedTime}
           </Typography>
           <Typography level='body-xs' color='text.secondary'>
-            {isRunning && !isPaused ? 'Running' : isPaused ? 'Paused' : 'Ready'}
+            {isRunning && !isPaused
+              ? t('common:ui.timer.running')
+              : isPaused
+                ? t('common:ui.timer.paused')
+                : t('common:ui.timer.ready')}
           </Typography>
         </Box>
 
@@ -300,7 +314,7 @@ const TimerCard = ({
             <WatchLater sx={{ color: 'primary.600', fontSize: '1.25rem' }} />
           </Box>
           <Typography level='title-lg' sx={{ fontWeight: 600 }}>
-            {title}
+            {displayTitle}
           </Typography>
         </Box>
       </Box>
@@ -378,10 +392,10 @@ const TimerCard = ({
               }}
             >
               {isRunning && !isPaused
-                ? 'Running'
+                ? t('common:ui.timer.running')
                 : isPaused
-                  ? 'Paused'
-                  : 'Ready'}
+                  ? t('common:ui.timer.paused')
+                  : t('common:ui.timer.ready')}
             </Typography>
           </Box>
         </Box>
@@ -495,7 +509,10 @@ const TimerCard = ({
       {time > 0 && (
         <Box sx={{ mt: 3, textAlign: 'center' }}>
           <Typography level='body-sm' color='text.secondary'>
-            Session: {Math.floor(time / 60)}m {time % 60}s
+            {t('common:ui.timer.sessionDuration', {
+              minutes: Math.floor(time / 60),
+              seconds: time % 60,
+            })}
           </Typography>
         </Box>
       )}

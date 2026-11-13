@@ -52,6 +52,13 @@ const ChoresOverview = () => {
   const [search, setSearch] = useState('')
   const Navigate = useNavigate()
 
+  const statusLabels = {
+    [CHORE_STATUS.NO_DUE_DATE]: t('common:ui.actions.noDueDate'),
+    [CHORE_STATUS.DUE_SOON]: t('common:ui.actions.dueSoon'),
+    [CHORE_STATUS.DUE_NOW]: t('common:ui.actions.dueNow'),
+    [CHORE_STATUS.OVER_DUE]: t('common:ui.actions.overdue'),
+  }
+
   const getChoreStatus = chore => {
     if (chore.nextDueDate === null) {
       return CHORE_STATUS.NO_DUE_DATE
@@ -195,7 +202,7 @@ const ChoresOverview = () => {
               {/* cirular icon if the chore is due will be red else yellow: */}
               <td>
                 <Chip color={getChoreStatusColor(chore)}>
-                  {getChoreStatus(chore)}
+                  {statusLabels[getChoreStatus(chore)]}
                 </Chip>
               </td>
               <td
@@ -240,7 +247,7 @@ const ChoresOverview = () => {
                 <Tooltip
                   title={
                     chore.nextDueDate === null
-                      ? 'no due date'
+                      ? statusLabels[CHORE_STATUS.NO_DUE_DATE]
                       : moment(chore.nextDueDate).format('YYYY-MM-DD')
                   }
                   size='sm'
@@ -325,7 +332,7 @@ const ChoresOverview = () => {
         }}
         onSave={date => {
           if (activeUserId === null) {
-            alert('Please select a performer')
+            alert(t('choreView.selectAPerformer'))
             return
           }
           MarkChoreComplete(choreId, null, date, activeUserId)

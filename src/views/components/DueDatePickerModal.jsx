@@ -113,7 +113,7 @@ const DueDatePickerModal = ({
 }) => {
   const { t } = useTranslation('chores')
   const { ResponsiveModal } = useResponsiveModal()
-  const { firstDayOfWeek } = useLocalization()
+  const { firstDayOfWeek, language } = useLocalization()
 
   // Local buffered state — only committed on Apply
   const [localDueDateOnly, setLocalDueDateOnly] = useState(dueDateOnly)
@@ -482,29 +482,17 @@ const DueDatePickerModal = ({
           }}
         >
           <Calendar
+            locale={language}
             value={
               localDueDateOnly ? new Date(`${localDueDateOnly}T00:00:00`) : null
             }
             calendarType={calendarType}
             onChange={handleCalendarChange}
             formatShortWeekday={(locale, date) =>
-              ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'][date.getDay()]
+              new Intl.DateTimeFormat(locale, { weekday: 'short' }).format(date)
             }
             formatMonth={(locale, date) =>
-              [
-                'Jan',
-                'Feb',
-                'Mar',
-                'Apr',
-                'May',
-                'Jun',
-                'Jul',
-                'Aug',
-                'Sep',
-                'Oct',
-                'Nov',
-                'Dec',
-              ][date.getMonth()]
+              new Intl.DateTimeFormat(locale, { month: 'short' }).format(date)
             }
           />
         </Box>

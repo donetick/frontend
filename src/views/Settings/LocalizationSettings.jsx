@@ -21,6 +21,7 @@ import {
 } from '@/contexts/LocalizationContext'
 
 import { track } from '../../analytics'
+import { getMomentLocale } from '../../i18n/languages'
 import SettingsLayout from './SettingsLayout'
 import SettingsSection from './SettingsSection'
 
@@ -56,7 +57,9 @@ const LocalizationSettings = () => {
 
   // One fixed example makes formats easy to compare, including after a
   // language switch (without waiting for Moment's global locale effect).
-  const sampleDate = moment('2026-01-15T14:30:00').locale(language)
+  const sampleDate = moment('2026-01-15T14:30:00').locale(
+    getMomentLocale(language),
+  )
   const dateFormatOptions = [
     { value: DATE_FORMATS.MDY, label: t('localization.formats.mdy') },
     { value: DATE_FORMATS.DMY, label: t('localization.formats.dmy') },

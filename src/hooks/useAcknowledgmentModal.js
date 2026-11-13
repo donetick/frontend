@@ -1,13 +1,15 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 const useAcknowledgmentModal = () => {
+  const { t } = useTranslation('common')
   const [ackModalConfig, setAckModalConfig] = useState({})
 
   const showAcknowledgment = (
     message,
     title,
     onAcknowledge,
-    acknowledgeText = 'Got it',
+    acknowledgeText = t('joinCircle.gotIt'),
     color = 'primary',
   ) => {
     setAckModalConfig({

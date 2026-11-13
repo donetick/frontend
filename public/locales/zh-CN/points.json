@@ -1,0 +1,80 @@
+{
+  "redeem": "扣除积分",
+  "sections": {
+    "overview": "概览"
+  },
+  "redeemModal": {
+    "redeemButton": "扣除",
+    "pointsAvailable": "可用积分：{{count}}",
+    "pointsToRedeem": "扣除积分数",
+    "placeholder": "输入积分数…",
+    "cannotExceed": "不能超过可用积分",
+    "quickAdd": "快速添加：",
+    "aboutToRedeem": "你即将扣除",
+    "amount": "{{count}} 积分",
+    "remaining": "剩余：{{count}} 积分"
+  },
+  "leaderboard": {
+    "titlePoints": "积分排行榜",
+    "titleTasks": "任务排行榜",
+    "subtitlePoints": "按所选时间范围内获得的积分排名",
+    "subtitleTasks": "按所选时间范围内完成的任务数排名",
+    "modePoints": "积分",
+    "modeTasks": "任务",
+    "you": "你",
+    "tasksAndAvg": "{{tasks}} 个任务 • 每个任务平均 {{avg}} 积分",
+    "available": "可用：{{count}}",
+    "points_one": "{{count}} 积分",
+    "points_other": "{{count}} 积分"
+  },
+  "tabs": {
+    "short7d": "7天",
+    "short6m": "6个月",
+    "shortAll": "全部",
+    "days7": "7 天",
+    "months6": "6 个月",
+    "allTime": "全部时间",
+    "short30d": "30天",
+    "days30": "30 天"
+  },
+  "filter": {
+    "analysisTitle": "筛选与分析",
+    "title": "筛选积分",
+    "showFor": "显示以下成员的积分：",
+    "timePeriod": "时间范围："
+  },
+  "cards": {
+    "available": {
+      "title": "可用积分",
+      "subtext": "可用于兑换"
+    },
+    "redeemed": {
+      "title": "已兑换",
+      "subtext": "已使用的积分"
+    },
+    "total": {
+      "title": "总积分",
+      "subtext": "累计获得的积分"
+    },
+    "period": {
+      "title": "期间积分",
+      "allTime": "全部时间",
+      "last6Months": "最近 6 个月",
+      "lastDays_one": "最近 {{count}} 天",
+      "lastDays_other": "最近 {{count}} 天"
+    }
+  },
+  "summary": {
+    "showingFor": "显示以下成员的积分",
+    "selectUser": "选择成员以查看积分",
+    "unknownUser": "未知用户",
+    "overThe": "统计范围：",
+    "allTime": "全部时间",
+    "last6Months": "最近 6 个月",
+    "lastDays_one": "最近 {{count}} 天",
+    "lastDays_other": "最近 {{count}} 天"
+  },
+  "trend": {
+    "title": "积分趋势"
+  }
+}

@@ -1,10 +1,12 @@
 import { WifiOff } from '@mui/icons-material'
 import { Alert, Box } from '@mui/joy'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { networkManager } from '../../hooks/NetworkManager'
 
 const NetworkBanner = () => {
+  const { t } = useTranslation('common')
   const [isOnline, setIsOnline] = useState(networkManager.isOnline)
   const [offlineReason, setOfflineReason] = useState(
     networkManager.offlineReason,
@@ -41,8 +43,8 @@ const NetworkBanner = () => {
 
   const message =
     offlineReason === 'server'
-      ? 'Server unreachable. Changes will sync when connection is restored.'
-      : 'No internet connection. Some features may not be available.'
+      ? t('networkBanner.serverUnavailable')
+      : t('networkBanner.offline')
 
   return (
     <Box sx={{}}>

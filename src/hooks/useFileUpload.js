@@ -83,8 +83,8 @@ export const useFileUpload = ({
           return null
         } else if (!response.ok) {
           showError({
-            title: 'Upload Failed',
-            message: 'Failed to upload file.',
+            title: t('common:ui.remaining.uploadFailed'),
+            message: t('common:ui.remaining.uploadFileFailed'),
           })
           return null
         }
@@ -100,8 +100,8 @@ export const useFileUpload = ({
         }
       } catch {
         showError({
-          title: 'Upload Failed',
-          message: 'An error occurred while processing the file.',
+          title: t('common:ui.remaining.uploadFailed'),
+          message: t('common:ui.remaining.processFileFailed'),
         })
         return null
       }

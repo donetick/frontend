@@ -256,7 +256,9 @@ const NotificationSetting = () => {
         message:
           status === 409
             ? t('notifications.deviceLimitMessage')
-            : error || t('notifications.registrationFailedMessage'),
+            : !status || error === 'Unknown error'
+              ? t('notifications.registrationFailedMessage')
+              : error || t('notifications.registrationFailedMessage'),
       })
     }
     window.addEventListener('deviceTokenRegistered', registered)

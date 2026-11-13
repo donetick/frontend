@@ -1,11 +1,13 @@
 import { Check } from '@mui/icons-material'
 import { Box, Typography } from '@mui/joy'
+import { useTranslation } from 'react-i18next'
 
 export default function WizardStepper({ activeStep, onStepChange, steps, sx }) {
+  const { t } = useTranslation('common')
   return (
     <Box
       component='nav'
-      aria-label='Task creation steps'
+      aria-label={t('common:ui.taskEditor.stepsLabel')}
       sx={{ display: { xs: 'none', sm: 'flex' }, py: 1, ...sx }}
     >
       {steps.map((label, index) => (

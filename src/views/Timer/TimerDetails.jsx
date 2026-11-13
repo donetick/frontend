@@ -128,11 +128,15 @@ const TimerDetails = () => {
   }
 
   const formatDuration = seconds => {
-    if (seconds < 60) return `${seconds}s`
-    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ${seconds % 60}s`
+    if (seconds < 60) return t('common:ui.timer.seconds', { seconds })
+    if (seconds < 3600)
+      return t('common:ui.timer.minutesSeconds', {
+        minutes: Math.floor(seconds / 60),
+        seconds: seconds % 60,
+      })
     const hours = Math.floor(seconds / 3600)
     const minutes = Math.floor((seconds % 3600) / 60)
-    return `${hours}h ${minutes}m`
+    return t('common:ui.timer.hoursMinutes', { hours, minutes })
   }
 
   const startEditingSession = () => {
@@ -282,7 +286,7 @@ const TimerDetails = () => {
           )
           showSuccess({
             title: t('toast.startQueuedTitle'),
-            message: "You're offline — start will sync when back online",
+            message: t('chores:choreView.offlineStart'),
             undoAction: async () => {
               await commandQueue.cancel(cmdId)
             },
@@ -320,7 +324,7 @@ const TimerDetails = () => {
           )
           showSuccess({
             title: t('toast.pauseQueuedTitle'),
-            message: "You're offline — pause will sync when back online",
+            message: t('chores:choreView.offlinePause'),
             undoAction: async () => {
               await commandQueue.cancel(cmdId)
             },
@@ -774,7 +778,15 @@ const TimerDetails = () => {
                                   zIndex: 1,
                                 },
                               }}
-                              title={`Session ${index + 1}: ${formatDuration(sessionDuration)} ${isOngoing ? '(ongoing)' : ''}`}
+                              title={t(
+                                isOngoing
+                                  ? 'common:ui.timer.ongoingSessionTooltip'
+                                  : 'common:ui.timer.sessionTooltip',
+                                {
+                                  number: index + 1,
+                                  duration: formatDuration(sessionDuration),
+                                },
+                              )}
                             />
                           )
                         })
@@ -1130,7 +1142,7 @@ const TimerDetails = () => {
                                           >
                                             {sessionUser?.displayName ||
                                               sessionUser?.name ||
-                                              'Unknown'}
+                                              t('common:taskGroups.unknown')}
                                           </Chip>
                                         ) : null
                                       })()}
@@ -1436,7 +1448,11 @@ const TimerDetails = () => {
                 },
               },
             }}
-            title={isTimerRunning() ? 'Pause Timer' : 'Start Timer'}
+            title={
+              isTimerRunning()
+                ? t('chores:choreView.pauseTimer')
+                : t('chores:choreView.startTimer')
+            }
           >
             {isTimerRunning() ? (
               <PauseCircle sx={{ fontSize: 24 }} />

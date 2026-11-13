@@ -1,14 +1,16 @@
 import { Container, Modal } from '@mui/joy'
 import { useMediaQuery } from '@mui/material'
+import { useTranslation } from 'react-i18next'
 
 export default function WizardContainer({ children, onClose, sx, ...props }) {
+  const { t } = useTranslation('common')
   const mobile = useMediaQuery('(max-width:599px)')
   const content = (
     <Container
       {...props}
       role={mobile ? 'dialog' : undefined}
       aria-modal={mobile ? true : undefined}
-      aria-label={mobile ? 'Task editor' : undefined}
+      aria-label={mobile ? t('settings:layout.taskEditor.title') : undefined}
       tabIndex={mobile ? -1 : undefined}
       sx={{
         ...sx,

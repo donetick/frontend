@@ -1,0 +1,56 @@
+{
+  "blurb": "使用积分兑换奖励；管理员还可以管理奖励目录。可用积分：{{points}}。",
+  "redeem": "兑换",
+  "notEnoughPoints": "积分不足",
+  "approve": "批准",
+  "reject": "拒绝",
+  "actions": {
+    "menu": "{{name}} 的操作"
+  },
+  "pointsCost_one": "{{count}} 积分",
+  "pointsCost_other": "{{count}} 积分",
+  "tabs": {
+    "store": "商店",
+    "requests": "申请"
+  },
+  "status": {
+    "pending": "待处理",
+    "approved": "已批准",
+    "rejected": "已拒绝"
+  },
+  "delete": {
+    "title": "删除奖励",
+    "message": "确定要删除此奖励吗？删除后将无法再兑换。"
+  },
+  "redeemConfirm": {
+    "title": "兑换奖励",
+    "message": "是否花费 {{cost}} 积分申请兑换“{{name}}”？需要管理员批准。"
+  },
+  "requests": {
+    "emptyTitle": "暂无兑换申请",
+    "emptyDescription": "有人兑换奖励后，兑换申请将显示在这里。"
+  },
+  "modal": {
+    "errorEmptyName": "名称不能为空",
+    "errorInvalidCost": "所需积分必须为大于 0 的数字",
+    "saveFailedTitle": "保存奖励失败",
+    "saveFailedMessage": "无法保存奖励，请重试。",
+    "name": "名称",
+    "description": "描述",
+    "pointsCost": "所需积分",
+    "active": "已启用",
+    "editTitle": "编辑奖励",
+    "addTitle": "添加奖励",
+    "saveChanges": "保存更改",
+    "addReward": "添加奖励"
+  },
+  "view": {
+    "subtitle": "用努力获得的积分，兑换一份特别的奖励。",
+    "availableBalance": "可用余额",
+    "pointsLabel": "积分",
+    "rewardFallbackDescription": "一份值得期待的小奖励。",
+    "emptyTitle": "暂无奖励",
+    "emptyDescription": "添加奖励，例如电影之夜或小点心，让圈子成员可以使用积分兑换。",
+    "createReward": "创建奖励"
+  }
+}

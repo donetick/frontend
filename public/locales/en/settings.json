@@ -433,7 +433,8 @@
     "eventWeeklyDigestShort": "a weekly preview",
     "digestHourLabel": "Digest Delivery Time",
     "digestHourHelper": "Local hour (in your profile timezone) that digests are sent",
-    "preferenceUpdateFailed": "Failed to update notification preference. Please try again."
+    "preferenceUpdateFailed": "Failed to update notification preference. Please try again.",
+    "targetUpdateFailedGeneric": "Could not update notification target. Please try again."
   },
   "mfa": {
     "title": "Multi-Factor Authentication",

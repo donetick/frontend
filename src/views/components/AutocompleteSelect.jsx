@@ -4,6 +4,7 @@ import AutocompleteOption from '@mui/joy/AutocompleteOption'
 import FormControl from '@mui/joy/FormControl'
 import ListItemDecorator from '@mui/joy/ListItemDecorator'
 import * as React from 'react'
+import { useTranslation } from 'react-i18next'
 
 const filter = createFilterOptions()
 
@@ -12,6 +13,7 @@ export default function FreeSoloCreateOption({
   options,
   selected,
 }) {
+  const { t } = useTranslation('common')
   React.useEffect(() => {
     setValue(options)
   }, [options])
@@ -53,7 +55,7 @@ export default function FreeSoloCreateOption({
           if (inputValue !== '' && !isExisting) {
             filtered.push({
               inputValue,
-              title: `Add "${inputValue}"`,
+              title: t('common:ui.remaining.addOption', { value: inputValue }),
             })
           }
           return filtered
