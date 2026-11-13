@@ -29,6 +29,7 @@ import {
 } from '@mui/icons-material'
 import {
   Box,
+  Button,
   Checkbox,
   CircularProgress,
   Dropdown,
@@ -56,9 +57,13 @@ import { useNavigate } from 'react-router-dom'
 
 import { networkManager } from '../../../hooks/NetworkManager'
 import { useChorePermissions } from '../../../hooks/useChorePermissions'
-import { useCreateChore } from '../../../queries/ChoreQueries'
+import {
+  useCreateChore,
+  useUnArchiveChore,
+} from '../../../queries/ChoreQueries'
 import { useUserProfile } from '../../../queries/UserQueries'
 import { useNotification } from '../../../service/NotificationProvider'
+import { notInCompletionWindow } from '../../../utils/Chores'
 import { CompleteSubTask } from '../../../utils/Fetcher'
 import ChoreActionMenu from '../../components/ChoreActionMenu'
 import { buildChorePayload } from '../../components/VoiceToTask/parseVoiceTask'
@@ -75,8 +80,10 @@ import { boardCardInteractions } from './boardCardInteractions'
 import { boardCollisionDetection } from './boardCollisionDetection'
 import { applyTaskOrder, getTaskDropOrder } from './boardTaskOrdering'
 import ProjectBoardCard from './ProjectBoardCard'
+import ProjectCompletedColumn from './ProjectCompletedColumn'
 import ProjectSectionComposer from './ProjectSectionComposer'
 import ProjectTaskRow from './ProjectTaskRow'
+import { uncheckCompletedChore } from './uncheckCompletedChore'
 const EMPTY_MEMBERS = []
 const ignoreActionMenu = () => {}
 
@@ -768,6 +775,34 @@ const ProjectBoard = ({
 }) => {
   const { t } = useTranslation('chores')
   const [dragPreview, setDragPreview] = useState(null)
+  const [hiddenCompletedProjects, setHiddenCompletedProjects] = useState(() => {
+    try {
+      return (
+        JSON.parse(localStorage.getItem('board-hidden-completed') || '{}') || {}
+      )
+    } catch {
+      return {}
+    }
+  })
+  const setCompletedHidden = hidden => {
+    const next = { ...hiddenCompletedProjects, [projectId]: hidden }
+    setHiddenCompletedProjects(next)
+    try {
+      localStorage.setItem('board-hidden-completed', JSON.stringify(next))
+    } catch {
+      /* Storage may be unavailable. Keep the in-session preference. */
+    }
+  }
+  const restoreChoreMutation = useUnArchiveChore()
+  const { showError } = useNotification()
+  const completionPermissions = useChorePermissions(dragPreview?.task)
+  const canCompleteDraggedTask = Boolean(
+    dragPreview?.task &&
+    dragPreview.task.isActive !== false &&
+    dragPreview.task.status !== 3 &&
+    completionPermissions.complete &&
+    !notInCompletionWindow(dragPreview.task),
+  )
   const [actionMenu, setActionMenu] = useState(null)
   const openActionMenu = useCallback((anchorEl, chore) => {
     setActionMenu({ anchorEl, chore })
@@ -898,10 +933,13 @@ const ProjectBoard = ({
   const handleDragStart = ({ active }) => {
     closeActionMenu()
     setDragTaskOrder(null)
-    if (active.data.current?.type === 'task') {
-      const task = chores.find(
-        chore => String(chore.id) === active.data.current.taskId,
-      )
+    if (['task', 'archivedTask'].includes(active.data.current?.type)) {
+      const task =
+        active.data.current.type === 'archivedTask'
+          ? active.data.current.task
+          : chores.find(
+              chore => String(chore.id) === active.data.current.taskId,
+            )
       const rect = active.rect.current?.initial
       setDragPreview(
         task
@@ -945,7 +983,7 @@ const ProjectBoard = ({
     if (order) setDragTaskOrder({ ...order, projectId })
   }
 
-  const handleDragEnd = ({ active, over }) => {
+  const handleDragEnd = async ({ active, over }) => {
     setDragPreview(null)
     setDragTaskOrder(null)
     if (!over || (active.id === over.id && !dragTaskOrder)) return
@@ -985,7 +1023,44 @@ const ProjectBoard = ({
       return
     }
 
+    if (activeData?.type === 'archivedTask') {
+      const sectionId = overData?.sectionId
+      if (!sections.some(section => section.id === sectionId)) return
+      const task = activeData.task
+      const target = choresBySection[sectionId] || []
+      const hoveredIndex = target.findIndex(
+        chore => String(chore.id) === overData?.taskId,
+      )
+      const afterChoreId =
+        hoveredIndex === 0
+          ? null
+          : taskMutationId(
+              target[hoveredIndex > 0 ? hoveredIndex - 1 : target.length - 1]
+                ?.id,
+            )
+      try {
+        const response = await uncheckCompletedChore(
+          task,
+          restoreChoreMutation.mutateAsync,
+        )
+        if (!response?.ok) throw new Error(t('permissions.failed'))
+        await moveChoreMutation.mutateAsync({
+          projectId,
+          choreId: taskMutationId(task.id),
+          sectionId,
+          afterChoreId: target.length ? afterChoreId : null,
+        })
+      } catch (error) {
+        showError({ message: error.message })
+      }
+      return
+    }
+
     if (activeData?.type !== 'task') return
+    if (overData?.type === 'completed') {
+      if (canCompleteDraggedTask) handleAction('complete', dragPreview.task)
+      return
+    }
     const taskId = activeData.taskId
     const order = getTaskDropOrder(
       displayedChoresBySection,
@@ -1076,6 +1151,25 @@ const ProjectBoard = ({
                 userProfile={userProfile}
               />
             ))}
+            {hiddenCompletedProjects[projectId] ? (
+              <Button
+                variant='plain'
+                color='neutral'
+                size='sm'
+                onClick={() => setCompletedHidden(false)}
+              >
+                {t('board.showCompleted')}
+              </Button>
+            ) : (
+              <ProjectCompletedColumn
+                key={projectId}
+                projectId={projectId}
+                displayMode={displayMode}
+                canDrop={!isMultiSelectMode && canCompleteDraggedTask}
+                isMultiSelectMode={isMultiSelectMode}
+                onHide={() => setCompletedHidden(true)}
+              />
+            )}
             <ProjectSectionComposer
               displayMode={displayMode}
               onSubmit={addSection}
