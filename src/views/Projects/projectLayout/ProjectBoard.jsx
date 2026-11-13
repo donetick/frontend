@@ -85,11 +85,8 @@ const taskDndId = id => `task:${id}`
 // Keep offline-created IDs intact until SyncEngine maps them to server IDs.
 const taskMutationId = id => (String(id).startsWith('temp_') ? id : Number(id))
 
-const interactiveControlSelector =
-  'button, input, textarea, select, a, [role="button"], [role="checkbox"], [role="menuitem"], [contenteditable="true"]'
-
-// Section headers use explicit handles. Tasks use their whole non-interactive
-// surface as the drag activator in both list and board views.
+// Section headers and tasks both use their whole non-interactive surface as the
+// drag activator. The handle stays as an affordance and keyboard entry point.
 const DragHandle = memo(function DragHandle({
   attributes,
   className,
@@ -141,6 +138,33 @@ const ColumnDragContext = createContext(null)
 const ColumnDragHandle = ({ label }) => {
   const dragProps = useContext(ColumnDragContext)
   return <DragHandle {...dragProps} compact label={label} />
+}
+
+// The header behaves like a task card: a click runs the header's own action
+// while a press-and-hold starts the column drag. Nested controls opt out.
+const ColumnDragSurface = ({ children, isMultiSelectMode, onActivate, sx }) => {
+  const { isDragging, listeners } = useContext(ColumnDragContext) ?? {}
+  return (
+    <Box
+      {...boardCardInteractions({
+        isDragging,
+        isMultiSelectMode,
+        listeners,
+        onOpen: onActivate,
+      })}
+      sx={{
+        cursor: isMultiSelectMode
+          ? 'default'
+          : isDragging
+            ? 'grabbing'
+            : 'grab',
+        userSelect: 'none',
+        ...sx,
+      }}
+    >
+      {children}
+    </Box>
+  )
 }
 
 // Keep Joy/Emotion entirely outside the per-frame render path. This surface
@@ -532,15 +556,10 @@ const BoardColumn = ({
             : undefined
         }
       >
-        <Box
-          onClick={event => {
-            const control = event.target.closest(interactiveControlSelector)
-            if (
-              displayMode !== 'list' ||
-              (control && event.currentTarget.contains(control))
-            )
-              return
-            setIsCollapsed(value => !value)
+        <ColumnDragSurface
+          isMultiSelectMode={isMultiSelectMode}
+          onActivate={() => {
+            if (displayMode === 'list') setIsCollapsed(value => !value)
           }}
           sx={{
             display: 'flex',
@@ -677,9 +696,9 @@ const BoardColumn = ({
               flexDirection: 'column',
               gap: displayMode === 'list' ? 0 : 1,
               minHeight: displayMode === 'list' ? 44 : 88,
-              maxHeight:
-                displayMode === 'list' ? 'none' : 'calc(100vh - 260px)',
-              overflowY: displayMode === 'list' ? 'visible' : 'auto',
+              maxHeight: 'max(88px, calc(100dvh - 260px))',
+              overflowY: 'auto',
+              overscrollBehaviorY: 'contain',
               p: displayMode === 'list' ? 0 : 1,
             }}
           >
