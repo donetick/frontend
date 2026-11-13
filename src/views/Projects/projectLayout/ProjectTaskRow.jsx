@@ -330,6 +330,7 @@ const ProjectTaskRow = memo(function ProjectTaskRow({
         <Box className='project-task-secondary-action' sx={{ flexShrink: 0 }}>
           <ChoreActionMenuTrigger
             variant='plain'
+            color='neutral'
             onClick={event => {
               event.stopPropagation()
               onOpenActionMenu?.(event.currentTarget, chore)
@@ -342,6 +343,8 @@ const ProjectTaskRow = memo(function ProjectTaskRow({
               minWidth: 28,
               left: 0,
               p: 0,
+              borderRadius: 'sm',
+              '& svg': { fontSize: 18 },
             }}
           />
         </Box>
