@@ -17,9 +17,10 @@ import {
   Switch,
   Typography,
 } from '@mui/joy'
-import { useTranslation } from 'react-i18next'
 
 import NumberInput from '../../components/common/NumberInput'
+import { useXPTranslation as useTranslation } from '../../queries/XPQueries'
+import XPCategorySelect from '../XP/XPCategorySelect'
 
 const STRATEGY_VALUES = [
   'keep_last_assigned',
@@ -140,6 +141,7 @@ export const AdvancedOptionsTrigger = ({
 // Panel — place this as a sibling below the description/subtask sections
 const AdvancedOptionsSection = ({
   assignStrategy,
+  categoryID,
   completionWindow,
   deadlineOffset,
   hasAssignees,
@@ -148,6 +150,7 @@ const AdvancedOptionsSection = ({
   isPrivacyInherited,
   isPrivate,
   onAssignStrategyChange,
+  onCategoryChange,
   onCompletionWindowChange,
   onDeadlineOffsetChange,
   onIsPrivateChange,
@@ -213,7 +216,7 @@ const AdvancedOptionsSection = ({
               allowEmpty
               emptyValue={0}
               min={0}
-              max={9999}
+              max={1000000000}
               placeholder='0'
               onValueChange={next => onPointsChange(next > 0 ? next : -1)}
               sx={{ width: 64 }}
@@ -224,10 +227,18 @@ const AdvancedOptionsSection = ({
               variant='outlined'
               color='neutral'
               onClick={handleIncrement}
+              disabled={displayPoints >= 1000000000}
             >
               <Add sx={{ fontSize: 16 }} />
             </IconButton>
           </FieldRow>
+
+          {points > 0 && (
+            <XPCategorySelect
+              value={categoryID ?? 0}
+              onChange={onCategoryChange}
+            />
+          )}
 
           {/* Require approval */}
           <FieldRow

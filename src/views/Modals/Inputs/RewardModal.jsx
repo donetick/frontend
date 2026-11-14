@@ -1,10 +1,10 @@
 import { Box, FormControl, Input, Switch, Textarea, Typography } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 
 import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal.js'
+import { useXPTranslation as useTranslation } from '../../../queries/XPQueries'
 import { useNotification } from '../../../service/NotificationProvider.jsx'
 import { CreateReward, UpdateReward } from '../../../utils/Fetcher'
 
@@ -41,7 +41,7 @@ function RewardModal({ isOpen, onClose, reward }) {
       return false
     }
     const cost = Number(pointsCost)
-    if (!Number.isFinite(cost) || cost <= 0) {
+    if (!Number.isSafeInteger(cost) || cost <= 0 || cost > 2147483647) {
       setError(t('modal.errorInvalidCost'))
       return false
     }
@@ -126,7 +126,7 @@ function RewardModal({ isOpen, onClose, reward }) {
           <Input
             fullWidth
             type='number'
-            slotProps={{ input: { min: 1 } }}
+            slotProps={{ input: { min: 1, max: 2147483647, step: 1 } }}
             value={pointsCost}
             onChange={e => setPointsCost(e.target.value)}
           />

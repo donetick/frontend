@@ -27,20 +27,20 @@ import {
 import { useQueryClient } from '@tanstack/react-query'
 import PropTypes from 'prop-types'
 import { useMemo, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 
 import EmptyState from '../../components/common/EmptyState'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
+import { useXPTranslation as useTranslation } from '../../queries/XPQueries'
 import {
   ApproveRedemption,
   DeleteReward,
-  RedeemReward,
   RejectRedemption,
 } from '../../utils/Fetcher'
 import { getSafeBottom, getSafeBottomStyles } from '../../utils/SafeAreaUtils'
 import ScrollHideFab from '../components/ScrollHideFab'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import RewardModal from '../Modals/Inputs/RewardModal'
+import XPRewardRedeem from '../XP/XPRewardRedeem'
 import { useRedemptions, useRewards } from './RewardQueries'
 
 const surfaceSx = {
@@ -290,6 +290,7 @@ RedemptionRow.propTypes = {
 const RewardsView = ({ embedded = false, view = 'store' }) => {
   const { t } = useTranslation('rewards')
   const queryClient = useQueryClient()
+  const [xpReward, setXPReward] = useState(null)
 
   const { data: rewards = [], isLoading: rewardsLoading } = useRewards()
   const { data: userProfile } = useUserProfile()
@@ -323,6 +324,7 @@ const RewardsView = ({ embedded = false, view = 'store' }) => {
     queryClient.invalidateQueries({ queryKey: ['rewards'] })
     queryClient.invalidateQueries({ queryKey: ['redemptions'] })
     queryClient.invalidateQueries({ queryKey: ['allCircleMembers'] })
+    queryClient.invalidateQueries({ queryKey: ['xp'] })
   }
 
   const handleAdd = () => {
@@ -348,21 +350,7 @@ const RewardsView = ({ embedded = false, view = 'store' }) => {
     })
   }
   const handleRedeem = reward => {
-    setConfirmationModel({
-      isOpen: true,
-      title: t('redeemConfirm.title'),
-      message: t('redeemConfirm.message', {
-        name: reward.name,
-        cost: reward.pointsCost,
-      }),
-      confirmText: t('redeem'),
-      color: 'primary',
-      cancelText: t('common:cancel'),
-      onClose: confirmed => {
-        if (confirmed) RedeemReward(reward.id).then(invalidateAll)
-        setConfirmationModel({})
-      },
-    })
+    setXPReward(reward)
   }
   const handleApprove = redemption => {
     ApproveRedemption(redemption.id).then(invalidateAll)
@@ -391,6 +379,14 @@ const RewardsView = ({ embedded = false, view = 'store' }) => {
         pt: embedded ? 0 : { xs: 1, sm: 2 },
       }}
     >
+      {xpReward && (
+        <XPRewardRedeem
+          key={xpReward.id}
+          reward={xpReward}
+          onClose={() => setXPReward(null)}
+          onSuccess={invalidateAll}
+        />
+      )}
       {!embedded && (
         <Box component='header' sx={{ mb: 2.5 }}>
           <Typography
