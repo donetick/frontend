@@ -93,9 +93,9 @@ const useHomeSummary = (
   { scope = 'mine', userId: scopedUserId } = {},
 ) => {
   const { data: userProfile, isLoading: profileLoading } = useUserProfile()
-  const { data: membersData, isLoading: membersLoading } = useCircleMembers()
-  const { data: projects = [], isLoading: projectsLoading } = useProjects()
-  const { data: filters = [], isLoading: filtersLoading } = useFilters()
+  const { data: membersData } = useCircleMembers()
+  const { data: projects = [] } = useProjects()
+  const { data: filters = [] } = useFilters()
   // The open list can't say what anyone finished, and the circle ring is a
   // week: it needs the completion log. Same window and shape the activity
   // screens already ask for, so this usually lands on a warm cache.
@@ -339,8 +339,7 @@ const useHomeSummary = (
     ...summary,
     circle,
     filterPulse,
-    isLoading:
-      profileLoading || membersLoading || projectsLoading || filtersLoading,
+    isLoading: profileLoading,
     membersData,
     projectPulse,
     userProfile,

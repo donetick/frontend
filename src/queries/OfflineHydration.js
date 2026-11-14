@@ -2,93 +2,90 @@ import { offlineDB } from '../utils/OfflineDB'
 import { isOfflineFeatureEnabled } from '../utils/OfflineFeatureToggle'
 import { mergePendingCreates } from '../utils/PendingChores'
 
-// Seeds React Query with whatever the offline store already holds, so the
-// first paint comes from cache instead of from the network.
-//
-// Without this, a cold start against an unreachable server shows a spinner for
-// as long as fetch() takes to fail — up to the ApiClient timeout — because the
-// screens gate their render on `isLoading` and every queryFn only reaches its
-// cache fallback inside a catch block. An unreachable host (Wi-Fi dropped, LAN
-// IP no longer routable) fails slowly: the request hangs until it times out,
-// unlike a server that is up but refusing, which fails instantly.
-//
-// Seeded entries are backdated so React Query treats them as stale and still
-// refetches in the background, replacing them the moment the server answers.
-// Seeding mid-flight is safe: setQueryData marks the write `manual`, which
-// leaves an in-flight fetch running (and its result wins) while flipping the
-// query out of its loading state.
+// Backdate restored data so requests revalidate it in the background.
 const HYDRATED_UPDATED_AT = 1
-
 const isMissing = value => value === null || typeof value === 'undefined'
-
-// A corrupted or half-written cache entry must not reach a screen that expects
-// a list, so anything that isn't an array is treated as absent.
 const asList = value => (Array.isArray(value) ? value : undefined)
 
-// Never overwrite a query that already has data: by the time the IDB read
-// finishes, a fast network may have resolved the real request already.
-const seed = (queryClient, queryKey, data) => {
-  if (isMissing(data)) return
-  if (!isMissing(queryClient.getQueryState(queryKey)?.data)) return
-  queryClient.setQueryData(queryKey, data, { updatedAt: HYDRATED_UPDATED_AT })
-}
-
-export const hydrateQueriesFromOfflineCache = async queryClient => {
+export const hydrateQueriesFromOfflineCache = async (
+  queryClient,
+  { criticalOnly = false } = {},
+) => {
   if (!isOfflineFeatureEnabled()) return
-  // No session means nothing of the user's to restore (login, invite links).
   const token = localStorage.getItem('token')
   if (!token) return
 
+  // Never restore the previous session after logout or an account switch.
+  const seed = (queryKey, data) => {
+    if (localStorage.getItem('token') !== token || isMissing(data)) return
+    if (!isMissing(queryClient.getQueryState(queryKey)?.data)) return
+    queryClient.setQueryData(queryKey, data, { updatedAt: HYDRATED_UPDATED_AT })
+  }
+  const restore = async operation => {
+    try {
+      await operation()
+    } catch (err) {
+      // One unreadable resource must not prevent the others from rendering.
+      console.error('Failed to hydrate query from offline cache', err)
+    }
+  }
+
   try {
     await offlineDB.init()
-
-    // These KV keys are written by the queries being seeded — UserQueries,
-    // LabelQueries, ProjectQueries and FilterQueries — so the two sides have
-    // to stay in step. Hydration is silent when it finds nothing, and a
-    // renamed key would quietly cost that screen its offline first paint.
-    const [profile, labels, projects, circleMembers, filters, chores] =
-      await Promise.all([
-        offlineDB.getKV('user_profile'),
-        offlineDB.getKV('labels'),
-        offlineDB.getKV('projects'),
-        offlineDB.getKV('circle_members'),
-        offlineDB.getKV('filters'),
-        // Both backends scan the whole store regardless of this flag. Read the
-        // complete list once, then derive the active list in memory so direct
-        // launches into the archive screen are hydrated without a second scan.
-        offlineDB.getChores(true),
-      ])
-
-    seed(queryClient, ['userProfile', token], profile)
-    seed(queryClient, ['labels'], asList(labels))
-    seed(queryClient, ['projects'], asList(projects))
-    seed(queryClient, ['filters'], asList(filters))
-
-    // Sections live outside the chore delta-sync feed. Restore each visited
-    // project's columns too, otherwise cached tasks have nowhere to render.
-    await Promise.all(
-      (asList(projects) || []).map(async project => {
-        const sections = await offlineDB.getKV(`project_sections:${project.id}`)
-        seed(queryClient, ['projectSections', project.id], asList(sections))
+    // Start optional reads independently. Startup only waits for the profile
+    // and task snapshot; a project/section read must never hold the app shell.
+    const optional = Promise.all([
+      ...['labels', 'filters'].map(key =>
+        restore(async () => seed([key], asList(await offlineDB.getKV(key)))),
+      ),
+      restore(async () => {
+        const members = asList(await offlineDB.getKV('circle_members'))
+        if (members) seed(['allCircleMembers'], { res: members })
       }),
-    )
-    const members = asList(circleMembers)
-    if (members) seed(queryClient, ['allCircleMembers'], { res: members })
-
-    const cachedChores = asList(chores)
-    if (cachedChores) {
-      // An empty array is still valid cached data and must be seeded; otherwise
-      // users with no chores remain on the network spinner until it times out.
-      // mergePendingCreates may also turn an empty cache into a visible list.
-      const allChores = await mergePendingCreates(cachedChores)
-      seed(queryClient, ['chores', true], { res: allChores })
-      seed(queryClient, ['chores', false], {
-        res: allChores.filter(chore => chore.isActive !== false),
-      })
-    }
+      restore(async () => {
+        const projects = asList(await offlineDB.getKV('projects'))
+        seed(['projects'], projects)
+        // Columns are independent of the home/task-list critical path.
+        await Promise.all(
+          (projects || []).map(project =>
+            restore(async () => {
+              const sections = await offlineDB.getKV(
+                `project_sections:${project.id}`,
+              )
+              seed(['projectSections', project.id], asList(sections))
+            }),
+          ),
+        )
+      }),
+    ])
+    const critical = Promise.all([
+      restore(async () => {
+        seed(['userProfile', token], await offlineDB.getKV('user_profile'))
+      }),
+      restore(async () => {
+        const cached = asList(await offlineDB.getChores(true))
+        if (!cached) return
+        const chores = await mergePendingCreates(cached)
+        // Empty storage is not proof of an empty account. Only a completed
+        // sync or successful list fetch establishes a valid empty snapshot.
+        const synced = chores.length > 0 || (await offlineDB.getLastSyncTime())
+        const complete =
+          synced || (await offlineDB.getKV('chores_snapshot:true'))
+        const active =
+          complete || (await offlineDB.getKV('chores_snapshot:false'))
+        if (chores.length > 0 || complete) {
+          seed(['chores', true], { res: chores })
+        }
+        if (chores.length > 0 || active) {
+          seed(['chores', false], {
+            res: chores.filter(chore => chore.isActive !== false),
+          })
+        }
+      }),
+    ])
+    await critical
+    if (!criticalOnly) await optional
   } catch (err) {
-    // Hydration is an optimization — a failure here just means the normal
-    // network path (and its own cache fallbacks) takes over.
-    console.error('Failed to hydrate queries from offline cache', err)
+    console.error('Failed to open offline cache', err)
   }
 }

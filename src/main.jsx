@@ -15,9 +15,21 @@ const isMarketingSite =
   marketingHosts.has(window.location.hostname) ||
   new URLSearchParams(window.location.search).get('site') === 'marketing'
 
-export const Site = React.lazy(() =>
-  isMarketingSite ? import('./MarketingApp.jsx') : import('./Application.jsx'),
-)
+export const Site = React.lazy(async () => {
+  if (isMarketingSite) return import('./MarketingApp.jsx')
+
+  // Download/evaluate the app and restore local state in parallel. Keep the
+  // existing bootstrap screen until essentials are ready, then reveal the
+  // app directly with data instead of mounting Home into another spinner.
+  // No API request or optional cache read is awaited here.
+  const [application] = await Promise.all([
+    import('./Application.jsx'),
+    import('./utils/AuthSession.js').then(({ restoreSession }) =>
+      restoreSession(),
+    ),
+  ])
+  return application
+})
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

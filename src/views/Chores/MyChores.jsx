@@ -132,7 +132,7 @@ const MyChores = () => {
   const { impersonatedUser } = useImpersonateUser()
   const Navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
-  const { data: userLabels, isLoading: userLabelsLoading } = useLabels()
+  const { data: userLabels = [] } = useLabels()
   const { data: projects = EMPTY_PROJECTS, isLoading: projectsLoading } =
     useProjects()
   const {
@@ -142,12 +142,22 @@ const MyChores = () => {
     isLoading: choresLoading,
     refetch: refetchChores,
   } = useChores(false)
-  const {
-    data: membersData,
-    isError: membersError,
-    isLoading: membersLoading,
-  } = useCircleMembers()
-  const [chores, setChores] = useState([])
+  const { data: membersData } = useCircleMembers()
+  const processedChores = useMemo(() => {
+    let sortedChores = [...(choresData?.res || [])].sort(ChoreSorter)
+
+    if (impersonatedUser) {
+      sortedChores = sortedChores.filter(
+        chore =>
+          chore.assignedTo === impersonatedUser.userId ||
+          chore.assignees?.some(a => a.userId === impersonatedUser.userId) ||
+          chore.isPrivate === false,
+      )
+    }
+
+    return sortedChores
+  }, [choresData?.res, impersonatedUser])
+  const [chores, setChores] = useState(processedChores)
   const [addTaskModalOpen, setAddTaskModalOpen] = useState(false)
   // 'voice' | 'scan' | null — set by the quick-capture widget deep links
   const [addTaskInitialMode, setAddTaskInitialMode] = useState(null)
@@ -486,25 +496,6 @@ const MyChores = () => {
     setFilter: setQuickFilter,
   } = useFilter(projectFilteredChores, quickFilterDefs)
 
-  const processedChores = useMemo(() => {
-    if (!choresData?.res) {
-      return []
-    }
-
-    let sortedChores = [...choresData.res].sort(ChoreSorter)
-
-    if (impersonatedUser) {
-      sortedChores = sortedChores.filter(
-        chore =>
-          chore.assignedTo === impersonatedUser.userId ||
-          chore.assignees?.some(a => a.userId === impersonatedUser.userId) ||
-          chore.isPrivate === false,
-      )
-    }
-
-    return sortedChores
-  }, [choresData?.res, impersonatedUser])
-
   const choreSections = useMemo(() => {
     if (!chores.length || !userProfile?.id) {
       return []
@@ -558,22 +549,12 @@ const MyChores = () => {
   ])
 
   useEffect(() => {
-    if (
-      !choresLoading &&
-      !membersLoading &&
-      userProfile?.id &&
-      membersData?.res &&
-      choresData?.res
-    ) {
+    if (userProfile?.id && choresData?.res) {
       // Section state is managed by its own effect.
       setChores(processedChores)
     }
   }, [
-    membersLoading,
-    choresLoading,
-    isUserProfileLoading,
     choresData?.res,
-    membersData?.res,
     processedChores, // Added to ensure local state syncs when query data updates
     userProfile,
     impersonatedUser?.userId,
@@ -1127,7 +1108,7 @@ const MyChores = () => {
   }
 
   // Show error state when API is unreachable
-  if (choresError || membersError) {
+  if ((choresError && !choresData) || (!isUserProfileLoading && !userProfile)) {
     return (
       <Container maxWidth='md'>
         <EmptyState
@@ -1142,7 +1123,7 @@ const MyChores = () => {
             label: t('chores:empty.errorAction'),
             onClick: () => {
               refetchChores()
-              queryClient.invalidateQueries({ queryKey: ['circleMembers'] })
+              queryClient.invalidateQueries({ queryKey: ['userProfile'] })
             },
           }}
         />
@@ -1150,14 +1131,8 @@ const MyChores = () => {
     )
   }
 
-  if (
-    isUserProfileLoading ||
-    userProfile === null ||
-    userLabelsLoading ||
-    membersLoading ||
-    choresLoading ||
-    projectsLoading
-  ) {
+  // Secondary metadata must not hide an already usable task list.
+  if (isUserProfileLoading || choresLoading) {
     return (
       <>
         <LoadingComponent />

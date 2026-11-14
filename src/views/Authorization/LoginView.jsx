@@ -20,9 +20,9 @@ import { useResource } from '../../queries/ResourceQueries'
 import { useUserProfile } from '../../queries/UserQueries.jsx'
 import { useNotification } from '../../service/NotificationProvider'
 import { apiClient } from '../../utils/ApiClient'
+import { startSession } from '../../utils/AuthSession'
 import { getPendingInvite } from '../../utils/PendingInvite'
 import statusBarManager from '../../utils/StatusBarManager'
-import { saveTokens } from '../../utils/TokenStorage'
 import { buildChildUsername, getUserDisplayInfo } from '../../utils/UserHelpers'
 import {
   AuthDivider,
@@ -280,7 +280,7 @@ const LoginView = () => {
           const expiry = responseData.expire || responseData.access_token_expiry
 
           // Save all tokens including refresh tokens
-          await saveTokens({
+          await startSession({
             accessToken: token,
             accessTokenExpiry: expiry,
             refreshToken: responseData.refresh_token,
@@ -329,7 +329,7 @@ const LoginView = () => {
 
   const handleMFASuccess = async data => {
     // Save all tokens including refresh tokens
-    await saveTokens({
+    await startSession({
       accessToken: data.token,
       accessTokenExpiry: data.expire,
       refreshToken: data.refresh_token,

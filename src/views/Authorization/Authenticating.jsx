@@ -8,9 +8,9 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import { useUserProfile } from '../../queries/UserQueries'
 import { apiClient } from '../../utils/ApiClient'
+import { startSession } from '../../utils/AuthSession'
 import { GetUserProfile } from '../../utils/Fetcher'
 import { endOAuthExchange } from '../../utils/OAuthExchangeState'
-import { saveTokens } from '../../utils/TokenStorage'
 import AuthShell from './AuthShell'
 import { authButtonSx } from './authStyles'
 import MFAVerificationModal from './MFAVerificationModal'
@@ -57,7 +57,7 @@ const AuthenticationLoading = () => {
   }
 
   const handleMFASuccess = async data => {
-    await saveTokens({
+    await startSession({
       accessToken: data.token,
       accessTokenExpiry: data.expire,
       refreshToken: data.refresh_token,
@@ -147,7 +147,7 @@ const AuthenticationLoading = () => {
           return
         }
 
-        await saveTokens({
+        await startSession({
           accessToken: data.token || data.access_token,
           accessTokenExpiry: data.expire || data.access_token_expiry,
           refreshToken: data.refresh_token,
