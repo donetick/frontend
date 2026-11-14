@@ -101,6 +101,7 @@ const HomeView = () => {
 
   const {
     data: choresData,
+    isError: choresError,
     isLoading: choresLoading,
     refetch: refetchChores,
   } = useChores()
@@ -108,7 +109,9 @@ const HomeView = () => {
   // Home holds the same optimistic list the task list holds, so an action
   // taken here disappears from the row immediately instead of waiting on a
   // refetch. The query stays the source of truth and re-syncs below.
-  const [chores, setChores] = useState([])
+  const [chores, setChores] = useState(() =>
+    [...(choresData?.res || [])].sort(ChoreSorter),
+  )
   useEffect(() => {
     if (!choresData?.res) return
     setChores([...choresData.res].sort(ChoreSorter))
@@ -132,6 +135,7 @@ const HomeView = () => {
     unplanned,
     upcoming,
     userProfile,
+    userProfileError,
     verdict,
   } = useHomeSummary(chores, {
     scope: taskScope,
@@ -190,7 +194,30 @@ const HomeView = () => {
     setCaptureOpen(true)
   }
 
-  if (isLoading || choresLoading || !userProfile) return <LoadingComponent />
+  // The auth flow owns signed-out navigation, including logout cleanup.
+  if (!localStorage.getItem('token')) return null
+
+  if ((userProfileError && !userProfile) || (choresError && !choresData)) {
+    return (
+      <Container maxWidth='md'>
+        <EmptyState
+          variant='error'
+          fullHeight
+          title={t('chores:empty.errorTitle')}
+          description={t('chores:empty.errorDescription')}
+          primaryAction={{
+            label: t('chores:empty.errorAction'),
+            onClick: () => {
+              refetchChores()
+              queryClient.invalidateQueries({ queryKey: ['userProfile'] })
+            },
+          }}
+        />
+      </Container>
+    )
+  }
+
+  if (isLoading || choresLoading) return <LoadingComponent />
 
   const performers = membersData?.res || []
   const currentMember = performers.find(

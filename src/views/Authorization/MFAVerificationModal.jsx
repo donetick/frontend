@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 
 import ModalActions from '../../components/common/ModalActions'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
+import { SessionStorageError } from '../../utils/AuthSession'
 import { VerifyMFA } from '../../utils/Fetcher'
 import { authInputSx } from './authStyles'
 
@@ -35,7 +36,7 @@ const MFAVerificationModal = ({
 
       if (response.ok) {
         const data = await response.json()
-        onSuccess(data)
+        await onSuccess(data)
       } else {
         const errorData = await response.json()
         const message = errorData.message || t('mfaModal.invalidCode')
@@ -45,7 +46,10 @@ const MFAVerificationModal = ({
     } catch (error) {
       // A wrong code is shown inline; a failed request is escalated to the
       // caller so it can surface a toast instead of looking like a bad code.
-      const message = t('mfaModal.verifyFailed')
+      const message =
+        error instanceof SessionStorageError
+          ? error.message
+          : t('mfaModal.verifyFailed')
       setError(message)
       onError?.(message)
       console.error('MFA verification error:', error)
