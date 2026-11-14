@@ -7,10 +7,7 @@ const HYDRATED_UPDATED_AT = 1
 const isMissing = value => value === null || typeof value === 'undefined'
 const asList = value => (Array.isArray(value) ? value : undefined)
 
-export const hydrateQueriesFromOfflineCache = async (
-  queryClient,
-  { criticalOnly = false } = {},
-) => {
+export const hydrateQueriesFromOfflineCache = async queryClient => {
   if (!isOfflineFeatureEnabled()) return
   const token = localStorage.getItem('token')
   if (!token) return
@@ -34,7 +31,7 @@ export const hydrateQueriesFromOfflineCache = async (
     await offlineDB.init()
     // Start optional reads independently. Startup only waits for the profile
     // and task snapshot; a project/section read must never hold the app shell.
-    const optional = Promise.all([
+    void Promise.all([
       ...['labels', 'filters'].map(key =>
         restore(async () => seed([key], asList(await offlineDB.getKV(key)))),
       ),
@@ -58,7 +55,7 @@ export const hydrateQueriesFromOfflineCache = async (
         )
       }),
     ])
-    const critical = Promise.all([
+    await Promise.all([
       restore(async () => {
         seed(['userProfile', token], await offlineDB.getKV('user_profile'))
       }),
@@ -68,23 +65,20 @@ export const hydrateQueriesFromOfflineCache = async (
         const chores = await mergePendingCreates(cached)
         // Empty storage is not proof of an empty account. Only a completed
         // sync or successful list fetch establishes a valid empty snapshot.
-        const synced = chores.length > 0 || (await offlineDB.getLastSyncTime())
         const complete =
-          synced || (await offlineDB.getKV('chores_snapshot:true'))
-        const active =
-          complete || (await offlineDB.getKV('chores_snapshot:false'))
-        if (chores.length > 0 || complete) {
+          chores.length > 0 ||
+          (await offlineDB.getLastSyncTime()) ||
+          (await offlineDB.getKV('chores_snapshot:true'))
+        if (complete) {
           seed(['chores', true], { res: chores })
         }
-        if (chores.length > 0 || active) {
+        if (complete || (await offlineDB.getKV('chores_snapshot:false'))) {
           seed(['chores', false], {
             res: chores.filter(chore => chore.isActive !== false),
           })
         }
       }),
     ])
-    await critical
-    if (!criticalOnly) await optional
   } catch (err) {
     console.error('Failed to open offline cache', err)
   }

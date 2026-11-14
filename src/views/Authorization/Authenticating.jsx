@@ -8,7 +8,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import { useUserProfile } from '../../queries/UserQueries'
 import { apiClient } from '../../utils/ApiClient'
-import { startSession } from '../../utils/AuthSession'
+import { SessionStorageError, startSession } from '../../utils/AuthSession'
 import { GetUserProfile } from '../../utils/Fetcher'
 import { endOAuthExchange } from '../../utils/OAuthExchangeState'
 import AuthShell from './AuthShell'
@@ -164,7 +164,11 @@ const AuthenticationLoading = () => {
       } catch (error) {
         console.error('Authentication request failed', error)
         setMessage(t('authenticating.signInFailed'))
-        setSubMessage(t('authenticating.tryAgain'))
+        setSubMessage(
+          error instanceof SessionStorageError
+            ? error.message
+            : t('authenticating.tryAgain'),
+        )
         setStatus('error')
       }
     }
@@ -203,9 +207,9 @@ const AuthenticationLoading = () => {
         onClose={handleMFAClose}
         sessionToken={mfaSessionToken}
         onSuccess={handleMFASuccess}
-        onError={() => {
+        onError={message => {
           setMessage(t('authenticating.signInFailed'))
-          setSubMessage(t('authenticating.mfaFailed'))
+          setSubMessage(message || t('authenticating.mfaFailed'))
         }}
       />
     </AuthShell>

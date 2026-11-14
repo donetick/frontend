@@ -20,7 +20,7 @@ import { useResource } from '../../queries/ResourceQueries'
 import { useUserProfile } from '../../queries/UserQueries.jsx'
 import { useNotification } from '../../service/NotificationProvider'
 import { apiClient } from '../../utils/ApiClient'
-import { startSession } from '../../utils/AuthSession'
+import { SessionStorageError, startSession } from '../../utils/AuthSession'
 import { getPendingInvite } from '../../utils/PendingInvite'
 import statusBarManager from '../../utils/StatusBarManager'
 import { buildChildUsername, getUserDisplayInfo } from '../../utils/UserHelpers'
@@ -309,7 +309,10 @@ const LoginView = () => {
       const providerName = provider === 'apple' ? 'Apple' : 'Google'
       showError({
         title: t('providerLoginError', { provider: providerName }),
-        message: t('networkError'),
+        message:
+          error instanceof SessionStorageError
+            ? error.message
+            : t('networkError'),
       })
     }
   }

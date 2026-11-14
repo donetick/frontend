@@ -92,7 +92,11 @@ const useHomeSummary = (
   chores,
   { scope = 'mine', userId: scopedUserId } = {},
 ) => {
-  const { data: userProfile, isLoading: profileLoading } = useUserProfile()
+  const {
+    data: userProfile,
+    error: userProfileError,
+    isLoading: profileLoading,
+  } = useUserProfile()
   const { data: membersData } = useCircleMembers()
   const { data: projects = [] } = useProjects()
   const { data: filters = [] } = useFilters()
@@ -343,6 +347,7 @@ const useHomeSummary = (
     membersData,
     projectPulse,
     userProfile,
+    userProfileError,
   }
 }
 

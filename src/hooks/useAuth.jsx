@@ -2,7 +2,11 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { apiClient } from '../utils/ApiClient'
-import { clearSession, startSession } from '../utils/AuthSession'
+import {
+  clearSession,
+  SessionStorageError,
+  startSession,
+} from '../utils/AuthSession'
 
 const AuthContext = createContext(null)
 
@@ -85,7 +89,13 @@ export const AuthProvider = ({ children }) => {
       return { success: true, data }
     } catch (error) {
       setIsLoading(false)
-      return { success: false, error: 'Network error' }
+      return {
+        success: false,
+        error:
+          error instanceof SessionStorageError
+            ? error.message
+            : 'Network error',
+      }
     }
   }
 

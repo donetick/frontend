@@ -135,6 +135,7 @@ const HomeView = () => {
     unplanned,
     upcoming,
     userProfile,
+    userProfileError,
     verdict,
   } = useHomeSummary(chores, {
     scope: taskScope,
@@ -193,7 +194,10 @@ const HomeView = () => {
     setCaptureOpen(true)
   }
 
-  if ((!isLoading && !userProfile) || (choresError && !choresData)) {
+  // The auth flow owns signed-out navigation, including logout cleanup.
+  if (!localStorage.getItem('token')) return null
+
+  if ((userProfileError && !userProfile) || (choresError && !choresData)) {
     return (
       <Container maxWidth='md'>
         <EmptyState

@@ -123,8 +123,11 @@ const sortChores = (a, b, sortBy, direction) => {
 }
 
 const MyChores = () => {
-  const { data: userProfile, isLoading: isUserProfileLoading } =
-    useUserProfile()
+  const {
+    data: userProfile,
+    error: userProfileError,
+    isLoading: isUserProfileLoading,
+  } = useUserProfile()
   const { t } = useTranslation('chores')
   const isLargeScreen = useMediaQuery(theme => theme.breakpoints.up('md'))
   const { showError, showSuccess, showUndo, showWarning } = useNotification()
@@ -1107,8 +1110,11 @@ const MyChores = () => {
     clearQuickFilters()
   }
 
-  // Show error state when API is unreachable
-  if ((choresError && !choresData) || (!isUserProfileLoading && !userProfile)) {
+  // The auth flow owns signed-out navigation, including logout cleanup.
+  if (!localStorage.getItem('token')) return null
+
+  // Only failed essential queries without cached data need an error screen.
+  if ((choresError && !choresData) || (userProfileError && !userProfile)) {
     return (
       <Container maxWidth='md'>
         <EmptyState
