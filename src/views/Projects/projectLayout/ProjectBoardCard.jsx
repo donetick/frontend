@@ -116,6 +116,7 @@ const ProjectBoardCard = memo(function ProjectBoardCard({
           <Box className='project-task-secondary-action' sx={{ flexShrink: 0 }}>
             <ChoreActionMenuTrigger
               variant='plain'
+              color='neutral'
               onClick={event => {
                 event.stopPropagation()
                 onOpenActionMenu?.(event.currentTarget, chore)
@@ -126,7 +127,8 @@ const ProjectBoardCard = memo(function ProjectBoardCard({
                 height: 44,
                 minWidth: 44,
                 color: 'text.tertiary',
-                borderRadius: 'md',
+                borderRadius: 'sm',
+                '& svg': { fontSize: 18 },
               }}
             />
           </Box>

@@ -1035,6 +1035,7 @@ const ChoreActionMenu = ({
  */
 export const ChoreActionMenuTrigger = ({
   'aria-label': ariaLabel,
+  color = 'success',
   onClick,
   onMouseEnter,
   onMouseLeave,
@@ -1048,7 +1049,7 @@ export const ChoreActionMenuTrigger = ({
       aria-haspopup='menu'
       aria-label={ariaLabel || t('choreView.more')}
       variant={variant}
-      color='success'
+      color={color}
       onClick={onClick}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
