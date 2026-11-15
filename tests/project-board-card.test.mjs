@@ -5,6 +5,9 @@ import vm from 'node:vm'
 
 import { transformSync } from '@swc/core'
 
+import { boardCardInteractions } from '../src/views/Projects/projectLayout/boardCardInteractions.js'
+import { loadChorePermissions } from './helpers/chore-permissions.mjs'
+
 const element = (type, props) => ({ type, props })
 const components = new Proxy({}, { get: (_, name) => name })
 
@@ -19,21 +22,13 @@ function render(overrides = {}, options = {}) {
     '@mui/joy': components,
     '@mui/icons-material': components,
     'react-i18next': { useTranslation: () => ({ t: key => key }) },
-    '../../../contexts/ImpersonateUserContext': {
-      useImpersonateUser: () => ({
-        impersonatedUser: options.impersonatedUser,
-      }),
-    },
     '../../../contexts/LocalizationContext': {
       useLocalization: () => ({ timeFormat: 'HH:mm' }),
     },
     '../../../hooks/usePendingCommands': {
       usePendingCommands: () => ({ data: options.pendingCommands || [] }),
     },
-    '../../../queries/UserQueries': {
-      useUserProfile: () => ({ data: { id: 5 } }),
-      useCircleMembers: () => ({ data: { res: options.members || [] } }),
-    },
+    '../../../hooks/useChorePermissions': loadChorePermissions(options),
     '../../../utils/ChoreCardHelpers': {
       getDueDateChipColor: () => 'danger',
       getDueDateChipText: () => 'Yesterday',
@@ -48,6 +43,10 @@ function render(overrides = {}, options = {}) {
     },
     '../../components/ChoreActionMenu': {
       ChoreActionMenuTrigger: 'MenuTrigger',
+    },
+    '../../components/ChoreStatusChip': {
+      default: 'ChoreStatusChip',
+      __esModule: true,
     },
     '../../components/PendingBadge': {
       default: 'PendingBadge',
@@ -84,12 +83,19 @@ function render(overrides = {}, options = {}) {
   modules['./ProjectTaskAction'] = { default: Action, __esModule: true }
   const Card = load('ProjectBoardCard')
   const props = {
-    chore: { id: 9, name: 'Wash the dishes', status: 0 },
     onAction: (action, chore) => actions.push([action, chore.id]),
     onSelectionToggle: () => selections.push(true),
     onOpenActionMenu: (anchor, chore) => menus.push([anchor, chore.id]),
     onChipClick: filter => filters.push(filter),
     ...overrides,
+    chore: {
+      id: 9,
+      name: 'Wash the dishes',
+      status: 0,
+      circleId: 1,
+      assignedTo: 5,
+      ...overrides.chore,
+    },
   }
   return {
     tree: Card(props),
@@ -118,27 +124,75 @@ test('one-tap actions retain completion, pause, resume and approval semantics', 
     [2, 'start'],
     [3, 'approve'],
   ]) {
-    const card = render({
-      chore: { id: 9, name: 'Task', status, createdBy: 5 },
-    })
+    const card = render(
+      { chore: { id: 9, name: 'Task', status, createdBy: 5 } },
+      status === 3
+        ? { members: [{ userId: 5, circleId: 1, role: 'manager' }] }
+        : {},
+    )
     assert.equal(card.action.props.disabled, false)
     assert.ok(card.action.props.sx.minHeight >= 44)
     card.action.props.onClick(event)
     assert.deepEqual(card.actions, [[action, 9]])
   }
   assert.equal(render({}, { outsideWindow: true }).action.props.disabled, true)
+  assert.equal(
+    render({ chore: { isActive: false } }).action.props.disabled,
+    true,
+  )
+  assert.equal(render({ chore: { assignedTo: 8 } }).action.props.disabled, true)
 })
 
 test('approval respects roles, ownership and impersonation', () => {
   const props = { chore: { id: 9, name: 'Task', status: 3, createdBy: 8 } }
-  assert.equal(render(props).action.props.disabled, true)
+  for (const role of ['admin', 'manager']) {
+    const card = render(props, {
+      members: [{ userId: 5, circleId: 1, role }],
+    })
+    assert.equal(card.action.type, 'IconButton')
+    assert.equal(card.action.props.disabled, false)
+    card.action.props.onClick(event)
+    assert.deepEqual(card.actions, [['approve', 9]])
+  }
+  for (const options of [
+    {},
+    { userId: 8 },
+    { members: [{ userId: 5, circleId: 2, role: 'admin' }] },
+    {
+      impersonatedUser: { userId: 8 },
+      members: [{ userId: 5, circleId: 1, role: 'admin' }],
+    },
+  ]) {
+    const card = render(props, options)
+    assert.equal(card.action.type, 'ChoreStatusChip')
+    assert.equal(card.action.props.chore.status, 3)
+    assert.equal(card.action.props.onClick, undefined)
+    assert.deepEqual(card.actions, [])
+  }
+  const impersonated = render(props, {
+    impersonatedUser: { userId: 8 },
+    members: [{ userId: 8, circleId: 1, role: 'manager' }],
+  })
+  assert.equal(impersonated.action.props.disabled, false)
+  impersonated.action.props.onClick(event)
+  assert.deepEqual(impersonated.actions, [['approve', 9]])
+})
+
+test('restricted project visibility bounds task completion and approval', () => {
+  const chore = {
+    projectId: 10,
+    project: { id: 10, visibility: 'members', created_by: 8, memberIds: [] },
+  }
+  const options = { members: [{ userId: 5, circleId: 1, role: 'admin' }] }
+  assert.equal(render({ chore }, options).action.props.disabled, true)
   assert.equal(
-    render(props, { members: [{ userId: 5, role: 'admin' }] }).action.props
-      .disabled,
-    false,
+    render({ chore: { ...chore, status: 3 } }, options).action.type,
+    'ChoreStatusChip',
   )
+  const visible = { ...chore, project: { ...chore.project, memberIds: [5] } }
+  assert.equal(render({ chore: visible }, options).action.props.disabled, false)
   assert.equal(
-    render(props, { impersonatedUser: { userId: 8 } }).action.props.disabled,
+    render({ chore: { ...visible, status: 3 } }, options).action.props.disabled,
     false,
   )
 })
@@ -156,25 +210,57 @@ test('selection does not complete a task and hides secondary actions', () => {
   )
 })
 
-test('title is a keyboard-operable native control and menus have a shared owner', () => {
+test('title leaves keyboard ownership to the board surface and menus share an owner', () => {
   const card = render()
   const title = find(card.tree, node => node.props?.title === 'Wash the dishes')
-  assert.equal(title.props.component, 'button')
-  assert.equal(title.props.type, 'button')
+  assert.equal(title.props.component, 'span')
+  assert.equal(title.props.onClick, undefined)
   assert.equal(title.props.sx.overflowWrap, 'anywhere')
   find(card.tree, node => node.type === 'MenuTrigger').props.onClick(event)
   assert.deepEqual(card.menus, [['anchor', 9]])
+
+  const boardSource = readFileSync(
+    new URL(
+      '../src/views/Projects/projectLayout/ProjectBoard.jsx',
+      import.meta.url,
+    ),
+    'utf8',
+  )
+  assert.match(boardSource, /\.\.\.boardCardInteractions\(\{/)
+  assert.match(boardSource, /role: 'button'/)
+  assert.match(boardSource, /tabIndex: isOverlay \? -1 : 0/)
+  for (const isMultiSelectMode of [false, true]) {
+    const calls = []
+    const interactions = boardCardInteractions({
+      isMultiSelectMode,
+      onOpen: () => calls.push('open'),
+      onSelectionToggle: () => calls.push('select'),
+      listeners: { onKeyDown: () => calls.push('drag') },
+    })
+    const surface = {}
+    const keyEvent = {
+      currentTarget: surface,
+      target: surface,
+      preventDefault() {},
+    }
+    interactions.onKeyDown({ ...keyEvent, key: 'Enter' })
+    interactions.onKeyDown({ ...keyEvent, key: ' ' })
+    assert.deepEqual(
+      calls,
+      isMultiSelectMode ? ['select', 'select'] : ['open', 'drag'],
+    )
+    interactions.onKeyDown({ ...keyEvent, target: {}, key: 'Enter' })
+    assert.equal(calls.length, 2)
+  }
 })
 
-test('metadata is secondary, labels still filter and queued actions stay visible', () => {
-  const label = { id: 1, name: 'Kitchen' }
+test('metadata is secondary and queued actions stay visible', () => {
   const card = render({
     chore: {
       id: 9,
       name: 'Task',
       status: 0,
       nextDueDate: '2026-01-01',
-      labelsV2: [label, { id: 2, name: 'Home' }],
       _pending: true,
     },
   })
@@ -182,8 +268,6 @@ test('metadata is secondary, labels still filter and queued actions stay visible
   assert.equal(due.props.dateTime, '2026-01-01')
   assert.equal(due.props.sx.color, 'danger.plainColor')
   assert.ok(find(card.tree, node => node.type === 'PendingBadge'))
-  find(card.tree, node => node.props?.title === 'Kitchen').props.onClick(event)
-  assert.equal(card.filters[0].label, label)
   assert.equal(
     find(render().tree, node => node.props?.component === 'time'),
     undefined,

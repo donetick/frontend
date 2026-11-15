@@ -2,18 +2,18 @@ import moment from 'moment'
 
 import { DAYS, sortWeekdays } from './WeekdayUtils'
 const allMonths = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
+  'january',
+  'february',
+  'march',
+  'april',
+  'may',
+  'june',
+  'july',
+  'august',
+  'september',
+  'october',
+  'november',
+  'december',
 ]
 /**
  * Get the text to display for a chore's due date
@@ -137,31 +137,30 @@ export const getRecurrentChipText = chore => {
   } else if (chore.frequencyType === 'yearly') {
     return 'Yearly'
   } else if (chore.frequencyType === 'days_of_the_week') {
-    let days = sortWeekdays(metadata.days)
+    const days = sortWeekdays(metadata.days)
+    // Stored keys are English; only the display should depend on the locale.
+    const formatDay = day =>
+      moment()
+        .day((DAYS.indexOf(day) + 1) % 7)
+        .format('ddd')
     if (days.length > 4) {
-      const allDays = DAYS.map(
-        day => day.charAt(0).toUpperCase() + day.slice(1),
-      )
-      const selectedDays = days.map(d => moment().day(d).format('dddd'))
-      const notSelectedDay = allDays.filter(day => !selectedDays.includes(day))
-      const notSelectedShortdays = notSelectedDay.map(d =>
-        moment().day(d).format('ddd'),
-      )
+      const notSelectedDay = DAYS.filter(day => !days.includes(day))
+      const notSelectedShortdays = notSelectedDay.map(formatDay)
       return `Daily except ${notSelectedShortdays.join(', ')}`
     } else {
-      days = days.map(d => moment().day(d).format('ddd'))
-      return days.join(', ')
+      return days.map(formatDay).join(', ')
     }
   } else if (chore.frequencyType === 'day_of_the_month') {
-    let months = metadata?.months ? metadata.months : allMonths
+    const months = (metadata?.months || allMonths).map(month =>
+      month.toLowerCase(),
+    )
+    const formatMonth = month =>
+      moment().month(allMonths.indexOf(month)).format('MMM')
     if (months.length > 6) {
-      const selectedMonths = months.map(m => moment().month(m).format('MMMM'))
       const notSelectedMonth = allMonths.filter(
-        month => !selectedMonths.includes(month),
+        month => !months.includes(month),
       )
-      const notSelectedShortMonths = notSelectedMonth.map(m =>
-        moment().month(m).format('MMM'),
-      )
+      const notSelectedShortMonths = notSelectedMonth.map(formatMonth)
       let result = `Monthly ${chore.frequency}${dayOfMonthSuffix(
         chore.frequency,
       )}`
@@ -170,13 +169,12 @@ export const getRecurrentChipText = chore => {
         except ${notSelectedShortMonths.join(', ')}`
       return result
     } else {
-      let freqData = metadata
-      const months = [...freqData.months]
+      const selectedMonths = [...months]
         .sort((a, b) => allMonths.indexOf(a) - allMonths.indexOf(b))
-        .map(m => moment().month(m).format('MMM'))
+        .map(formatMonth)
       return `${chore.frequency}${dayOfMonthSuffix(
         chore.frequency,
-      )} of ${months.join(', ')}`
+      )} of ${selectedMonths.join(', ')}`
     }
   } else if (chore.frequencyType === 'interval') {
     return `Every ${chore.frequency} ${metadata.unit}`
