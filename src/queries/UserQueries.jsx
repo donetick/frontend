@@ -68,6 +68,7 @@ export const useUserProfile = ({ enabled = true } = {}) => {
 
   const { data, error, isLoading } = useQuery({
     queryKey: ['userProfile', token],
+    networkMode: 'always',
     queryFn: async () => {
       if (!token) {
         return null
@@ -82,12 +83,15 @@ export const useUserProfile = ({ enabled = true } = {}) => {
         }
         return result.res || null
       } catch {
-        // API unreachable — only serve cached profile for authenticated sessions
-        return await offlineDB.getKV('user_profile')
+        // API unreachable — only serve cached profile for authenticated sessions.
+        const cached = await offlineDB.getKV('user_profile')
+        if (cached) return cached
+        throw new Error(
+          'Unable to load your profile. Connect to the server and retry.',
+        )
       }
     },
     staleTime: 30 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
     enabled: enabled && !!token,
   })
   return {

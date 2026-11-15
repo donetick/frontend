@@ -66,6 +66,7 @@ const buildOfflineChore = task => ({
 export const useChores = (includeArchive = false, { enabled = true } = {}) => {
   return useQuery({
     queryKey: ['chores', includeArchive],
+    networkMode: 'always',
     refetchOnWindowFocus: true,
     enabled,
     queryFn: async () => {
@@ -73,8 +74,8 @@ export const useChores = (includeArchive = false, { enabled = true } = {}) => {
         try {
           // Sync from server first (coalesced with any run already in flight,
           // so a just-created chore can't be missed by a stale cursor). This
-          // await no longer delays the first paint — hydrateQueriesFromOfflineCache
-          // seeds this query from the cache at startup, which makes this run a
+          // await no longer delays the first paint — AuthSession restores
+          // this query from the cache before mounting, which makes this run a
           // background refresh.
           if (networkManager.isOnline) {
             await syncEngine.sync()

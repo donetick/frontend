@@ -976,8 +976,10 @@ class OfflineDB {
       this.backend = isNative() ? new SQLiteBackend() : new IndexedDBBackend()
       await this.backend.init()
       this.initialized = true
+    })().finally(() => {
+      // A transient open failure must not permanently poison future reads.
       this._initPromise = null
-    })()
+    })
 
     return this._initPromise
   }
