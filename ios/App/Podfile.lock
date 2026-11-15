@@ -262,7 +262,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Alamofire: 7193b3b92c74a07f85569e1a6c4f4237291e7496
-  AppAuth: ef4da5a3fc2e10b90c09a0a94a9baeaedc0341d5
+  AppAuth: 3a08d0739dfbebc98104f5baa69d23201122bfd9
   AppCheckCore: be8fce5469f68d7f6a29aa94b25f097409ff7fdc
   Capacitor: 52f999235b8bd6a7d01694753f4f4d54d182e3a3
   CapacitorApp: 305bd13c44f6f9d164e2ee66a4faa956ed8c0e06
@@ -291,9 +291,9 @@ SPEC CHECKSUMS:
   FirebaseInstallations: eb29ccbf64eaedf86fd5b2ccc7fabde567660b52
   FirebaseMessaging: 40017d7bc8457ee295b0f41d480a80fdabc9994e
   GoogleDataTransport: aae35b7ea0c09004c3797d53c8c41f66f219d6a7
-  GoogleSignIn: c7f09cfbc85a1abf69187be091997c317cc33b77
+  GoogleSignIn: 6833f07f101074e6d9f58b1ae0daad4b25ed0339
   GoogleUtilities: 766ace00c6b10d8148408f329d10c4f051931850
-  GTMAppAuth: 217a876b249c3c585a54fd6f73e6b58c4f5c4238
+  GTMAppAuth: 9566e1a3451fd6967b58188fa15286fb6ae7914f
   GTMSessionFetcher: 5aea5ba6bd522a239e236100971f10cb71b96ab6
   IONFilesystemLib: 306469e4c563f61de82d7bca2bbfed9e64d1b2d2
   JcesarmobileCapacitorOcr: d3668e104d7ad8968a9d00fd4766e18fea0fe305
