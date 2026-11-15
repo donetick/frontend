@@ -40,6 +40,9 @@ export default ({ command, mode }) => {
   })
 
   return defineConfig({
+    // Self-hosted builds use relative asset URLs so the backend can serve the app when under a prefix (e.g. Home Assistant ingress).
+    // index.html has <base href="/"> which the backend updates when there is a prefix so relative URLs resolve properly.
+    base: mode === 'selfhosted' ? './' : '/',
     define: {
       'import.meta.env.VITE_APP_VERSION': JSON.stringify(pkg.version),
     },
