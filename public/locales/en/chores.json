@@ -881,6 +881,39 @@
     "dismissAnalysis": "Dismiss photo analysis"
   },
   "repeat": {
+    "bounds": {
+      "activePeriod": "Active period",
+      "period": {
+        "always": "Always active",
+        "starts": "From a date",
+        "seasonal": "Seasonal"
+      },
+      "alwaysHelp": "This task is live from now on, with no start date or season.",
+      "startsOn": "Starts on",
+      "startsHelp": "Before this date the task is dormant, not overdue.",
+      "seasonStart": "Season start",
+      "seasonEnd": "Season end",
+      "monthLabel": "Month",
+      "dayLabel": "Day",
+      "unset": "Not set",
+      "seasonalHelp": "The season repeats every year and may wrap across New Year, for example November 1 to February 28. An omitted start means January 1; an omitted end means December 31. Outside the season the task is dormant, not overdue, and its recurring schedule stays anchored.",
+      "stopRepeating": "Stop repeating",
+      "stopOptional": "(optional)",
+      "stop": {
+        "never": "Never",
+        "completions": "After a number of completions",
+        "date": "On a specific date"
+      },
+      "limitLabel": "Number of completions",
+      "limitHint": "The task ends once it has been completed this many times, counted across every season. Only completed tasks count, not skips or misses.",
+      "stopDateLabel": "Stops after",
+      "stopDateHint": "Inclusive, in the schedule’s timezone. The task ends after this date and is not generated again.",
+      "invalidPeriodType": "Choose a valid active period.",
+      "invalidStopType": "Choose a valid way to stop repeating.",
+      "invalidDate": "Enter a valid date.",
+      "stopBeforeStart": "Stop date must be on or after the start date.",
+      "invalidLimit": "Enter a whole number of completions greater than zero."
+    },
     "days": {
       "monday": "Monday",
       "tuesday": "Tuesday",
