@@ -59,6 +59,15 @@ export const combineDueDate = ({ dueDateOnly, dueTime, useCustomTime }) => {
   return moment(`${dueDateOnly} 23:59:59`, 'YYYY-MM-DD HH:mm:ss').toDate()
 }
 
+// Time of day for a custom repeat. Empty for a date-only due date, so the
+// backend keeps the due date's own time.
+export const scheduleTimeFromDueDate = dueDate => {
+  if (!dueDate) return ''
+  const m = moment(dueDate)
+  if (!m.isValid() || m.format('HH:mm') === END_OF_DAY_TIME) return ''
+  return m.format()
+}
+
 export const getQuickScheduleDate = option => {
   const now = new Date()
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())

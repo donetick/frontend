@@ -68,7 +68,7 @@ import {
   parseRepeatV2,
 } from './CustomParsers'
 import DueDatePickerField from './DueDatePickerField'
-import { combineDueDate } from './DueDatePickerModal'
+import { combineDueDate, scheduleTimeFromDueDate } from './DueDatePickerModal'
 import LabelsPickerField from './LabelsPickerField'
 import NotificationPickerField from './NotificationPickerField'
 import PriorityPickerField from './PriorityPickerField'
@@ -1413,7 +1413,10 @@ const TaskInput = ({
 
     if (frequency) {
       chore.frequencyType = frequency.frequencyType
-      chore.frequencyMetadata = frequency.frequencyMetadata
+      chore.frequencyMetadata = {
+        ...frequency.frequencyMetadata,
+        time: scheduleTimeFromDueDate(dueDate),
+      }
       chore.frequency = frequency.frequency
     }
     if (dueDate && !isAlwaysAvailable) {

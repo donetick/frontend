@@ -57,7 +57,7 @@ import {
   Typography,
 } from '@mui/joy'
 import moment from 'moment'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   useBlocker,
@@ -113,6 +113,7 @@ import { useSinglePageTaskEditor } from '../../utils/TaskEditorPreferences'
 import { generateUUID } from '../../utils/UUID'
 import { sortWeekdays } from '../../utils/WeekdayUtils'
 import { useProjectFilter } from '../Chores/hooks/useProjectFilter.js'
+import { scheduleTimeFromDueDate } from '../components/DueDatePickerModal'
 import LoadingComponent from '../components/Loading.jsx'
 import RichTextEditor from '../components/RichTextEditor.jsx'
 import SubTasks from '../components/SubTask.jsx'
@@ -441,6 +442,17 @@ const ChoreEdit = () => {
           ? `${frequencySummary} · ${dueSummary}`
           : dueSummary
 
+  // Custom repeats take their time of day from the due date instead of a
+  // picker of their own.
+  const scheduleMetadata = useMemo(
+    () => ({
+      ...frequencyMetadata,
+      time: scheduleTimeFromDueDate(dueDate),
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    }),
+    [frequencyMetadata, dueDate],
+  )
+
   const HandleValidateChore = (step = null) => {
     let errors = {}
 
@@ -649,7 +661,9 @@ const ChoreEdit = () => {
       nextDueDate: dueDate ? new Date(dueDate).toISOString() : null,
       frequencyType: frequencyType,
       frequency: Number(frequency),
-      frequencyMetadata: frequencyMetadata,
+      frequencyMetadata: REPEAT_ON_TYPE.includes(frequencyType)
+        ? scheduleMetadata
+        : frequencyMetadata,
       assignedTo: assignedToValue,
       assignStrategy: assignStrategyValue,
       isRolling: isRolling,
@@ -1485,7 +1499,11 @@ const ChoreEdit = () => {
                     setUseCustomTime(false)
                   }
                 }}
-                frequencyMetadata={frequencyMetadata}
+                frequencyMetadata={
+                  REPEAT_ON_TYPE.includes(frequencyType)
+                    ? scheduleMetadata
+                    : frequencyMetadata
+                }
                 onFrequencyMetadataUpdate={setFrequencyMetadata}
                 frequencyError={errors?.frequency}
                 allUserThings={allUserThings}

@@ -6,7 +6,6 @@ import {
   FormControl,
   FormHelperText,
   Grid,
-  Input,
   List,
   ListItem,
   Option,
@@ -15,7 +14,6 @@ import {
   Select,
   Typography,
 } from '@mui/joy'
-import moment from 'moment'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -69,9 +67,7 @@ const generateSchedulePreview = (metadata, formatTimeFn, t) => {
     .map(day => t(`repeat.daysShort.${day}`))
     .join(', ')
 
-  const timeStr = metadata.time
-    ? formatTimeFn(metadata.time)
-    : t('repeat.defaultTime')
+  const timeStr = metadata.time ? formatTimeFn(metadata.time) : null
 
   if (
     metadata.weekPattern === 'week_of_month' &&
@@ -80,14 +76,21 @@ const generateSchedulePreview = (metadata, formatTimeFn, t) => {
     const occurrenceStr = metadata.occurrences
       .map(w => t(`repeat.ordinal.${occurrenceKey(w)}`))
       .join(', ')
-    return t('repeat.previewOccurrence', {
-      occurrences: occurrenceStr,
-      days: dayNames,
-      time: timeStr,
-    })
+    return timeStr
+      ? t('repeat.previewOccurrence', {
+          occurrences: occurrenceStr,
+          days: dayNames,
+          time: timeStr,
+        })
+      : t('repeat.previewOccurrenceNoTime', {
+          occurrences: occurrenceStr,
+          days: dayNames,
+        })
   }
 
-  return t('repeat.previewEvery', { days: dayNames, time: timeStr })
+  return timeStr
+    ? t('repeat.previewEvery', { days: dayNames, time: timeStr })
+    : t('repeat.previewEveryNoTime', { days: dayNames })
 }
 
 export const RepeatOnSections = ({
@@ -99,14 +102,7 @@ export const RepeatOnSections = ({
 }) => {
   const { fmt } = useLocalization()
   const { t } = useTranslation('chores')
-  // if time on frequencyMetadata is not set, try to set it to the nextDueDate if available,
-  // otherwise set it to 18:00 of the current day
   useEffect(() => {
-    if (!frequencyMetadata?.time) {
-      frequencyMetadata.time = moment(
-        moment(new Date()).format('YYYY-MM-DD') + 'T' + '18:00',
-      ).format()
-    }
     // Initialize weekPattern if not set
     if (!frequencyMetadata?.weekPattern) {
       onFrequencyMetadataUpdate({
@@ -116,34 +112,6 @@ export const RepeatOnSections = ({
       })
     }
   }, [frequencyMetadata, onFrequencyMetadataUpdate])
-
-  const timePickerComponent = (
-    <Grid
-      item
-      sm={12}
-      sx={{
-        display: 'flex',
-        direction: 'column',
-        flexDirection: 'column',
-      }}
-    >
-      <Typography level='h5'>{t('repeat.timeOfDay')}</Typography>
-      <Input
-        type='time'
-        sx={{ width: '150px' }}
-        defaultValue={moment(frequencyMetadata?.time).format('HH:mm')}
-        onChange={e => {
-          onFrequencyMetadataUpdate({
-            ...frequencyMetadata,
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-            time: moment(
-              moment(new Date()).format('YYYY-MM-DD') + 'T' + e.target.value,
-            ).format(),
-          })
-        }}
-      />
-    </Grid>
-  )
 
   switch (frequencyType) {
     case 'interval':
@@ -178,7 +146,6 @@ export const RepeatOnSections = ({
               ))}
             </Select>
           </Grid>
-          {timePickerComponent}
         </>
       )
     case 'days_of_the_week':
@@ -378,8 +345,6 @@ export const RepeatOnSections = ({
               )}
             </Box>
           </Grid>
-
-          {timePickerComponent}
         </>
       )
     case 'day_of_the_month':
@@ -479,7 +444,6 @@ export const RepeatOnSections = ({
             />
             <Typography>{t('repeat.ofAboveMonths')}</Typography>
           </Box>
-          {timePickerComponent}
         </>
       )
 
@@ -572,13 +536,7 @@ const RepeatSection = ({
                         onFrequencyUpdate(1)
                         onFrequencyMetadataUpdate({
                           unit: 'days',
-                          time: frequencyMetadata?.time
-                            ? frequencyMetadata?.time
-                            : moment(
-                                moment(new Date()).format('YYYY-MM-DD') +
-                                  'T' +
-                                  '18:00',
-                              ).format(),
+                          time: frequencyMetadata?.time || '',
                           timezone:
                             Intl.DateTimeFormat().resolvedOptions().timeZone,
                         })
