@@ -21,6 +21,7 @@ import { useUserProfile } from '../../queries/UserQueries.jsx'
 import { useNotification } from '../../service/NotificationProvider'
 import { apiClient } from '../../utils/ApiClient'
 import { SessionStorageError, startSession } from '../../utils/AuthSession'
+import { absoluteAppUrl } from '../../utils/BasePath'
 import { getPendingInvite } from '../../utils/PendingInvite'
 import statusBarManager from '../../utils/StatusBarManager'
 import { buildChildUsername, getUserDisplayInfo } from '../../utils/UserHelpers'
@@ -440,7 +441,7 @@ const LoginView = () => {
       }
     } else {
       // For web platforms, use the current approach
-      params.set('redirect_uri', `${window.location.origin}/auth/oauth2`)
+      params.set('redirect_uri', absoluteAppUrl('/auth/oauth2'))
 
       console.log('redirect', `${authentikAuthorizeUrl}?${params.toString()}`)
       window.location.href = `${authentikAuthorizeUrl}?${params.toString()}`

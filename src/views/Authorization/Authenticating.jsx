@@ -9,6 +9,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useUserProfile } from '../../queries/UserQueries'
 import { apiClient } from '../../utils/ApiClient'
 import { SessionStorageError, startSession } from '../../utils/AuthSession'
+import { absoluteAppUrl } from '../../utils/BasePath'
 import { GetUserProfile } from '../../utils/Fetcher'
 import { endOAuthExchange } from '../../utils/OAuthExchangeState'
 import AuthShell from './AuthShell'
@@ -100,7 +101,7 @@ const AuthenticationLoading = () => {
       const baseURL = apiClient.getApiURL()
       const redirectURI = Capacitor.isNativePlatform()
         ? 'donetick://auth/oauth2'
-        : `${window.location.origin}/auth/oauth2`
+        : absoluteAppUrl('/auth/oauth2')
       try {
         const response = await fetch(`${baseURL}/auth/oauth2/callback`, {
           method: 'POST',
