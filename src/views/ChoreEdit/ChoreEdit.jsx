@@ -109,6 +109,10 @@ import {
 } from '../../utils/ProjectAccess'
 import { getIconComponent } from '../../utils/ProjectIcons'
 import { getSafeBottomPadding } from '../../utils/SafeAreaUtils.js'
+import {
+  getDefaultIsRolling,
+  setDefaultIsRolling,
+} from '../../utils/TaskDefaults'
 import { useSinglePageTaskEditor } from '../../utils/TaskEditorPreferences'
 import { generateUUID } from '../../utils/UUID'
 import { sortWeekdays } from '../../utils/WeekdayUtils'
@@ -224,6 +228,7 @@ const ChoreEdit = () => {
   const [showSavePrivacyDefault, setShowSavePrivacyDefault] = useState(false)
   const [privacySaved, setPrivacySaved] = useState(false)
   const [showSaveAssigneeDefault, setShowSaveAssigneeDefault] = useState(false)
+  const [showSaveRollingDefault, setShowSaveRollingDefault] = useState(false)
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
 
   const { data: userLabelsRaw, isLoading: isUserLabelsLoading } = useLabels()
@@ -751,6 +756,8 @@ const ChoreEdit = () => {
         const savedAssignees = JSON.parse(defaultAssigneeSetting)
         setAssignableTo(savedAssignees)
       }
+
+      setIsRolling(getDefaultIsRolling())
     }
   }, [])
   useEffect(() => {
@@ -1614,7 +1621,10 @@ const ChoreEdit = () => {
                       <Radio
                         overlay
                         checked={!isRolling}
-                        onClick={() => setIsRolling(false)}
+                        onClick={() => {
+                          setIsRolling(false)
+                          setShowSaveRollingDefault(getDefaultIsRolling())
+                        }}
                         label={t('choreEdit.rescheduleFromDue')}
                       />
                       <FormHelperText>
@@ -1628,6 +1638,7 @@ const ChoreEdit = () => {
                         onClick={() => {
                           setIsRolling(true)
                           setDeadlineOffset(-1)
+                          setShowSaveRollingDefault(!getDefaultIsRolling())
                         }}
                         label={t('choreEdit.rescheduleFromCompletion')}
                       />
@@ -1636,6 +1647,31 @@ const ChoreEdit = () => {
                       </FormHelperText>
                     </FormControl>
                   </RadioGroup>
+                  {showSaveRollingDefault && (
+                    <Box
+                      sx={{ mt: 1, display: 'flex', justifyContent: 'start' }}
+                    >
+                      <Button
+                        variant='outlined'
+                        size='sm'
+                        color='neutral'
+                        startDecorator={<Save />}
+                        sx={{
+                          borderRadius: 6,
+                          fontWeight: 500,
+                          '&:hover': {
+                            background: 'neutral.softHoverBg',
+                          },
+                        }}
+                        onClick={() => {
+                          setDefaultIsRolling(isRolling)
+                          setShowSaveRollingDefault(false)
+                        }}
+                      >
+                        {t('taskEditor.useAsDefault')}
+                      </Button>
+                    </Box>
+                  )}
                 </Box>
               )}
             </EditorSection>

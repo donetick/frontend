@@ -51,6 +51,7 @@ import {
   getProjectAudienceIds,
 } from '../../utils/ProjectAccess'
 import { getIconComponent } from '../../utils/ProjectIcons'
+import { getDefaultIsRolling } from '../../utils/TaskDefaults'
 import { generateUUID } from '../../utils/UUID'
 import { useLabels } from '../Labels/LabelQueries'
 import { useProjects, useProjectSections } from '../Projects/ProjectQueries'
@@ -1378,7 +1379,7 @@ const TaskInput = ({
           : null,
       assignedTo: finalAssignedTo,
       assignStrategy: finalAssignStrategy,
-      isRolling: false,
+      isRolling: getDefaultIsRolling(),
       labelsV2: labelsV2,
       priority: priority ? Number(priority) : 0,
       points: points > -1 ? points : null,
