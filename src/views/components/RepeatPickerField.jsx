@@ -16,10 +16,17 @@ import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { FieldGroupTitle } from '../../components/common/FieldGroup'
 import ModalActions from '../../components/common/ModalActions'
 import NumberInput from '../../components/common/NumberInput'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 import { getRecurrentChipText } from '../../utils/ChoreCardHelpers'
+import {
+  serializeRecurrenceBounds,
+  supportsRecurrenceBounds,
+  validateRecurrenceBounds,
+} from '../../utils/RecurrenceBounds'
+import RecurrenceBoundsFields from './RecurrenceBoundsFields'
 
 const FREQUENCY_TYPES = [
   'daily',
@@ -103,27 +110,12 @@ const initLocalState = value => {
 const getDisplayType = frequencyType =>
   REPEAT_ON_TYPE.includes(frequencyType) ? 'custom' : frequencyType
 
-// Shared section label
-const SectionLabel = ({ children }) => (
-  <Typography
-    level='body-xs'
-    sx={{
-      color: 'text.tertiary',
-      mb: 0.75,
-      textTransform: 'uppercase',
-      letterSpacing: '0.05em',
-    }}
-  >
-    {children}
-  </Typography>
-)
-
 // Shared time-of-day picker
 const TimeRow = ({ metadata, onUpdate }) => {
   const { t } = useTranslation('chores')
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mt: 2 }}>
-      <SectionLabel>{t('repeat.picker.timeOfDay')}</SectionLabel>
+      <FieldGroupTitle>{t('repeat.picker.timeOfDay')}</FieldGroupTitle>
       <Input
         type='time'
         size='sm'
@@ -158,7 +150,7 @@ const IntervalSection = ({
   const { t } = useTranslation('chores')
   return (
     <Box>
-      <SectionLabel>{t('repeat.picker.repeatEvery')}</SectionLabel>
+      <FieldGroupTitle>{t('repeat.picker.repeatEvery')}</FieldGroupTitle>
       <Box
         sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}
       >
@@ -222,7 +214,7 @@ const DaysOfWeekSection = ({
 
   return (
     <Box>
-      <SectionLabel>{t('repeat.picker.days')}</SectionLabel>
+      <FieldGroupTitle>{t('repeat.picker.days')}</FieldGroupTitle>
       <List orientation='horizontal' wrap sx={pillListSx}>
         {DAYS.map(day => (
           <ListItem key={day}>
@@ -239,7 +231,7 @@ const DaysOfWeekSection = ({
       </List>
 
       <Box sx={{ mt: 2 }}>
-        <SectionLabel>{t('repeat.picker.pattern')}</SectionLabel>
+        <FieldGroupTitle>{t('repeat.picker.pattern')}</FieldGroupTitle>
         <RadioGroup
           orientation='horizontal'
           value={weekPattern}
@@ -290,7 +282,7 @@ const DaysOfWeekSection = ({
 
       {weekPattern === 'week_of_month' && (
         <Box sx={{ mt: 1.5 }}>
-          <SectionLabel>{t('repeat.picker.occurrences')}</SectionLabel>
+          <FieldGroupTitle>{t('repeat.picker.occurrences')}</FieldGroupTitle>
           <List orientation='horizontal' wrap sx={pillListSx}>
             {OCCURRENCE_VALUES.map(opt => (
               <ListItem key={opt}>
@@ -335,7 +327,7 @@ const DayOfMonthSection = ({
 
   return (
     <Box>
-      <SectionLabel>{t('repeat.picker.months')}</SectionLabel>
+      <FieldGroupTitle>{t('repeat.picker.months')}</FieldGroupTitle>
       <List orientation='horizontal' wrap sx={pillListSx}>
         {MONTHS.map(month => (
           <ListItem key={month}>
@@ -352,7 +344,7 @@ const DayOfMonthSection = ({
       </List>
 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mt: 2 }}>
-        <SectionLabel>{t('repeat.picker.dayOfMonth')}</SectionLabel>
+        <FieldGroupTitle>{t('repeat.picker.dayOfMonth')}</FieldGroupTitle>
         <NumberInput
           size='sm'
           value={frequency}
@@ -406,7 +398,11 @@ const RepeatPickerField = ({
     if (type === 'custom') {
       setLocalFrequencyType('interval')
       setLocalFrequency(1)
-      setLocalFrequencyMetadata({ ...defaultMetadata(), unit: 'days' })
+      setLocalFrequencyMetadata(prev => ({
+        ...defaultMetadata(),
+        ...prev,
+        unit: 'days',
+      }))
     } else {
       setLocalFrequencyType(type)
       setLocalFrequency(1)
@@ -431,11 +427,22 @@ const RepeatPickerField = ({
     }
   }
 
+  const boundsError =
+    supportsRecurrenceBounds(localFrequencyType) &&
+    validateRecurrenceBounds(localFrequencyMetadata?.scheduleBounds)
+
   const handleSave = () => {
+    if (boundsError) return
     onChange({
       frequencyType: localFrequencyType,
       frequency: localFrequency,
-      frequencyMetadata: localFrequencyMetadata,
+      // Bounds leave this picker in the current shape, never a loaded legacy one.
+      frequencyMetadata: {
+        ...localFrequencyMetadata,
+        scheduleBounds: supportsRecurrenceBounds(localFrequencyType)
+          ? serializeRecurrenceBounds(localFrequencyMetadata?.scheduleBounds)
+          : undefined,
+      },
     })
     setIsOpen(false)
   }
@@ -523,14 +530,18 @@ const RepeatPickerField = ({
               label: t('common:cancel'),
               onClick: () => setIsOpen(false),
             }}
-            primary={{ label: t('repeat.picker.apply'), onClick: handleSave }}
+            primary={{
+              label: t('repeat.picker.apply'),
+              onClick: handleSave,
+              disabled: Boolean(boundsError),
+            }}
           />
         }
       >
         {/* Frequency type selector */}
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
           <Box>
-            <SectionLabel>{t('repeat.picker.frequency')}</SectionLabel>
+            <FieldGroupTitle>{t('repeat.picker.frequency')}</FieldGroupTitle>
             <List orientation='horizontal' wrap sx={pillListSx}>
               {FREQUENCY_TYPES.map(type => (
                 <ListItem key={type}>
@@ -551,7 +562,9 @@ const RepeatPickerField = ({
           {displayType === 'custom' && (
             <>
               <Box>
-                <SectionLabel>{t('repeat.picker.scheduleType')}</SectionLabel>
+                <FieldGroupTitle>
+                  {t('repeat.picker.scheduleType')}
+                </FieldGroupTitle>
                 <RadioGroup
                   orientation='horizontal'
                   value={localFrequencyType}
@@ -614,6 +627,15 @@ const RepeatPickerField = ({
                   onFrequencyMetadataUpdate={setLocalFrequencyMetadata}
                 />
               )}
+            </>
+          )}
+          {supportsRecurrenceBounds(localFrequencyType) && (
+            <>
+              <Divider />
+              <RecurrenceBoundsFields
+                metadata={localFrequencyMetadata}
+                onChange={setLocalFrequencyMetadata}
+              />
             </>
           )}
         </Box>

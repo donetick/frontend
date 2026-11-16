@@ -39,6 +39,7 @@ import {
   Dropdown,
   FormControl,
   FormHelperText,
+  FormLabel,
   IconButton,
   Input,
   List,
@@ -66,6 +67,7 @@ import {
 
 import DurationInput from '../../components/common/DurationInput'
 import EmptyState from '../../components/common/EmptyState'
+import { FieldGroupTitle, FieldHint } from '../../components/common/FieldGroup'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import NumberInput from '../../components/common/NumberInput'
 import PermissionDeniedModal from '../../components/common/PermissionDeniedModal'
@@ -104,12 +106,18 @@ import {
   PROJECT_VISIBILITY,
 } from '../../utils/ProjectAccess'
 import { getIconComponent } from '../../utils/ProjectIcons'
+import {
+  serializeRecurrenceBounds,
+  supportsRecurrenceBounds,
+  validateRecurrenceBounds,
+} from '../../utils/RecurrenceBounds'
 import { getSafeBottomPadding } from '../../utils/SafeAreaUtils.js'
 import { useSinglePageTaskEditor } from '../../utils/TaskEditorPreferences'
 import { generateUUID } from '../../utils/UUID'
 import { sortWeekdays } from '../../utils/WeekdayUtils'
 import { useProjectFilter } from '../Chores/hooks/useProjectFilter.js'
 import LoadingComponent from '../components/Loading.jsx'
+import { BOUNDS_ERRORS } from '../components/RecurrenceBoundsFields'
 import RichTextEditor from '../components/RichTextEditor.jsx'
 import SubTasks from '../components/SubTask.jsx'
 import { useLabels } from '../Labels/LabelQueries'
@@ -463,6 +471,17 @@ const ChoreEdit = () => {
       errors.frequency = t('choreEdit.errSelectDayOfWeek')
     }
 
+    if (supportsRecurrenceBounds(frequencyType)) {
+      const boundsError = validateRecurrenceBounds(
+        frequencyMetadata?.scheduleBounds,
+      )
+      if (boundsError) {
+        errors.frequency = t(`repeat.bounds.${boundsError}`, {
+          defaultValue: BOUNDS_ERRORS[boundsError],
+        })
+      }
+    }
+
     // Validate advanced scheduling patterns
     if (
       frequencyType === 'days_of_the_week' &&
@@ -645,7 +664,14 @@ const ChoreEdit = () => {
       nextDueDate: dueDate ? new Date(dueDate).toISOString() : null,
       frequencyType: frequencyType,
       frequency: Number(frequency),
-      frequencyMetadata: frequencyMetadata,
+      // Saving rewrites bounds into the current shape, even when the editor
+      // loaded a pre-split payload and the user never touched the control.
+      frequencyMetadata: {
+        ...frequencyMetadata,
+        scheduleBounds: supportsRecurrenceBounds(frequencyType)
+          ? serializeRecurrenceBounds(frequencyMetadata?.scheduleBounds)
+          : undefined,
+      },
       assignedTo: assignedToValue,
       assignStrategy: assignStrategyValue,
       isRolling: isRolling,
@@ -1136,12 +1162,6 @@ const ChoreEdit = () => {
         maxWidth: 'none !important',
         minHeight: { sm: 'calc(100dvh - 56px)' },
         '@media (min-width: 1024px)': { minHeight: '100dvh' },
-        '& .task-editor-grid h4, & .task-editor-grid h5': {
-          fontSize: 14,
-          fontWeight: 500,
-          mb: 0.75,
-          color: 'text.secondary',
-        },
         '& .task-editor-grid .MuiInput-root, & .task-editor-grid .MuiSelect-root, & .task-editor-grid .MuiAutocomplete-root':
           { minHeight: 44, borderRadius: 'md', minWidth: 0 },
         '& .task-properties': {
@@ -1435,9 +1455,7 @@ const ChoreEdit = () => {
               <Box data-wizard-name>
                 <FormControl error={errors.name}>
                   {!singlePageEditor && (
-                    <Typography level='h4'>
-                      {t('taskEditor.taskName')}
-                    </Typography>
+                    <FormLabel>{t('taskEditor.taskName')}</FormLabel>
                   )}
                   <Input
                     aria-label={t('taskEditor.taskName2')}
@@ -1460,13 +1478,9 @@ const ChoreEdit = () => {
               error={errors.frequency || errors.dueDate || errors.thingTrigger}
               summary={scheduleSummary}
             >
-              <Typography
-                level='body-sm'
-                textColor='text.tertiary'
-                sx={{ mb: 2 }}
-              >
+              <FieldHint sx={{ mb: 2 }}>
                 {t('taskEditor.chooseWhenThisTaskIsDueAnd')}
-              </Typography>
+              </FieldHint>
 
               <RepeatSection
                 frequency={frequency}
@@ -1504,13 +1518,13 @@ const ChoreEdit = () => {
               {frequencyType !== 'always' &&
                 (frequencyType !== 'trigger' || dueDate) && (
                   <Box mt={3} mb={2}>
-                    <Typography level='h4'>
+                    <FieldGroupTitle>
                       {choreId ? 'Next due date' : 'First due date'}
-                    </Typography>
+                    </FieldGroupTitle>
                     {frequencyType === 'trigger' && !dueDate && (
-                      <Typography level='body-sm'>
+                      <FieldHint>
                         {t('taskEditor.theTaskBecomesDueWhenItsThing')}
-                      </Typography>
+                      </FieldHint>
                     )}
 
                     <Box
@@ -1526,11 +1540,11 @@ const ChoreEdit = () => {
                       }}
                     >
                       <FormControl error={Boolean(errors.dueDate)}>
-                        <Typography level='h4'>
+                        <FormLabel>
                           {REPEAT_ON_TYPE.includes(frequencyType)
                             ? 'Start date'
                             : 'Date'}
-                        </Typography>
+                        </FormLabel>
                         <Input
                           type='date'
                           aria-label={t('taskEditor.dueDate')}
@@ -1558,9 +1572,7 @@ const ChoreEdit = () => {
                         )}
                       </FormControl>
                       <FormControl>
-                        <Typography level='h4'>
-                          {t('taskEditor.time')}
-                        </Typography>
+                        <FormLabel>{t('taskEditor.time')}</FormLabel>
                         {useCustomTime ? (
                           <Input
                             type='time'
@@ -1602,9 +1614,9 @@ const ChoreEdit = () => {
                 frequencyType,
               ) && (
                 <Box>
-                  <Typography level='h4'>
+                  <FieldGroupTitle>
                     {t('choreEdit.schedulingPrefs')}
-                  </Typography>
+                  </FieldGroupTitle>
                   <RadioGroup name='tiers' sx={{ gap: 1, '& > div': { p: 1 } }}>
                     <FormControl>
                       <Radio
@@ -1646,26 +1658,10 @@ const ChoreEdit = () => {
               summary={assignmentSummary}
             >
               <Box mb={2}>
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: 1,
-                    mb: 1,
-                  }}
-                >
-                  <Typography level='h4' sx={{ mb: '0 !important' }}>
-                    {t('taskEditor.assignTo')}
-                  </Typography>
-                </Box>
-                <Typography
-                  level='body-sm'
-                  textColor='text.tertiary'
-                  sx={{ mb: 1.5 }}
-                >
+                <FieldGroupTitle>{t('taskEditor.assignTo')}</FieldGroupTitle>
+                <FieldHint>
                   {t('taskEditor.chooseWhoCanBeAssignedThisTask')}
-                </Typography>
+                </FieldHint>
                 <Card variant='plain' sx={{ p: 0, bgcolor: 'transparent' }}>
                   <List
                     orientation='horizontal'
@@ -1850,10 +1846,8 @@ const ChoreEdit = () => {
 
               {assignees.length > 1 && (
                 <Box className='task-properties'>
-                  <Box mb={2}>
-                    <Typography level='h4'>
-                      {t('taskEditor.assignedNow')}
-                    </Typography>
+                  <FormControl sx={{ mb: 2 }}>
+                    <FormLabel>{t('taskEditor.assignedNow')}</FormLabel>
                     <Select
                       placeholder={
                         assignees.length === 0
@@ -1874,12 +1868,10 @@ const ChoreEdit = () => {
                           </Option>
                         ))}
                     </Select>
-                  </Box>
+                  </FormControl>
 
-                  <Box>
-                    <Typography level='h4'>
-                      {t('taskEditor.nextAssignment')}
-                    </Typography>
+                  <FormControl>
+                    <FormLabel>{t('taskEditor.nextAssignment')}</FormLabel>
                     <Select
                       aria-label={t('taskEditor.nextAssignment')}
                       value={assignStrategy}
@@ -1893,7 +1885,7 @@ const ChoreEdit = () => {
                         </Option>
                       ))}
                     </Select>
-                  </Box>
+                  </FormControl>
                 </Box>
               )}
             </EditorSection>
@@ -2177,7 +2169,7 @@ const ChoreEdit = () => {
             >
               <Box className='task-properties'>
                 <FormControl>
-                  <Typography level='h4'>{t('choreEdit.priority')}</Typography>
+                  <FormLabel>{t('choreEdit.priority')}</FormLabel>
                   <Select
                     aria-label={t('choreEdit.priority')}
                     value={priority}
@@ -2211,8 +2203,8 @@ const ChoreEdit = () => {
                 </FormControl>
                 {/* Project Selection - Show only if there are multiple projects */}
                 {projects.length >= 1 && (
-                  <Box mb={2}>
-                    <Typography level='h4'>{t('choreEdit.project')}</Typography>
+                  <FormControl sx={{ mb: 2 }}>
+                    <FormLabel>{t('choreEdit.project')}</FormLabel>
                     <Select
                       value={projectId}
                       onChange={(event, newValue) => setProjectId(newValue)}
@@ -2301,11 +2293,11 @@ const ChoreEdit = () => {
                         </Option>
                       ))}
                     </Select>
-                  </Box>
+                  </FormControl>
                 )}
 
-                <Box mb={2}>
-                  <Typography level='h4'>{t('choreEdit.labels')}</Typography>
+                <FormControl sx={{ mb: 2 }}>
+                  <FormLabel>{t('choreEdit.labels')}</FormLabel>
                   <Select
                     multiple
                     onChange={(event, newValue) => {
@@ -2371,7 +2363,7 @@ const ChoreEdit = () => {
                       {t('choreEdit.addNewLabel')}
                     </MenuItem>
                   </Select>
-                </Box>
+                </FormControl>
               </Box>
             </EditorSection>
             <Box>
@@ -2788,7 +2780,7 @@ const ChoreEdit = () => {
                   boxShadow: 'sm',
                 }}
               >
-                <Typography level='body1'>
+                <Typography level='body-sm'>
                   {t('choreEdit.createdBy')}{' '}
                   <Chip variant='solid'>
                     {
@@ -2802,7 +2794,7 @@ const ChoreEdit = () => {
                   <>
                     <Divider sx={{ my: 1 }} />
 
-                    <Typography level='body1'>
+                    <Typography level='body-sm'>
                       {t('choreEdit.updatedBy')}{' '}
                       <Chip variant='solid'>
                         {

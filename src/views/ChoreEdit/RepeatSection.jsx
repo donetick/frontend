@@ -5,6 +5,7 @@ import {
   Checkbox,
   FormControl,
   FormHelperText,
+  FormLabel,
   Grid,
   Input,
   List,
@@ -19,12 +20,14 @@ import moment from 'moment'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { FieldGroupTitle } from '../../components/common/FieldGroup'
 import NumberInput from '../../components/common/NumberInput'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
 import { useUserProfile } from '../../queries/UserQueries'
 import { isPlusAccount } from '../../utils/Helpers'
 import { DAYS, sortWeekdays } from '../../utils/WeekdayUtils'
+import RecurrenceBoundsFields from '../components/RecurrenceBoundsFields'
 import ThingTriggerSection from './ThingTriggerSection'
 
 const FREQUENCY_TYPES_RADIOS = [
@@ -118,30 +121,24 @@ export const RepeatOnSections = ({
   }, [frequencyMetadata, onFrequencyMetadataUpdate])
 
   const timePickerComponent = (
-    <Grid
-      item
-      sm={12}
-      sx={{
-        display: 'flex',
-        direction: 'column',
-        flexDirection: 'column',
-      }}
-    >
-      <Typography level='h5'>{t('repeat.timeOfDay')}</Typography>
-      <Input
-        type='time'
-        sx={{ width: '150px' }}
-        defaultValue={moment(frequencyMetadata?.time).format('HH:mm')}
-        onChange={e => {
-          onFrequencyMetadataUpdate({
-            ...frequencyMetadata,
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-            time: moment(
-              moment(new Date()).format('YYYY-MM-DD') + 'T' + e.target.value,
-            ).format(),
-          })
-        }}
-      />
+    <Grid item sm={12}>
+      <FormControl>
+        <FormLabel>{t('repeat.timeOfDay')}</FormLabel>
+        <Input
+          type='time'
+          sx={{ width: '150px' }}
+          defaultValue={moment(frequencyMetadata?.time).format('HH:mm')}
+          onChange={e => {
+            onFrequencyMetadataUpdate({
+              ...frequencyMetadata,
+              timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+              time: moment(
+                moment(new Date()).format('YYYY-MM-DD') + 'T' + e.target.value,
+              ).format(),
+            })
+          }}
+        />
+      </FormControl>
     </Grid>
   )
 
@@ -150,7 +147,7 @@ export const RepeatOnSections = ({
       return (
         <>
           <Grid item sm={12} sx={{ display: 'flex', alignItems: 'center' }}>
-            <Typography level='h5'>{t('repeat.every')}</Typography>
+            <FormLabel sx={{ mb: 0, mr: 1 }}>{t('repeat.every')}</FormLabel>
             <NumberInput
               min={1}
               max={1000}
@@ -510,7 +507,7 @@ const RepeatSection = ({
   return (
     <Box>
       <FormControl>
-        <Typography level='h4'>{t('repeat.picker.scheduleType')}</Typography>
+        <FormLabel>{t('repeat.picker.scheduleType')}</FormLabel>
         <Select
           aria-label={t('repeat.picker.scheduleType')}
           value={
@@ -546,7 +543,9 @@ const RepeatSection = ({
             variant='plain'
             sx={{ mt: 2, p: 0, bgcolor: 'transparent', gap: 1.5 }}
           >
-            <Typography level='h5'>{t('taskEditor.repeats')}</Typography>
+            <FieldGroupTitle sx={{ mb: 0 }}>
+              {t('taskEditor.repeats')}
+            </FieldGroupTitle>
 
             <List
               orientation='horizontal'
@@ -571,6 +570,7 @@ const RepeatSection = ({
                         onFrequencyTypeUpdate(REPEAT_ON_TYPE[0])
                         onFrequencyUpdate(1)
                         onFrequencyMetadataUpdate({
+                          ...frequencyMetadata,
                           unit: 'days',
                           time: frequencyMetadata?.time
                             ? frequencyMetadata?.time
@@ -697,6 +697,10 @@ const RepeatSection = ({
                   </Grid>
                 </>
               ))}
+            <RecurrenceBoundsFields
+              metadata={frequencyMetadata}
+              onChange={onFrequencyMetadataUpdate}
+            />
             <FormControl error={Boolean(frequencyError)}>
               <FormHelperText error>{frequencyError}</FormHelperText>
             </FormControl>

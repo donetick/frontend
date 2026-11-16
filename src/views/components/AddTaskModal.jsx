@@ -50,6 +50,10 @@ import {
   getProjectAudienceIds,
 } from '../../utils/ProjectAccess'
 import { getIconComponent } from '../../utils/ProjectIcons'
+import {
+  serializeRecurrenceBounds,
+  supportsRecurrenceBounds,
+} from '../../utils/RecurrenceBounds'
 import { generateUUID } from '../../utils/UUID'
 import { useLabels } from '../Labels/LabelQueries'
 import { useProjects, useProjectSections } from '../Projects/ProjectQueries'
@@ -1410,7 +1414,18 @@ const TaskInput = ({
 
     if (frequency) {
       chore.frequencyType = frequency.frequencyType
-      chore.frequencyMetadata = frequency.frequencyMetadata
+      // The repeat picker already serializes bounds, but a frequency parsed
+      // from the typed text or a voice override never goes through it — so the
+      // payload is rewritten into the current shape here either way, and the
+      // key is dropped for types that have no bounds (once, always, trigger).
+      chore.frequencyMetadata = {
+        ...frequency.frequencyMetadata,
+        scheduleBounds: supportsRecurrenceBounds(frequency.frequencyType)
+          ? serializeRecurrenceBounds(
+              frequency.frequencyMetadata?.scheduleBounds,
+            )
+          : undefined,
+      }
       chore.frequency = frequency.frequency
     }
     if (dueDate && !isAlwaysAvailable) {

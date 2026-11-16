@@ -19,6 +19,7 @@ import {
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { FieldGroupTitle, FieldHint } from '../../components/common/FieldGroup'
 import NumberInput from '../../components/common/NumberInput'
 import { GetThings } from '../../utils/Fetcher'
 
@@ -79,11 +80,9 @@ export default function CompletionActionsSection({
   return (
     <Box mb={3}>
       {showHeading && (
-        <Typography level='h4'>{t('taskEditor.onCompletion')}</Typography>
+        <FieldGroupTitle>{t('taskEditor.onCompletion')}</FieldGroupTitle>
       )}
-      <Typography level='body-sm' mb={1}>
-        {t('taskEditor.awardPointsOrChangeThingsWhenThis')}
-      </Typography>
+      <FieldHint>{t('taskEditor.awardPointsOrChangeThingsWhenThis')}</FieldHint>
       {loadError && (
         <Typography color='danger'>
           {t('taskEditor.unableToLoadThingsReloadToTry')}
@@ -104,7 +103,7 @@ export default function CompletionActionsSection({
               gap: 1,
             }}
           >
-            <Typography level='title-md'>
+            <Typography level='title-sm'>
               {t('taskEditor.awardPoints')}
             </Typography>
             <IconButton
@@ -141,7 +140,7 @@ export default function CompletionActionsSection({
             }}
           >
             <Box>
-              <Typography level='title-md'>
+              <Typography level='title-sm'>
                 {t('choreEdit.requireApproval')}
               </Typography>
               <Typography level='body-sm' textColor='text.tertiary'>

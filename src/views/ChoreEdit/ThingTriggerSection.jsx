@@ -4,6 +4,7 @@ import {
   Box,
   Button,
   FormControl,
+  FormLabel,
   Input,
   Option,
   Select,
@@ -130,7 +131,7 @@ const ThingTriggerSection = ({
             }}
           >
             <FormControl error={isAttepmtingToSave && !selectedThing}>
-              <Typography level='h4'>{t('taskEditor.thing')}</Typography>
+              <FormLabel>{t('taskEditor.thing')}</FormLabel>
               <Autocomplete
                 aria-label={t('taskEditor.triggerThing')}
                 options={things}
@@ -149,7 +150,7 @@ const ThingTriggerSection = ({
             </FormControl>
             {selectedThing?.type === 'boolean' && (
               <FormControl>
-                <Typography level='h4'>{t('taskEditor.becomes')}</Typography>
+                <FormLabel>{t('taskEditor.becomes')}</FormLabel>
                 <Select
                   aria-label={t('taskEditor.triggerState')}
                   value={triggerState}
@@ -162,9 +163,7 @@ const ThingTriggerSection = ({
             )}
             {selectedThing?.type === 'text' && (
               <FormControl>
-                <Typography level='h4'>
-                  {t('taskEditor.matchesText')}
-                </Typography>
+                <FormLabel>{t('taskEditor.matchesText')}</FormLabel>
                 <Input
                   aria-label={t('taskEditor.triggerText')}
                   value={triggerState || ''}
@@ -174,7 +173,7 @@ const ThingTriggerSection = ({
             )}
             {selectedThing?.type === 'number' && (
               <FormControl>
-                <Typography level='h4'>{t('taskEditor.condition')}</Typography>
+                <FormLabel>{t('taskEditor.condition')}</FormLabel>
                 <Box sx={{ display: 'flex', gap: 1, minWidth: 0 }}>
                   <Select
                     aria-label={t('taskEditor.triggerCondition')}
