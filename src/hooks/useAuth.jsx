@@ -2,11 +2,8 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { apiClient } from '../utils/ApiClient'
-import {
-  clearSession,
-  SessionStorageError,
-  startSession,
-} from '../utils/AuthSession'
+import { offlineDB } from '../utils/OfflineDB'
+import { clearAllTokens, saveTokens } from '../utils/TokenStorage'
 
 const AuthContext = createContext(null)
 
@@ -35,7 +32,7 @@ export const AuthProvider = ({ children }) => {
   const clearAuth = async () => {
     setToken(null)
     setUser(null)
-    await clearSession()
+    await clearAllTokens()
   }
 
   const login = async credentials => {
@@ -76,26 +73,28 @@ export const AuthProvider = ({ children }) => {
       const userToken = data.token || data.access_token
 
       if (userToken) {
-        await startSession({
+        setToken(userToken)
+
+        try {
+          await offlineDB.clearAll()
+        } catch (e) {
+          console.error('Error clearing offline data on login', e)
+        }
+
+        // Use centralized token storage
+        await saveTokens({
           accessToken: userToken,
           accessTokenExpiry: data.expire || data.access_token_expiry,
           refreshToken: data.refresh_token,
           refreshTokenExpiry: data.refresh_token_expiry,
         })
-        setToken(userToken)
       }
 
       setIsLoading(false)
       return { success: true, data }
     } catch (error) {
       setIsLoading(false)
-      return {
-        success: false,
-        error:
-          error instanceof SessionStorageError
-            ? error.message
-            : 'Network error',
-      }
+      return { success: false, error: 'Network error' }
     }
   }
 

@@ -416,10 +416,8 @@ class SyncEngine {
   // and get removed, so the offline cache doesn't keep ghost chores.
   async cacheChores(chores, { complete = false } = {}) {
     if (!isOfflineFeatureEnabled()) return
-    if (!Array.isArray(chores)) return
+    if (!chores || chores.length === 0) return
     await offlineDB.saveChores(chores)
-    await offlineDB.saveKV('chores_snapshot:false', true)
-    if (complete) await offlineDB.saveKV('chores_snapshot:true', true)
 
     if (complete) {
       try {

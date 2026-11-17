@@ -6,10 +6,14 @@ import {
   recordApiFailure,
   recordServerVersionFromResponse,
 } from '../service/DiagnosticsSession'
-import { clearSession } from './AuthSession'
 import { logout, RefreshToken } from './Fetcher'
 import { isOAuthExchangeInProgress } from './OAuthExchangeState'
-import { isRefreshTokenExpired, saveTokens } from './TokenStorage'
+import { offlineDB } from './OfflineDB'
+import {
+  clearAllTokens,
+  isRefreshTokenExpired,
+  saveTokens,
+} from './TokenStorage'
 
 const OAUTH_EXCHANGE_IN_PROGRESS = 'OAuth exchange in progress'
 
@@ -195,10 +199,11 @@ class ApiClient {
       console.error('Error clearing app badge on logout', e)
     }
 
+    await clearAllTokens()
     try {
-      await clearSession()
+      await offlineDB.clearAll()
     } catch (e) {
-      console.error('Error clearing session on logout', e)
+      console.error('Error clearing offline data on logout', e)
     }
     try {
       // Dynamic import sidesteps the ApiClient <-> ImageCache module cycle

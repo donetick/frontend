@@ -8,9 +8,9 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import { useUserProfile } from '../../queries/UserQueries'
 import { apiClient } from '../../utils/ApiClient'
-import { SessionStorageError, startSession } from '../../utils/AuthSession'
 import { GetUserProfile } from '../../utils/Fetcher'
 import { endOAuthExchange } from '../../utils/OAuthExchangeState'
+import { saveTokens } from '../../utils/TokenStorage'
 import AuthShell from './AuthShell'
 import { authButtonSx } from './authStyles'
 import MFAVerificationModal from './MFAVerificationModal'
@@ -57,7 +57,7 @@ const AuthenticationLoading = () => {
   }
 
   const handleMFASuccess = async data => {
-    await startSession({
+    await saveTokens({
       accessToken: data.token,
       accessTokenExpiry: data.expire,
       refreshToken: data.refresh_token,
@@ -147,7 +147,7 @@ const AuthenticationLoading = () => {
           return
         }
 
-        await startSession({
+        await saveTokens({
           accessToken: data.token || data.access_token,
           accessTokenExpiry: data.expire || data.access_token_expiry,
           refreshToken: data.refresh_token,
@@ -164,11 +164,7 @@ const AuthenticationLoading = () => {
       } catch (error) {
         console.error('Authentication request failed', error)
         setMessage(t('authenticating.signInFailed'))
-        setSubMessage(
-          error instanceof SessionStorageError
-            ? error.message
-            : t('authenticating.tryAgain'),
-        )
+        setSubMessage(t('authenticating.tryAgain'))
         setStatus('error')
       }
     }
@@ -207,9 +203,9 @@ const AuthenticationLoading = () => {
         onClose={handleMFAClose}
         sessionToken={mfaSessionToken}
         onSuccess={handleMFASuccess}
-        onError={message => {
+        onError={() => {
           setMessage(t('authenticating.signInFailed'))
-          setSubMessage(message || t('authenticating.mfaFailed'))
+          setSubMessage(t('authenticating.mfaFailed'))
         }}
       />
     </AuthShell>
