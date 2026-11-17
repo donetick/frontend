@@ -1,5 +1,6 @@
 import { CreditCard, Person, Toll } from '@mui/icons-material'
 import {
+  Alert,
   Avatar,
   Box,
   Card,
@@ -10,59 +11,111 @@ import {
   Stack,
   Typography,
 } from '@mui/joy'
-import { useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import ModalActions from '../../components/common/ModalActions.jsx'
 import NumberInput from '../../components/common/NumberInput.jsx'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal.js'
+import {
+  useUserXP,
+  useXPTranslation as useTranslation,
+} from '../../queries/XPQueries'
 import { resolvePhotoURL } from '../../utils/Helpers.jsx'
+import { generateUUID } from '../../utils/UUID'
+import XPCategorySelect from '../XP/XPCategorySelect'
 
 function RedeemPointsModal({ config }) {
-  const { t } = useTranslation('points')
+  const { t, xpMode } = useTranslation('points')
   const { ResponsiveModal } = useResponsiveModal()
 
   const [points, setPoints] = useState(0)
+  const [category, setCategory] = useState(null)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+  const submitting = useRef(false)
+  const balances = useUserXP(config?.user?.userId)
+  const available = balances.data?.categories?.[String(category)] || 0
+  const requestKey = useMemo(
+    () => generateUUID(),
+    [config?.isOpen, config?.user?.userId, points, category],
+  )
   const predefinedPoints = [1, 5, 10, 25, 50]
 
   useEffect(() => {
     setPoints(0)
-  }, [config])
+    setCategory(null)
+    setError('')
+  }, [config?.isOpen, config?.user?.userId])
 
   const addPredefinedPoints = point => {
     const newPoints = points + point
-    if (newPoints > config.available) {
-      setPoints(config.available)
+    if (newPoints > Math.min(available, 1000000000)) {
+      setPoints(Math.min(available, 1000000000))
       return
     }
     setPoints(newPoints)
   }
 
-  const canRedeem = points > 0 && points <= config.available
+  const canRedeem =
+    Number.isSafeInteger(points) &&
+    points > 0 &&
+    points <= 1000000000 &&
+    points <= available &&
+    category !== null &&
+    !balances.error &&
+    !balances.isLoading
+  const save = async () => {
+    if (!canRedeem || submitting.current) return
+    submitting.current = true
+    setSaving(true)
+    setError('')
+    try {
+      await config?.onSave({
+        points: Number(points),
+        userId: config?.user?.userId,
+        categoryId: category,
+        requestKey,
+      })
+    } catch (failure) {
+      setError(failure.message)
+    } finally {
+      submitting.current = false
+      setSaving(false)
+    }
+  }
 
   return (
     <ResponsiveModal
       open={config?.isOpen}
-      onClose={config?.onClose}
+      onClose={saving ? undefined : config?.onClose}
       size='md'
       title={t('redeem')}
       footer={
         <ModalActions
-          secondary={{ label: t('common:cancel'), onClick: config?.onClose }}
+          secondary={{
+            label: t('common:cancel'),
+            onClick: config?.onClose,
+            disabled: saving,
+          }}
           primary={{
             label: t('redeemModal.redeemButton'),
             startDecorator: <CreditCard />,
-            disabled: !canRedeem,
-            onClick: () =>
-              config?.onSave({
-                points: Number(points),
-                userId: config?.user?.userId,
-              }),
+            disabled: !canRedeem || saving,
+            onClick: save,
           }}
         />
       }
     >
       <Stack spacing={2}>
+        {(error || balances.error) && (
+          <Alert color='danger'>{error || balances.error.message}</Alert>
+        )}
+        <XPCategorySelect
+          value={category}
+          onChange={setCategory}
+          balances={balances.data?.category_details || []}
+          disabled={saving || balances.isLoading}
+        />
         {/* User Info Card */}
         <Card
           variant='soft'
@@ -108,7 +161,8 @@ function RedeemPointsModal({ config }) {
           <NumberInput
             value={points}
             min={0}
-            max={config?.available || 0}
+            max={Math.min(available, 1000000000)}
+            disabled={saving}
             size='lg'
             variant='outlined'
             startDecorator={<Toll />}
@@ -124,7 +178,7 @@ function RedeemPointsModal({ config }) {
               },
             }}
           />
-          {points > config?.available && (
+          {points > available && (
             <Typography level='body-xs' sx={{ color: 'danger.500', mt: 0.5 }}>
               {t('redeemModal.cannotExceed')}
             </Typography>
@@ -146,9 +200,14 @@ function RedeemPointsModal({ config }) {
             {predefinedPoints.map(point => (
               <IconButton
                 key={point}
-                aria-label={`Add ${point} points`}
+                aria-label={t('xp.quickAddAmount', {
+                  count: point,
+                  unit: xpMode ? 'XP' : t('xp.points'),
+                })}
                 variant='outlined'
-                disabled={points + point > config?.available}
+                disabled={
+                  saving || points + point > Math.min(available, 1000000000)
+                }
                 onClick={() => addPredefinedPoints(point)}
                 sx={{
                   borderRadius: '50%',
@@ -198,7 +257,7 @@ function RedeemPointsModal({ config }) {
               sx={{ color: 'text.secondary', mt: 0.5 }}
             >
               {t('redeemModal.remaining', {
-                count: (config?.available || 0) - points,
+                count: available - points,
               })}
             </Typography>
           </Card>

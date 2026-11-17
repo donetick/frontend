@@ -47,6 +47,7 @@ import {
 import { resolvePhotoURL } from '../../utils/Helpers'
 import LoadingComponent from '../components/Loading'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
+import XPSettings from '../XP/XPSettings'
 import SettingsLayout from './SettingsLayout'
 
 const sectionTitleSx = {
@@ -354,6 +355,13 @@ const CircleSettings = () => {
 
   return (
     <SettingsLayout title={t('circleSettings.title')}>
+      <XPSettings
+        canManage={circleMembers.some(
+          member =>
+            member.userId === userProfile.id &&
+            ['admin', 'manager'].includes(member.role),
+        )}
+      />
       <Box sx={{ maxWidth: 760, pb: 4 }}>
         <Typography
           level='body-md'

@@ -17,13 +17,16 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 
 import NumberInput from '../../components/common/NumberInput'
+import { useXPTranslation as useTranslation } from '../../queries/XPQueries'
 import { GetThings } from '../../utils/Fetcher'
+import XPCategorySelect from '../XP/XPCategorySelect'
 
 export default function CompletionActionsSection({
   actions,
+  categoryID,
+  onCategoryChange,
   onChange,
   onPointsChange,
   onRequireApprovalChange,
@@ -62,7 +65,8 @@ export default function CompletionActionsSection({
   }
   const hasPoints = points !== -1
   const pointsValid =
-    !hasPoints || (Number.isInteger(points) && points >= 0 && points <= 1000)
+    !hasPoints ||
+    (Number.isInteger(points) && points >= 0 && points <= 1000000000)
   useEffect(() => {
     onValidate(
       pointsValid &&
@@ -119,15 +123,19 @@ export default function CompletionActionsSection({
             <NumberInput
               value={points}
               min={0}
-              max={1000}
+              max={1000000000}
               onValueChange={onPointsChange}
             />
             <FormHelperText>
               {pointsValid
                 ? 'Awarded to the user who completes the task, after approval when required.'
-                : 'Enter a whole number from 0 to 1000.'}
+                : 'Enter a whole number from 0 to 1000000000.'}
             </FormHelperText>
           </FormControl>
+          <XPCategorySelect
+            value={categoryID ?? 0}
+            onChange={onCategoryChange}
+          />
         </Card>
       )}
       {requireApproval && (

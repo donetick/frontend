@@ -25,7 +25,6 @@ import {
 } from '@mui/joy'
 import moment from 'moment'
 import { useMemo, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
 import {
   Bar,
@@ -40,13 +39,18 @@ import {
 import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext.jsx'
 import { useChoresHistory } from '../../queries/ChoreQueries.jsx'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
+import {
+  useRefreshXP,
+  useXPTranslation as useTranslation,
+  xpRequest,
+} from '../../queries/XPQueries'
 import { isPlusHistoryWindow } from '../../utils/entitlements.js'
-import { RedeemPoints } from '../../utils/Fetcher.jsx'
 import { resolvePhotoURL } from '../../utils/Helpers.jsx'
 import LoadingComponent from '../components/Loading.jsx'
 import RedeemPointsModal from '../Modals/RedeemPointsModal'
 import { useRedemptions } from '../Rewards/RewardQueries.jsx'
 import RewardsView from '../Rewards/RewardsView.jsx'
+import XPBreakdown from '../XP/XPBreakdown'
 
 const PERIODS = [
   { shortKey: 'tabs.short7d', value: 7 },
@@ -137,7 +141,8 @@ const getPeriodLabel = (period, t) => {
 }
 
 const UserPoints = () => {
-  const { t } = useTranslation('points')
+  const { t, xpMode } = useTranslation('points')
+  const refreshXP = useRefreshXP()
   const [period, setPeriod] = useState(7)
   const [selectedUser, setSelectedUser] = useState(null)
   const [leaderboardMode, setLeaderboardMode] = useState('points')
@@ -371,6 +376,11 @@ const UserPoints = () => {
     >
       {pageTabs}
 
+      <XPBreakdown
+        key={activeSelectedUser}
+        userID={activeSelectedUser}
+        canAdjust={isAdmin}
+      />
       <Box
         sx={{
           alignItems: { xs: 'flex-start', sm: 'center' },
@@ -656,6 +666,7 @@ const UserPoints = () => {
               />
               <Bar
                 dataKey='points'
+                name={xpMode ? 'XP' : t('xp.points')}
                 fill='var(--joy-palette-primary-500)'
                 maxBarSize={32}
                 radius={[6, 6, 2, 2]}
@@ -812,13 +823,16 @@ const UserPoints = () => {
           available: availablePoints,
           user: selectedUserData,
           onClose: () => setIsRedeemModalOpen(false),
-          onSave: ({ points, userId }) => {
-            RedeemPoints(userId, points, userProfile.circleID)
-              .then(() => {
-                setIsRedeemModalOpen(false)
-                refetchCircleMembers()
-              })
-              .catch(error => console.error(error))
+          onSave: async ({ categoryId, points, requestKey, userId }) => {
+            await xpRequest(
+              `/users/${userId}/xp/adjust`,
+              'POST',
+              { points, categoryId, action: 'remove' },
+              requestKey,
+            )
+            await refreshXP()
+            setIsRedeemModalOpen(false)
+            refetchCircleMembers()
           },
         }}
       />
