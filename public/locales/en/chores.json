@@ -206,6 +206,7 @@
     "times": "times",
     "details": "Details",
     "createdBy": "Created By",
+    "createdAt": "Created At",
     "na": "N/A",
     "taskCompleted": "Task Completed",
     "taskCompletedMessage": "Your task has been marked as complete",

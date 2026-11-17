@@ -47,6 +47,7 @@ import { useChorePermissions } from '../../hooks/useChorePermissions'
 import { useDescriptionHtml } from '../../hooks/useDescriptionHtml'
 import { usePendingCommands } from '../../hooks/usePendingCommands'
 import {
+  useChore,
   useChoreDetails,
   useChoreHistory,
 } from '../../queries/ChoreQueries.jsx'
@@ -179,6 +180,7 @@ const ChoreView = () => {
     isError: isChoreError,
     isLoading: isChoreLoading,
   } = useChoreDetails(choreId)
+  const { data: choreRecordData } = useChore(choreId)
   const { data: choreHistoryData } = useChoreHistory(choreId)
 
   const { data: pendingCmds } = usePendingCommands(choreId)
@@ -214,6 +216,7 @@ const ChoreView = () => {
 
   useEffect(() => {
     if (chore && performers?.length > 0) {
+      const createdAt = chore.createdAt || choreRecordData?.res?.createdAt
       const cards = [
         {
           size: 6,
@@ -268,11 +271,15 @@ const ChoreView = () => {
             performers.find(p => p.userId === chore.createdBy)?.displayName ||
             t('choreView.na')
           }`,
+          subtext2: `${t('choreView.createdAt')}: ${
+            createdAt ? fmt.dateTime(createdAt) : t('choreView.na')
+          }`,
+          subtext2Color: 'text.secondary',
         },
       ]
       setInfoCards(cards)
     }
-  }, [chore, performers, completionCount, t])
+  }, [chore, choreRecordData, performers, completionCount, fmt, t])
   const handleUpdatePriority = priority => {
     UpdateChorePriority(choreId, priority.value)
       .then(response => {
@@ -1032,7 +1039,10 @@ const ChoreView = () => {
                     {card.subtext2 && (
                       <Typography
                         level='body-sm'
-                        sx={{ color: 'danger.plainColor', lineHeight: 1.5 }}
+                        sx={{
+                          color: card.subtext2Color || 'danger.plainColor',
+                          lineHeight: 1.5,
+                        }}
                       >
                         {card.subtext2}
                       </Typography>
