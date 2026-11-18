@@ -1402,14 +1402,16 @@ const TaskInput = ({
     }
 
     // Every plan gets reminders; the free plan is capped at the on-due one.
-    // Without the flag the backend never schedules them. "always" chores are
-    // rejected with forbidden_with_trigger_frequency if notification is true,
-    // same rule as trigger frequencies.
+    // Only scheduled tasks can use reminders. Keep the API payload aligned
+    // with the editor and backend rules for always-available and trigger tasks.
     const planReminders = sanitizeRemindersForPlan(
       notificationMetadata?.templates,
       isPlusAccount(userProfile),
     )
-    const hasReminders = planReminders.length > 0 && !isAlwaysAvailable
+    const hasReminders =
+      planReminders.length > 0 &&
+      Boolean(dueDate) &&
+      !['always', 'trigger'].includes(frequency?.frequencyType)
 
     if (frequency) {
       chore.frequencyType = frequency.frequencyType
@@ -1424,11 +1426,16 @@ const TaskInput = ({
       // a due date lands with nextDueDate: null.
       chore.nextDueDate = new Date(dueDate).toISOString()
     }
-    if (hasReminders && (frequency || dueDate)) {
-      chore.notification = true
+    const overdueNagging =
+      dueDate && !isAlwaysAvailable && chore.frequencyType !== 'trigger'
+        ? notificationMetadata?.overdueNagging
+        : null
+    if ((hasReminders && (frequency || dueDate)) || overdueNagging) {
+      chore.notification = hasReminders && Boolean(frequency || dueDate)
       chore.notificationMetadata = {
         ...notificationMetadata,
         templates: planReminders,
+        overdueNagging,
       }
     }
 
@@ -2070,8 +2077,26 @@ const TaskInput = ({
               />
               <NotificationPickerField
                 value={notificationMetadata}
+                remindersAllowed={
+                  Boolean(dueDate) &&
+                  !['always', 'trigger'].includes(frequency?.frequencyType)
+                }
+                remindersUnavailableReason={
+                  ['always', 'trigger'].includes(frequency?.frequencyType)
+                    ? 'remindersUnsupported'
+                    : 'remindersNeedDueDate'
+                }
                 onChange={setNotificationMetadata}
-                onClear={() => setNotificationMetadata({ templates: [] })}
+                onClear={() =>
+                  setNotificationMetadata(previous => ({
+                    ...previous,
+                    templates: [],
+                  }))
+                }
+                naggingAllowed={
+                  Boolean(dueDate) &&
+                  !['always', 'trigger'].includes(frequency?.frequencyType)
+                }
                 emptyDisplay={pickerEmptyDisplay}
               />
             </Box>

@@ -296,6 +296,19 @@ const TaskPreviewCard = ({
           />
           <NotificationPickerField
             emptyDisplay='icon'
+            remindersAllowed={
+              Boolean(effective.dueDate) &&
+              !['always', 'trigger'].includes(
+                effective.frequency?.frequencyType ?? effective.frequencyType,
+              )
+            }
+            remindersUnavailableReason={
+              ['always', 'trigger'].includes(
+                effective.frequency?.frequencyType ?? effective.frequencyType,
+              )
+                ? 'remindersUnsupported'
+                : 'remindersNeedDueDate'
+            }
             value={effective.notificationMetadata}
             onChange={metadata => onPatch({ notificationMetadata: metadata })}
             onClear={() => onPatch({ notificationMetadata: { templates: [] } })}

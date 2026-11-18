@@ -100,6 +100,7 @@ import { imageSourceToFile } from '../../utils/FileConvert'
 import { isPlusAccount, resolvePhotoURL } from '../../utils/Helpers'
 import { getImageSrc, removeCachedImage } from '../../utils/ImageCache'
 import { filterLabels, sortLabels } from '../../utils/LabelPickerOptions'
+import { isValidOverdueNagging } from '../../utils/overdueNagging'
 import Priorities from '../../utils/Priorities.jsx'
 import {
   filterMembersForProject,
@@ -114,6 +115,7 @@ import { generateUUID } from '../../utils/UUID'
 import { sortWeekdays } from '../../utils/WeekdayUtils'
 import { useProjectFilter } from '../Chores/hooks/useProjectFilter.js'
 import LoadingComponent from '../components/Loading.jsx'
+import OverdueNaggingSettings from '../components/OverdueNaggingSettings'
 import RichTextEditor from '../components/RichTextEditor.jsx'
 import SubTasks from '../components/SubTask.jsx'
 import { useLabels } from '../Labels/LabelQueries'
@@ -388,6 +390,7 @@ const ChoreEdit = () => {
     dueDate: 'schedule',
     thingTrigger: 'schedule',
     completionActions: 'actions',
+    overdueNagging: 'notifications',
   }
   const focusError = key => {
     const step =
@@ -499,6 +502,14 @@ const ChoreEdit = () => {
       if (!isThingValid) {
         errors.thingTrigger = t('choreEdit.errThingTrigger')
       }
+    }
+
+    if (
+      dueDate &&
+      !NOTIFICATION_FORBIDDEN_TYPE.includes(frequencyType) &&
+      !isValidOverdueNagging(notificationMetadata?.overdueNagging)
+    ) {
+      errors.overdueNagging = t('remind.overdueNaggingInvalid')
     }
 
     if (!completionActionsValid)
@@ -654,13 +665,21 @@ const ChoreEdit = () => {
       assignStrategy: assignStrategyValue,
       isRolling: isRolling,
       isActive: isActive,
-      notification: isNotificable && planReminders.length > 0,
+      notification:
+        Boolean(dueDate) &&
+        !NOTIFICATION_FORBIDDEN_TYPE.includes(frequencyType) &&
+        isNotificable &&
+        planReminders.length > 0,
       labels: labels.map(l => l.name),
       labelsV2: labelsV2,
       subTasks: subTasks,
       notificationMetadata: {
         ...notificationMetadata,
         templates: planReminders,
+        overdueNagging:
+          dueDate && !NOTIFICATION_FORBIDDEN_TYPE.includes(frequencyType)
+            ? (notificationMetadata?.overdueNagging ?? null)
+            : null,
       },
       thingTrigger: thingTrigger,
       completionActions,
@@ -2467,12 +2486,25 @@ const ChoreEdit = () => {
               icon={NotificationsOutlined}
               section='notifications'
               collapsible
-              defaultOpen={isNotificable}
-              summary={isNotificable ? 'Reminders enabled' : 'Reminders off'}
+              defaultOpen={
+                isNotificable || Boolean(notificationMetadata?.overdueNagging)
+              }
+              error={errors.overdueNagging}
+              summary={
+                notificationMetadata?.overdueNagging
+                  ? t('remind.overdueNagging')
+                  : isNotificable
+                    ? 'Reminders enabled'
+                    : 'Reminders off'
+              }
             >
               {NOTIFICATION_FORBIDDEN_TYPE.includes(frequencyType) ? (
                 <FormHelperText sx={{ mb: 2 }}>
                   {t('choreEdit.notifyForTaskUnavailable')}
+                </FormHelperText>
+              ) : !dueDate ? (
+                <FormHelperText sx={{ mb: 2 }}>
+                  {t('remind.remindersNeedDueDate')}
                 </FormHelperText>
               ) : (
                 <Box
@@ -2498,6 +2530,25 @@ const ChoreEdit = () => {
                         }
                       }}
                       value={notificationMetadata}
+                    />
+                  </Box>
+
+                  <Box
+                    sx={{
+                      pt: 2,
+                      borderTop: '1px solid',
+                      borderColor: 'divider',
+                    }}
+                  >
+                    <OverdueNaggingSettings
+                      allowed={Boolean(dueDate)}
+                      value={notificationMetadata?.overdueNagging}
+                      onChange={overdueNagging =>
+                        setNotificationMetadata(previous => ({
+                          ...previous,
+                          overdueNagging,
+                        }))
+                      }
                     />
                   </Box>
 
