@@ -2,7 +2,7 @@ import './styles/safe-area.css'
 
 import { Capacitor } from '@capacitor/core'
 import { Box, Button, Snackbar, Typography, useColorScheme } from '@mui/joy'
-import { useCallback, useEffect, useState } from 'react'
+import { Suspense, useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useRegisterSW } from 'virtual:pwa-register/react'
@@ -181,7 +181,9 @@ const AppContent = () => {
               <NavBar />
               <Box sx={{ flex: 1, minWidth: 0, width: '100%' }}>
                 <PageTransition>
-                  <Outlet />
+                  <Suspense fallback={<div role='status'>Loading page...</div>}>
+                    <Outlet />
+                  </Suspense>
                 </PageTransition>
                 <MobileBottomNav />
               </Box>

@@ -1,10 +1,10 @@
 import PropTypes from 'prop-types'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 import { useGlobalShortcutScope } from '../contexts/KeyboardShortcutScopeContext'
 import { QuickAddModalContext } from '../contexts/QuickAddModalContext'
-import TaskInput from '../views/components/AddTaskModal'
+const TaskInput = lazy(() => import('../views/components/AddTaskModal'))
 
 const BLOCKED_ROUTES = [
   '/login',
@@ -64,11 +64,13 @@ const GlobalQuickAdd = ({ children }) => {
     <QuickAddModalContext.Provider value={register}>
       {children}
       {isOpen && (
-        <TaskInput
-          isModalOpen
-          onChoreUpdate={onChoreUpdate}
-          onClose={() => setIsOpen(false)}
-        />
+        <Suspense fallback={null}>
+          <TaskInput
+            isModalOpen
+            onChoreUpdate={onChoreUpdate}
+            onClose={() => setIsOpen(false)}
+          />
+        </Suspense>
       )}
     </QuickAddModalContext.Provider>
   )
