@@ -51,8 +51,8 @@ import {
   getProjectAudienceIds,
 } from '../../utils/ProjectAccess'
 import { getIconComponent } from '../../utils/ProjectIcons'
-import { generateUUID } from '../../utils/UUID'
 import { useQuickAddMoreFields } from '../../utils/QuickAddFieldsPreference'
+import { generateUUID } from '../../utils/UUID'
 import { useLabels } from '../Labels/LabelQueries'
 import { useProjects, useProjectSections } from '../Projects/ProjectQueries'
 import AdvancedOptionsSection, {
