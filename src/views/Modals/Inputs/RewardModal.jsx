@@ -16,6 +16,7 @@ function RewardModal({ isOpen, onClose, reward }) {
   const [description, setDescription] = useState('')
   const [pointsCost, setPointsCost] = useState('')
   const [isActive, setIsActive] = useState(true)
+  const [autoApprove, setAutoApprove] = useState(false)
   const [error, setError] = useState('')
   const queryClient = useQueryClient()
   const { showError } = useNotification()
@@ -26,11 +27,13 @@ function RewardModal({ isOpen, onClose, reward }) {
       setDescription(reward.description || '')
       setPointsCost(String(reward.pointsCost))
       setIsActive(reward.isActive)
+      setAutoApprove(Boolean(reward.autoApprove))
     } else {
       setName('')
       setDescription('')
       setPointsCost('')
       setIsActive(true)
+      setAutoApprove(false)
     }
     setError('')
   }, [reward])
@@ -56,6 +59,7 @@ function RewardModal({ isOpen, onClose, reward }) {
       description,
       pointsCost: Number(pointsCost),
       isActive,
+      autoApprove,
     }
 
     const save = reward?.id
@@ -140,6 +144,24 @@ function RewardModal({ isOpen, onClose, reward }) {
           <Switch
             checked={isActive}
             onChange={e => setIsActive(e.target.checked)}
+          />
+        </FormControl>
+
+        <FormControl
+          orientation='horizontal'
+          sx={{ alignItems: 'center', justifyContent: 'space-between' }}
+        >
+          <Box sx={{ pr: 2 }}>
+            <Typography level='body-sm'>
+              {t('modal.autoApprove')}
+            </Typography>
+            <Typography level='body-xs' textColor='text.tertiary'>
+              {t('modal.autoApproveDescription')}
+            </Typography>
+          </Box>
+          <Switch
+            checked={autoApprove}
+            onChange={e => setAutoApprove(e.target.checked)}
           />
         </FormControl>
 

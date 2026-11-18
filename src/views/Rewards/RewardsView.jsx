@@ -351,10 +351,15 @@ const RewardsView = ({ embedded = false, view = 'store' }) => {
     setConfirmationModel({
       isOpen: true,
       title: t('redeemConfirm.title'),
-      message: t('redeemConfirm.message', {
-        name: reward.name,
-        cost: reward.pointsCost,
-      }),
+      message: t(
+        reward.autoApprove
+          ? 'redeemConfirm.autoApproveMessage'
+          : 'redeemConfirm.message',
+        {
+          name: reward.name,
+          cost: reward.pointsCost,
+        },
+      ),
       confirmText: t('redeem'),
       color: 'primary',
       cancelText: t('common:cancel'),

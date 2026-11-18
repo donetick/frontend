@@ -24,7 +24,8 @@
   },
   "redeemConfirm": {
     "title": "Redeem Reward",
-    "message": "Request \"{{name}}\" for {{cost}} points? An admin will need to approve it."
+    "message": "Request \"{{name}}\" for {{cost}} points? An admin will need to approve it.",
+    "autoApproveMessage": "Redeem \"{{name}}\" for {{cost}} points? It will be approved and the points deducted immediately."
   },
   "requests": {
     "emptyTitle": "No redemption requests",
@@ -39,6 +40,8 @@
     "description": "Description",
     "pointsCost": "Points cost",
     "active": "Active",
+    "autoApprove": "Auto-approve redemptions",
+    "autoApproveDescription": "Approve requests and deduct points immediately when the member has enough points.",
     "editTitle": "Edit Reward",
     "addTitle": "Add Reward",
     "saveChanges": "Save Changes",
