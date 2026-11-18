@@ -81,6 +81,23 @@ import SmartTaskTitleInput from './SmartTaskTitleInput'
 import SubTasks from './SubTask'
 import { buildChorePayload, parseVoiceTask } from './VoiceToTask/parseVoiceTask'
 import VoicePanel from './VoiceToTask/VoicePanel'
+
+const quickAddChipSx = {
+  borderRadius: '128px',
+  minHeight: 40,
+  px: 1.25,
+  gap: 1,
+  transition: 'all 0.25s ease-in-out',
+}
+
+const pickerRowSx = {
+  display: 'flex',
+  gap: 1.5,
+  flexWrap: 'wrap',
+  // Leave room for the clear buttons that extend past the selected chips.
+  paddingInlineEnd: '18px',
+}
+
 // Canonical reminder template shape, shared with NotificationTemplate and
 // LocalNotificationScheduler: a signed value plus 'm' | 'h' | 'd'. Negative is
 // before due, positive is after, zero is on due.
@@ -1493,6 +1510,119 @@ const TaskInput = ({
     return <></>
   }
 
+  const pickerFields = {
+    dueDate: (
+      <DueDatePickerField
+        key='dueDate'
+        emptyDisplay={pickerEmptyDisplay}
+        dueDateOnly={dueDateOnly}
+        dueTime={dueTime}
+        useCustomTime={useCustomTime}
+        onDueDateChange={handleDueDateChange}
+        onDueTimeChange={handleDueTimeChange}
+        onUseCustomTimeChange={handleUseCustomTimeChange}
+        onClear={() => {
+          setDueDateOnly(null)
+          setDueTime(null)
+          setUseCustomTime(false)
+        }}
+      />
+    ),
+    repeat: (
+      <RepeatPickerField
+        key='repeat'
+        emptyDisplay={pickerEmptyDisplay}
+        value={frequency}
+        onChange={newFrequency => {
+          setFrequency(newFrequency)
+          // "always" tasks never have a due date — clear whatever
+          // was picked so the chips don't show a contradictory state
+          if (newFrequency?.frequencyType === 'always') {
+            setDueDateOnly(null)
+            setDueTime(null)
+            setUseCustomTime(false)
+          }
+        }}
+        onClear={() => setFrequency(null)}
+      />
+    ),
+    priority: (
+      <PriorityPickerField
+        key='priority'
+        value={priority}
+        onChange={setPriority}
+        onClear={() => setPriority(0)}
+        emptyDisplay={pickerEmptyDisplay}
+        priorityColors={PRIORITY_COLORS}
+        priorityLabels={PRIORITY_LABELS}
+      />
+    ),
+    assignee: (
+      <AssigneePickerField
+        key='assignee'
+        emptyDisplay={pickerEmptyDisplay}
+        values={assignees.map(a => a.userId)}
+        isAnyone={isAnyoneTask}
+        onChange={userIds => {
+          if (userIds.includes('anyone')) {
+            setIsAnyoneTask(true)
+            setAssignees([])
+          } else {
+            setIsAnyoneTask(false)
+            setAssignees(userIds.map(userId => ({ userId })))
+          }
+        }}
+        onClear={() => {
+          setIsAnyoneTask(false)
+          setAssignees([])
+        }}
+        members={assignableMembers}
+      />
+    ),
+    labels: (
+      <LabelsPickerField
+        key='labels'
+        emptyDisplay={pickerEmptyDisplay}
+        values={(labelsV2 || []).map(label => label.id)}
+        onChange={ids =>
+          setLabelsV2(
+            (userLabels || []).filter(label => ids.includes(label.id)),
+          )
+        }
+        onClear={() => setLabelsV2([])}
+        labels={userLabels || []}
+      />
+    ),
+    attachments: (
+      <AttachmentPickerField
+        key='attachments'
+        attachments={attachments}
+        onChange={setAttachments}
+        onClear={() => setAttachments([])}
+        emptyDisplay={pickerEmptyDisplay}
+        entityType='chore_attachment_draft'
+        draftId={draftId}
+      />
+    ),
+    notifications: (
+      <NotificationPickerField
+        key='notifications'
+        value={notificationMetadata}
+        onChange={setNotificationMetadata}
+        onClear={() => setNotificationMetadata({ templates: [] })}
+        emptyDisplay={pickerEmptyDisplay}
+      />
+    ),
+  }
+  const quickAddPickers = []
+  const morePickers = []
+  for (const [fieldId, picker] of Object.entries(pickerFields)) {
+    const row = quickAddMoreFields.includes(fieldId)
+      ? morePickers
+      : quickAddPickers
+    row.push(picker)
+  }
+
   return (
     <>
       <ResponsiveModal
@@ -1984,133 +2114,9 @@ const TaskInput = ({
               />
             </Box>
 
-            <Box
-              sx={{
-                paddingTop: 2,
-                paddingBottom: 1,
-                display: 'flex',
-                flexDirection: 'row',
-                gap: 1.5,
-                overflowX: 'auto',
-                '&::-webkit-scrollbar': { display: 'none' },
-                flexWrap: isMobile ? 'nowrap' : 'wrap',
-              }}
-            >
-              {(!quickAddMoreFields.includes('dueDate') ||
-                showQuickAddMore) && (
-                <DueDatePickerField
-                  emptyDisplay={pickerEmptyDisplay}
-                  dueDateOnly={dueDateOnly}
-                  dueTime={dueTime}
-                  useCustomTime={useCustomTime}
-                  onDueDateChange={handleDueDateChange}
-                  onDueTimeChange={handleDueTimeChange}
-                  onUseCustomTimeChange={handleUseCustomTimeChange}
-                  onClear={() => {
-                    setDueDateOnly(null)
-                    setDueTime(null)
-                    setUseCustomTime(false)
-                  }}
-                />
-              )}
-              {(!quickAddMoreFields.includes('repeat') || showQuickAddMore) && (
-                <RepeatPickerField
-                  emptyDisplay={pickerEmptyDisplay}
-                  value={frequency}
-                  onChange={newFrequency => {
-                    setFrequency(newFrequency)
-                    // "always" tasks never have a due date — clear whatever
-                    // was picked so the chips don't show a contradictory state
-                    if (newFrequency?.frequencyType === 'always') {
-                      setDueDateOnly(null)
-                      setDueTime(null)
-                      setUseCustomTime(false)
-                    }
-                  }}
-                  onClear={() => setFrequency(null)}
-                />
-              )}
-              {(!quickAddMoreFields.includes('priority') ||
-                showQuickAddMore) && (
-                <PriorityPickerField
-                  value={priority}
-                  onChange={setPriority}
-                  onClear={() => setPriority(0)}
-                  emptyDisplay={pickerEmptyDisplay}
-                  priorityColors={PRIORITY_COLORS}
-                  priorityLabels={PRIORITY_LABELS}
-                />
-              )}
-              {(!quickAddMoreFields.includes('assignee') ||
-                showQuickAddMore) && (
-                <AssigneePickerField
-                  emptyDisplay={pickerEmptyDisplay}
-                  values={assignees.map(a => a.userId)}
-                  isAnyone={isAnyoneTask}
-                  onChange={userIds => {
-                    if (userIds.includes('anyone')) {
-                      setIsAnyoneTask(true)
-                      setAssignees([])
-                    } else {
-                      setIsAnyoneTask(false)
-                      setAssignees(userIds.map(userId => ({ userId })))
-                    }
-                  }}
-                  onClear={() => {
-                    setIsAnyoneTask(false)
-                    setAssignees([])
-                  }}
-                  members={assignableMembers}
-                />
-              )}
-              {(!quickAddMoreFields.includes('labels') || showQuickAddMore) && (
-                <LabelsPickerField
-                  emptyDisplay={pickerEmptyDisplay}
-                  values={(labelsV2 || []).map(label => label.id)}
-                  onChange={ids =>
-                    setLabelsV2(
-                      (userLabels || []).filter(label =>
-                        ids.includes(label.id),
-                      ),
-                    )
-                  }
-                  onClear={() => setLabelsV2([])}
-                  labels={userLabels || []}
-                />
-              )}
-              {(!quickAddMoreFields.includes('attachments') ||
-                showQuickAddMore) && (
-                <AttachmentPickerField
-                  attachments={attachments}
-                  onChange={setAttachments}
-                  onClear={() => setAttachments([])}
-                  emptyDisplay={pickerEmptyDisplay}
-                  entityType='chore_attachment_draft'
-                  draftId={draftId}
-                />
-              )}
-              {(!quickAddMoreFields.includes('notifications') ||
-                showQuickAddMore) && (
-                <NotificationPickerField
-                  value={notificationMetadata}
-                  onChange={setNotificationMetadata}
-                  onClear={() => setNotificationMetadata({ templates: [] })}
-                  emptyDisplay={pickerEmptyDisplay}
-                />
-              )}
-              {quickAddMoreFields.length > 0 && (
-                <Button
-                  size='sm'
-                  variant={showQuickAddMore ? 'soft' : 'outlined'}
-                  color='neutral'
-                  onClick={() => setShowQuickAddMore(value => !value)}
-                >
-                  {showQuickAddMore
-                    ? t('advancedOptions.less')
-                    : t('advancedOptions.more')}
-                </Button>
-              )}
-            </Box>
+            {quickAddPickers.length > 0 && (
+              <Box sx={{ ...pickerRowSx, pt: 2, pb: 1 }}>{quickAddPickers}</Box>
+            )}
 
             <Box
               sx={{
@@ -2133,13 +2139,7 @@ const TaskInput = ({
                       <KeyboardShortcutHint shortcut='E' />
                     )
                   }
-                  sx={{
-                    borderRadius: '128px',
-                    minHeight: 40,
-                    px: 1.25,
-                    gap: 1,
-                    transition: 'all 0.25s ease-in-out',
-                  }}
+                  sx={quickAddChipSx}
                 >
                   <Add sx={{ fontSize: 20 }} />
                   <Typography level='body-sm'>
@@ -2158,13 +2158,7 @@ const TaskInput = ({
                       <KeyboardShortcutHint shortcut='J' />
                     )
                   }
-                  sx={{
-                    borderRadius: '128px',
-                    minHeight: 40,
-                    px: 1.25,
-                    gap: 1,
-                    transition: 'all 0.25s ease-in-out',
-                  }}
+                  sx={quickAddChipSx}
                 >
                   <Add sx={{ fontSize: 20 }} />
                   <Typography level='body-sm'>
@@ -2172,7 +2166,30 @@ const TaskInput = ({
                   </Typography>
                 </Button>
               )}
-              {quickAddMoreFields.length === 0 && (
+              {quickAddMoreFields.length > 0 ? (
+                <Button
+                  size='sm'
+                  variant='outlined'
+                  color='neutral'
+                  aria-expanded={showQuickAddMore}
+                  onClick={() => setShowQuickAddMore(value => !value)}
+                  sx={quickAddChipSx}
+                >
+                  <KeyboardArrowDown
+                    sx={{
+                      fontSize: 20,
+                      transform: showQuickAddMore
+                        ? 'rotate(180deg)'
+                        : undefined,
+                    }}
+                  />
+                  <Typography level='body-sm'>
+                    {showQuickAddMore
+                      ? t('advancedOptions.less')
+                      : t('advancedOptions.more')}
+                  </Typography>
+                </Button>
+              ) : (
                 <AdvancedOptionsTrigger
                   open={showAdvanced}
                   onToggle={() => setShowAdvanced(v => !v)}
@@ -2188,6 +2205,10 @@ const TaskInput = ({
                 />
               )}
             </Box>
+
+            {showQuickAddMore && morePickers.length > 0 && (
+              <Box sx={{ ...pickerRowSx, mt: 1.5 }}>{morePickers}</Box>
+            )}
 
             <AdvancedOptionsSection
               open={

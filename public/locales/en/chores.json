@@ -1209,7 +1209,8 @@
     },
     "hrs": "hrs",
     "setDueDateHint": "Set a due date to configure completion window",
-    "more": "More"
+    "more": "More",
+    "less": "Less"
   },
   "filterBuilder": {
     "customDueDate": {
