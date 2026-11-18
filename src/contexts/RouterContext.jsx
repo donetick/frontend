@@ -53,6 +53,7 @@ import NotificationIntegrationsSettings from '../views/Settings/NotificationInte
 import NotificationSetting from '../views/Settings/NotificationSetting'
 import PrivacyAnalyticsSettings from '../views/Settings/PrivacyAnalyticsSettings'
 import ProfileSettings from '../views/Settings/ProfileSettings'
+import QuickAddSettings from '../views/Settings/QuickAddSettings'
 import StorageSettings from '../views/Settings/StorageSettings'
 import WebhookSettings from '../views/Settings/WebhookSettings'
 import WidgetSettings from '../views/Settings/WidgetSettings'
@@ -145,6 +146,10 @@ const Router = createBrowserRouter([
           {
             path: 'home-sections',
             element: <HomeSectionsSettings />,
+          },
+          {
+            path: 'quick-add',
+            element: <QuickAddSettings />,
           },
           {
             path: 'layout',
