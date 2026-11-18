@@ -152,9 +152,7 @@ function RewardModal({ isOpen, onClose, reward }) {
           sx={{ alignItems: 'center', justifyContent: 'space-between' }}
         >
           <Box sx={{ pr: 2 }}>
-            <Typography level='body-sm'>
-              {t('modal.autoApprove')}
-            </Typography>
+            <Typography level='body-sm'>{t('modal.autoApprove')}</Typography>
             <Typography level='body-xs' textColor='text.tertiary'>
               {t('modal.autoApproveDescription')}
             </Typography>
