@@ -1,3 +1,5 @@
+import { appPathname } from './BasePath'
+
 // Tracks whether an OAuth authorization-code exchange is currently in flight.
 //
 // During that window the app is legitimately unauthenticated: the deep link has
@@ -21,4 +23,4 @@ export const endOAuthExchange = () => {
 // full page load, so nothing has run to set the flag — the pathname check covers
 // that case (and doubles as a backstop if the flag is never cleared).
 export const isOAuthExchangeInProgress = () =>
-  exchangeInProgress || window.location.pathname === '/auth/oauth2'
+  exchangeInProgress || appPathname() === '/auth/oauth2'

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 
 import logo from '../../assets/logo.svg'
 import { networkManager } from '../../hooks/NetworkManager'
+import { withBasePath } from '../../utils/BasePath'
 
 // Mirrors StartupScreen's markup/CSS classes (defined in index.html) so the
 // handoff from the pre-JS startup screen to this component feels seamless.
@@ -72,7 +73,7 @@ const LoadingComponent = () => {
             variant='outlined'
             color='primary'
             onClick={() => {
-              window.location.href = '/' // navigate back to the home page
+              window.location.href = withBasePath('/') // navigate back to the home page
             }}
             sx={{
               mt: 2,

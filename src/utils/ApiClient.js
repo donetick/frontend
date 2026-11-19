@@ -7,6 +7,7 @@ import {
   recordServerVersionFromResponse,
 } from '../service/DiagnosticsSession'
 import { clearSession } from './AuthSession'
+import { appPathname, withBasePath } from './BasePath'
 import { logout, RefreshToken } from './Fetcher'
 import { isOAuthExchangeInProgress } from './OAuthExchangeState'
 import { isRefreshTokenExpired, saveTokens } from './TokenStorage'
@@ -220,7 +221,8 @@ class ApiClient {
       console.error('Error during logout', e)
     }
 
-    if (window.location.pathname !== '/login') window.location.href = '/login'
+    if (appPathname() !== '/login')
+      window.location.href = withBasePath('/login')
   }
   async request(endpoint, options = {}) {
     await this.init()

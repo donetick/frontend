@@ -33,6 +33,7 @@ import { useSyncOnReconnect } from './hooks/useSyncOnReconnect'
 import { useResource } from './queries/ResourceQueries'
 import { GlobalSearchProvider } from './search/GlobalSearchContext'
 import { recordRoute } from './service/DiagnosticsSession'
+import { hasBasePath } from './utils/BasePath'
 import NetworkBanner from './views/components/NetworkBanner'
 
 const add = className => {
@@ -157,7 +158,10 @@ const AppContent = () => {
 
   return (
     <div>
-      {!Capacitor.isNativePlatform() && <WebServiceWorkerManager />}
+      {/* TODO: Investigate allowing the service worker under non-HA sub-paths (e.g. a reverse proxy at /donetick). */}
+      {!Capacitor.isNativePlatform() && !hasBasePath() && (
+        <WebServiceWorkerManager />
+      )}
       <ImpersonateUserProvider>
         <TimezonePrompt />
         <NavBarTitleProvider>

@@ -15,6 +15,8 @@ import SettingsRoutes from '@/views/Settings/SettingsRoutes'
 import ThemeSettings from '@/views/Settings/ThemeSettings'
 
 import GlobalSearchPage from '../search/GlobalSearchPage'
+import { BASE_PATH } from '../utils/BasePath'
+import { syncWithHomeAssistantPanel } from '../utils/HomeAssistantPanel'
 import AuthenticationLoading from '../views/Authorization/Authenticating'
 import ForgotPasswordView from '../views/Authorization/ForgotPasswordView'
 import LoginSettings from '../views/Authorization/LoginSettings'
@@ -65,7 +67,7 @@ import ThingsView from '../views/Things/ThingsView'
 import TimerDetails from '../views/Timer/TimerDetails'
 import UserActivities from '../views/User/UserActivities'
 import UserPoints from '../views/User/UserPoints'
-const Router = createBrowserRouter([
+const routes = [
   {
     path: '/',
     element: <App />,
@@ -336,7 +338,12 @@ const Router = createBrowserRouter([
       },
     ],
   },
-])
+]
+
+// basename lets the app run under a runtime path prefix (e.g. Home Assistant ingress).
+// BASE_PATH defaults to '', so the default deployment is unchanged.
+const Router = createBrowserRouter(routes, { basename: BASE_PATH || '/' })
+syncWithHomeAssistantPanel(Router)
 
 const RouterContext = ({ children }) => {
   return <RouterProvider router={Router} />
