@@ -35,6 +35,15 @@
   "overview": {
     "title": "Einstellungen",
     "subtitle": "Passe deine Erfahrung an und verwalte deine Kontoeinstellungen",
+    "support": "Hilfe und Feedback",
+    "groups": {
+      "account": "Dein Konto",
+      "circle": "Dein Kreis",
+      "preferences": "Präferenzen",
+      "connections": "Verbindungen",
+      "data": "Daten & Datenschutz",
+      "advanced": "Erweitert"
+    },
     "upgrade": {
       "title": "Auf Plus upgraden",
       "description": "Schalte leistungsstarke Funktionen frei und steigere deine Produktivität",
@@ -47,6 +56,18 @@
       }
     },
     "sections": {
+      "integrations": {
+        "title": "Integrationen",
+        "description": "Verbinde Kalender, Benachrichtigungsdienste und andere Apps."
+      },
+      "webhooks": {
+        "title": "Kreis-Webhooks",
+        "description": "Sende Änderungen an Aufgaben und Dingen im Kreis an einen externen Dienst."
+      },
+      "notification-integrations": {
+        "title": "Benachrichtigungsdienste",
+        "description": "Verbinde Telegram, Pushover oder Webhooks für Aufgabenbenachrichtigungen."
+      },
       "profile": {
         "title": "Profileinstellungen",
         "description": "Aktualisiere deine Profildaten, dein Foto, deinen Anzeigenamen und deine Zeitzone."
@@ -74,6 +95,14 @@
       "apitokens": {
         "title": "API-Tokens",
         "description": "Erstelle und verwalte Zugriffstoken für Drittanbieter-Integrationen und API-Zugriff."
+      },
+      "bridge": {
+        "title": "Donetick Bridge",
+        "description": "Verbinde dich mit der Donetick Bridge, um Push-Benachrichtigungen von dieser selbst gehosteten Instanz zuzustellen."
+      },
+      "calendar": {
+        "title": "Kalendersynchronisation",
+        "description": "Abonniere deine Aufgaben in Apple Kalender, Google Kalender, Outlook oder einer anderen Kalender-App."
       },
       "storage": {
         "title": "Speichereinstellungen",
@@ -111,6 +140,10 @@
         "title": "Fehler melden",
         "description": "Etwas funktioniert nicht richtig? Schick uns die Details zusammen mit einer technischen Momentaufnahme."
       },
+      "home-sections": {
+        "title": "Übersicht anpassen",
+        "description": "Blende Bereiche auf deinem Startbildschirm ein oder aus und ändere ihre Reihenfolge."
+      },
       "widgets": {
         "title": "Startbildschirm-Widgets",
         "description": "Lege fest, wie die Donetick-Widgets auf dem Startbildschirm dieses Geräts aussehen."
@@ -146,6 +179,13 @@
     "description": "Dein Konto wird automatisch mit einem Kreis verbunden, wenn du einen erstellst oder beitrittst. Lade Freunde ein, indem du den unten stehenden Kreiscode oder Link teilst. Du erhältst unten eine Benachrichtigung, wenn jemand deinem Kreis beitreten möchte.",
     "memberOf": "Du bist Teil von {{name}}",
     "yourCircleCode": "Dein Kreiscode lautet:",
+    "pendingApprovalMessage": "Deine Anfrage, {{name}} beizutreten, wartet auf die Genehmigung durch einen Kreis-Administrator.",
+    "cancelRequest": "Anfrage zurückziehen",
+    "cancelRequestTitle": "Beitrittsanfrage zurückziehen",
+    "cancelRequestMessage": "Möchtest du deine Anfrage, diesem Kreis beizutreten, wirklich zurückziehen?",
+    "cancelRequestButton": "Anfrage zurückziehen",
+    "requestCancelled": "Anfrage erfolgreich zurückgezogen",
+    "cancelRequestFailed": "Anfrage konnte nicht zurückgezogen werden",
     "copyCode": "Code kopieren",
     "shareInvite": "Einladung teilen",
     "codeCopied": "Code in die Zwischenablage kopiert",
@@ -182,10 +222,17 @@
     "refreshing": "Wird aktualisiert …",
     "refreshFailed": "Beitrittsanfragen konnten nicht aktualisiert werden",
     "wantsToJoin": "{{name}} möchte deinem Kreis beitreten.",
+    "noPendingRequests": "Gerade wartet niemand auf den Beitritt.",
     "accept": "Annehmen",
     "acceptRequestTitle": "Beitrittsanfrage annehmen",
     "acceptRequestMessage": "Möchtest du {{name}} (Benutzername: {{username}}) wirklich in deinen Kreis aufnehmen?",
     "requestAccepted": "Anfrage erfolgreich angenommen",
+    "decline": "Ablehnen",
+    "declineRequestTitle": "Beitrittsanfrage ablehnen",
+    "declineRequestMessage": "Möchtest du die Anfrage von {{name}} (Benutzername: {{username}}), deinem Kreis beizutreten, wirklich ablehnen?",
+    "declineRequestButton": "Ablehnen",
+    "requestDeclined": "Anfrage erfolgreich abgelehnt",
+    "declineRequestFailed": "Anfrage konnte nicht abgelehnt werden",
     "or": "oder",
     "joinOtherDescription": "Möchtest du dem Kreis einer anderen Person beitreten? Frage nach dem Kreiscode oder Beitrittslink. Gib den Code unten ein, um beizutreten.",
     "enterCircleCode": "Kreiscode eingeben:",
@@ -269,6 +316,7 @@
     "title": "Benachrichtigungseinstellungen",
     "description": "Ein kleiner Anstoß, ganz nach deinen Wünschen. Wähle, worüber du informiert wirst und wo deine Erinnerungen ankommen.",
     "taskReminders": "Aufgabenerinnerungen",
+    "approvals": "Genehmigungen & Anfragen",
     "summaries": "Zusammenfassungen",
     "deliveryTitle": "Wo du benachrichtigt wirst",
     "deliveryDescription": "Verwalte Erinnerungen auf diesem Gerät und Push-Benachrichtigungen für dein Konto.",
@@ -279,6 +327,10 @@
     "deviceSectionDescription": "Verwalte deine Gerätebenachrichtigungen",
     "deviceLabel": "Gerätebenachrichtigung",
     "deviceHelper": "Erhalte eine Benachrichtigung auf deinem Gerät, wenn eine Aufgabe fällig ist",
+    "enableLabel": "Benachrichtigungen aktivieren",
+    "enableHelper": "Erhalte Aufgabenerinnerungen auf diesem Gerät, dazu Anstupser, Ankündigungen und Zuweisungen, die an dein Konto gesendet werden.",
+    "enableHelperLocal": "Erhalte Erinnerungen auf diesem Gerät, wenn eine Aufgabe fällig wird.",
+    "pushOnlyFailed": "Erinnerungen auf diesem Gerät sind aktiv, aber das Gerät konnte nicht für Benachrichtigungen an dein Konto registriert werden. Du kannst es unten erneut versuchen.",
     "mobileOnly": "Diese Funktion ist nur auf Mobilgeräten verfügbar",
     "testNotification": "Testbenachrichtigung",
     "testNotificationBody": "Eine Aufgabe wird bald fällig",
@@ -339,6 +391,14 @@
     "preferenceSection": "Benachrichtigungsoptionen",
     "preferenceSectionDescription": "Wähle ein Benachrichtigungsprofil und passe dann einzelne Erinnerungen an, einschließlich täglicher und wöchentlicher Zusammenfassungen.",
     "profileLabel": "Benachrichtigungsprofil",
+    "profileSummary": "Du wirst benachrichtigt über: {{list}}.",
+    "profileSummaryWithDigest": "Du wirst benachrichtigt über: {{list}}. Zusammenfassungen kommen um {{time}}.",
+    "profileSummaryMuted": "Du wirst über nichts benachrichtigt. Wähle ein Profil oder aktiviere unten eine Erinnerung.",
+    "profileSummaryLoading": "Deine aktuelle Auswahl wird geladen …",
+    "profileCustomized_one": "{{count}} Abweichung von diesem Profil",
+    "profileCustomized_other": "{{count}} Abweichungen von diesem Profil",
+    "resetToProfile": "Auf {{profile}} zurücksetzen",
+    "fineTune": "Lege genau fest, worüber du informiert wirst",
     "profileHelper": "Ein Profil legt die Standardwerte für alle Erinnerungen unten fest. Du kannst jede Erinnerung trotzdem einzeln anpassen.",
     "profileBalanced": "Ausgewogen",
     "profilePlanner": "Vorausplanend",
@@ -346,18 +406,32 @@
     "profilePersistent": "Hartnäckig",
     "profileQuiet": "Ruhig",
     "profileCustom": "Benutzerdefiniert",
+    "eventOnAssignmentTitle": "Bei Zuweisung",
+    "eventOnAssignmentLabel": "Benachrichtige mich, wenn mir eine neue oder bestehende Aufgabe zugewiesen wird",
+    "eventOnAssignmentShort": "neue Zuweisungen",
+    "eventOnPendingApprovalTitle": "Genehmigung erforderlich",
+    "eventOnPendingApprovalLabel": "Benachrichtige mich, wenn eine erledigte Aufgabe auf meine Genehmigung wartet",
+    "eventOnPendingApprovalShort": "Aufgaben, die auf deine Genehmigung warten",
+    "eventOnRedemptionRequestTitle": "Einlöseanfrage",
+    "eventOnRedemptionRequestLabel": "Benachrichtige mich, wenn jemand eine Belohnung einlösen möchte",
+    "eventOnRedemptionRequestShort": "Einlöseanfragen",
     "eventPreDueTitle": "Vorab-Erinnerung",
     "eventPreDueLabel": "Erinnere mich, bevor eine Aufgabe fällig wird",
+    "eventPreDueShort": "Erinnerungen vor Fälligkeit",
     "eventDueTitle": "Fälligkeitserinnerung",
     "eventDueLabel": "Erinnere mich, wenn eine Aufgabe fällig wird",
+    "eventDueShort": "fällig werdende Aufgaben",
     "eventOverdueFollowupTitle": "Erinnerung bei Überfälligkeit",
     "eventOverdueFollowupLabel": "Erinnere mich an Aufgaben, die noch überfällig sind",
+    "eventOverdueFollowupShort": "Erinnerungen bei Überfälligkeit",
     "eventEscalationTitle": "Prioritäts-Eskalation",
     "eventEscalationLabel": "Zusätzlicher Push-Hinweis, nur für Aufgaben mit hoher oder dringender Priorität",
     "eventDailyDigestTitle": "Tägliche Zusammenfassung",
     "eventDailyDigestLabel": "Eine tägliche Übersicht über überfällige und anstehende Aufgaben",
+    "eventDailyDigestShort": "eine tägliche Zusammenfassung",
     "eventWeeklyDigestTitle": "Wöchentliche Zusammenfassung",
     "eventWeeklyDigestLabel": "Eine wöchentliche Vorschau auf die kommende Woche",
+    "eventWeeklyDigestShort": "eine wöchentliche Vorschau",
     "digestHourLabel": "Uhrzeit der Zusammenfassung",
     "digestHourHelper": "Lokale Stunde (in der Zeitzone deines Profils), zu der Zusammenfassungen verschickt werden",
     "preferenceUpdateFailed": "Die Benachrichtigungseinstellung konnte nicht aktualisiert werden. Bitte versuche es erneut."
