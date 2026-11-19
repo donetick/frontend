@@ -702,5 +702,11 @@
       "voice": "Zadat hlasem",
       "scan": "Naskenovat úkol"
     }
+  },
+  "calendar": {
+    "today": "Dnes",
+    "tomorrow": "Zítra",
+    "yesterday": "Včera",
+    "lastWeekday": "{{day}} minulý týden"
   }
 }

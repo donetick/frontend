@@ -702,5 +702,11 @@
       "voice": "",
       "scan": ""
     }
+  },
+  "calendar": {
+    "today": "今天",
+    "tomorrow": "明天",
+    "yesterday": "昨天",
+    "lastWeekday": "上{{day}}"
   }
 }

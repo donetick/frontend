@@ -702,5 +702,11 @@
       "voice": "",
       "scan": ""
     }
+  },
+  "calendar": {
+    "today": "今日",
+    "tomorrow": "明日",
+    "yesterday": "昨日",
+    "lastWeekday": "先週の{{day}}"
   }
 }

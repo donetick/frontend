@@ -728,5 +728,11 @@
       "voice": "Capture by voice",
       "scan": "Scan to task"
     }
+  },
+  "calendar": {
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "yesterday": "Yesterday",
+    "lastWeekday": "Last {{day}}"
   }
 }

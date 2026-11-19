@@ -1085,5 +1085,49 @@
     "noteTitle": ""
   },
   "tasksForDate": "משימות ליום {{date}}",
-  "createSuggestion": "צור \"{{value}}\""
+  "createSuggestion": "צור \"{{value}}\"",
+  "dueChip": {
+    "noDueDate": "ללא תאריך יעד",
+    "days_one": "{{count}} יום",
+    "days_two": "יומיים",
+    "days_other": "{{count}} ימים"
+  },
+  "repeatChip": {
+    "once": "פעם אחת",
+    "always": "תמיד",
+    "trigger": "טריגר",
+    "daily": "יומי",
+    "adaptive": "מסתגל",
+    "weekly": "שבועי",
+    "monthly": "חודשי",
+    "yearly": "שנתי",
+    "dailyExcept": "כל יום חוץ מ-{{days}}",
+    "monthlyOn": "כל חודש ב-{{day}}",
+    "monthlyOnExcept": "כל חודש ב-{{day}} חוץ מ-{{months}}",
+    "dayOfMonths": "ב-{{day}} בחודשים: {{months}}",
+    "everyUnit": {
+      "hours": "כל שעה",
+      "days": "כל יום",
+      "weeks": "כל שבוע",
+      "months": "כל חודש",
+      "years": "כל שנה"
+    },
+    "every": {
+      "hours_one": "כל {{count}} שעה",
+      "hours_two": "כל שעתיים",
+      "hours_other": "כל {{count}} שעות",
+      "days_one": "כל {{count}} יום",
+      "days_two": "כל יומיים",
+      "days_other": "כל {{count}} ימים",
+      "weeks_one": "כל {{count}} שבוע",
+      "weeks_two": "כל שבועיים",
+      "weeks_other": "כל {{count}} שבועות",
+      "months_one": "כל {{count}} חודש",
+      "months_two": "כל חודשיים",
+      "months_other": "כל {{count}} חודשים",
+      "years_one": "כל {{count}} שנה",
+      "years_two": "כל שנתיים",
+      "years_other": "כל {{count}} שנים"
+    }
+  }
 }

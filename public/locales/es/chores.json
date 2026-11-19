@@ -1085,5 +1085,49 @@
     "noteTitle": "Nota - {{choreName}}"
   },
   "tasksForDate": "Tareas para {{date}}",
-  "createSuggestion": "Crear \"{{value}}\""
+  "createSuggestion": "Crear \"{{value}}\"",
+  "dueChip": {
+    "noDueDate": "Sin fecha límite",
+    "days_one": "{{count}} día",
+    "days_many": "{{count}} días",
+    "days_other": "{{count}} días"
+  },
+  "repeatChip": {
+    "once": "Una vez",
+    "always": "Siempre",
+    "trigger": "Disparador",
+    "daily": "Diariamente",
+    "adaptive": "Adaptativa",
+    "weekly": "Semanalmente",
+    "monthly": "Mensualmente",
+    "yearly": "Anualmente",
+    "dailyExcept": "Diariamente excepto {{days}}",
+    "monthlyOn": "Mensualmente el {{day}}",
+    "monthlyOnExcept": "Mensualmente el {{day}} excepto {{months}}",
+    "dayOfMonths": "El {{day}} de {{months}}",
+    "everyUnit": {
+      "hours": "Cada hora",
+      "days": "Cada día",
+      "weeks": "Cada semana",
+      "months": "Cada mes",
+      "years": "Cada año"
+    },
+    "every": {
+      "hours_one": "Cada {{count}} hora",
+      "hours_many": "Cada {{count}} horas",
+      "hours_other": "Cada {{count}} horas",
+      "days_one": "Cada {{count}} día",
+      "days_many": "Cada {{count}} días",
+      "days_other": "Cada {{count}} días",
+      "weeks_one": "Cada {{count}} semana",
+      "weeks_many": "Cada {{count}} semanas",
+      "weeks_other": "Cada {{count}} semanas",
+      "months_one": "Cada {{count}} mes",
+      "months_many": "Cada {{count}} meses",
+      "months_other": "Cada {{count}} meses",
+      "years_one": "Cada {{count}} año",
+      "years_many": "Cada {{count}} años",
+      "years_other": "Cada {{count}} años"
+    }
+  }
 }

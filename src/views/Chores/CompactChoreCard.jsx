@@ -459,7 +459,7 @@ const CompactChoreCard = ({
                 ml: 1,
               }}
             >
-              {getDueDateChipText(chore.nextDueDate, chore, timeFormat, t)}
+              {getDueDateChipText(chore.nextDueDate, chore, timeFormat)}
             </Chip>
           )}
         </Box>

@@ -1085,5 +1085,49 @@
     "noteTitle": ""
   },
   "tasksForDate": "Tarefas para {{date}}",
-  "createSuggestion": "Criar \"{{value}}\""
+  "createSuggestion": "Criar \"{{value}}\"",
+  "dueChip": {
+    "noDueDate": "Sem data de vencimento",
+    "days_one": "{{count}} dia",
+    "days_many": "{{count}} dias",
+    "days_other": "{{count}} dias"
+  },
+  "repeatChip": {
+    "once": "Uma vez",
+    "always": "Sempre",
+    "trigger": "Gatilho",
+    "daily": "Diariamente",
+    "adaptive": "Adaptativo",
+    "weekly": "Semanalmente",
+    "monthly": "Mensalmente",
+    "yearly": "Anualmente",
+    "dailyExcept": "Diariamente exceto {{days}}",
+    "monthlyOn": "Mensalmente no dia {{day}}",
+    "monthlyOnExcept": "Mensalmente no dia {{day}} exceto {{months}}",
+    "dayOfMonths": "Dia {{day}} de {{months}}",
+    "everyUnit": {
+      "hours": "A cada hora",
+      "days": "Todo dia",
+      "weeks": "Toda semana",
+      "months": "Todo mês",
+      "years": "Todo ano"
+    },
+    "every": {
+      "hours_one": "A cada {{count}} hora",
+      "hours_many": "A cada {{count}} horas",
+      "hours_other": "A cada {{count}} horas",
+      "days_one": "A cada {{count}} dia",
+      "days_many": "A cada {{count}} dias",
+      "days_other": "A cada {{count}} dias",
+      "weeks_one": "A cada {{count}} semana",
+      "weeks_many": "A cada {{count}} semanas",
+      "weeks_other": "A cada {{count}} semanas",
+      "months_one": "A cada {{count}} mês",
+      "months_many": "A cada {{count}} meses",
+      "months_other": "A cada {{count}} meses",
+      "years_one": "A cada {{count}} ano",
+      "years_many": "A cada {{count}} anos",
+      "years_other": "A cada {{count}} anos"
+    }
+  }
 }
