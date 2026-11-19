@@ -156,6 +156,10 @@
         "title": "Overview customization",
         "description": "Show, hide, and reorder sections on your Home screen."
       },
+      "quick-add": {
+        "title": "Quick Add customization",
+        "description": "Choose which task fields stay visible in Quick Add and which go under More."
+      },
       "widgets": {
         "title": "Home Screen Widgets",
         "description": "Control how Donetick's home-screen widgets look on this device."
@@ -736,6 +740,34 @@
       "description": "Choose how you move through task settings.",
       "singlePage": "Keep everything on one page",
       "helper": "Show all task settings in one scrolling page instead of separate steps."
+    },
+    "quickAddSettings": {
+      "title": "Quick Add customization",
+      "description": "Choose which task fields stay visible in Quick Add and which go under More. This preference is saved on this device.",
+      "fieldsTitle": "Quick Add fields",
+      "helper": "Turn on a field to keep it visible in Quick Add. Turn it off to move it under More.",
+      "inQuickAdd": "Visible in Quick Add",
+      "inMore": "Available under More",
+      "fields": {
+        "dueDate": "Due date",
+        "repeat": "Repeat",
+        "priority": "Priority",
+        "assignee": "Assignee",
+        "labels": "Labels",
+        "attachments": "Attachments",
+        "notifications": "Notifications",
+        "points": "Points"
+      },
+      "fieldDescriptions": {
+        "dueDate": "Set the task due date.",
+        "repeat": "Choose a recurrence schedule.",
+        "priority": "Set the task priority.",
+        "assignee": "Choose who is responsible.",
+        "labels": "Categorize the task.",
+        "attachments": "Add photos or files.",
+        "notifications": "Configure task reminders.",
+        "points": "Award points when the task is completed."
+      }
     },
     "defaultView": {
       "title": "Default View",
