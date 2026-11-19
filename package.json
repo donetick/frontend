@@ -1,7 +1,7 @@
 {
   "name": "donetick",
   "private": true,
-  "version": "1.2.69",
+  "version": "1.2.73",
   "type": "module",
   "engines": {
     "node": ">=20.0.0",
