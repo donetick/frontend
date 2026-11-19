@@ -7,7 +7,11 @@ import useAcknowledgmentModal from '../../hooks/useAcknowledgmentModal'
 import { useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { JoinCircle } from '../../utils/Fetcher'
-import { clearPendingInvite, setPendingInvite } from '../../utils/PendingInvite'
+import {
+  clearPendingInvite,
+  getPendingInvite,
+  setPendingInvite,
+} from '../../utils/PendingInvite'
 import { authButtonSx } from '../Authorization/authStyles'
 import AcknowledgmentModal from '../Modals/Inputs/AcknowledgmentModal'
 import { CircleVignette } from '../Onboarding/OnboardingVignettes'
@@ -40,8 +44,10 @@ const JoinCircleView = () => {
   const code = searchParams.get('code')
   // `auto=1` is on the link we send the user back to after they authenticate,
   // and only there — someone who opens an invite while already signed in gets
-  // asked, not auto-joined.
-  const isReturningFromAuth = searchParams.get('auto') === '1'
+  // asked, not auto-joined. The parked invite proves the round-trip really
+  // started here; a pasted or external `auto=1` link has none.
+  const isReturningFromAuth =
+    searchParams.get('auto') === '1' && getPendingInvite() === code
   const autoJoinAttempted = useRef(false)
 
   const submitJoin = useCallback(() => {
