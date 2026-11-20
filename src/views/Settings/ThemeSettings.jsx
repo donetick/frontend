@@ -9,7 +9,7 @@ const ThemeSettings = () => {
 
   return (
     <SettingsLayout title={t('theme.title')}>
-      <Box sx={{ maxWidth: 680, pb: 4 }}>
+      <Box sx={{ maxWidth: 680 }}>
         <Typography
           level='body-md'
           textColor='text.secondary'

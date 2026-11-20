@@ -354,7 +354,7 @@ const CircleSettings = () => {
 
   return (
     <SettingsLayout title={t('circleSettings.title')}>
-      <Box sx={{ maxWidth: 760, pb: 4 }}>
+      <Box sx={{ maxWidth: 760 }}>
         <Typography
           level='body-md'
           textColor='text.secondary'

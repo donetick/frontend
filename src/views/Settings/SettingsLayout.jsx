@@ -18,7 +18,7 @@ const SettingsLayout = ({ children, title }) => {
 
   return (
     <Container maxWidth='lg'>
-      <Box sx={{ py: { xs: 2, sm: 3 } }}>
+      <Box>
         <Breadcrumbs
           aria-label={t('navigation.breadcrumbs')}
           sx={{ px: 0, mb: 2, fontSize: 'sm' }}

@@ -141,7 +141,7 @@ const CalendarSettings = () => {
 
   return (
     <SettingsLayout title={t('calendar.title')}>
-      <Stack spacing={3} sx={{ maxWidth: 720, pb: 4 }}>
+      <Stack spacing={3} sx={{ maxWidth: 720 }}>
         <Typography level='body-md'>{t('calendar.description')}</Typography>
 
         {loading || !isPlanKnown ? (

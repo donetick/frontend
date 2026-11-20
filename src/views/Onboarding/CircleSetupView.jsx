@@ -158,8 +158,9 @@ const CircleSetupView = () => {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        px: 3,
-        pb: 3,
+        px: 'var(--page-spacing)',
+        pb: 'calc(var(--page-spacing) + var(--safe-area-inset-bottom, 0px))',
+        pt: 'var(--page-spacing)',
         bgcolor: 'background.body',
       }}
     >

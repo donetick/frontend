@@ -237,7 +237,7 @@ const MobileBottomNav = () => {
       <Box
         aria-hidden='true'
         sx={{
-          height: `calc(${barHeight}px + var(--safe-area-inset-bottom, 0px))`,
+          height: barHeight,
         }}
       />
     </>

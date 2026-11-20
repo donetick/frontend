@@ -30,9 +30,9 @@ const AuthShell = ({
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        px: 2,
-        pt: { xs: 3, sm: 5 },
-        pb: 'calc(var(--safe-area-inset-bottom, 0px) + 24px)',
+        px: 'var(--page-spacing)',
+        pt: 'var(--page-spacing)',
+        pb: 'calc(var(--safe-area-inset-bottom, 0px) + var(--page-spacing))',
         bgcolor: 'background.body',
       }}
     >

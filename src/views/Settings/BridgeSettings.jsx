@@ -506,7 +506,7 @@ const BridgeSettings = () => {
 
   return (
     <SettingsLayout title={t('bridge.title')}>
-      <Box id='bridge' sx={{ maxWidth: 760, pb: 4 }}>
+      <Box id='bridge' sx={{ maxWidth: 760 }}>
         <BridgeIntro connected={connected} loading={loading} t={t} />
 
         {loading ? (

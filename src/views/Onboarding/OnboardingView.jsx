@@ -330,9 +330,9 @@ const OnboardingView = () => {
 
       <Box
         sx={{
-          px: 3,
-          pt: 1,
-          pb: 3,
+          px: 'var(--page-spacing)',
+          pt: 'var(--page-spacing)',
+          pb: 'calc(var(--page-spacing) + var(--safe-area-inset-bottom, 0px))',
           display: 'flex',
           flexDirection: 'column',
           gap: 2.5,
