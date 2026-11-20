@@ -1,0 +1,83 @@
+{
+  "redeem": "Scade puncte",
+  "sections": {
+    "overview": "Prezentare generală"
+  },
+  "redeemModal": {
+    "redeemButton": "Scade",
+    "pointsAvailable": "{{count}} de puncte disponibile",
+    "pointsToRedeem": "Puncte de scăzut",
+    "placeholder": "Introdu numărul de puncte...",
+    "cannotExceed": "Numărul nu poate depăși punctele disponibile",
+    "quickAdd": "Adăugare rapidă:",
+    "aboutToRedeem": "Urmează să scazi",
+    "amount": "{{count}} de puncte",
+    "remaining": "Rămase: {{count}} de puncte"
+  },
+  "leaderboard": {
+    "titlePoints": "Clasament după puncte",
+    "titleTasks": "Clasament după sarcini",
+    "subtitlePoints": "Clasament bazat pe punctele câștigate în perioada selectată",
+    "subtitleTasks": "Clasament bazat pe sarcinile finalizate în perioada selectată",
+    "modePoints": "Puncte",
+    "modeTasks": "Sarcini",
+    "you": "Tu",
+    "tasksAndAvg": "{{tasks}} sarcini • în medie {{avg}} pe sarcină",
+    "available": "{{count}} disponibile",
+    "points_one": "{{count}} punct",
+    "points_other": "{{count}} de puncte",
+    "points_few": "{{count}} puncte"
+  },
+  "tabs": {
+    "short7d": "7Z",
+    "short6m": "6L",
+    "shortAll": "Tot",
+    "days7": "7 zile",
+    "months6": "6 luni",
+    "allTime": "Întreaga perioadă",
+    "short30d": "30Z",
+    "days30": "30 de zile"
+  },
+  "filter": {
+    "analysisTitle": "Filtrare și analiză",
+    "title": "Filtrează punctele",
+    "showFor": "Afișează punctele pentru:",
+    "timePeriod": "Perioadă:"
+  },
+  "cards": {
+    "available": {
+      "title": "Disponibile",
+      "subtext": "Pot fi folosite"
+    },
+    "redeemed": {
+      "title": "Folosite",
+      "subtext": "Utilizate anterior"
+    },
+    "total": {
+      "title": "Total",
+      "subtext": "Câștigate în total"
+    },
+    "period": {
+      "title": "Puncte în această perioadă",
+      "allTime": "Întreaga perioadă",
+      "last6Months": "Ultimele 6 luni",
+      "lastDays_one": "Ultima {{count}} zi",
+      "lastDays_other": "Ultimele {{count}} de zile",
+      "lastDays_few": "Ultimele {{count}} zile"
+    }
+  },
+  "summary": {
+    "showingFor": "Se afișează punctele pentru",
+    "selectUser": "Selectează membrul ale cărui puncte vrei să le vezi",
+    "unknownUser": "Utilizator necunoscut",
+    "overThe": "în",
+    "allTime": "întreaga perioadă",
+    "last6Months": "ultimele 6 luni",
+    "lastDays_one": "ultima {{count}} zi",
+    "lastDays_other": "ultimele {{count}} de zile",
+    "lastDays_few": "ultimele {{count}} zile"
+  },
+  "trend": {
+    "title": "Evoluția punctelor"
+  }
+}

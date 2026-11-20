@@ -1,0 +1,197 @@
+{
+  "edit": {
+    "title": "Editează istoricul",
+    "completedDate": "Data finalizării",
+    "note": "Notă",
+    "additionalNotes": "Note suplimentare",
+    "deleteTitle": "Șterge istoricul",
+    "deleteMessage": "Sigur vrei să ștergi acest istoric?"
+  },
+  "status": {
+    "inProgress": "În desfășurare",
+    "completed": "Finalizată",
+    "skipped": "Omisă",
+    "pendingApproval": "În așteptarea aprobării",
+    "rejected": "Respinsă",
+    "missed": "Neefectuată",
+    "rescheduled": "Reprogramată",
+    "scheduled": "Programată"
+  },
+  "badge": {
+    "onTime": "La timp",
+    "onTimeLabel": "La timp"
+  },
+  "card": {
+    "wasDue": "Termenul era {{date}}",
+    "daysBeforeDue_one": "Cu {{count}} z înainte de termen",
+    "daysBeforeDue_other": "Cu {{count}} z înainte de termen",
+    "daysAfterDue_one": "Cu {{count}} z după termen",
+    "daysAfterDue_other": "Cu {{count}} z după termen",
+    "hoursBeforeDue_one": "Cu {{count}} h înainte de termen",
+    "hoursBeforeDue_other": "Cu {{count}} h înainte de termen",
+    "hoursAfterDue_one": "Cu {{count}} h după termen",
+    "hoursAfterDue_other": "Cu {{count}} h după termen",
+    "assignedTo": "Atribuită lui {{name}}",
+    "points_one": "★ {{count}} pct.",
+    "points_other": "★ {{count}} pct.",
+    "daysBeforeDue_few": "Cu {{count}} z înainte de termen",
+    "daysAfterDue_few": "Cu {{count}} z după termen",
+    "hoursBeforeDue_few": "Cu {{count}} h înainte de termen",
+    "hoursAfterDue_few": "Cu {{count}} h după termen",
+    "points_few": "★ {{count}} pct."
+  },
+  "detail": {
+    "title": "Detaliile activității",
+    "openTask": "Deschide sarcina",
+    "editEntry": "Editează înregistrarea",
+    "performedBy": "Efectuată de",
+    "assignedTo": "Atribuită lui",
+    "lastUpdated": "Ultima actualizare",
+    "duration": "Durată",
+    "pointsEarned": "Puncte câștigate",
+    "points_one": "{{count}} pct.",
+    "points_other": "{{count}} pct.",
+    "note": "Notă",
+    "reason": "Motiv",
+    "notes": "Note",
+    "points_few": "{{count}} pct."
+  },
+  "charts": {
+    "noData": "Nu există date disponibile",
+    "noLabels": "Fără etichete",
+    "unassigned": "Neatribuită",
+    "unknownTask": "Sarcină necunoscută",
+    "late": "Cu întârziere",
+    "status": {
+      "title": "Stare",
+      "description": "Starea sarcinilor finalizate"
+    },
+    "due": {
+      "title": "Termen",
+      "description": "Termenele sarcinilor curente"
+    },
+    "priority": {
+      "title": "Prioritate",
+      "description": "Sarcini după prioritate"
+    },
+    "labels": {
+      "title": "Etichete",
+      "description": "Sarcini după etichete"
+    },
+    "labelsDuration": {
+      "title": "Etichete (timp)",
+      "description": "Timp petrecut pe etichete (ore)"
+    },
+    "tasksTime": {
+      "title": "Sarcini (timp)",
+      "description": "Timp petrecut pe fiecare sarcină (ore)"
+    },
+    "assigneeBreakdown": {
+      "title": "După responsabil",
+      "description": "Sarcini grupate după responsabil"
+    }
+  },
+  "filter": {
+    "status": "Stare",
+    "pending": "În așteptare",
+    "labels": "Etichete",
+    "hasNotes": "Are note",
+    "hasPoints": "Are puncte",
+    "timePeriod": "Perioadă",
+    "user": "Utilizator",
+    "completedBy": "Finalizată de",
+    "completedAt": "Finalizată la"
+  },
+  "period": {
+    "days_one": "{{count}} zi",
+    "days_other": "{{count}} de zile",
+    "allTime": "Întreaga perioadă",
+    "days_few": "{{count}} zile"
+  },
+  "search": {
+    "placeholder": "Caută în istoric...",
+    "clear": "Șterge căutarea"
+  },
+  "sort": {
+    "date": "Data finalizării",
+    "updatedDate": "Data actualizării",
+    "performer": "Finalizată de",
+    "status": "Stare",
+    "points": "Puncte"
+  },
+  "activities": {
+    "title": "Activități",
+    "subtitle": "Vezi ce sarcini au fost finalizate, omise sau neefectuate",
+    "emptyTitle": "Nu există activitate în această perioadă",
+    "emptyDescriptionEveryone": "Nimeni din grupul tău nu a finalizat nimic {{period}}. Încearcă o perioadă mai lungă sau un alt membru.",
+    "emptyDescriptionMember": "{{name}} nu a finalizat nimic {{period}}. Încearcă o perioadă mai lungă sau un alt membru.",
+    "periodSoFar": "până acum",
+    "periodLastDays": "în ultimele {{count}} de zile",
+    "unknownMember": "acest membru",
+    "searchPlaceholder": "Caută activități...",
+    "sort": {
+      "date": "Dată",
+      "name": "Numele sarcinii",
+      "status": "Stare",
+      "points": "Puncte"
+    }
+  },
+  "title": {
+    "summary": "Rezumatul sarcinii",
+    "activity": "Activitatea sarcinii"
+  },
+  "noResults": {
+    "clear": "Șterge filtrele"
+  },
+  "toast": {
+    "updateQueued": {
+      "title": "Actualizarea istoricului este în așteptare",
+      "message": "Nu ai conexiune la internet. Actualizarea istoricului va fi sincronizată la restabilirea conexiunii."
+    },
+    "updated": {
+      "title": "Istoric actualizat",
+      "message": "Înregistrarea din istoric a fost actualizată cu succes."
+    },
+    "deleteQueued": {
+      "title": "Ștergerea din istoric este în așteptare",
+      "message": "Nu ai conexiune la internet. Ștergerea din istoric va fi sincronizată la restabilirea conexiunii."
+    },
+    "deleted": {
+      "title": "Înregistrare ștearsă din istoric",
+      "message": "Înregistrarea din istoric a fost ștearsă cu succes."
+    }
+  },
+  "delete": {
+    "title": "Șterge înregistrarea din istoric",
+    "message": "Sigur vrei să ștergi această înregistrare din istoric?"
+  },
+  "empty": {
+    "title": "Nu există încă istoric",
+    "description": "De fiecare dată când această sarcină este finalizată sau omisă, aici se înregistrează cine a făcut acțiunea și când. Încă nu s-a întâmplat nimic.",
+    "backToTasks": "Înapoi la sarcini",
+    "noResultsTitle": "Nicio înregistrare din istoric nu corespunde acestor filtre",
+    "noResultsDescription": "Există înregistrări în istoric, dar niciuna nu corespunde filtrelor active."
+  },
+  "info": {
+    "allCompleted": "Total finalizări",
+    "timesSuffix": "De {{count}} ori",
+    "averageTiming": "Abatere medie față de termen",
+    "onTime": "La timp",
+    "longestDelay": "Cea mai mare întârziere",
+    "neverLate": "Fără întârzieri",
+    "completedMost": "Cele mai multe finalizări",
+    "unknown": "Necunoscut",
+    "membersInvolved": "Membri implicați",
+    "membersSuffix": "{{count}} de membri",
+    "lastCompleted": "Ultima finalizare"
+  },
+  "noteViewer": {
+    "updatedAt": "Actualizat la {{date}}"
+  },
+  "plan": {
+    "lockedTitle": "În planul gratuit, istoricul este păstrat timp de {{days}} de zile",
+    "allLockedTitle": "Istoricul acestei sarcini este mai vechi de {{days}} de zile",
+    "lockedDescription": "Înregistrările mai vechi de {{days}} de zile pot fi șterse definitiv. Treci la Plus pentru a păstra întregul istoric.",
+    "unlock": "Treci la Plus"
+  }
+}
