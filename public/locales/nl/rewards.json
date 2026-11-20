@@ -24,7 +24,8 @@
   },
   "redeemConfirm": {
     "title": "Beloning inwisselen",
-    "message": "\"{{name}}\" aanvragen voor {{cost}} punten? Een beheerder moet dit goedkeuren."
+    "message": "\"{{name}}\" aanvragen voor {{cost}} punten? Een beheerder moet dit goedkeuren.",
+    "autoApproveMessage": "\"{{name}}\" inwisselen voor {{cost}} punten? De aanvraag wordt direct goedgekeurd en de punten worden meteen afgeschreven."
   },
   "requests": {
     "emptyTitle": "Geen inwisselaanvragen",
@@ -39,6 +40,8 @@
     "description": "Beschrijving",
     "pointsCost": "Kosten in punten",
     "active": "Actief",
+    "autoApprove": "Aanvragen automatisch goedkeuren",
+    "autoApproveDescription": "Keur aanvragen direct goed en schrijf punten af als het lid genoeg punten heeft.",
     "editTitle": "Beloning bewerken",
     "addTitle": "Beloning toevoegen",
     "saveChanges": "Wijzigingen opslaan",
