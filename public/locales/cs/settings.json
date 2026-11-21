@@ -47,6 +47,10 @@
       }
     },
     "sections": {
+      "mcp": {
+        "title": "AI asistenti (MCP)",
+        "description": "Umožněte nástrojům Claude, Cursor a dalším AI asistentům prohlížet a spravovat vaše úkoly."
+      },
       "profile": {
         "title": "Nastavení profilu",
         "description": "Upravte údaje profilu, fotku, zobrazované jméno a časové pásmo."
@@ -380,6 +384,52 @@
       "warning": "Vaše předchozí záložní kódy jsou nyní neplatné. Uložte si tyto nové kódy na bezpečné místo. Každý kód lze použít pouze jednou."
     },
     "generateCodes": "Vygenerovat nové kódy"
+  },
+  "mcp": {
+    "copied": "Zkopírováno do schránky",
+    "copyConfig": "Kopírovat konfiguraci",
+    "copySnippet": "Kopírovat příklad",
+    "tokenFailed": "Token se nepodařilo vytvořit. Zkuste to znovu.",
+    "about": {
+      "title": "K čemu to slouží?",
+      "description": "Donetick podporuje Model Context Protocol (MCP), otevřený standard pro propojení AI asistentů s aplikacemi. Po připojení může asistent prohlížet vaše úkoly a spravovat je za vás: „Co mám dnes na programu?“, „Přidej vynášení odpadků každé úterý“, „Označ mytí nádobí jako hotové“.",
+      "permissions": "Asistent používá váš účet a vidí přesně to co vy. Pro každou změnu platí stejná oprávnění, připomenutí a webhooky jako v aplikaci.",
+      "docs": "Přečíst dokumentaci MCP",
+      "tools": { "tasks": "Úkoly a domácí práce", "labels": "Štítky", "projects": "Projekty", "filters": "Filtry", "things": "Věci" }
+    },
+    "enable": {
+      "title": "Zapněte MCP na svém serveru",
+      "description": "Ve vlastní hostované instalaci je koncový bod MCP ve výchozím stavu vypnutý. Přidejte tento zápis do konfiguračního souboru a restartujte Donetick.",
+      "envVar": "Můžete také nastavit proměnnou prostředí DT_MCP_ENABLED=true.",
+      "publicTitle": "Ověřte dostupnost serveru",
+      "public": "Asistenti běžící v cloudu se k vašemu serveru připojují z internetu, ne z vaší místní sítě. Adresa v LAN ani localhost jim proto nebude fungovat. Donetick pro ně musí být dostupný na přístupné adrese přes HTTPS s platným certifikátem. Klienti běžící na vašem počítači, například Claude Code, mohou použít místní adresu.",
+      "publicUrl": "Níže uvedená URL serveru odpovídá adrese, kterou používá tato aplikace. Pokud je místní, nahraďte ji v příkladech svou veřejnou adresou."
+    },
+    "token": {
+      "title": "Krok 1: vytvořte přístupový token",
+      "description": "Asistent se přihlašuje pomocí dlouhodobého API tokenu místo vašeho hesla. Vytvořte token jen pro něj, abyste jej později mohli samostatně zneplatnit.",
+      "generate": "Vygenerovat token pro AI asistenta",
+      "manage": "Spravovat všechny API tokeny",
+      "fillLabel": "Token",
+      "fillHint": "Vložte sem token a příklady níže se automaticky vyplní. Zadané údaje se nikam neukládají ani neodesílají."
+    },
+    "connect": {
+      "title": "Krok 2: připojte asistenta",
+      "description": "Nastavte klienta MCP tak, aby používal tento server a odesílal token v hlavičce secretkey.",
+      "serverUrl": "URL serveru",
+      "copyUrl": "Kopírovat URL serveru",
+      "transport": "Transport: Streamable HTTP. Hlavička secretkey je stejná jako u zbytku API. Funguje i hlavička Authorization: Bearer, pokud klient podporuje jen tuto možnost."
+    },
+    "clients": {
+      "claudeCode": "Claude Code",
+      "claudeCodeHint": "Spusťte tento příkaz jednou v terminálu; Claude Code si server zapamatuje.",
+      "claudeDesktop": "Claude Desktop",
+      "claudeDesktopHint": "Přidejte tento zápis do claude_desktop_config.json (Nastavení → Vývojář → Upravit konfiguraci) a restartujte Claude Desktop. Je nutné mít nainstalovaný Node.js.",
+      "muse": "Muse",
+      "museHint": "Muse se umí nastavit na požádání. Pošlete mu tuto zprávu a vytvoří vám konektor. O API token si řekne zvlášť — zadejte ho tam, ne do chatu.",
+      "other": "Ostatní klienti",
+      "otherHint": "Funguje jakýkoli klient MCP s podporou Streamable HTTP: zadejte URL serveru a hlavičku secretkey. Tímto příkazem ověříte připojení; odpovědí by měl být seznam dostupných nástrojů."
+    }
   },
   "apiTokens": {
     "title": "API tokeny",

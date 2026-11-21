@@ -47,6 +47,10 @@
       }
     },
     "sections": {
+      "mcp": {
+        "title": "AI 助手（MCP）",
+        "description": "让 Claude、Cursor 等 AI 助手查看和管理你的任务。"
+      },
       "profile": {
         "title": "个人资料设置",
         "description": "更新你的个人资料、头像、显示名称和时区偏好。"
@@ -380,6 +384,52 @@
       "warning": "你之前的备用代码已失效。请将这些新代码保存在安全的地方。每个代码只能使用一次。"
     },
     "generateCodes": ""
+  },
+  "mcp": {
+    "copied": "已复制到剪贴板",
+    "copyConfig": "复制配置",
+    "copySnippet": "复制示例",
+    "tokenFailed": "无法创建令牌，请重试。",
+    "about": {
+      "title": "可以用来做什么？",
+      "description": "Donetick 支持模型上下文协议（Model Context Protocol，简称 MCP），这是一项用于连接 AI 助手与应用的开放标准。连接后，助手就能查看你的任务，并按你的要求操作，例如：“今天有哪些待办？”“添加每周二倒垃圾的任务”“把洗碗标记为已完成”。",
+      "permissions": "助手通过你的账户操作，只能看到你能看到的内容。每次修改都遵循与应用内操作相同的权限、提醒和 Webhook 规则。",
+      "docs": "阅读 MCP 文档",
+      "tools": { "tasks": "任务与家务", "labels": "标签", "projects": "项目", "filters": "筛选器", "things": "物件" }
+    },
+    "enable": {
+      "title": "在服务器上启用",
+      "description": "自托管实例默认关闭 MCP 接口。将以下内容添加到配置文件中，然后重启 Donetick。",
+      "envVar": "也可以改为设置环境变量 DT_MCP_ENABLED=true。",
+      "publicTitle": "确认助手能访问你的服务器",
+      "public": "云端助手通过互联网连接你的服务器，而不是通过你的本地网络，因此无法使用局域网或 localhost 地址。你需要将 Donetick 部署到助手可以访问的地址，并使用 HTTPS 和有效证书。Claude Code 等在你自己电脑上运行的客户端则可以使用本地地址。",
+      "publicUrl": "下方的服务器 URL 来自当前应用使用的地址。如果是本地地址，请将示例中的地址替换为你的公网地址。"
+    },
+    "token": {
+      "title": "第 1 步：创建访问令牌",
+      "description": "助手使用长期有效的 API 令牌登录，而不是你的密码。为它单独创建一个令牌，方便以后独立撤销其访问权限。",
+      "generate": "为 AI 助手生成令牌",
+      "manage": "管理所有 API 令牌",
+      "fillLabel": "令牌",
+      "fillHint": "在此粘贴令牌，下方示例会自动填入。你输入的内容不会被保存或发送到任何地方。"
+    },
+    "connect": {
+      "title": "第 2 步：连接你的助手",
+      "description": "将 MCP 客户端的连接地址设为此服务器，并通过 secretkey 请求头发送令牌。",
+      "serverUrl": "服务器 URL",
+      "copyUrl": "复制服务器 URL",
+      "transport": "传输方式：Streamable HTTP。secretkey 请求头与其他 API 接口使用的相同。如果客户端仅支持 Authorization: Bearer 请求头，也可以使用该方式。"
+    },
+    "clients": {
+      "claudeCode": "Claude Code",
+      "claudeCodeHint": "在终端中运行一次此命令，Claude Code 就会记住该服务器。",
+      "claudeDesktop": "Claude Desktop",
+      "claudeDesktopHint": "将以下内容添加到 claude_desktop_config.json（设置 → 开发者 → 编辑配置），然后重启 Claude Desktop。需要先安装 Node.js。",
+      "muse": "Muse",
+      "museHint": "Muse 可以根据你的请求自行配置。把这条消息发给它，它就会为你创建连接器。它会另行索要 API 令牌，请在专门的位置提供，不要直接发在聊天中。",
+      "other": "其他客户端",
+      "otherHint": "任何支持 Streamable HTTP 的 MCP 客户端都可以使用：填入服务器 URL 并配置 secretkey 请求头即可。运行此命令可测试连接，正常情况下会返回可用工具列表。"
+    }
   },
   "apiTokens": {
     "title": "API 令牌",

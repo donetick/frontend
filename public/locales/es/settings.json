@@ -47,6 +47,10 @@
       }
     },
     "sections": {
+      "mcp": {
+        "title": "Asistentes de IA (MCP)",
+        "description": "Permite que Claude, Cursor y otros asistentes de IA consulten y gestionen tus tareas."
+      },
       "profile": {
         "title": "Profile Ajustes",
         "description": "Actualizar your profile information, photo, display name, and timezone preferences."
@@ -380,6 +384,52 @@
       "warning": "Your previous backup codes are now invalid. Guardar these new codes in a safe place. Each code can only be used once."
     },
     "generateCodes": "Generar Nuevos Códigos"
+  },
+  "mcp": {
+    "copied": "Copiado al portapapeles",
+    "copyConfig": "Copiar configuración",
+    "copySnippet": "Copiar ejemplo",
+    "tokenFailed": "No se pudo crear el token. Inténtalo de nuevo.",
+    "about": {
+      "title": "¿Para qué sirve?",
+      "description": "Donetick es compatible con Model Context Protocol (MCP), un estándar abierto que conecta asistentes de IA con aplicaciones. Una vez conectado, el asistente puede consultar tus tareas y gestionarlas por ti: «¿Qué tengo pendiente para hoy?», «Añade sacar la basura todos los martes», «Marca lavar los platos como completado».",
+      "permissions": "El asistente usa tu cuenta y ve exactamente lo mismo que tú. Cada cambio respeta los mismos permisos, recordatorios y webhooks que la propia aplicación.",
+      "docs": "Leer la documentación de MCP",
+      "tools": { "tasks": "Tareas y quehaceres", "labels": "Etiquetas", "projects": "Proyectos", "filters": "Filtros", "things": "Objetos" }
+    },
+    "enable": {
+      "title": "Actívalo en tu servidor",
+      "description": "En una instancia autoalojada, el endpoint de MCP está desactivado por defecto. Añade esto a tu archivo de configuración y reinicia Donetick.",
+      "envVar": "También puedes definir la variable de entorno DT_MCP_ENABLED=true.",
+      "publicTitle": "Comprueba que tu servidor sea accesible",
+      "public": "Los asistentes que se ejecutan en la nube acceden a tu servidor desde Internet, no desde tu red local, así que una dirección LAN o localhost no les sirve. Necesitan que Donetick esté disponible en una dirección accesible, mediante HTTPS y con un certificado válido. Los clientes que se ejecutan en tu equipo, como Claude Code, pueden usar una dirección local.",
+      "publicUrl": "La URL del servidor que aparece abajo es la dirección que usa esta aplicación. Si es local, sustitúyela por tu dirección pública en los ejemplos."
+    },
+    "token": {
+      "title": "Paso 1: Crea un token de acceso",
+      "description": "Tu asistente inicia sesión con un token de API de larga duración en lugar de tu contraseña. Crea uno exclusivo para él para poder revocarlo por separado más adelante.",
+      "generate": "Generar token para el asistente de IA",
+      "manage": "Gestionar todos los tokens de API",
+      "fillLabel": "Token",
+      "fillHint": "Pega aquí un token para completar automáticamente los ejemplos de abajo. Lo que escribas no se guarda ni se envía a ningún sitio."
+    },
+    "connect": {
+      "title": "Paso 2: Conecta tu asistente",
+      "description": "Configura tu cliente MCP para usar este servidor y enviar el token en una cabecera secretkey.",
+      "serverUrl": "URL del servidor",
+      "copyUrl": "Copiar URL del servidor",
+      "transport": "Transporte: Streamable HTTP. La cabecera secretkey es la misma que usa el resto de la API. También funciona la cabecera Authorization: Bearer si tu cliente solo admite esa opción."
+    },
+    "clients": {
+      "claudeCode": "Claude Code",
+      "claudeCodeHint": "Ejecuta este comando una vez en tu terminal; Claude Code recordará el servidor.",
+      "claudeDesktop": "Claude Desktop",
+      "claudeDesktopHint": "Añade esto a claude_desktop_config.json (Configuración → Desarrollador → Editar configuración) y reinicia Claude Desktop. Necesitas tener Node.js instalado.",
+      "muse": "Muse",
+      "museHint": "Muse puede configurarse a partir de una petición. Envíale este mensaje y creará el conector por ti. Te pedirá el token de API por separado: introdúcelo allí, no en el chat.",
+      "other": "Otros clientes",
+      "otherHint": "Sirve cualquier cliente MCP compatible con Streamable HTTP: indica la URL del servidor y una cabecera secretkey. Ejecuta este comando para comprobar la conexión; debería devolver la lista de herramientas disponibles."
+    }
   },
   "apiTokens": {
     "title": "Tokens de API",
