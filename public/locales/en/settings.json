@@ -72,6 +72,10 @@
         "title": "Circle webhooks",
         "description": "Send circle task and thing updates to an external service."
       },
+      "mcp": {
+        "title": "AI Assistants (MCP)",
+        "description": "Let Claude, Cursor, and other AI assistants read and manage your tasks."
+      },
       "notification-integrations": {
         "title": "Notification integrations",
         "description": "Connect Telegram, Pushover, or webhooks for task notifications."
@@ -507,6 +511,58 @@
     "generateNew": "Generate New Token",
     "nameModalTitle": "Give a name for your new token, something to remember it by.",
     "generateToken": "Generate Token"
+  },
+  "mcp": {
+    "copied": "Copied to clipboard",
+    "copyConfig": "Copy configuration",
+    "copySnippet": "Copy snippet",
+    "tokenFailed": "Could not create the token. Please try again.",
+    "about": {
+      "title": "What this does",
+      "description": "Donetick speaks the Model Context Protocol (MCP), an open standard for connecting AI assistants to apps. Once connected, an assistant can see your tasks and act on them for you: “what is due today?”, “add trash night every Tuesday”, “mark the dishes done”.",
+      "permissions": "The assistant works through your own account: it sees exactly what you see, and every change follows the same permissions, reminders, and webhooks as the app itself.",
+      "docs": "Read the MCP documentation",
+      "tools": {
+        "tasks": "Tasks & chores",
+        "labels": "Labels",
+        "projects": "Projects",
+        "filters": "Filters",
+        "things": "Things"
+      }
+    },
+    "enable": {
+      "title": "Enable it on your server",
+      "description": "On a self-hosted instance the MCP endpoint is off until you turn it on. Add this to your config file and restart Donetick.",
+      "envVar": "You can also set the DT_MCP_ENABLED=true environment variable instead.",
+      "publicTitle": "Check your server is reachable",
+      "public": "Assistants that run in the cloud connect to your server from the internet, not from your network, so a LAN or localhost address will not work for them. Those need Donetick published on an address they can reach, over HTTPS with a valid certificate. Clients that run on your own machine, like Claude Code, can use a local address.",
+      "publicUrl": "The server URL below comes from the address this app is using. If that is a local one, replace it with your public address in the examples."
+    },
+    "token": {
+      "title": "Step 1: Create an access token",
+      "description": "Your assistant signs in with a long-lived API token instead of your password. Create one just for it, so you can revoke it on its own later.",
+      "generate": "Generate token for AI assistant",
+      "manage": "Manage all API tokens",
+      "fillLabel": "Token",
+      "fillHint": "Paste a token here and the examples below fill themselves in. Nothing you type is saved or sent anywhere."
+    },
+    "connect": {
+      "title": "Step 2: Connect your assistant",
+      "description": "Point your MCP client at this server and send the token in a secretkey header.",
+      "serverUrl": "Server URL",
+      "copyUrl": "Copy server URL",
+      "transport": "Transport: Streamable HTTP. The secretkey header is the same one the rest of the API uses; an Authorization: Bearer header works too if your client only supports that."
+    },
+    "clients": {
+      "claudeCode": "Claude Code",
+      "claudeCodeHint": "Run this once in your terminal; Claude Code remembers the server.",
+      "claudeDesktop": "Claude Desktop",
+      "claudeDesktopHint": "Add this to claude_desktop_config.json (Settings → Developer → Edit Config), then restart Claude Desktop. It needs Node.js installed.",
+      "muse": "Muse",
+      "museHint": "Muse sets itself up from a request, so send it this message and it will build the connector for you. It will ask for your API token separately; give it there rather than in the chat.",
+      "other": "Other clients",
+      "otherHint": "Any MCP client that supports Streamable HTTP works: give it the server URL and a secretkey header. Run this to check the connection; it should answer with the list of available tools."
+    }
   },
   "calendar": {
     "title": "Calendar Sync",
