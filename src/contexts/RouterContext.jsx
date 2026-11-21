@@ -48,6 +48,7 @@ import HomeSectionsSettings from '../views/Settings/HomeSectionsSettings'
 import IntegrationsSettings from '../views/Settings/IntegrationsSettings'
 import LayoutSettings from '../views/Settings/LayoutSettings'
 import LocalizationSettings from '../views/Settings/LocalizationSettings'
+import MCPSettings from '../views/Settings/MCPSettings'
 import MFASettings from '../views/Settings/MFASettings'
 import NotificationIntegrationsSettings from '../views/Settings/NotificationIntegrationsSettings'
 import NotificationSetting from '../views/Settings/NotificationSetting'
@@ -130,6 +131,10 @@ const Router = createBrowserRouter([
           {
             path: 'apitokens',
             element: <APITokenSettings />,
+          },
+          {
+            path: 'mcp',
+            element: <MCPSettings />,
           },
           {
             path: 'bridge',

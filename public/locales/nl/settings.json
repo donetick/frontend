@@ -47,6 +47,10 @@
       }
     },
     "sections": {
+      "mcp": {
+        "title": "AI-assistenten (MCP)",
+        "description": "Laat Claude, Cursor en andere AI-assistenten je taken bekijken en beheren."
+      },
       "profile": {
         "title": "Profielinstellingen",
         "description": "Werk je profielgegevens, foto, weergavenaam en tijdzone bij."
@@ -401,6 +405,52 @@
       "warning": "Je vorige back-upcodes zijn niet meer geldig. Bewaar deze nieuwe codes op een veilige plek. Elke code kan maar één keer worden gebruikt."
     },
     "generateCodes": "Nieuwe codes genereren"
+  },
+  "mcp": {
+    "copied": "Gekopieerd naar het klembord",
+    "copyConfig": "Configuratie kopiëren",
+    "copySnippet": "Voorbeeld kopiëren",
+    "tokenFailed": "Het token kon niet worden aangemaakt. Probeer het opnieuw.",
+    "about": {
+      "title": "Wat kun je hiermee?",
+      "description": "Donetick ondersteunt het Model Context Protocol (MCP), een open standaard die AI-assistenten met apps verbindt. Na het verbinden kan je assistent je taken bekijken en voor je beheren: ‘Wat moet er vandaag gebeuren?’, ‘Voeg elke dinsdag het vuilnis buitenzetten toe’, ‘Markeer de afwas als gedaan’.",
+      "permissions": "De assistent gebruikt je eigen account en ziet precies wat jij ziet. Voor elke wijziging gelden dezelfde rechten, herinneringen en webhooks als in de app.",
+      "docs": "MCP-documentatie lezen",
+      "tools": { "tasks": "Taken en klusjes", "labels": "Labels", "projects": "Projecten", "filters": "Filters", "things": "Dingen" }
+    },
+    "enable": {
+      "title": "Inschakelen op je server",
+      "description": "Bij een zelfgehoste installatie staat het MCP-endpoint standaard uit. Voeg dit toe aan je configuratiebestand en start Donetick opnieuw.",
+      "envVar": "Je kunt ook de omgevingsvariabele DT_MCP_ENABLED=true instellen.",
+      "publicTitle": "Controleer of je server bereikbaar is",
+      "public": "Assistenten in de cloud maken via internet verbinding met je server, niet via je lokale netwerk. Een LAN- of localhost-adres werkt dus niet voor hen. Donetick moet beschikbaar zijn op een bereikbaar adres, via HTTPS met een geldig certificaat. Clients op je eigen computer, zoals Claude Code, kunnen wel een lokaal adres gebruiken.",
+      "publicUrl": "De server-URL hieronder is het adres dat deze app gebruikt. Is dit een lokaal adres? Vervang het dan in de voorbeelden door je openbare adres."
+    },
+    "token": {
+      "title": "Stap 1: maak een toegangstoken aan",
+      "description": "Je assistent meldt zich aan met een lang geldig API-token in plaats van je wachtwoord. Maak er één speciaal voor je assistent aan, zodat je het later afzonderlijk kunt intrekken.",
+      "generate": "Token voor AI-assistent aanmaken",
+      "manage": "Alle API-tokens beheren",
+      "fillLabel": "Token",
+      "fillHint": "Plak hier een token om de voorbeelden hieronder automatisch in te vullen. Wat je invoert, wordt niet opgeslagen of verstuurd."
+    },
+    "connect": {
+      "title": "Stap 2: verbind je assistent",
+      "description": "Stel je MCP-client in op deze server en stuur het token mee in een secretkey-header.",
+      "serverUrl": "Server-URL",
+      "copyUrl": "Server-URL kopiëren",
+      "transport": "Transport: Streamable HTTP. De secretkey-header is dezelfde als bij de rest van de API. Een Authorization: Bearer-header werkt ook als je client alleen die optie ondersteunt."
+    },
+    "clients": {
+      "claudeCode": "Claude Code",
+      "claudeCodeHint": "Voer deze opdracht één keer uit in je terminal; Claude Code onthoudt de server.",
+      "claudeDesktop": "Claude Desktop",
+      "claudeDesktopHint": "Voeg dit toe aan claude_desktop_config.json (Instellingen → Ontwikkelaar → Configuratie bewerken) en start Claude Desktop opnieuw. Node.js moet geïnstalleerd zijn.",
+      "muse": "Muse",
+      "museHint": "Muse kan zichzelf op verzoek instellen. Stuur dit bericht en Muse maakt de connector voor je aan. Je API-token wordt apart gevraagd; vul het daar in, niet in de chat.",
+      "other": "Andere clients",
+      "otherHint": "Elke MCP-client die Streamable HTTP ondersteunt, werkt: geef de server-URL en een secretkey-header op. Voer deze opdracht uit om de verbinding te testen; je zou een lijst met beschikbare tools moeten terugkrijgen."
+    }
   },
   "apiTokens": {
     "title": "API-tokens",

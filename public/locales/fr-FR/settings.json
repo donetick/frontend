@@ -47,6 +47,10 @@
       }
     },
     "sections": {
+      "mcp": {
+        "title": "Assistants IA (MCP)",
+        "description": "Autorisez Claude, Cursor et d’autres assistants IA à consulter et à gérer vos tâches."
+      },
       "profile": {
         "title": "Paramètres du profil",
         "description": "Mettez à jour vos informations de profil, votre photo, votre nom affiché et votre fuseau horaire."
@@ -380,6 +384,52 @@
       "warning": "Vos anciens codes de secours ne sont plus valides. Conservez ces nouveaux codes en lieu sûr. Chaque code ne peut être utilisé qu'une seule fois."
     },
     "generateCodes": "Generate New Codes"
+  },
+  "mcp": {
+    "copied": "Copié dans le presse-papiers",
+    "copyConfig": "Copier la configuration",
+    "copySnippet": "Copier l’exemple",
+    "tokenFailed": "Impossible de créer le jeton. Veuillez réessayer.",
+    "about": {
+      "title": "À quoi ça sert ?",
+      "description": "Donetick prend en charge le Model Context Protocol (MCP), un standard ouvert qui relie les assistants IA aux applications. Une fois connecté, votre assistant peut consulter vos tâches et agir pour vous : « Qu’est-ce qui est prévu aujourd’hui ? », « Ajoute une tâche pour sortir les poubelles tous les mardis », « Marque la vaisselle comme terminée ».",
+      "permissions": "L’assistant utilise votre compte : il voit exactement ce que vous voyez. Chaque modification respecte les mêmes droits d’accès et déclenche les mêmes rappels et webhooks que dans l’application.",
+      "docs": "Consulter la documentation MCP",
+      "tools": { "tasks": "Tâches et corvées", "labels": "Étiquettes", "projects": "Projets", "filters": "Filtres", "things": "Objets" }
+    },
+    "enable": {
+      "title": "Activer MCP sur votre serveur",
+      "description": "Sur une instance auto-hébergée, le point d’accès MCP est désactivé par défaut. Ajoutez ceci à votre fichier de configuration, puis redémarrez Donetick.",
+      "envVar": "Vous pouvez aussi définir la variable d’environnement DT_MCP_ENABLED=true.",
+      "publicTitle": "Vérifier que votre serveur est accessible",
+      "public": "Les assistants hébergés dans le cloud accèdent à votre serveur depuis Internet, et non depuis votre réseau local. Une adresse LAN ou localhost ne leur convient donc pas. Donetick doit être accessible à une adresse publique en HTTPS, avec un certificat valide. Les clients exécutés sur votre ordinateur, comme Claude Code, peuvent utiliser une adresse locale.",
+      "publicUrl": "L’URL du serveur ci-dessous correspond à l’adresse utilisée par cette application. S’il s’agit d’une adresse locale, remplacez-la par votre adresse publique dans les exemples."
+    },
+    "token": {
+      "title": "Étape 1 : créer un jeton d’accès",
+      "description": "Votre assistant se connecte avec un jeton d’API de longue durée plutôt qu’avec votre mot de passe. Créez-lui un jeton dédié pour pouvoir le révoquer séparément par la suite.",
+      "generate": "Générer un jeton pour l’assistant IA",
+      "manage": "Gérer tous les jetons d’API",
+      "fillLabel": "Jeton",
+      "fillHint": "Collez un jeton ici pour remplir automatiquement les exemples ci-dessous. Rien de ce que vous saisissez n’est enregistré ni envoyé."
+    },
+    "connect": {
+      "title": "Étape 2 : connecter votre assistant",
+      "description": "Configurez votre client MCP pour utiliser ce serveur et transmettre le jeton dans un en-tête secretkey.",
+      "serverUrl": "URL du serveur",
+      "copyUrl": "Copier l’URL du serveur",
+      "transport": "Transport : Streamable HTTP. L’en-tête secretkey est le même que pour le reste de l’API. L’en-tête Authorization: Bearer fonctionne aussi si votre client ne prend en charge que cette méthode."
+    },
+    "clients": {
+      "claudeCode": "Claude Code",
+      "claudeCodeHint": "Exécutez cette commande une seule fois dans votre terminal : Claude Code mémorisera le serveur.",
+      "claudeDesktop": "Claude Desktop",
+      "claudeDesktopHint": "Ajoutez ceci à claude_desktop_config.json (Paramètres → Développeur → Modifier la configuration), puis redémarrez Claude Desktop. Node.js doit être installé.",
+      "muse": "Muse",
+      "museHint": "Muse peut se configurer à votre demande. Envoyez-lui ce message pour qu’il crée le connecteur. Il vous demandera votre jeton d’API séparément : fournissez-le à cet endroit, pas dans la conversation.",
+      "other": "Autres clients",
+      "otherHint": "Tout client MCP prenant en charge Streamable HTTP convient : indiquez-lui l’URL du serveur et un en-tête secretkey. Exécutez cette commande pour tester la connexion ; elle doit renvoyer la liste des outils disponibles."
+    }
   },
   "apiTokens": {
     "title": "Jetons d'API",

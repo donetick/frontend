@@ -47,6 +47,10 @@
       }
     },
     "sections": {
+      "mcp": {
+        "title": "AIアシスタント（MCP）",
+        "description": "ClaudeやCursorなどのAIアシスタントから、タスクの確認や管理ができるようにします。"
+      },
       "profile": {
         "title": "プロフィール設定",
         "description": "プロフィール情報、写真、表示名、タイムゾーンを更新します。"
@@ -380,6 +384,52 @@
       "warning": "以前のバックアップコードは無効になりました。新しいコードを安全な場所に保管してください。各コードは1回のみ使用できます。"
     },
     "generateCodes": ""
+  },
+  "mcp": {
+    "copied": "クリップボードにコピーしました",
+    "copyConfig": "設定をコピー",
+    "copySnippet": "サンプルをコピー",
+    "tokenFailed": "トークンを作成できませんでした。もう一度お試しください。",
+    "about": {
+      "title": "できること",
+      "description": "Donetickは、AIアシスタントとアプリをつなぐオープンな標準規格、Model Context Protocol（MCP）に対応しています。接続すると、アシスタントがタスクを確認したり、代わりに操作したりできます。「今日の予定は？」「毎週火曜日にゴミ出しを追加して」「食器洗いを完了にして」のように頼んでみましょう。",
+      "permissions": "アシスタントはあなたのアカウントを使い、あなたと同じ範囲の情報だけにアクセスします。変更には、アプリで操作した場合と同じ権限、リマインダー、Webhookの仕組みが適用されます。",
+      "docs": "MCPのドキュメントを読む",
+      "tools": { "tasks": "タスク・家事", "labels": "ラベル", "projects": "プロジェクト", "filters": "フィルター", "things": "モノ" }
+    },
+    "enable": {
+      "title": "サーバーで有効にする",
+      "description": "セルフホスト環境では、MCPエンドポイントは初期状態で無効です。設定ファイルに以下を追加し、Donetickを再起動してください。",
+      "envVar": "代わりに環境変数 DT_MCP_ENABLED=true を設定することもできます。",
+      "publicTitle": "サーバーにアクセスできるか確認する",
+      "public": "クラウドで動くアシスタントは、ローカルネットワークではなくインターネットからサーバーに接続するため、LAN内のアドレスやlocalhostは使えません。有効な証明書を使ったHTTPSで、アシスタントからアクセスできるアドレスにDonetickを公開する必要があります。Claude Codeのように自分のパソコンで動くクライアントなら、ローカルアドレスも使えます。",
+      "publicUrl": "以下のサーバーURLは、このアプリが使用しているアドレスです。ローカルアドレスの場合は、サンプル内のURLを公開アドレスに置き換えてください。"
+    },
+    "token": {
+      "title": "ステップ1：アクセストークンを作成",
+      "description": "アシスタントは、パスワードの代わりに長期利用できるAPIトークンでログインします。あとで個別に無効化できるよう、アシスタント専用のトークンを作成しましょう。",
+      "generate": "AIアシスタント用のトークンを生成",
+      "manage": "すべてのAPIトークンを管理",
+      "fillLabel": "トークン",
+      "fillHint": "ここにトークンを貼り付けると、以下のサンプルに自動で反映されます。入力内容は保存も送信もされません。"
+    },
+    "connect": {
+      "title": "ステップ2：アシスタントを接続",
+      "description": "MCPクライアントの接続先をこのサーバーに設定し、secretkeyヘッダーでトークンを送信してください。",
+      "serverUrl": "サーバーURL",
+      "copyUrl": "サーバーURLをコピー",
+      "transport": "トランスポート：Streamable HTTP。secretkeyヘッダーは、ほかのAPIと共通です。クライアントがAuthorization: Bearerヘッダーにしか対応していない場合は、そちらも使えます。"
+    },
+    "clients": {
+      "claudeCode": "Claude Code",
+      "claudeCodeHint": "ターミナルでこのコマンドを一度実行すると、Claude Codeにサーバーが登録されます。",
+      "claudeDesktop": "Claude Desktop",
+      "claudeDesktopHint": "claude_desktop_config.jsonに以下を追加し（設定 → 開発者 → 設定を編集）、Claude Desktopを再起動してください。Node.jsのインストールが必要です。",
+      "muse": "Muse",
+      "museHint": "Museは、依頼するだけで接続を設定できます。このメッセージを送ると、コネクターを作成してくれます。APIトークンは別途求められるので、チャットではなく専用の入力欄に入力してください。",
+      "other": "その他のクライアント",
+      "otherHint": "Streamable HTTPに対応したMCPクライアントなら利用できます。サーバーURLとsecretkeyヘッダーを設定してください。このコマンドで接続を確認できます。利用可能なツールの一覧が返ってくれば成功です。"
+    }
   },
   "apiTokens": {
     "title": "APIトークン",

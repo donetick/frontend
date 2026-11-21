@@ -16,6 +16,7 @@ import {
   PrivacyTip,
   Security,
   Settings,
+  SmartToy,
   SpaceDashboard,
   Storage,
   Tune,
@@ -59,6 +60,7 @@ export const SETTINGS_SECTIONS = [
   { id: 'calendar', icon: CalendarMonth, parent: 'integrations' },
   { id: 'notification-integrations', icon: Link, parent: 'integrations' },
   { id: 'apitokens', icon: Api, parent: 'integrations', parentOnly: true },
+  { id: 'mcp', icon: SmartToy, parent: 'integrations', parentOnly: true },
   { id: 'webhooks', icon: Webhook, parent: 'integrations', parentOnly: true },
   {
     id: 'bridge',
