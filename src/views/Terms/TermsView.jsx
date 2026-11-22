@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link as RouterLink } from 'react-router-dom'
 
 const TermsView = () => {
   return (
@@ -87,7 +88,7 @@ const TermsView = () => {
       </p>
       <p>
         How we handle personal information is covered in our{' '}
-        <a href='/privacy'>Privacy Policy</a>, including what our analytics and
+        <RouterLink to='/privacy'>Privacy Policy</RouterLink>, including what our analytics and
         error reporting do and don't collect, and how to turn them off.
       </p>
 

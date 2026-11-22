@@ -2,6 +2,7 @@ import { Capacitor } from '@capacitor/core'
 import { useTranslation } from 'react-i18next'
 
 import { useChorePermissions } from '../../../hooks/useChorePermissions'
+import { absoluteAppUrl } from '../../../utils/BasePath'
 import DueDatePickerModal, {
   combineDueDate,
   splitDueDate,
@@ -15,7 +16,7 @@ import WriteNFCModal from '../../Modals/Inputs/WriteNFCModal'
 const getNFCUrl = choreId =>
   Capacitor.getPlatform() === 'android' || Capacitor.getPlatform() === 'ios'
     ? `donetick://chores/${choreId}`
-    : `${window.location.origin}/chores/${choreId}`
+    : absoluteAppUrl(`/chores/${choreId}`)
 
 const ChoreModals = ({
   activeModal,

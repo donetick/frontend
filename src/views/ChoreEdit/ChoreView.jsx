@@ -59,6 +59,7 @@ import {
 } from '../../queries/TimeQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
 import { useNotification } from '../../service/NotificationProvider'
+import { absoluteAppUrl } from '../../utils/BasePath'
 import {
   ChoreHistoryStatus,
   ChoreStatus,
@@ -126,7 +127,7 @@ const hasHtmlTags = value => /<\/?[a-z][\s\S]*>/i.test(value)
 const getNFCUrl = choreId =>
   Capacitor.getPlatform() === 'android' || Capacitor.getPlatform() === 'ios'
     ? `donetick://chores/${choreId}`
-    : `${window.location.origin}/chores/${choreId}`
+    : absoluteAppUrl(`/chores/${choreId}`)
 
 const ChoreView = () => {
   const { t } = useTranslation('chores')
