@@ -77,6 +77,7 @@ import RepeatPickerField from './RepeatPickerField'
 import RichTextEditor from './RichTextEditor'
 import ScanPanel from './ScanToTask/ScanPanel'
 import { extractTaskFromImage } from './ScanToTask/useScanToTask'
+import ScrollableFieldRow from './ScrollableFieldRow'
 import SmartTaskTitleInput from './SmartTaskTitleInput'
 import SubTasks from './SubTask'
 import { buildChorePayload, parseVoiceTask } from './VoiceToTask/parseVoiceTask'
@@ -93,9 +94,24 @@ const quickAddChipSx = {
 const pickerRowSx = {
   display: 'flex',
   gap: 1.5,
-  flexWrap: 'wrap',
-  // Leave room for the clear buttons that extend past the selected chips.
+  // A selected chip's clear button is pinned at top -12px / right -16px, and
+  // this row scrolls, so anything outside the padding box gets clipped. Pad
+  // past that overhang on every side or the (x) loses its top edge. Kept
+  // vertically symmetric: the chips centre on the row, and so do the scroll
+  // chevrons that anchor to it.
+  py: '14px',
   paddingInlineEnd: '18px',
+  // Enough for the focus ring on the first chip, which would otherwise be
+  // shaved off by the same clipping.
+  paddingInlineStart: '4px',
+  // The chips stay on one line and scroll sideways instead of wrapping, so the
+  // row keeps a fixed height no matter how many fields are shown.
+  flexWrap: 'nowrap',
+  overflowX: 'auto',
+  scrollbarWidth: 'none',
+  '&::-webkit-scrollbar': { display: 'none' },
+  // Without this the chips compress to fit instead of overflowing
+  '& > *': { flexShrink: 0 },
 }
 
 // Canonical reminder template shape, shared with NotificationTemplate and
@@ -2115,7 +2131,9 @@ const TaskInput = ({
             </Box>
 
             {quickAddPickers.length > 0 && (
-              <Box sx={{ ...pickerRowSx, pt: 2, pb: 1 }}>{quickAddPickers}</Box>
+              <ScrollableFieldRow rowSx={pickerRowSx} sx={{ mt: 0.5 }}>
+                {quickAddPickers}
+              </ScrollableFieldRow>
             )}
 
             <Box
@@ -2166,7 +2184,7 @@ const TaskInput = ({
                   </Typography>
                 </Button>
               )}
-              {quickAddMoreFields.length > 0 ? (
+              {morePickers.length > 0 && (
                 <Button
                   size='sm'
                   variant='outlined'
@@ -2189,25 +2207,28 @@ const TaskInput = ({
                       : t('advancedOptions.more')}
                   </Typography>
                 </Button>
-              ) : (
-                <AdvancedOptionsTrigger
-                  open={showAdvanced}
-                  onToggle={() => setShowAdvanced(v => !v)}
-                  activeCount={
-                    [
-                      points > -1,
-                      requireApproval,
-                      completionWindow > -1,
-                      deadlineOffset > -1,
-                    ].filter(Boolean).length
-                  }
-                  emptyDisplay={pickerEmptyDisplay}
-                />
               )}
+              {/* Advanced options stay reachable regardless of which fields the
+                  user pushed behind "More" */}
+              <AdvancedOptionsTrigger
+                open={showAdvanced}
+                onToggle={() => setShowAdvanced(v => !v)}
+                activeCount={
+                  [
+                    points > -1,
+                    requireApproval,
+                    completionWindow > -1,
+                    deadlineOffset > -1,
+                  ].filter(Boolean).length
+                }
+                emptyDisplay={pickerEmptyDisplay}
+              />
             </Box>
 
             {showQuickAddMore && morePickers.length > 0 && (
-              <Box sx={{ ...pickerRowSx, mt: 1.5 }}>{morePickers}</Box>
+              <ScrollableFieldRow rowSx={pickerRowSx} sx={{ mt: 0.5 }}>
+                {morePickers}
+              </ScrollableFieldRow>
             )}
 
             <AdvancedOptionsSection
