@@ -1,0 +1,63 @@
+{
+  "builder": {
+    "errorName": "Introdu un nume pentru filtru",
+    "errorConditions": "Configurează cel puțin o condiție de filtrare",
+    "editTitle": "Editează filtrul",
+    "newTitle": "Filtru nou",
+    "addConditions": "Adaugă condiții pentru previzualizare",
+    "save": "Salvează filtrul",
+    "name": "Numele filtrului",
+    "namePlaceholder": "De ex. sarcinile restante ale Anei",
+    "color": "Culoare",
+    "sharing": "Partajare",
+    "shared": "Partajat cu grupul tău",
+    "private": "Doar tu",
+    "conditions": "Condiții de filtrare",
+    "conditionsHint": "Extinde o secțiune pentru a rafina filtrul. Sarcinile trebuie să îndeplinească condițiile din fiecare secțiune configurată; dacă selectezi mai multe opțiuni într-o secțiune, este suficientă îndeplinirea oricăreia dintre ele.",
+    "anyValue": "Oricare"
+  },
+  "nameExists": "Există deja un filtru cu acest nume",
+  "tasks_one": "{{count}} sarcină",
+  "tasks_other": "{{count}} de sarcini",
+  "overdue": "{{count}} restante",
+  "noConditions": "Fără condiții",
+  "condition_one": "{{count}} condiție",
+  "condition_other": "{{count}} de condiții",
+  "usedCount": "Folosit de {{count}} ori",
+  "delete": {
+    "title": "Șterge filtrul",
+    "message": "Sigur vrei să ștergi „{{name}}”? Această acțiune nu poate fi anulată."
+  },
+  "empty": {
+    "title": "Nu există încă filtre salvate",
+    "description": "Salvează un set de condiții, precum „restante și atribuite mie”, și accesează-l rapid de oriunde.",
+    "createFilter": "Creează un filtru",
+    "noResultsTitle": "Niciun filtru nu corespunde",
+    "noResultsWithSearch": "Niciun filtru salvat nu corespunde căutării „{{search}}”.",
+    "noResultsDefault": "Niciun filtru salvat nu corespunde filtrării curente.",
+    "clearSearch": "Șterge căutarea",
+    "showAllFilters": "Afișează toate filtrele"
+  },
+  "header": {
+    "title": "Filtre",
+    "subtitle": "Salvează combinațiile preferate de filtre pentru acces rapid. Creează vizualizări personalizate pentru a organiza și a găsi mai repede sarcinile."
+  },
+  "searchPlaceholder": "Caută filtre",
+  "sort": {
+    "smart": "Inteligent",
+    "name": "Nume",
+    "usage": "Număr de utilizări",
+    "lastUsed": "Ultima utilizare",
+    "created": "Data creării"
+  },
+  "show": {
+    "title": "Afișează",
+    "all": "Toate filtrele",
+    "pinned": "Fixate",
+    "unpinned": "Nefixate"
+  },
+  "pin": "Fixează",
+  "unpin": "Anulează fixarea",
+  "tasks_few": "{{count}} sarcini",
+  "condition_few": "{{count}} condiții"
+}
