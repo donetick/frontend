@@ -85,6 +85,11 @@ export const LANGUAGE_DEFAULTS = {
     timeFormat: TIME_FORMATS.HOUR_24,
     firstDayOfWeek: 0,
   },
+  ro: {
+    dateFormat: DATE_FORMATS.DMY,
+    timeFormat: TIME_FORMATS.HOUR_24,
+    firstDayOfWeek: 1,
+  },
   ru: {
     dateFormat: DATE_FORMATS.DMY,
     timeFormat: TIME_FORMATS.HOUR_24,
@@ -111,6 +116,7 @@ export const AVAILABLE_LANGUAGES = [
   { code: 'ja', name: 'Japanese', nativeName: '日本語' },
   { code: 'pl', name: 'Polish', nativeName: 'Polski' },
   { code: 'pt', name: 'Portuguese (Brazil)', nativeName: 'Português (Brasil)' },
+  { code: 'ro', name: 'Romanian', nativeName: 'Română' },
   { code: 'ru', name: 'Russian', nativeName: 'Русский' },
   { code: 'zh-CN', name: 'Chinese (Simplified)', nativeName: '简体中文' },
 ]
