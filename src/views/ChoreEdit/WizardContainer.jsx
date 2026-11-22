@@ -1,9 +1,13 @@
 import { Container, Modal } from '@mui/joy'
+import { useContext } from 'react'
 
+import { TaskSidePaneContext } from '../../contexts/TaskSidePaneContext'
 import { useResponsiveQuery } from '../../hooks/useResponsiveQuery'
 
 export default function WizardContainer({ children, onClose, sx, ...props }) {
-  const mobile = useResponsiveQuery('wizardMobile')
+  const smallViewport = useResponsiveQuery('wizardMobile')
+  const inSidePane = useContext(TaskSidePaneContext)
+  const mobile = smallViewport && !inSidePane
   const content = (
     <Container
       {...props}
@@ -13,6 +17,19 @@ export default function WizardContainer({ children, onClose, sx, ...props }) {
       tabIndex={mobile ? -1 : undefined}
       sx={{
         ...sx,
+        ...(inSidePane
+          ? {
+              minHeight: '0 !important',
+              '& > .MuiSheet-root': {
+                height: 'calc(100dvh - 52px)',
+                maxHeight: 'calc(100dvh - 52px)',
+                minHeight: 0,
+                borderRadius: 0,
+                boxShadow: 'none',
+                bgcolor: 'transparent',
+              },
+            }
+          : {}),
         ...(mobile
           ? {
               position: 'absolute',

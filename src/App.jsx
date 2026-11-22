@@ -4,7 +4,7 @@ import { Capacitor } from '@capacitor/core'
 import { Box, Button, Snackbar, Typography, useColorScheme } from '@mui/joy'
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useRegisterSW } from 'virtual:pwa-register/react'
 
 import MobileBottomNav from '@/views/components/MobileBottomNav'
@@ -16,8 +16,8 @@ import {
 } from './analytics'
 import useAnalyticsIdentity from './analytics/useAnalyticsIdentity'
 import { registerCapacitorListeners } from './CapacitorListener'
-import PageTransition from './components/animations/PageTransition'
 import GlobalQuickAdd from './components/GlobalQuickAdd'
+import TaskRouteLayout from './components/TaskRouteLayout'
 import TimezonePrompt from './components/TimezonePrompt'
 import { viewportMedia } from './constants/responsive'
 import { ImpersonateUserProvider } from './contexts/ImpersonateUserContext'
@@ -181,9 +181,7 @@ const AppContent = () => {
             >
               <NavBar />
               <Box sx={{ flex: 1, minWidth: 0, width: '100%' }}>
-                <PageTransition>
-                  <Outlet />
-                </PageTransition>
+                <TaskRouteLayout />
                 <MobileBottomNav />
               </Box>
             </Box>
