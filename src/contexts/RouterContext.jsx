@@ -44,6 +44,7 @@ import PrivacyPolicyView from '../views/PrivacyPolicy/PrivacyPolicyView'
 import ProjectView from '../views/Projects/ProjectView'
 import APITokenSettings from '../views/Settings/APITokenSettings'
 import CalendarSettings from '../views/Settings/CalendarSettings'
+import ConnectionSettings from '../views/Settings/ConnectionSettings'
 import HomeSectionsSettings from '../views/Settings/HomeSectionsSettings'
 import IntegrationsSettings from '../views/Settings/IntegrationsSettings'
 import LayoutSettings from '../views/Settings/LayoutSettings'
@@ -147,6 +148,10 @@ const Router = createBrowserRouter([
           {
             path: 'storage',
             element: <StorageSettings />,
+          },
+          {
+            path: 'connection',
+            element: <ConnectionSettings />,
           },
           {
             path: 'home-sections',

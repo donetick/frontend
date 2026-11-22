@@ -2,7 +2,7 @@ import MarkEmailReadOutlined from '@mui/icons-material/MarkEmailReadOutlined'
 import { Box, Button, Link, Typography } from '@mui/joy'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 import { useNotification } from '../../service/NotificationProvider'
 import { ResetPassword } from '../../utils/Fetcher'
@@ -16,8 +16,13 @@ const isInvalidEmail = email =>
 const ForgotPasswordView = () => {
   const { t } = useTranslation('auth')
   const navigate = useNavigate()
+  const location = useLocation()
   const [resetStatusOk, setResetStatusOk] = useState(null)
-  const [email, setEmail] = useState('')
+  // Account settings sends signed-in users here, so skip retyping the address
+  // and send them back where they came from instead of to the sign-in form.
+  const [email, setEmail] = useState(location.state?.email ?? '')
+  const returnTo = location.state?.returnTo
+  const backLabel = returnTo ? t('goBack') : t('backToSignIn')
   const [emailError, setEmailError] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { showError, showNotification } = useNotification()
@@ -102,9 +107,9 @@ const ForgotPasswordView = () => {
             size='lg'
             variant='solid'
             sx={authButtonSx}
-            onClick={() => navigate('/login')}
+            onClick={() => navigate(returnTo ?? '/login')}
           >
-            {t('backToSignIn')}
+            {backLabel}
           </Button>
         </Box>
       </AuthShell>
@@ -146,16 +151,16 @@ const ForgotPasswordView = () => {
         level='body-sm'
         sx={{ mt: 3, textAlign: 'center', color: 'text.secondary' }}
       >
-        {t('rememberedIt')}{' '}
+        {!returnTo && `${t('rememberedIt')} `}
         <Link
           component='button'
           type='button'
           level='body-sm'
           fontWeight={600}
           underline='hover'
-          onClick={() => navigate('/login')}
+          onClick={() => navigate(returnTo ?? '/login')}
         >
-          {t('backToSignIn')}
+          {backLabel}
         </Link>
       </Typography>
     </AuthShell>

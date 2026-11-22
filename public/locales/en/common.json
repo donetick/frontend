@@ -345,6 +345,10 @@
     "hoursAgo": "{{count}}h ago",
     "online": "Online",
     "offline": "Offline",
+    "serverUnreachable": "Can't reach server",
+    "serverDegraded": "Server having trouble",
+    "serverUnreachableHint": "The server is not answering. It may be down, restarting, or blocked by this network.",
+    "serverDegradedHint": "The server is answering with errors. Some actions may fail.",
     "syncing": "Syncing...",
     "lastSync": "Last sync: {{time}}",
     "offlineSince": "Offline since {{duration}}",
@@ -361,7 +365,11 @@
     "pendingActionsTitle": "Pending actions",
     "actionsWaitingToSync_one": "{{count}} action waiting to be synced.",
     "actionsWaitingToSync_other": "{{count}} actions waiting to be synced.",
-    "cancelActionAria": "Cancel {{label}}"
+    "cancelActionAria": "Cancel {{label}}",
+    "noQueueHint": "Changes you make now may not be saved until the connection is back.",
+    "checkConnection": "Check connection",
+    "connectionDetails": "Connection details",
+    "donetickStatus": "Donetick status page"
   },
   "attachments": "Attachments",
   "fileNumbered": "File {{index}}",

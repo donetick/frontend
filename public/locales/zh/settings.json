@@ -395,7 +395,13 @@
       "description": "Donetick 支持模型上下文协议（Model Context Protocol，简称 MCP），这是一项用于连接 AI 助手与应用的开放标准。连接后，助手就能查看你的任务，并按你的要求操作，例如：“今天有哪些待办？”“添加每周二倒垃圾的任务”“把洗碗标记为已完成”。",
       "permissions": "助手通过你的账户操作，只能看到你能看到的内容。每次修改都遵循与应用内操作相同的权限、提醒和 Webhook 规则。",
       "docs": "阅读 MCP 文档",
-      "tools": { "tasks": "任务与家务", "labels": "标签", "projects": "项目", "filters": "筛选器", "things": "物件" }
+      "tools": {
+        "tasks": "任务与家务",
+        "labels": "标签",
+        "projects": "项目",
+        "filters": "筛选器",
+        "things": "物件"
+      }
     },
     "enable": {
       "title": "在服务器上启用",

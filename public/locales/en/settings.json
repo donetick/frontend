@@ -167,6 +167,10 @@
       "widgets": {
         "title": "Home Screen Widgets",
         "description": "Control how Donetick's home-screen widgets look on this device."
+      },
+      "connection": {
+        "title": "Connection & server",
+        "description": "Check whether Donetick can reach its server, and see which server this app uses."
       }
     }
   },
@@ -273,6 +277,15 @@
     "cancel": "Cancel",
     "password": "Password :",
     "changePassword": "Change Password",
+    "resetPassword": "Reset Password",
+    "passwordLocalDescription": "Set a new password for this account.",
+    "passwordResetDescription": "We'll email you a secure link to set a new password.",
+    "passwordNoEmailDescription": "This account has no email address, so a reset link can't be sent. Ask whoever manages your account to set a new password for you.",
+    "passwordManagedBy": "Managed by {{provider}}",
+    "passwordProviderDescription": "You signed in with {{provider}}, so there's no Donetick password to change. Manage your password with {{provider}}.",
+    "providerGoogle": "Google",
+    "providerApple": "Apple",
+    "providerSso": "your single sign-on provider",
     "passwordChanged": "Password changed successfully",
     "passwordChangeFailed": "Password change failed",
     "dangerZone": "Danger Zone",
@@ -702,6 +715,61 @@
     "clearPreferences": "Clear App Preferences",
     "clearPreferencesTitle": "Clear App Preferences",
     "clearPreferencesMessage": "Are you sure you want to clear all app preferences? This will reset your app settings and may require you to log in again."
+  },
+  "connection": {
+    "title": "Connection & server",
+    "states": {
+      "healthy": {
+        "badge": "Connected",
+        "title": "Donetick is talking to your server",
+        "description": "Requests are going through normally. If something still looks stale, check again to force a fresh round trip."
+      },
+      "degraded": {
+        "badge": "Server errors",
+        "title": "The server is answering with errors",
+        "description": "The server is reachable but failing requests. Some actions may not save until it recovers."
+      },
+      "unreachable": {
+        "badge": "Server unreachable",
+        "title": "Donetick can't reach the server",
+        "description": "Nothing came back from the server. It may be down, restarting, or blocked by this network."
+      },
+      "deviceOffline": {
+        "badge": "No internet",
+        "title": "This device is offline",
+        "description": "There's no network connection on this device, so the server can't be reached from here."
+      },
+      "unknown": {
+        "badge": "Not checked",
+        "title": "No request has reached the server yet",
+        "description": "Nothing has been sent to the server in this session. Check now to confirm it answers."
+      }
+    },
+    "checkNow": "Check now",
+    "checking": "Checking...",
+    "checkReachable": "The server answered.",
+    "checkUnreachable": "The server did not answer.",
+    "serverTitle": "Server",
+    "unknownServer": "No server configured",
+    "officialServer": "Donetick Cloud",
+    "selfHostedServer": "Self-hosted",
+    "serverVersion": "Server version {{version}}",
+    "versionUnknown": "Server version not reported",
+    "lastContact": "Last successful response",
+    "lastFailure": "Last failed request",
+    "never": "Never",
+    "networkError": "No response",
+    "httpStatus": "HTTP {{status}}",
+    "statusPageAction": "Open status page",
+    "offlineSettings": "Offline settings",
+    "statusPageTitle": "Donetick status page",
+    "statusPageDescription": "Live health checks, planned maintenance windows, and incident updates for Donetick Cloud.",
+    "selfHostedTitle": "Checking a self-hosted server",
+    "selfHostedDescription": "The Donetick Cloud status page does not cover your server. Check that your Donetick instance is running and reachable from this device or network.",
+    "recentFailuresTitle": "Recent failed requests",
+    "recentFailuresDescription": "The last few requests the server refused or never answered.",
+    "noFailures": "No failed requests in this session.",
+    "sessionOnlyNote": "Collected in this session only — these details reset when the app restarts."
   },
   "sidepanel": {
     "title": "Sidepanel Customization",

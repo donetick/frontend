@@ -1,6 +1,8 @@
 import {
   CheckCircleOutline,
   ClearAll,
+  CloudOff,
+  InfoOutlined,
   Refresh,
   Sync,
   SyncDisabled,
@@ -25,6 +27,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import PropTypes from 'prop-types'
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Link as RouterLink } from 'react-router-dom'
 
 import { networkManager } from '../../hooks/NetworkManager'
 import { commandQueue } from '../../utils/CommandQueue'
@@ -32,6 +35,12 @@ import {
   isOfflineFeatureEnabled,
   subscribeToOfflineFeature,
 } from '../../utils/OfflineFeatureToggle'
+import {
+  getServerHealth,
+  probeServer,
+  SERVER_STATUS,
+  subscribeToServerHealth,
+} from '../../utils/ServerHealth'
 import { syncEngine } from '../../utils/SyncEngine'
 
 const COMMAND_LABEL_KEYS = {
@@ -60,6 +69,220 @@ const formatCommandLabel = (commandType, t) => {
   )
 }
 
+const SectionLabel = ({ children, color }) => (
+  <Box sx={{ px: 1, py: 0.5 }}>
+    <Typography
+      level='body-xs'
+      sx={{
+        fontWeight: 600,
+        color,
+        textTransform: 'uppercase',
+        letterSpacing: '0.05em',
+      }}
+    >
+      {children}
+    </Typography>
+  </Box>
+)
+
+SectionLabel.propTypes = {
+  children: PropTypes.node,
+  color: PropTypes.string,
+}
+
+const StatusHeader = ({
+  dotColor,
+  errorText,
+  label,
+  lastSyncText,
+  offlineSinceText,
+  syncing,
+  t,
+  troubleColor,
+  troubleText,
+}) => (
+  <Sheet sx={{ p: 1.5, borderRadius: 'var(--joy-radius-sm)', mb: 1 }}>
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        mb: 0.5,
+      }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box
+          sx={{
+            width: 8,
+            height: 8,
+            borderRadius: '50%',
+            backgroundColor: dotColor,
+          }}
+        />
+        <Typography level='title-sm' sx={{ fontWeight: 600 }}>
+          {label}
+        </Typography>
+      </Box>
+      {syncing && (
+        <Typography
+          level='body-xs'
+          sx={{ color: 'var(--joy-palette-primary-500)' }}
+        >
+          {t('sync.syncing')}
+        </Typography>
+      )}
+    </Box>
+
+    <Typography
+      level='body-xs'
+      sx={{ color: 'var(--joy-palette-text-tertiary)' }}
+    >
+      {lastSyncText}
+    </Typography>
+
+    {offlineSinceText && (
+      <Typography
+        level='body-xs'
+        sx={{ color: 'var(--joy-palette-danger-400)', mt: 0.25 }}
+      >
+        {offlineSinceText}
+      </Typography>
+    )}
+
+    {errorText && (
+      <Typography
+        level='body-xs'
+        sx={{ color: 'var(--joy-palette-danger-500)', mt: 0.25 }}
+      >
+        {errorText}
+      </Typography>
+    )}
+
+    {/* What is actually wrong, in one line, before any queue detail. */}
+    {troubleText && (
+      <Typography level='body-xs' sx={{ color: troubleColor, mt: 0.5 }}>
+        {troubleText}
+      </Typography>
+    )}
+  </Sheet>
+)
+
+StatusHeader.propTypes = {
+  dotColor: PropTypes.string.isRequired,
+  errorText: PropTypes.string,
+  label: PropTypes.string.isRequired,
+  lastSyncText: PropTypes.string.isRequired,
+  offlineSinceText: PropTypes.string,
+  syncing: PropTypes.bool,
+  t: PropTypes.func.isRequired,
+  troubleColor: PropTypes.string,
+  troubleText: PropTypes.string,
+}
+
+const PendingSection = ({ groupedPending, t }) => {
+  if (groupedPending.length === 0) return null
+  const pendingCount = groupedPending.reduce(
+    (total, [, count]) => total + count,
+    0,
+  )
+  return (
+    <>
+      <SectionLabel color='var(--joy-palette-text-secondary)'>
+        {t('sync.pending', { count: pendingCount })}
+      </SectionLabel>
+      {groupedPending.map(([type, count]) => (
+        <Box
+          key={type}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            px: 1,
+            py: 0.5,
+            borderRadius: 'var(--joy-radius-sm)',
+          }}
+        >
+          <Typography level='body-sm'>{formatCommandLabel(type, t)}</Typography>
+          <Chip size='sm' color='warning' variant='soft'>
+            {count}
+          </Chip>
+        </Box>
+      ))}
+      <Divider sx={{ my: 0.5 }} />
+    </>
+  )
+}
+
+PendingSection.propTypes = {
+  groupedPending: PropTypes.array.isRequired,
+  t: PropTypes.func.isRequired,
+}
+
+const FailedSection = ({ failedCommands, onDismiss, t }) => {
+  if (failedCommands.length === 0) return null
+  return (
+    <>
+      <SectionLabel color='var(--joy-palette-danger-500)'>
+        {t('sync.failed', { count: failedCommands.length })}
+      </SectionLabel>
+      {failedCommands.map(cmd => (
+        <Box
+          key={cmd.id}
+          sx={{
+            px: 1,
+            py: 0.75,
+            mb: 0.5,
+            borderRadius: 'var(--joy-radius-sm)',
+            backgroundColor: 'var(--joy-palette-danger-softBg)',
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
+            <Typography
+              level='body-sm'
+              sx={{
+                color: 'var(--joy-palette-danger-700)',
+                fontWeight: 500,
+              }}
+            >
+              {formatCommandLabel(cmd.commandType, t)}
+            </Typography>
+            <Button
+              size='sm'
+              variant='plain'
+              color='danger'
+              sx={{ fontSize: 11, py: 0, minHeight: 'unset', px: 0.5 }}
+              onClick={() => onDismiss(cmd.id)}
+            >
+              {t('sync.dismiss')}
+            </Button>
+          </Box>
+          {cmd.error && (
+            <Typography
+              level='body-xs'
+              sx={{ color: 'var(--joy-palette-danger-500)', mt: 0.25 }}
+            >
+              {cmd.error}
+            </Typography>
+          )}
+        </Box>
+      ))}
+      <Divider sx={{ my: 0.5 }} />
+    </>
+  )
+}
+
+FailedSection.propTypes = {
+  failedCommands: PropTypes.array.isRequired,
+  onDismiss: PropTypes.func.isRequired,
+  t: PropTypes.func.isRequired,
+}
+
 function SyncStatusIndicator({ showLabel = false }) {
   const { t } = useTranslation('common')
   const queryClient = useQueryClient()
@@ -72,10 +295,14 @@ function SyncStatusIndicator({ showLabel = false }) {
     nextRetryAt: syncEngine.nextRetryAt,
   })
   const [isOnline, setIsOnline] = useState(networkManager.isOnline)
+  const [deviceOnline, setDeviceOnline] = useState(networkManager.deviceOnline)
   const [offlineSince, setOfflineSince] = useState(networkManager.offlineSince)
   const [offlineReason, setOfflineReason] = useState(
     networkManager.offlineReason,
   )
+  // Server reachability is tracked for everyone, not just offline-mode users,
+  // so a server outage can be named even when nothing is being queued.
+  const [serverHealth, setServerHealth] = useState(getServerHealth)
 
   const [offlineFeatureEnabled, setOfflineFeatureEnabled] = useState(
     isOfflineFeatureEnabled(),
@@ -107,12 +334,15 @@ function SyncStatusIndicator({ showLabel = false }) {
   useEffect(() => {
     const handleNetworkChange = online => {
       setIsOnline(online)
+      setDeviceOnline(networkManager.deviceOnline)
       setOfflineReason(networkManager.offlineReason)
       if (!online) setOfflineSince(networkManager.offlineSince)
     }
     networkManager.registerNetworkListener(handleNetworkChange)
     return () => networkManager.unregisterNetworkListener(handleNetworkChange)
   }, [])
+
+  useEffect(() => subscribeToServerHealth(setServerHealth), [])
 
   // Only tick while a countdown is on screen — the schedule exists at all
   // times (the cache refresh is always pending), and re-rendering the nav bar
@@ -136,6 +366,8 @@ function SyncStatusIndicator({ showLabel = false }) {
   }, [syncState.nextRetryAt, syncState.syncing, showsCountdown])
 
   useEffect(() => {
+    // Nothing is queued with offline mode off, so there is no queue to poll.
+    if (!offlineFeatureEnabled) return undefined
     const update = async () => {
       try {
         const [pending, failed] = await Promise.all([
@@ -151,7 +383,7 @@ function SyncStatusIndicator({ showLabel = false }) {
     update()
     const interval = setInterval(update, 5000)
     return () => clearInterval(interval)
-  }, [syncState])
+  }, [syncState, offlineFeatureEnabled])
 
   const refreshCommands = async () => {
     const [pending, failed] = await Promise.all([
@@ -212,6 +444,32 @@ function SyncStatusIndicator({ showLabel = false }) {
   const failedCount = failedCommands.length
   const totalBadge = pendingCount + failedCount
 
+  // Device first: with no network on the device, "the server is down" is a
+  // guess, and the only useful thing to say is that this device is offline.
+  const serverUnreachable =
+    deviceOnline && serverHealth.status === SERVER_STATUS.unreachable
+  const serverDegraded =
+    deviceOnline && serverHealth.status === SERVER_STATUS.degraded
+  // Offline mode drops the whole app to offline when the server stops
+  // answering; that case is already named more precisely by serverUnreachable.
+  const offlineOnDevice = !deviceOnline || (!isOnline && !serverUnreachable)
+  const hasConnectionIssue =
+    offlineOnDevice || serverUnreachable || serverDegraded
+
+  const handleCheckServer = async () => {
+    const health = await probeServer()
+    if (health.status === SERVER_STATUS.unreachable) return
+    // Only a successful sync restores the offline state (see SyncEngine), so a
+    // healthy answer hands off to the sync rather than flipping the flag here.
+    if (offlineFeatureEnabled) {
+      await handleForceSync()
+      return
+    }
+    // Without the queue there is nothing to replay — just refetch what the
+    // screens failed to load while the server was away.
+    queryClient.invalidateQueries()
+  }
+
   // One sync glyph across every state, so the icon never changes shape — only
   // its colour and whether it spins. "All synced" is deliberately the quietest
   // of them: it is the state nobody needs to look at, so it shouldn't shout.
@@ -230,23 +488,48 @@ function SyncStatusIndicator({ showLabel = false }) {
           }}
         />
       )
-    if (!isOnline) return <SyncDisabled sx={{ ...sx, color: 'danger.500' }} />
+    if (offlineOnDevice)
+      return <SyncDisabled sx={{ ...sx, color: 'danger.500' }} />
+    // The cloud glyph is the one exception to the single-sync-glyph rule: a
+    // server that is down is not a sync problem the user can do anything about.
+    if (serverUnreachable)
+      return <CloudOff sx={{ ...sx, color: 'danger.500' }} />
     if (failedCount > 0)
       return <SyncProblem sx={{ ...sx, color: 'danger.400' }} />
+    if (serverDegraded)
+      return <SyncProblem sx={{ ...sx, color: 'warning.500' }} />
     if (pendingCount > 0) return <Sync sx={{ ...sx, color: 'warning.500' }} />
     return <Sync sx={{ ...sx, color: 'text.tertiary' }} />
   }
 
   const getStatusLabel = () => {
     if (syncState.syncing) return t('sync.syncing')
-    if (!isOnline) return t('sync.offline')
+    if (offlineOnDevice) return t('sync.offline')
+    if (serverUnreachable) return t('sync.serverUnreachable')
     if (failedCount > 0) return t('sync.failed', { count: failedCount })
+    if (serverDegraded) return t('sync.serverDegraded')
     if (pendingCount > 0)
       return t('sync.pendingSyncLabel', { count: pendingCount })
     return t('sync.allSynced')
   }
 
-  if (!offlineFeatureEnabled) return null
+  const headerDotColor = serverDegraded
+    ? 'var(--joy-palette-warning-500)'
+    : offlineOnDevice || serverUnreachable
+      ? 'var(--joy-palette-danger-500)'
+      : 'var(--joy-palette-success-500)'
+
+  const headerLabel = offlineOnDevice
+    ? t('sync.offline')
+    : serverUnreachable
+      ? t('sync.serverUnreachable')
+      : serverDegraded
+        ? t('sync.serverDegraded')
+        : t('sync.online')
+
+  // With offline mode off there is no queue to report on, so the indicator only
+  // earns its place in the nav bar when something is actually wrong.
+  if (!offlineFeatureEnabled && !hasConnectionIssue) return null
 
   return (
     <Dropdown>
@@ -321,178 +604,50 @@ function SyncStatusIndicator({ showLabel = false }) {
           borderRadius: 'var(--joy-radius-md)',
         }}
       >
-        {/* Header */}
-        <Sheet sx={{ p: 1.5, borderRadius: 'var(--joy-radius-sm)', mb: 1 }}>
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              mb: 0.5,
-            }}
-          >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Box
-                sx={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: '50%',
-                  backgroundColor: isOnline
-                    ? 'var(--joy-palette-success-500)'
-                    : 'var(--joy-palette-danger-500)',
-                }}
-              />
-              <Typography level='title-sm' sx={{ fontWeight: 600 }}>
-                {isOnline ? t('sync.online') : t('sync.offline')}
-              </Typography>
-            </Box>
-            {syncState.syncing && (
-              <Typography
-                level='body-xs'
-                sx={{ color: 'var(--joy-palette-primary-500)' }}
-              >
-                {t('sync.syncing')}
-              </Typography>
-            )}
-          </Box>
+        <StatusHeader
+          dotColor={headerDotColor}
+          label={headerLabel}
+          syncing={syncState.syncing}
+          lastSyncText={t('sync.lastSync', {
+            time: formatTime(syncState.lastSync),
+          })}
+          offlineSinceText={
+            !isOnline && offlineSince
+              ? t('sync.offlineSince', {
+                  duration: formatOfflineDuration(offlineSince),
+                })
+              : null
+          }
+          errorText={
+            syncState.error
+              ? t('sync.errorPrefix', { message: syncState.error })
+              : null
+          }
+          troubleText={
+            serverUnreachable
+              ? t('sync.serverUnreachableHint')
+              : serverDegraded
+                ? t('sync.serverDegradedHint')
+                : null
+          }
+          troubleColor={
+            serverUnreachable
+              ? 'var(--joy-palette-danger-500)'
+              : 'var(--joy-palette-warning-600)'
+          }
+          t={t}
+        />
 
-          <Typography
-            level='body-xs'
-            sx={{ color: 'var(--joy-palette-text-tertiary)' }}
-          >
-            {t('sync.lastSync', { time: formatTime(syncState.lastSync) })}
-          </Typography>
+        <PendingSection groupedPending={groupedPending} t={t} />
 
-          {!isOnline && offlineSince && (
-            <Typography
-              level='body-xs'
-              sx={{ color: 'var(--joy-palette-danger-400)', mt: 0.25 }}
-            >
-              {t('sync.offlineSince', {
-                duration: formatOfflineDuration(offlineSince),
-              })}
-            </Typography>
-          )}
-
-          {syncState.error && (
-            <Typography
-              level='body-xs'
-              sx={{ color: 'var(--joy-palette-danger-500)', mt: 0.25 }}
-            >
-              {t('sync.errorPrefix', { message: syncState.error })}
-            </Typography>
-          )}
-        </Sheet>
-
-        {/* Pending actions */}
-        {groupedPending.length > 0 && (
-          <>
-            <Box sx={{ px: 1, py: 0.5 }}>
-              <Typography
-                level='body-xs'
-                sx={{
-                  fontWeight: 600,
-                  color: 'var(--joy-palette-text-secondary)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                }}
-              >
-                {t('sync.pending', { count: pendingCount })}
-              </Typography>
-            </Box>
-            {groupedPending.map(([type, count]) => (
-              <Box
-                key={type}
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  px: 1,
-                  py: 0.5,
-                  borderRadius: 'var(--joy-radius-sm)',
-                }}
-              >
-                <Typography level='body-sm'>
-                  {formatCommandLabel(type, t)}
-                </Typography>
-                <Chip size='sm' color='warning' variant='soft'>
-                  {count}
-                </Chip>
-              </Box>
-            ))}
-            <Divider sx={{ my: 0.5 }} />
-          </>
-        )}
-
-        {/* Failed actions */}
-        {failedCommands.length > 0 && (
-          <>
-            <Box sx={{ px: 1, py: 0.5 }}>
-              <Typography
-                level='body-xs'
-                sx={{
-                  fontWeight: 600,
-                  color: 'var(--joy-palette-danger-500)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                }}
-              >
-                {t('sync.failed', { count: failedCount })}
-              </Typography>
-            </Box>
-            {failedCommands.map(cmd => (
-              <Box
-                key={cmd.id}
-                sx={{
-                  px: 1,
-                  py: 0.75,
-                  mb: 0.5,
-                  borderRadius: 'var(--joy-radius-sm)',
-                  backgroundColor: 'var(--joy-palette-danger-softBg)',
-                }}
-              >
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                  }}
-                >
-                  <Typography
-                    level='body-sm'
-                    sx={{
-                      color: 'var(--joy-palette-danger-700)',
-                      fontWeight: 500,
-                    }}
-                  >
-                    {formatCommandLabel(cmd.commandType, t)}
-                  </Typography>
-                  <Button
-                    size='sm'
-                    variant='plain'
-                    color='danger'
-                    sx={{ fontSize: 11, py: 0, minHeight: 'unset', px: 0.5 }}
-                    onClick={() => handleDismissFailed(cmd.id)}
-                  >
-                    {t('sync.dismiss')}
-                  </Button>
-                </Box>
-                {cmd.error && (
-                  <Typography
-                    level='body-xs'
-                    sx={{ color: 'var(--joy-palette-danger-500)', mt: 0.25 }}
-                  >
-                    {cmd.error}
-                  </Typography>
-                )}
-              </Box>
-            ))}
-            <Divider sx={{ my: 0.5 }} />
-          </>
-        )}
+        <FailedSection
+          failedCommands={failedCommands}
+          onDismiss={handleDismissFailed}
+          t={t}
+        />
 
         {/* All clear */}
-        {pendingCount === 0 && failedCount === 0 && (
+        {offlineFeatureEnabled && pendingCount === 0 && failedCount === 0 && (
           <Box
             sx={{
               px: 1,
@@ -546,35 +701,86 @@ function SyncStatusIndicator({ showLabel = false }) {
               level='body-xs'
               sx={{ color: 'var(--joy-palette-text-tertiary)' }}
             >
-              {t('sync.willSync')}
+              {offlineFeatureEnabled
+                ? t('sync.willSync')
+                : t('sync.noQueueHint')}
             </Typography>
           </Box>
         )}
 
         <Divider sx={{ my: 0.5 }} />
 
-        <MenuItem
-          disabled={syncState.syncing || totalBadge === 0}
-          onClick={handleCancelAll}
-          sx={{
-            borderRadius: 'var(--joy-radius-sm)',
-            '&:hover': {
-              backgroundColor: 'var(--joy-palette-neutral-softHoverBg)',
-            },
-          }}
-        >
-          <ListItemDecorator>
-            <ClearAll sx={{ fontSize: 18 }} />
-          </ListItemDecorator>
-          <Typography level='body-sm' sx={{ fontWeight: 500 }}>
-            {t('sync.cancelAll')}
-          </Typography>
-        </MenuItem>
+        {offlineFeatureEnabled && (
+          <MenuItem
+            disabled={syncState.syncing || totalBadge === 0}
+            onClick={handleCancelAll}
+            sx={{
+              borderRadius: 'var(--joy-radius-sm)',
+              '&:hover': {
+                backgroundColor: 'var(--joy-palette-neutral-softHoverBg)',
+              },
+            }}
+          >
+            <ListItemDecorator>
+              <ClearAll sx={{ fontSize: 18 }} />
+            </ListItemDecorator>
+            <Typography level='body-sm' sx={{ fontWeight: 500 }}>
+              {t('sync.cancelAll')}
+            </Typography>
+          </MenuItem>
+        )}
 
         {/* Sync Now — must be a MenuItem so Menu doesn't swallow the click */}
+        {offlineFeatureEnabled ? (
+          <MenuItem
+            disabled={syncState.syncing}
+            onClick={handleForceSync}
+            sx={{
+              borderRadius: 'var(--joy-radius-sm)',
+              '&:hover': {
+                backgroundColor: 'var(--joy-palette-neutral-softHoverBg)',
+              },
+            }}
+          >
+            <ListItemDecorator>
+              {syncState.syncing ? (
+                <CircularProgress size='sm' />
+              ) : (
+                <Refresh sx={{ fontSize: 18 }} />
+              )}
+            </ListItemDecorator>
+            <Typography level='body-sm' sx={{ fontWeight: 500 }}>
+              {syncState.syncing ? t('sync.syncing') : t('sync.syncNow')}
+            </Typography>
+          </MenuItem>
+        ) : (
+          <MenuItem
+            disabled={syncState.syncing}
+            onClick={handleCheckServer}
+            sx={{
+              borderRadius: 'var(--joy-radius-sm)',
+              '&:hover': {
+                backgroundColor: 'var(--joy-palette-neutral-softHoverBg)',
+              },
+            }}
+          >
+            <ListItemDecorator>
+              {syncState.syncing ? (
+                <CircularProgress size='sm' />
+              ) : (
+                <Refresh sx={{ fontSize: 18 }} />
+              )}
+            </ListItemDecorator>
+            <Typography level='body-sm' sx={{ fontWeight: 500 }}>
+              {t('sync.checkConnection')}
+            </Typography>
+          </MenuItem>
+        )}
+
+        {/* The way out of the dropdown: which server, and is it up? */}
         <MenuItem
-          disabled={syncState.syncing}
-          onClick={handleForceSync}
+          component={RouterLink}
+          to='/settings/connection'
           sx={{
             borderRadius: 'var(--joy-radius-sm)',
             '&:hover': {
@@ -583,14 +789,10 @@ function SyncStatusIndicator({ showLabel = false }) {
           }}
         >
           <ListItemDecorator>
-            {syncState.syncing ? (
-              <CircularProgress size='sm' />
-            ) : (
-              <Refresh sx={{ fontSize: 18 }} />
-            )}
+            <InfoOutlined sx={{ fontSize: 18 }} />
           </ListItemDecorator>
           <Typography level='body-sm' sx={{ fontWeight: 500 }}>
-            {syncState.syncing ? t('sync.syncing') : t('sync.syncNow')}
+            {t('sync.connectionDetails')}
           </Typography>
         </MenuItem>
       </Menu>

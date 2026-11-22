@@ -9,6 +9,7 @@ import {
 import { clearSession } from './AuthSession'
 import { logout, RefreshToken } from './Fetcher'
 import { isOAuthExchangeInProgress } from './OAuthExchangeState'
+import { recordServerResponse, recordServerUnreachable } from './ServerHealth'
 import { isRefreshTokenExpired, saveTokens } from './TokenStorage'
 
 const OAUTH_EXCHANGE_IN_PROGRESS = 'OAuth exchange in progress'
@@ -246,6 +247,9 @@ class ApiClient {
       // Passive diagnostics: learn the server build from whatever it already
       // answers, and keep the last few refusals for crash reports.
       recordServerVersionFromResponse(response)
+      // Ungated, unlike networkManager: knowing the server answered is useful
+      // to every user, not only the ones running with offline mode on.
+      recordServerResponse(response.status)
       if (!response.ok) {
         recordApiFailure({
           endpoint,
@@ -347,6 +351,7 @@ class ApiClient {
         error?.name === 'AbortError' && fetchOptions.signal?.aborted
       if (!externalAbort) {
         networkManager.setServerUnreachable()
+        recordServerUnreachable()
         recordApiFailure({ endpoint, method: config.method, status: 'network' })
       }
       console.error('Request failed', error)
