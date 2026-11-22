@@ -1,6 +1,7 @@
 import { Box, Sheet } from '@mui/joy'
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 
+import { TaskSidePaneContext } from '../../contexts/TaskSidePaneContext'
 import { useResponsiveQuery } from '../../hooks/useResponsiveQuery'
 import { useChoresHistory } from '../../queries/ChoreQueries'
 import { ChoresGrouper } from '../../utils/Chores'
@@ -19,6 +20,7 @@ const Sidepanel = ({
   tempFilter,
 }) => {
   const isLargeScreen = useResponsiveQuery('largeUp')
+  const taskPaneOpen = useContext(TaskSidePaneContext)
   const [dueDatePieChartData, setDueDatePieChartData] = useState([])
   const [sidepanelConfig, setSidepanelConfig] = useState([])
   const {
@@ -114,7 +116,7 @@ const Sidepanel = ({
     }
   }
 
-  if (!isLargeScreen) {
+  if (!isLargeScreen || taskPaneOpen) {
     return null
   }
 
