@@ -40,6 +40,7 @@ import {
   getFirstLink,
   splitTextAtFirstLink,
 } from '../../utils/ExternalLinks.js'
+import { visibleLabels } from '../../utils/Labels'
 import Priorities from '../../utils/Priorities'
 import ChoreActionMenu, {
   ChoreActionMenuTrigger,
@@ -342,7 +343,7 @@ const ChoreCard = ({
                         }}
                       />
                     )}
-                    {chore.labelsV2?.map((l, index) => {
+                    {visibleLabels(chore.labelsV2).map((l, index) => {
                       return (
                         <div
                           role='none'
@@ -357,7 +358,10 @@ const ChoreCard = ({
                               onChipClick({ label: l })
                             }
                           }}
-                          style={{ display: 'inline-block', cursor: 'pointer' }} // Make the wrapper clickable
+                          style={{
+                            display: 'inline-block',
+                            cursor: 'pointer',
+                          }} // Make the wrapper clickable
                           key={`chorecard-${chore.id}-label-${l.id}`}
                         >
                           <Chip

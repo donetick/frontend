@@ -82,6 +82,7 @@ import {
   UpdateChorePriority,
   UpdateDueDate,
 } from '../../utils/Fetcher'
+import { visibleLabels } from '../../utils/Labels'
 import { offlineDB } from '../../utils/OfflineDB'
 import { getSafeBottomPadding } from '../../utils/SafeAreaUtils.js'
 import ChoreActionMenu from '../components/ChoreActionMenu'
@@ -902,7 +903,7 @@ const ChoreView = () => {
             gap: 0.5,
           }}
         >
-          {chore?.labelsV2?.map((label, index) => (
+          {visibleLabels(chore?.labelsV2).map((label, index) => (
             <Chip
               key={index}
               sx={{

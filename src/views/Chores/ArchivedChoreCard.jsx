@@ -6,6 +6,7 @@ import {
   getTextColorFromBackgroundColor,
 } from '../../utils/Colors.jsx'
 import { useDateFormatter } from '../../utils/DateFormatter'
+import { visibleLabels as getVisibleLabels } from '../../utils/Labels'
 
 const ArchivedChoreCard = ({
   chore,
@@ -26,10 +27,11 @@ const ArchivedChoreCard = ({
     ? performers.find(p => p.userId === chore.assignedTo)?.displayName
     : null
 
-  const visibleLabels = chore.labelsV2?.slice(0, 2) ?? []
+  const publicLabels = getVisibleLabels(chore.labelsV2)
+  const visibleLabels = publicLabels.slice(0, 2)
   const extraLabelCount = Math.max(
     0,
-    (chore.labelsV2?.length ?? 0) - visibleLabels.length,
+    publicLabels.length - visibleLabels.length,
   )
   const showMetaRow = Boolean(assigneeName) || visibleLabels.length > 0
 

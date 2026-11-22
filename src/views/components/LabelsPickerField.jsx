@@ -1,11 +1,13 @@
 import { Add, Check, Label } from '@mui/icons-material'
-import { Button } from '@mui/joy'
+import { Box, Button } from '@mui/joy'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { filterLabels, sortLabels } from '../../utils/LabelPickerOptions'
+import { isSystemLabel } from '../../utils/Labels'
 import LabelModal from '../Modals/Inputs/LabelModal'
 import BaseOptionPicker from './BaseOptionPicker'
+import HiddenLabelIndicator from './HiddenLabelIndicator'
 
 const LabelsPickerField = ({
   emptyDisplay = 'icon-text',
@@ -47,9 +49,14 @@ const LabelsPickerField = ({
             }}
           />
         )}
-        renderItemEnd={({ selected }) =>
-          selected ? <Check sx={{ fontSize: 18, ml: 'auto' }} /> : null
-        }
+        renderItemEnd={({ item, selected }) => (
+          <Box
+            sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 'auto' }}
+          >
+            {isSystemLabel(item) && <HiddenLabelIndicator />}
+            {selected && <Check sx={{ fontSize: 18 }} />}
+          </Box>
+        )}
         getTriggerText={({ isEmpty, selectedItems }) => {
           if (isEmpty) return t('picker.label')
           if (selectedItems.length === 1) return selectedItems[0].name
