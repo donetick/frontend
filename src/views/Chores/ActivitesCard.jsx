@@ -149,14 +149,18 @@ const ActivityItem = ({ activity, members, onViewNote }) => {
         </Avatar>
       </ListItemDecorator>
 
-      <ListItemContent sx={{ flex: 1 }}>
+      <ListItemContent sx={{ flex: 1, minWidth: 0, overflowWrap: 'anywhere' }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
           {/* Activity header */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography level='title-sm' sx={{ flex: 1 }}>
+            <Typography level='title-sm' sx={{ flex: 1, minWidth: 0 }}>
               {activity.choreName}
             </Typography>
-            <Typography level='body-xs' color='text.secondary'>
+            <Typography
+              level='body-xs'
+              color='text.secondary'
+              sx={{ flexShrink: 0 }}
+            >
               {getTimeDisplay(
                 activity.performedAt ||
                   activity.updatedAt ||
@@ -166,7 +170,14 @@ const ActivityItem = ({ activity, members, onViewNote }) => {
           </Box>
 
           {/* Who completed it */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: 0.5,
+            }}
+          >
             {/* Status chip */}
 
             <Chip
@@ -223,7 +234,7 @@ const ActivityItem = ({ activity, members, onViewNote }) => {
                 }}
               >
                 <Notes sx={{ fontSize: 14, mt: 0.1, flexShrink: 0 }} />
-                <Box sx={{ flex: 1 }}>
+                <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Typography
                     level='body-xs'
                     sx={{
@@ -452,7 +463,15 @@ const ActivitiesCard = ({ title }) => {
       </Box>
 
       {/* Scrollable activity list */}
-      <Box sx={{ maxHeight: 280, overflowY: 'auto', flex: 1 }}>
+      <Box
+        sx={{
+          maxHeight: 280,
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          minWidth: 0,
+          flex: 1,
+        }}
+      >
         {Object.entries(groupedActivities).map(([date, activities]) => {
           const isToday = moment(date).isSame(moment(), 'day')
           const isYesterday = moment(date).isSame(
