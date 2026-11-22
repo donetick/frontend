@@ -5,11 +5,20 @@
  */
 
 :root {
-  /* Fallback values for safe area insets when not on native platforms */
-  --safe-area-inset-top: 0px;
-  --safe-area-inset-right: 0px;
-  --safe-area-inset-bottom: 0px;
-  --safe-area-inset-left: 0px;
+  /* Values for safe area insets when not on native platforms. The browser's
+   * own insets are the right answer on mobile web: iOS reports the home
+   * indicator in a standalone PWA and the minimized Safari toolbar that
+   * overlays the bottom of the page while scrolling, so a `position: fixed`
+   * bottom bar needs this to avoid being cut off. `viewport-fit=cover` in
+   * index.html is what makes these non-zero.
+   *
+   * On native, StatusBarManager sets these same properties inline on
+   * documentElement from the SafeArea plugin — an inline style outranks this
+   * rule, so the native values keep winning. */
+  --safe-area-inset-top: env(safe-area-inset-top, 0px);
+  --safe-area-inset-right: env(safe-area-inset-right, 0px);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-inset-left: env(safe-area-inset-left, 0px);
 }
 
 /* Utility classes for safe area handling */
