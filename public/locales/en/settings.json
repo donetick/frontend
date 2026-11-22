@@ -721,7 +721,7 @@
     "states": {
       "healthy": {
         "badge": "Connected",
-        "title": "Donetick is talking to your server",
+        "title": "Donetick is talking to the server",
         "description": "Requests are going through normally. If something still looks stale, check again to force a fresh round trip."
       },
       "degraded": {
@@ -769,7 +769,7 @@
     "recentFailuresTitle": "Recent failed requests",
     "recentFailuresDescription": "The last few requests the server refused or never answered.",
     "noFailures": "No failed requests in this session.",
-    "sessionOnlyNote": "Collected in this session only — these details reset when the app restarts."
+    "sessionOnlyNote": "Collected in this session only. these details reset when the app restarts."
   },
   "sidepanel": {
     "title": "Sidepanel Customization",
