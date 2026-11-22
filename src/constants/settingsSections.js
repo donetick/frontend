@@ -5,6 +5,7 @@ import {
   CalendarMonth,
   Circle,
   CloudQueue,
+  CloudSync,
   Code,
   FamilyRestroom,
   Hub,
@@ -73,6 +74,9 @@ export const SETTINGS_SECTIONS = [
   { id: 'storage', icon: Storage, group: 'data' },
   { id: 'privacy', icon: PrivacyTip, group: 'data' },
   { id: 'advanced', icon: Settings, group: 'advanced' },
+  // Reached from the sync indicator when something is wrong, and from Advanced
+  // when someone goes looking for "which server am I on?".
+  { id: 'connection', icon: CloudSync, parent: 'advanced' },
   // Not a settings page: `to` sends this row to the library's own route.
   // It lives here because Settings is where people look for a feature they
   // remember existing, and it sits with storage because both are about

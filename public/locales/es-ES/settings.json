@@ -395,7 +395,13 @@
       "description": "Donetick es compatible con Model Context Protocol (MCP), un estándar abierto que conecta asistentes de IA con aplicaciones. Una vez conectado, el asistente puede consultar tus tareas y gestionarlas por ti: «¿Qué tengo pendiente para hoy?», «Añade sacar la basura todos los martes», «Marca fregar los platos como completado».",
       "permissions": "El asistente usa tu cuenta y ve exactamente lo mismo que tú. Cada cambio respeta los mismos permisos, recordatorios y webhooks que la propia aplicación.",
       "docs": "Leer la documentación de MCP",
-      "tools": { "tasks": "Tareas y labores del hogar", "labels": "Etiquetas", "projects": "Proyectos", "filters": "Filtros", "things": "Objetos" }
+      "tools": {
+        "tasks": "Tareas y labores del hogar",
+        "labels": "Etiquetas",
+        "projects": "Proyectos",
+        "filters": "Filtros",
+        "things": "Objetos"
+      }
     },
     "enable": {
       "title": "Actívalo en tu servidor",

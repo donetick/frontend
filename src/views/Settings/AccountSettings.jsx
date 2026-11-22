@@ -9,6 +9,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import moment from 'moment'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 
 import SubscriptionModal from '../../components/SubscriptionModal'
 import { useLocalization } from '../../contexts/LocalizationContext'
@@ -33,12 +34,23 @@ const surfaceSx = {
   borderRadius: 'xl',
 }
 
+// Mirrors AuthProviderType in dt-core (internal/user/model/model.go): a
+// non-zero provider means the account has no Donetick password at all --
+// credentials live with Google/Apple/the SSO server.
+const AUTH_PROVIDER = {
+  DONETICK: 0,
+  OAUTH2: 1,
+  GOOGLE: 2,
+  APPLE: 3,
+}
+
 const AccountSettings = () => {
   const { t } = useTranslation('settings')
   const { data: userProfile } = useUserProfile()
   const queryClient = useQueryClient()
   const { showNotification } = useNotification()
   const { fmt } = useLocalization()
+  const navigate = useNavigate()
 
   const [changePasswordModal, setChangePasswordModal] = useState(false)
   const [subscriptionModal, setSubscriptionModal] = useState(false)
@@ -71,6 +83,22 @@ const AccountSettings = () => {
           date: fmt.date(userProfile.expiration),
         })
       : t('accountSettings.freeDescription')
+
+  // Self-hosted instances let you set a password straight from here; on
+  // donetick.com the change goes through the emailed reset link instead.
+  const isSelfHosted = import.meta.env.VITE_IS_SELF_HOSTED === 'true'
+  const authProvider = userProfile.provider ?? AUTH_PROVIDER.DONETICK
+  const hasLocalPassword = authProvider === AUTH_PROVIDER.DONETICK
+  // Child accounts have no email, so there is nowhere to send a reset link --
+  // their password is managed by the parent from Sub-accounts settings.
+  const canEmailReset = Boolean(userProfile.email)
+  const canChangePassword = hasLocalPassword && (isSelfHosted || canEmailReset)
+  const externalProviderName =
+    authProvider === AUTH_PROVIDER.GOOGLE
+      ? t('accountSettings.providerGoogle')
+      : authProvider === AUTH_PROVIDER.APPLE
+        ? t('accountSettings.providerApple')
+        : t('accountSettings.providerSso')
 
   const showPurchaseError = error => {
     if (error?.code === '1') return
@@ -283,53 +311,89 @@ const AccountSettings = () => {
           </Box>
         </Sheet>
 
-        {import.meta.env.VITE_IS_SELF_HOSTED === 'true' && (
-          <Box component='section' sx={{ mt: 3.5 }}>
-            <Typography
-              level='title-md'
-              sx={{ fontWeight: 650, letterSpacing: '-0.01em', mb: 1.25 }}
-            >
-              {t('accountSettings.password')}
-            </Typography>
-            <Sheet
-              sx={{
-                ...surfaceSx,
-                alignItems: { xs: 'flex-start', sm: 'center' },
-                display: 'flex',
-                flexDirection: { xs: 'column', sm: 'row' },
-                gap: 1.5,
-                justifyContent: 'space-between',
-                p: 2,
-              }}
-            >
-              <Box sx={{ alignItems: 'center', display: 'flex', gap: 1.5 }}>
-                <Box
-                  sx={{
-                    bgcolor: 'background.level2',
-                    borderRadius: '50%',
-                    color: 'text.secondary',
-                    display: 'grid',
-                    flex: '0 0 auto',
-                    height: 42,
-                    placeItems: 'center',
-                    width: 42,
-                  }}
-                >
-                  <LockOutlined />
-                </Box>
-                <Typography level='body-md'>••••••••••••</Typography>
+        <Box component='section' sx={{ mt: 3.5 }}>
+          <Typography
+            level='title-md'
+            sx={{ fontWeight: 650, letterSpacing: '-0.01em', mb: 1.25 }}
+          >
+            {t('accountSettings.password')}
+          </Typography>
+          <Sheet
+            sx={{
+              ...surfaceSx,
+              alignItems: { xs: 'flex-start', sm: 'center' },
+              display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
+              gap: 1.5,
+              justifyContent: 'space-between',
+              p: 2,
+            }}
+          >
+            <Box sx={{ alignItems: 'center', display: 'flex', gap: 1.5 }}>
+              <Box
+                sx={{
+                  bgcolor: 'background.level2',
+                  borderRadius: '50%',
+                  color: 'text.secondary',
+                  display: 'grid',
+                  flex: '0 0 auto',
+                  height: 42,
+                  placeItems: 'center',
+                  width: 42,
+                }}
+              >
+                <LockOutlined />
               </Box>
+              <Box>
+                <Typography level='body-md'>
+                  {hasLocalPassword
+                    ? '••••••••••••'
+                    : t('accountSettings.passwordManagedBy', {
+                        provider: externalProviderName,
+                      })}
+                </Typography>
+                <Typography
+                  level='body-sm'
+                  textColor='text.secondary'
+                  sx={{ maxWidth: 420, textWrap: 'pretty' }}
+                >
+                  {!hasLocalPassword
+                    ? t('accountSettings.passwordProviderDescription', {
+                        provider: externalProviderName,
+                      })
+                    : isSelfHosted
+                      ? t('accountSettings.passwordLocalDescription')
+                      : canEmailReset
+                        ? t('accountSettings.passwordResetDescription')
+                        : t('accountSettings.passwordNoEmailDescription')}
+                </Typography>
+              </Box>
+            </Box>
+            {canChangePassword && (
               <Button
                 variant='soft'
                 startDecorator={<LockOutlined />}
-                onClick={() => setChangePasswordModal(true)}
-                sx={{ width: { xs: '100%', sm: 'auto' } }}
+                onClick={() => {
+                  if (isSelfHosted) {
+                    setChangePasswordModal(true)
+                    return
+                  }
+                  navigate('/forgot-password', {
+                    state: {
+                      email: userProfile.email,
+                      returnTo: '/settings/account',
+                    },
+                  })
+                }}
+                sx={{ flexShrink: 0, width: { xs: '100%', sm: 'auto' } }}
               >
-                {t('accountSettings.changePassword')}
+                {isSelfHosted
+                  ? t('accountSettings.changePassword')
+                  : t('accountSettings.resetPassword')}
               </Button>
-            </Sheet>
-          </Box>
-        )}
+            )}
+          </Sheet>
+        </Box>
 
         <Box component='section' sx={{ mt: 4 }}>
           <Sheet
