@@ -1046,7 +1046,9 @@
     "analysisFailed": "We couldn't analyze this photo",
     "attachmentStillAdded": "Your photo is still attached.",
     "continueManually": "You can continue creating the task manually.",
-    "dismissAnalysis": "Dismiss photo analysis"
+    "dismissAnalysis": "Dismiss photo analysis",
+    "scrollFieldsStart": "Show previous fields",
+    "scrollFieldsEnd": "Show more fields"
   },
   "repeat": {
     "days": {
