@@ -2,39 +2,38 @@ import '@meauxt/react-swipeable-list/dist/styles.css'
 
 import { SwipeableList, Type as ListType } from '@meauxt/react-swipeable-list'
 import {
-  AccessTime,
-  Add,
-  BrowseGallery,
   Delete,
   Edit,
   MoreVert,
-  PauseCircle,
+  Pause,
   Person,
   PlayArrow,
+  Timer as TimerIcon,
 } from '@mui/icons-material'
-import EditIcon from '@mui/icons-material/Edit'
 import {
   Alert,
   Avatar,
   Box,
   Button,
-  Card,
-  CardContent,
   Chip,
   Container,
+  Divider,
   FormControl,
   FormHelperText,
-  Grid,
+  FormLabel,
   IconButton,
   Input,
+  Sheet,
   Typography,
 } from '@mui/joy'
 import moment from 'moment'
+import PropTypes from 'prop-types'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 
 import EmptyState from '../../components/common/EmptyState'
+import ModalActions from '../../components/common/ModalActions'
 import SwipeActionButton from '../../components/common/SwipeActionButton'
 import { TrailingSwipeActions as TrailingActions } from '../../components/common/SwipeActionTray'
 import SwipeListItem, {
@@ -43,7 +42,8 @@ import SwipeListItem, {
 import { viewportMedia } from '../../constants/responsive'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useChorePermissions } from '../../hooks/useChorePermissions'
-import { useChoreDetails } from '../../queries/ChoreQueries'
+import { useResponsiveModal } from '../../hooks/useResponsiveModal'
+import { useChore } from '../../queries/ChoreQueries'
 import {
   useChoreTimer,
   usePauseChore,
@@ -54,11 +54,12 @@ import { useCircleMembers } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { notInCompletionWindow } from '../../utils/Chores'
 import { commandQueue, CommandType } from '../../utils/CommandQueue'
+import { hapticMedium } from '../../utils/Haptics'
 import { resolvePhotoURL } from '../../utils/Helpers'
 import { isOfflineFeatureEnabled } from '../../utils/OfflineFeatureToggle'
-import { getSafeBottom, getSafeBottomStyles } from '../../utils/SafeAreaUtils'
+import { getSafeBottomPadding } from '../../utils/SafeAreaUtils'
 import LoadingComponent from '../components/Loading'
-import ScrollHideFab from '../components/ScrollHideFab'
+import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 
 // Effectively "can this action be queued offline?" — requires the offline
 // feature, otherwise there is no command queue to replay it later.
@@ -67,18 +68,114 @@ const isNetworkError = err =>
   err instanceof TypeError &&
   err.message === 'Failed to fetch'
 
+const surfaceSx = {
+  bgcolor: 'background.surface',
+  border: '1px solid',
+  borderColor: 'divider',
+  borderRadius: 'xl',
+}
+
+const heroBackground =
+  'linear-gradient(145deg, var(--joy-palette-background-surface) 30%, var(--joy-palette-primary-softBg) 140%)'
+
+const formatClock = seconds => {
+  const hours = Math.floor(seconds / 3600)
+  const minutes = Math.floor((seconds % 3600) / 60)
+  const secs = seconds % 60
+  return [hours, minutes, secs].map(part => part.toString().padStart(2, '0'))
+}
+
+const formatTime = seconds => formatClock(seconds).join(':')
+
+const formatDuration = seconds => {
+  if (seconds < 60) return `${seconds}s`
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ${seconds % 60}s`
+  const hours = Math.floor(seconds / 3600)
+  const minutes = Math.floor((seconds % 3600) / 60)
+  return `${hours}h ${minutes}m`
+}
+
+// A breathing dot is the cheapest way to say "this number is still moving"
+// without animating the digits themselves.
+const LiveDot = ({ color = 'primary' }) => (
+  <Box
+    sx={{
+      bgcolor: `${color}.solidBg`,
+      borderRadius: '50%',
+      flex: '0 0 auto',
+      height: 8,
+      width: 8,
+      animation: 'timerPulse 1.8s ease-in-out infinite',
+      '@keyframes timerPulse': {
+        '0%, 100%': { opacity: 1, transform: 'scale(1)' },
+        '50%': { opacity: 0.3, transform: 'scale(0.65)' },
+      },
+    }}
+  />
+)
+
+LiveDot.propTypes = {
+  color: PropTypes.string,
+}
+
+const StatCell = ({ label, value, valueColor }) => (
+  <Box sx={{ flex: 1, minWidth: 0, px: { xs: 0.5, sm: 1 } }}>
+    <Typography
+      level='body-xs'
+      textColor='text.tertiary'
+      sx={{
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+      }}
+    >
+      {label}
+    </Typography>
+    <Typography
+      level='title-md'
+      textColor={valueColor}
+      sx={{ fontVariantNumeric: 'tabular-nums', mt: 0.25 }}
+    >
+      {value}
+    </Typography>
+  </Box>
+)
+
+StatCell.propTypes = {
+  label: PropTypes.string.isRequired,
+  value: PropTypes.node.isRequired,
+  valueColor: PropTypes.string,
+}
+
+const LegendKey = ({ label, sx }) => (
+  <Box sx={{ alignItems: 'center', display: 'flex', gap: 0.625 }}>
+    <Box sx={{ borderRadius: 'xs', height: 8, width: 8, ...sx }} />
+    <Typography level='body-xs' textColor='text.tertiary'>
+      {label}
+    </Typography>
+  </Box>
+)
+
+LegendKey.propTypes = {
+  label: PropTypes.string.isRequired,
+  sx: PropTypes.object,
+}
+
 const TimerDetails = () => {
-  const { t } = useTranslation(['timer', 'chores'])
+  const { t } = useTranslation(['timer', 'chores', 'common'])
   const { choreId } = useParams()
-  const { data: choreData } = useChoreDetails(choreId)
+  const { data: choreData } = useChore(choreId)
   const permissions = useChorePermissions(choreData?.res)
   const { fmt } = useLocalization()
   const [timerData, setTimerData] = useState(null)
   const [loading, setLoading] = useState(false)
   const [editingSessions, setEditingSessions] = useState({})
+  const [editingPauseIndex, setEditingPauseIndex] = useState(null)
+  const { ResponsiveModal } = useResponsiveModal()
   const [currentTime, setCurrentTime] = useState(new Date())
   const [timerActionLoading, setTimerActionLoading] = useState(false)
   const [showMoreInfoId, setShowMoreInfoId] = useState(null)
+  const [confirmConfig, setConfirmConfig] = useState({})
   const { showError, showSuccess } = useNotification()
 
   // Fetch circle members data
@@ -86,7 +183,11 @@ const TimerDetails = () => {
     useCircleMembers()
 
   // Timer hooks
-  const { data: choreTimer, refetch: refetchTimer } = useChoreTimer(choreId)
+  const {
+    data: choreTimer,
+    isLoading: isTimerLoading,
+    refetch: refetchTimer,
+  } = useChoreTimer(choreId)
   const startChore = useStartChore()
   const pauseChore = usePauseChore()
   const updateTimeSession = useUpdateTimeSession()
@@ -100,7 +201,10 @@ const TimerDetails = () => {
 
   // Update timerData when choreTimer data changes
   useEffect(() => {
-    if (choreTimer?.res) {
+    if (choreTimer) {
+      // A resumed interval may start after the last one-second clock tick.
+      // Publish a fresh clock with the new data, not one tick later.
+      setCurrentTime(new Date())
       setTimerData(choreTimer.res)
     }
   }, [choreTimer])
@@ -119,25 +223,10 @@ const TimerDetails = () => {
     }
   }, [timerData])
 
-  const formatTime = seconds => {
-    const hours = Math.floor(seconds / 3600)
-    const minutes = Math.floor((seconds % 3600) / 60)
-    const secs = seconds % 60
-    return `${hours.toString().padStart(2, '0')}:${minutes
-      .toString()
-      .padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
-  }
-
-  const formatDuration = seconds => {
-    if (seconds < 60) return `${seconds}s`
-    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ${seconds % 60}s`
-    const hours = Math.floor(seconds / 3600)
-    const minutes = Math.floor((seconds % 3600) / 60)
-    return `${hours}h ${minutes}m`
-  }
-
-  const startEditingSession = () => {
+  const startEditingSession = pause => {
     if (timerData && permissions.editTime) {
+      setShowMoreInfoId(null)
+      setEditingPauseIndex(timerData.pauseLog.indexOf(pause))
       setEditingSessions(prev => ({
         ...prev,
         [timerData.id]: {
@@ -153,24 +242,6 @@ const TimerDetails = () => {
     }
   }
 
-  const addPauseLogEntry = sessionId => {
-    setEditingSessions(prev => ({
-      ...prev,
-      [sessionId]: {
-        ...prev[sessionId],
-        pauseLog: [
-          ...prev[sessionId].pauseLog,
-          {
-            start: new Date().toISOString(),
-            end: null,
-            duration: 0,
-            updatedBy: 0, // This should be current user ID
-          },
-        ],
-      },
-    }))
-  }
-
   const updatePauseLogEntry = (sessionId, pauseIndex, field, value) => {
     setEditingSessions(prev => {
       const updatedPauseLog = prev[sessionId].pauseLog.map((pause, index) => {
@@ -181,7 +252,12 @@ const TimerDetails = () => {
           if (updatedPause.start && updatedPause.end) {
             const startTime = new Date(updatedPause.start)
             const endTime = new Date(updatedPause.end)
-            updatedPause.duration = Math.floor((endTime - startTime) / 1000)
+            updatedPause.duration = Math.max(
+              0,
+              Math.floor((endTime - startTime) / 1000),
+            )
+          } else {
+            updatedPause.duration = 0
           }
 
           return updatedPause
@@ -199,18 +275,6 @@ const TimerDetails = () => {
     })
   }
 
-  const deletePauseLogEntry = (sessionId, pauseIndex) => {
-    setEditingSessions(prev => ({
-      ...prev,
-      [sessionId]: {
-        ...prev[sessionId],
-        pauseLog: prev[sessionId].pauseLog.filter(
-          (_, index) => index !== pauseIndex,
-        ),
-      },
-    }))
-  }
-
   const cancelEditingSession = sessionId => {
     setEditingSessions(prev => {
       const { [sessionId]: removed, ...rest } = prev
@@ -222,19 +286,38 @@ const TimerDetails = () => {
     const editingData = editingSessions[sessionId]
     if (!editingData) return
 
+    const editedPause = editingData.pauseLog[editingPauseIndex]
+    if (
+      !editedPause?.start ||
+      (editedPause.end &&
+        new Date(editedPause.end) < new Date(editedPause.start))
+    ) {
+      showError({
+        title: t('toast.sessionUpdateFailTitle'),
+        message: t('toast.tryAgain'),
+      })
+      return
+    }
+
     setLoading(true)
     try {
-      // Use the auto-calculated duration from the editing session
+      // Merge only the selected interval into the latest timer data.
+      const pauseLog = timerData.pauseLog.map((entry, index) =>
+        index === editingPauseIndex ? editedPause : entry,
+      )
       const updateData = {
         startTime: new Date(editingData.startTime).toISOString(),
         endTime: editingData.endTime
           ? new Date(editingData.endTime).toISOString()
           : null,
-        duration: editingData.duration,
-        pauseLog: editingData.pauseLog,
+        duration: pauseLog.reduce(
+          (total, entry) => total + (entry.duration || 0),
+          0,
+        ),
+        pauseLog,
       }
 
-      updateTimeSession.mutate(
+      await updateTimeSession.mutateAsync(
         { choreId, sessionId, sessionData: updateData },
         {
           onSuccess: () => {
@@ -342,7 +425,7 @@ const TimerDetails = () => {
 
   // Determine if timer is currently running
   const isTimerRunning = () => {
-    if (!timerData || !timerData.pauseLog) return false
+    if (!timerData || timerData.endTime || !timerData.pauseLog) return false
     return timerData.pauseLog.some(session => session.start && !session.end)
   }
 
@@ -355,7 +438,7 @@ const TimerDetails = () => {
       ? new Date(timerData.endTime)
       : currentTime
 
-    return Math.floor((endTime - startTime) / 1000) // in seconds
+    return Math.max(0, Math.floor((endTime - startTime) / 1000))
   }
 
   // Calculate current active duration (including ongoing session) (real-time)
@@ -363,7 +446,7 @@ const TimerDetails = () => {
     if (!timerData || !timerData.pauseLog) return 0
 
     let totalActive = 0
-    const now = currentTime
+    const now = timerData.endTime ? new Date(timerData.endTime) : currentTime
 
     timerData.pauseLog.forEach(session => {
       if (session.start && session.end) {
@@ -373,11 +456,16 @@ const TimerDetails = () => {
         )
       } else if (session.start && !session.end) {
         // Ongoing session - real-time calculation
-        totalActive += Math.floor((now - new Date(session.start)) / 1000)
+        // Clamp each interval so a stale clock or clock skew cannot subtract
+        // seconds from work already completed before resuming.
+        totalActive += Math.max(
+          0,
+          Math.floor((now - new Date(session.start)) / 1000),
+        )
       }
     })
 
-    return totalActive
+    return Math.max(0, totalActive)
   }
 
   // Calculate idle time (total time minus active time) (real-time)
@@ -388,11 +476,66 @@ const TimerDetails = () => {
     return Math.max(0, totalDuration - activeDuration)
   }
 
-  const handleEditSession = () => {
-    startEditingSession()
+  const handleEditSession = pause => {
+    startEditingSession(pause)
   }
 
-  if (loading || isCircleMembersLoading) {
+  // A row is one work interval inside the timer session, so removing it is an
+  // update of the remaining pause log — not a delete of the session record.
+  // Identity, never index: the list is sorted newest-first.
+  const removePauseEntry = async pause => {
+    const remaining = (timerData.pauseLog || []).filter(
+      entry => entry !== pause,
+    )
+    setLoading(true)
+    try {
+      await updateTimeSession.mutateAsync({
+        choreId,
+        sessionId: timerData.id,
+        sessionData: {
+          startTime: timerData.startTime,
+          endTime: timerData.endTime || null,
+          // The stored duration is total active seconds, so it has to lose the
+          // deleted interval with it.
+          duration: remaining.reduce(
+            (total, entry) => total + (entry.duration || 0),
+            0,
+          ),
+          pauseLog: remaining,
+        },
+      })
+      showSuccess({
+        title: t('toast.sessionDeletedTitle'),
+        message: t('toast.sessionDeletedMessage'),
+      })
+      refetchTimer()
+    } catch (error) {
+      showError({
+        title: t('toast.sessionDeleteErrorTitle'),
+        message: error?.message || t('toast.tryAgain'),
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const confirmDeletePauseEntry = pause => {
+    setShowMoreInfoId(null)
+    setConfirmConfig({
+      isOpen: true,
+      title: t('toast.deleteConfirmTitle'),
+      message: t('toast.deleteConfirmMessage'),
+      confirmText: t('common:delete'),
+      cancelText: t('common:cancel'),
+      color: 'danger',
+      onClose: isConfirmed => {
+        setConfirmConfig({})
+        if (isConfirmed) removePauseEntry(pause)
+      },
+    })
+  }
+
+  if (isTimerLoading || isCircleMembersLoading) {
     return <LoadingComponent />
   }
 
@@ -407,10 +550,29 @@ const TimerDetails = () => {
           ? 'chores:permissions.window'
           : null
 
-  return (
-    <Container maxWidth='lg' sx={{ py: 2 }}>
-      {/* Header */}
+  const running = isTimerRunning()
+  const finished = Boolean(timerData?.endTime)
+  const activeSeconds = calculateCurrentActiveDuration()
+  const totalSeconds = calculateTotalDuration()
+  const idleSeconds = calculateIdleTime()
+  const activePercent = activeSeconds
+    ? Math.round((activeSeconds / Math.max(totalSeconds, 1)) * 100)
+    : 0
+  const [clockHours, clockMinutes, clockSeconds] = formatClock(activeSeconds)
+  const sessions = timerData?.pauseLog || []
+  const isEditing = Boolean(timerData && editingSessions[timerData.id])
 
+  return (
+    <Container
+      maxWidth='md'
+      sx={{
+        pb: getSafeBottomPadding(4),
+        pt: 1.5,
+        px: { xs: 2, sm: 3 },
+        // The mobile bottom bar owns the bottom edge here.
+        [viewportMedia.mobile]: { pb: getSafeBottomPadding(11) },
+      }}
+    >
       {loading && (
         <Alert color='neutral' sx={{ mb: 2 }}>
           {t('loading')}
@@ -423,1030 +585,644 @@ const TimerDetails = () => {
         </Alert>
       )}
 
-      {!loading && timerData && (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-          {/* Timer Summary */}
-          <Card
-            variant='plain'
-            sx={{
-              p: 0,
-            }}
-          >
-            {/* Stats Grid */}
-            <Grid container spacing={2} sx={{ mb: 3 }}>
-              {/* Active Time */}
-              <Grid item xs={6} sm={6} md={3}>
-                <Card
-                  variant='soft'
-                  sx={{
-                    borderRadius: 'md',
-                    boxShadow: 1,
-                    px: 2,
-                    py: 1,
-                    minHeight: 90,
-                    height: '100%',
-                    justifyContent: 'start',
-                  }}
-                >
-                  <CardContent>
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'start',
-                        mb: 0.5,
-                      }}
-                    >
-                      <PlayArrow
-                        sx={{
-                          fontSize: 16,
-                          mr: 1,
-                        }}
-                      />
-                      <Typography
-                        level='body-md'
-                        sx={{
-                          fontWeight: '500',
-                          color: 'text.primary',
-                        }}
-                      >
-                        {t('activeWork')}
-                      </Typography>
-                    </Box>
-                    <Box>
-                      <Typography
-                        level='h4'
-                        color='primary'
-                        sx={{
-                          fontWeight: 'bold',
-                          lineHeight: 1.5,
-                        }}
-                      >
-                        {formatDuration(calculateCurrentActiveDuration())}
-                      </Typography>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
-
-              {/* Idle Time */}
-              <Grid item xs={6} sm={6} md={3}>
-                <Card
-                  variant='soft'
-                  sx={{
-                    borderRadius: 'md',
-                    boxShadow: 1,
-                    px: 2,
-                    py: 1,
-                    minHeight: 90,
-                    height: '100%',
-                    justifyContent: 'start',
-                  }}
-                >
-                  <CardContent>
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'start',
-                        mb: 0.5,
-                      }}
-                    >
-                      <PauseCircle
-                        sx={{
-                          fontSize: 16,
-                          mr: 1,
-                        }}
-                      />
-                      <Typography
-                        level='body-md'
-                        sx={{
-                          fontWeight: '500',
-                          color: 'text.primary',
-                        }}
-                      >
-                        {t('breakTime')}
-                      </Typography>
-                    </Box>
-                    <Box>
-                      <Typography
-                        level='h4'
-                        color='warning'
-                        sx={{
-                          fontWeight: 'bold',
-                          lineHeight: 1.5,
-                        }}
-                      >
-                        {formatDuration(calculateIdleTime())}
-                      </Typography>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
-
-              {/* Total Sessions */}
-              <Grid item xs={6} sm={6} md={3}>
-                <Card
-                  variant='soft'
-                  sx={{
-                    borderRadius: 'md',
-                    boxShadow: 1,
-                    px: 2,
-                    py: 1,
-                    minHeight: 90,
-                    height: '100%',
-                    justifyContent: 'start',
-                  }}
-                >
-                  <CardContent>
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'start',
-                        mb: 0.5,
-                      }}
-                    >
-                      <BrowseGallery
-                        sx={{
-                          fontSize: 16,
-                          mr: 1,
-                        }}
-                      />
-                      <Typography
-                        level='body-md'
-                        sx={{
-                          fontWeight: '500',
-                          color: 'text.primary',
-                        }}
-                      >
-                        {t('sessions')}
-                      </Typography>
-                    </Box>
-                    <Box>
-                      <Typography
-                        level='h4'
-                        sx={{
-                          color: 'text.secondary',
-                          fontWeight: 'bold',
-                          lineHeight: 1.5,
-                        }}
-                      >
-                        {timerData.pauseLog?.length || 0}
-                      </Typography>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
-
-              {/* Total Session Time */}
-              <Grid item xs={6} sm={6} md={3}>
-                <Card
-                  variant='soft'
-                  sx={{
-                    borderRadius: 'md',
-                    boxShadow: 1,
-                    px: 2,
-                    py: 1,
-                    minHeight: 90,
-                    height: '100%',
-                    justifyContent: 'start',
-                  }}
-                >
-                  <CardContent>
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'start',
-                        mb: 0.5,
-                      }}
-                    >
-                      <AccessTime
-                        sx={{
-                          fontSize: 16,
-                          mr: 1,
-                        }}
-                      />
-                      <Typography
-                        level='body-md'
-                        sx={{
-                          fontWeight: '500',
-                          color: 'text.primary',
-                        }}
-                      >
-                        {t('totalTime')}
-                      </Typography>
-                    </Box>
-                    <Box>
-                      <Typography
-                        level='h4'
-                        sx={{
-                          color: 'text.secondary',
-                          fontWeight: 'bold',
-                          lineHeight: 1.5,
-                        }}
-                      >
-                        {formatTime(calculateTotalDuration())}
-                      </Typography>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
-            </Grid>
-
-            {/* Progress Bar */}
-            <Box>
+      {timerData && (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {/* Hero: the running clock, the one control that matters, and the
+              shape of the session — stacked so a glance answers "how long have
+              I worked, and is it still counting?" */}
+          <Sheet sx={{ ...surfaceSx, overflow: 'hidden' }}>
+            <Box
+              sx={{
+                background: heroBackground,
+                p: { xs: 2.25, sm: 3 },
+                position: 'relative',
+              }}
+            >
               <Box
                 sx={{
+                  bgcolor: 'primary.softBg',
+                  borderRadius: '50%',
+                  filter: 'blur(2px)',
+                  height: 180,
+                  opacity: 0.5,
+                  position: 'absolute',
+                  right: -80,
+                  top: -90,
+                  width: 180,
+                }}
+              />
+              <Box sx={{ position: 'relative' }}>
+                <Box
+                  sx={{
+                    alignItems: 'center',
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: 1,
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <Chip
+                    size='sm'
+                    variant='soft'
+                    color={
+                      running ? 'primary' : finished ? 'success' : 'warning'
+                    }
+                    startDecorator={running ? <LiveDot /> : undefined}
+                  >
+                    {finished
+                      ? t('common:done')
+                      : running
+                        ? t('liveSession')
+                        : t('breakTime')}
+                  </Chip>
+                  <Typography level='body-xs' textColor='text.tertiary'>
+                    {finished
+                      ? t('timeline.ended', {
+                          time: fmt.time(timerData.endTime),
+                        })
+                      : t('timeline.started', {
+                          time: fmt.time(timerData.startTime),
+                        })}
+                  </Typography>
+                </Box>
+
+                {/* Seconds step back visually so the digits that actually
+                    matter stay readable while they tick. */}
+                <Box
+                  sx={{
+                    alignItems: 'baseline',
+                    display: 'flex',
+                    gap: 0.5,
+                    mt: 1.5,
+                  }}
+                >
+                  <Typography
+                    component='span'
+                    sx={{
+                      fontSize: 'clamp(2.75rem, 13vw, 4rem)',
+                      fontVariantNumeric: 'tabular-nums',
+                      fontWeight: 650,
+                      letterSpacing: '-0.05em',
+                      lineHeight: 1,
+                    }}
+                  >
+                    {clockHours}:{clockMinutes}
+                  </Typography>
+                  <Typography
+                    component='span'
+                    textColor='text.tertiary'
+                    sx={{
+                      fontSize: 'clamp(1.25rem, 6vw, 1.75rem)',
+                      fontVariantNumeric: 'tabular-nums',
+                      fontWeight: 600,
+                      letterSpacing: '-0.03em',
+                      lineHeight: 1,
+                    }}
+                  >
+                    :{clockSeconds}
+                  </Typography>
+                </Box>
+                <Typography
+                  level='body-sm'
+                  textColor='text.secondary'
+                  sx={{ mt: 0.75 }}
+                >
+                  {t('activeWork')}
+                </Typography>
+
+                {!finished && (
+                  <Button
+                    size='lg'
+                    color={running ? 'warning' : 'primary'}
+                    startDecorator={running ? <Pause /> : <PlayArrow />}
+                    onClick={running ? handlePauseTimer : handleStartTimer}
+                    loading={timerActionLoading}
+                    disabled={
+                      loading || timerActionLoading || Boolean(timerRestriction)
+                    }
+                    sx={{
+                      alignSelf: 'flex-start',
+                      borderRadius: 'lg',
+                      mt: 2.25,
+                      minWidth: 170,
+                      width: { xs: '100%', sm: 'auto' },
+                    }}
+                  >
+                    {running ? t('pause') : t('resume')}
+                  </Button>
+                )}
+                {timerRestriction && (
+                  <Typography
+                    level='body-xs'
+                    textColor='text.secondary'
+                    sx={{ mt: 1 }}
+                  >
+                    {t(timerRestriction)}
+                  </Typography>
+                )}
+              </Box>
+            </Box>
+
+            <Divider />
+
+            {/* One bar instead of the old progress bar + separate timeline:
+                filled runs are work, the gaps between them are the breaks. */}
+            <Box sx={{ p: { xs: 2, sm: 2.5 } }}>
+              <Box
+                sx={{
+                  alignItems: 'baseline',
                   display: 'flex',
+                  gap: 1,
                   justifyContent: 'space-between',
-                  alignItems: 'center',
                   mb: 1,
                 }}
               >
-                <Typography
-                  level='body-sm'
-                  sx={{ color: 'text.secondary', fontWeight: 'medium' }}
-                >
-                  {t('distribution')}
+                <Typography level='title-sm'>
+                  {t('activityTimeline')}
                 </Typography>
-                <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
-                  {calculateCurrentActiveDuration() > 0
-                    ? t('percentActive', {
-                        percent: Math.round(
-                          (calculateCurrentActiveDuration() /
-                            calculateTotalDuration()) *
-                            100,
-                        ),
-                      })
+                <Typography level='body-xs' textColor='text.tertiary'>
+                  {activeSeconds > 0
+                    ? t('percentActive', { percent: activePercent })
                     : t('noActiveTime')}
                 </Typography>
               </Box>
-              <Box
-                sx={{
-                  height: 8,
-                  backgroundColor: 'neutral.200',
-                  borderRadius: 'sm',
-                  overflow: 'hidden',
-                  position: 'relative',
-                }}
-              >
-                <Box
-                  sx={{
-                    height: '100%',
-                    width: `${Math.round((calculateCurrentActiveDuration() / Math.max(calculateTotalDuration(), 1)) * 100)}%`,
-                    backgroundColor: 'primary.solidBg',
-                    borderRadius: 'sm',
-                    transition: 'width 0.3s ease-in-out',
-                  }}
-                />
-              </Box>
 
-              {/* Timeline Graph */}
-              <Box sx={{ mt: 3 }}>
-                <Typography
-                  level='body-sm'
-                  sx={{ color: 'text.secondary', fontWeight: 'medium', mb: 2 }}
-                >
-                  {t('activityTimeline')}
-                </Typography>
+              {sessions.length > 0 ? (
+                <>
+                  <Box
+                    sx={{
+                      bgcolor: 'neutral.softBg',
+                      borderRadius: 'sm',
+                      height: 10,
+                      overflow: 'hidden',
+                      position: 'relative',
+                    }}
+                  >
+                    {sessions.map((session, index) => {
+                      const sessionStart = new Date(session.start)
+                      const sessionEnd = session.end
+                        ? new Date(session.end)
+                        : currentTime
+                      const startOffset = Math.max(
+                        0,
+                        (sessionStart - new Date(timerData.startTime)) / 1000,
+                      )
+                      const sessionDuration = Math.max(
+                        0,
+                        (sessionEnd - sessionStart) / 1000,
+                      )
+                      const isOngoing = !session.end
 
-                {timerData &&
-                timerData.pauseLog &&
-                timerData.pauseLog.length > 0 ? (
-                  <Box>
-                    {/* Timeline visualization */}
-                    <Box
-                      sx={{
-                        height: 40,
-                        backgroundColor: 'neutral.100',
-                        borderRadius: 'sm',
-                        position: 'relative',
-                        overflow: 'hidden',
-                        border: '1px solid',
-                        borderColor: 'divider',
-                        mb: 2,
-                      }}
-                    >
-                      {(() => {
-                        const totalDuration = calculateTotalDuration()
-                        const startTime = new Date(timerData.startTime)
-
-                        return timerData.pauseLog.map((session, index) => {
-                          const sessionStart = new Date(session.start)
-                          const sessionEnd = session.end
-                            ? new Date(session.end)
-                            : currentTime
-
-                          // Calculate position and width as percentages
-                          const startOffset = Math.max(
-                            0,
-                            (sessionStart - startTime) / 1000,
-                          )
-                          const sessionDuration = Math.max(
-                            0,
-                            (sessionEnd - sessionStart) / 1000,
-                          )
-
-                          const leftPercent =
-                            (startOffset / Math.max(totalDuration, 1)) * 100
-                          const widthPercent =
-                            (sessionDuration / Math.max(totalDuration, 1)) * 100
-
-                          const isOngoing = !session.end
-
-                          return (
-                            <Box
-                              key={index}
-                              sx={{
-                                position: 'absolute',
-                                left: `${leftPercent}%`,
-                                width: `${widthPercent}%`,
-                                height: '100%',
-                                backgroundColor: isOngoing
-                                  ? 'primary.solidHoverBg'
-                                  : 'primary.solidBg',
-                                borderRight: isOngoing ? '2px solid' : 'none',
-                                borderRightColor: 'primary.outlinedBorder',
-                                transition: 'all 0.3s ease-in-out',
-                                '&:hover': {
-                                  backgroundColor: 'primary.solidActiveBg',
-                                  zIndex: 1,
-                                },
-                              }}
-                              title={`Session ${index + 1}: ${formatDuration(sessionDuration)} ${isOngoing ? '(ongoing)' : ''}`}
-                            />
-                          )
-                        })
-                      })()}
-                    </Box>
-
-                    {/* Legend and time markers */}
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        flexWrap: 'wrap',
-                        gap: 2,
-                      }}
-                    >
-                      {/* Legend */}
-                      <Box
-                        sx={{ display: 'flex', gap: 2, alignItems: 'center' }}
-                      >
+                      return (
                         <Box
+                          key={index}
+                          title={`${t('sessionNumberShort', {
+                            number: index + 1,
+                          })} · ${formatDuration(Math.floor(sessionDuration))}`}
                           sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 0.5,
+                            bgcolor: isOngoing
+                              ? 'primary.solidHoverBg'
+                              : 'primary.solidBg',
+                            borderRadius: 'sm',
+                            height: '100%',
+                            left: `${(startOffset / Math.max(totalSeconds, 1)) * 100}%`,
+                            // Sub-minute runs would otherwise vanish entirely.
+                            minWidth: 3,
+                            position: 'absolute',
+                            width: `${(sessionDuration / Math.max(totalSeconds, 1)) * 100}%`,
                           }}
-                        >
-                          <Box
-                            sx={{
-                              width: 12,
-                              height: 12,
-                              backgroundColor: 'primary.solidBg',
-                              borderRadius: 'xs',
-                            }}
-                          />
-                          <Typography
-                            level='body-xs'
-                            sx={{ color: 'text.tertiary' }}
-                          >
-                            {t('activeWork')}
-                          </Typography>
-                        </Box>
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 0.5,
-                          }}
-                        >
-                          <Box
-                            sx={{
-                              width: 12,
-                              height: 12,
-                              backgroundColor: 'neutral.100',
-                              borderRadius: 'xs',
-                              border: '1px solid',
-                              borderColor: 'divider',
-                            }}
-                          />
-                          <Typography
-                            level='body-xs'
-                            sx={{ color: 'text.tertiary' }}
-                          >
-                            {t('breakTime')}
-                          </Typography>
-                        </Box>
-                        {isTimerRunning() && (
-                          <Box
-                            sx={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: 0.5,
-                            }}
-                          >
-                            <Box
-                              sx={{
-                                width: 12,
-                                height: 12,
-                                backgroundColor: 'primary.solidHoverBg',
-                                borderRadius: 'xs',
-                                border: '2px solid',
-                                borderColor: 'primary.outlinedBorder',
-                              }}
-                            />
-                            <Typography
-                              level='body-xs'
-                              sx={{ color: 'text.tertiary' }}
-                            >
-                              {t('liveSession')}
-                            </Typography>
-                          </Box>
-                        )}
-                      </Box>
-
-                      {/* Time markers */}
-                      <Box
-                        sx={{ display: 'flex', gap: 2, alignItems: 'center' }}
-                      >
-                        <Typography
-                          level='body-xs'
-                          sx={{ color: 'text.tertiary' }}
-                        >
-                          {t('timeline.started', {
-                            time: fmt.time(timerData.startTime),
-                          })}
-                        </Typography>
-                        {timerData.endTime && (
-                          <Typography
-                            level='body-xs'
-                            sx={{ color: 'text.tertiary' }}
-                          >
-                            {t('timeline.ended', {
-                              time: fmt.time(timerData.endTime),
-                            })}
-                          </Typography>
-                        )}
-                        {!timerData.endTime && (
-                          <Typography
-                            level='body-xs'
-                            sx={{ color: 'primary.plainColor' }}
-                          >
-                            {t('timeline.now', { time: fmt.time(currentTime) })}
-                          </Typography>
-                        )}
-                        <Typography
-                          level='body-xs'
-                          sx={{ color: 'text.tertiary' }}
-                        >
-                          {t('timeline.active', {
-                            percent:
-                              calculateCurrentActiveDuration() > 0
-                                ? Math.round(
-                                    (calculateCurrentActiveDuration() /
-                                      calculateTotalDuration()) *
-                                      100,
-                                  )
-                                : 0,
-                          })}
-                        </Typography>
-                      </Box>
-                    </Box>
+                        />
+                      )
+                    })}
                   </Box>
-                ) : (
-                  <Alert color='neutral' variant='soft' sx={{ py: 2 }}>
-                    <Typography level='body-sm'>
-                      {t('timeline.emptyState')}
+                  <Box
+                    sx={{
+                      alignItems: 'center',
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      gap: 1.5,
+                      justifyContent: 'space-between',
+                      mt: 1.25,
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', gap: 1.5 }}>
+                      <LegendKey
+                        label={t('activeWork')}
+                        sx={{ bgcolor: 'primary.solidBg' }}
+                      />
+                      <LegendKey
+                        label={t('breakTime')}
+                        sx={{ bgcolor: 'neutral.softBg' }}
+                      />
+                    </Box>
+                    <Typography
+                      level='body-xs'
+                      textColor={
+                        finished ? 'text.tertiary' : 'primary.plainColor'
+                      }
+                    >
+                      {finished
+                        ? t('timeline.ended', {
+                            time: fmt.time(timerData.endTime),
+                          })
+                        : t('timeline.now', { time: fmt.time(currentTime) })}
                     </Typography>
-                  </Alert>
-                )}
-              </Box>
+                  </Box>
+                </>
+              ) : (
+                <Typography level='body-sm' textColor='text.secondary'>
+                  {t('timeline.emptyState')}
+                </Typography>
+              )}
             </Box>
-          </Card>
 
-          {!permissions.editTime && (
-            <Typography level='body-sm'>
-              {t('chores:permissions.editTime')}
-            </Typography>
-          )}
-          {timerRestriction && (
-            <Typography level='body-sm'>{t(timerRestriction)}</Typography>
-          )}
-          {/* Session Breakdown */}
-          <Box sx={{ mt: 2 }}>
+            <Divider />
+
+            {/* The three numbers that used to be three chunky cards. */}
             <Box
               sx={{
+                bgcolor: 'background.level1',
                 display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                mb: 2,
+                px: { xs: 1.5, sm: 2 },
+                py: 1.5,
               }}
             >
-              <Typography level='h4'>{t('sessionBreakdown')}</Typography>
-              {permissions.editTime && !editingSessions[timerData.id] && (
-                <Button
-                  variant='outlined'
-                  color='primary'
-                  startDecorator={<Edit />}
-                  onClick={() => startEditingSession()}
-                  size='sm'
-                >
-                  {t('common:edit')}
-                </Button>
-              )}
-              {editingSessions[timerData.id] && (
-                <Box sx={{ display: 'flex', gap: 1 }}>
-                  <Button
-                    variant='outlined'
-                    onClick={() => cancelEditingSession(timerData.id)}
-                    size='sm'
-                  >
-                    {t('common:cancel')}
-                  </Button>
-                  <Button
-                    variant='solid'
-                    color='primary'
-                    onClick={() => saveSession(timerData.id)}
-                    loading={loading}
-                    size='sm'
-                  >
-                    {t('saveChanges')}
-                  </Button>
-                </Box>
-              )}
+              <StatCell
+                label={t('totalTime')}
+                value={formatTime(totalSeconds)}
+              />
+              <Divider orientation='vertical' />
+              <StatCell
+                label={t('breakTime')}
+                value={formatDuration(idleSeconds)}
+                valueColor={idleSeconds > 0 ? 'warning.plainColor' : undefined}
+              />
+              <Divider orientation='vertical' />
+              <StatCell label={t('sessions')} value={sessions.length} />
+            </Box>
+          </Sheet>
+
+          {/* Session Breakdown */}
+          <Box>
+            <Box
+              sx={{
+                alignItems: 'center',
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: 1,
+                justifyContent: 'space-between',
+                mb: 1.25,
+                px: 0.5,
+              }}
+            >
+              <Typography level='title-sm'>{t('sessionBreakdown')}</Typography>
             </Box>
 
-            {!editingSessions[timerData.id] ? (
-              <Box>
-                {/* Read-only view */}
-                {timerData.pauseLog && timerData.pauseLog.length > 0 && (
-                  <Box>
-                    <Typography
-                      level='body-md'
-                      sx={{ fontWeight: 'bold', mb: 2 }}
-                    >
-                      {t('timeline.workSessionsCount', {
-                        count: timerData.pauseLog.length,
-                      })}
-                    </Typography>
+            {!permissions.editTime && (
+              <Typography
+                level='body-xs'
+                textColor='text.tertiary'
+                sx={{ display: 'block', mb: 1, px: 0.5 }}
+              >
+                {t('chores:permissions.editTime')}
+              </Typography>
+            )}
 
-                    <SwipeableList
-                      type={ListType.IOS}
-                      fullSwipe
-                      threshold={SWIPE_COMMIT_THRESHOLD}
-                    >
-                      {timerData.pauseLog
-                        .sort((a, b) => moment(b.start) - moment(a.start))
-                        .map((pause, pauseIndex) => {
-                          const isOngoing = !pause.end
-                          const sessionDate = moment(pause.start).format(
-                            'MMM DD',
-                          )
-                          const startTime = fmt.time(pause.start)
-                          const endTime = pause.end ? fmt.time(pause.end) : null
+            <>
+              {sessions.length > 0 ? (
+                <Sheet sx={{ ...surfaceSx, overflow: 'hidden' }}>
+                  <SwipeableList
+                    type={ListType.IOS}
+                    fullSwipe
+                    threshold={SWIPE_COMMIT_THRESHOLD}
+                  >
+                    {[...sessions]
+                      .sort((a, b) => moment(b.start) - moment(a.start))
+                      .map((pause, pauseIndex) => {
+                        const isOngoing = !pause.end
+                        const sessionUser =
+                          pause.updatedBy && pause.updatedBy !== 0
+                            ? getMemberById(pause.updatedBy)
+                            : null
+                        const realTimeDuration = isOngoing
+                          ? Math.max(
+                              0,
+                              Math.floor(
+                                (currentTime - new Date(pause.start)) / 1000,
+                              ),
+                            )
+                          : pause.duration
 
-                          const realTimeDuration = isOngoing
-                            ? Math.max(
-                                0,
-                                Math.floor(
-                                  (currentTime - new Date(pause.start)) / 1000,
-                                ),
-                              )
-                            : pause.duration
-
-                          return (
-                            <SwipeListItem
-                              key={pauseIndex}
-                              swipeActionOpen={
-                                showMoreInfoId === pauseIndex
-                                  ? 'trailing'
-                                  : null
-                              }
-                              trailingActions={
-                                <TrailingActions
-                                  description={t('chores:permissions.editTime')}
-                                >
-                                  <SwipeActionButton
-                                    disabled={!permissions.editTime}
-                                    onClick={() => handleEditSession()}
-                                    icon={<EditIcon />}
-                                    label={t('common:edit')}
-                                  />
-                                </TrailingActions>
-                              }
-                            >
-                              {/* Session Card Content */}
-                              <Card
-                                variant='soft'
-                                sx={{
-                                  p: 2,
-                                  display: 'flex',
-                                  flexDirection: 'row',
-                                  alignItems: 'center',
-                                  gap: 2,
-                                  minHeight: 'auto',
-                                  borderColor: isOngoing
-                                    ? 'primary.outlinedBorder'
-                                    : 'divider',
-                                  borderRadius: 0,
-                                  borderBottom: '1px solid',
-                                  minWidth: '100%',
-                                }}
+                        return (
+                          <SwipeListItem
+                            key={pauseIndex}
+                            swipeActionOpen={
+                              showMoreInfoId === pauseIndex ? 'trailing' : null
+                            }
+                            trailingActions={
+                              <TrailingActions
+                                description={t('chores:permissions.editTime')}
                               >
-                                {/* Session indicator */}
+                                <SwipeActionButton
+                                  disabled={!permissions.editTime}
+                                  onClick={() => {
+                                    hapticMedium()
+                                    handleEditSession(pause)
+                                  }}
+                                  bgcolor='primary.solidBg'
+                                  color='primary.solidColor'
+                                  icon={<Edit />}
+                                  label={t('common:edit')}
+                                />
+                                <SwipeActionButton
+                                  disabled={!permissions.editTime}
+                                  onClick={() => {
+                                    hapticMedium()
+                                    confirmDeletePauseEntry(pause)
+                                  }}
+                                  bgcolor='danger.500'
+                                  color='#fff'
+                                  icon={<Delete />}
+                                  label={t('common:delete')}
+                                />
+                              </TrailingActions>
+                            }
+                          >
+                            {/* Rows read as a log: the time range leads,
+                                  the duration is the number you compare. */}
+                            <Box
+                              sx={{
+                                alignItems: 'center',
+                                bgcolor: 'background.surface',
+                                borderTop:
+                                  pauseIndex === 0 ? 'none' : '1px solid',
+                                borderColor: 'divider',
+                                display: 'flex',
+                                gap: 1.5,
+                                minWidth: 0,
+                                px: { xs: 1.5, sm: 2 },
+                                py: 1.5,
+                                width: '100%',
+                              }}
+                            >
+                              {isOngoing ? (
+                                <LiveDot />
+                              ) : (
                                 <Box
                                   sx={{
-                                    width: 8,
-                                    height: 8,
+                                    bgcolor: 'neutral.softActiveBg',
                                     borderRadius: '50%',
-                                    backgroundColor: isOngoing
-                                      ? 'primary.solidBg'
-                                      : 'neutral.400',
-                                    flexShrink: 0,
+                                    flex: '0 0 auto',
+                                    height: 8,
+                                    width: 8,
                                   }}
                                 />
+                              )}
 
-                                {/* Duration - Main focus */}
-                                <Box sx={{ flexShrink: 0 }}>
-                                  <Typography
-                                    level='h4'
-                                    sx={{
-                                      fontWeight: 'bold',
-                                      color: isOngoing
-                                        ? 'primary.plainColor'
-                                        : 'text.primary',
-                                      lineHeight: 1,
-                                      mb: 0.3,
-                                    }}
-                                  >
-                                    {formatDuration(realTimeDuration)}
-                                  </Typography>
-                                  <Box
-                                    sx={{ display: 'flex', gap: 0.5, mt: 0.5 }}
-                                  >
-                                    {isOngoing && (
-                                      <Chip
-                                        size='sm'
-                                        color='primary'
-                                        variant='soft'
-                                        sx={{ fontSize: '0.7rem' }}
-                                      >
-                                        {t('live')}
-                                      </Chip>
-                                    )}
-                                    {/* User chip showing who started the session */}
-                                    {pause.updatedBy &&
-                                      pause.updatedBy !== 0 &&
-                                      (() => {
-                                        const sessionUser = getMemberById(
-                                          pause.updatedBy,
-                                        )
-                                        return sessionUser ? (
-                                          <Chip
-                                            size='sm'
-                                            variant='outlined'
-                                            color='neutral'
-                                            startDecorator={
-                                              <Avatar
-                                                size='sm'
-                                                src={resolvePhotoURL(
-                                                  sessionUser?.image,
-                                                )}
-                                                sx={{ width: 16, height: 16 }}
-                                              >
-                                                {sessionUser?.displayName?.charAt(
-                                                  0,
-                                                ) ||
-                                                  sessionUser?.name?.charAt(
-                                                    0,
-                                                  ) || <Person />}
-                                              </Avatar>
-                                            }
-                                            sx={{ fontSize: '0.7rem' }}
-                                          >
-                                            {sessionUser?.displayName ||
-                                              sessionUser?.name ||
-                                              'Unknown'}
-                                          </Chip>
-                                        ) : null
-                                      })()}
-                                  </Box>
-                                </Box>
-
-                                {/* Session details */}
+                              <Box sx={{ flex: 1, minWidth: 0 }}>
+                                <Typography
+                                  level='body-sm'
+                                  sx={{
+                                    fontVariantNumeric: 'tabular-nums',
+                                    fontWeight: 550,
+                                  }}
+                                >
+                                  {fmt.time(pause.start)}
+                                  {pause.end
+                                    ? ` → ${fmt.time(pause.end)}`
+                                    : ` ${t('timeline.ongoing')}`}
+                                </Typography>
                                 <Box
                                   sx={{
-                                    flex: 1,
-                                    minWidth: 0,
-                                    textAlign: 'right',
+                                    alignItems: 'center',
+                                    display: 'flex',
+                                    flexWrap: 'wrap',
+                                    gap: 0.75,
+                                    mt: 0.25,
                                   }}
                                 >
-                                  <Typography
-                                    level='body-sm'
-                                    sx={{
-                                      fontWeight: 'medium',
-                                      color: 'text.secondary',
-                                      mb: 0.2,
-                                    }}
-                                  >
-                                    {t('timeline.sessionNumber', {
-                                      number: pauseIndex + 1,
-                                    })}{' '}
-                                    • {sessionDate}
-                                  </Typography>
                                   <Typography
                                     level='body-xs'
-                                    sx={{
-                                      color: 'text.tertiary',
-                                      fontFamily: 'monospace',
-                                    }}
+                                    textColor='text.tertiary'
                                   >
-                                    {startTime}{' '}
-                                    {endTime
-                                      ? `→ ${endTime}`
-                                      : t('timeline.ongoing')}
+                                    {moment(pause.start).format('MMM DD')}
                                   </Typography>
+                                  {sessionUser && (
+                                    <Chip
+                                      size='sm'
+                                      variant='soft'
+                                      color='neutral'
+                                      startDecorator={
+                                        <Avatar
+                                          size='sm'
+                                          src={resolvePhotoURL(
+                                            sessionUser?.image,
+                                          )}
+                                          sx={{ height: 16, width: 16 }}
+                                        >
+                                          {sessionUser?.displayName?.charAt(
+                                            0,
+                                          ) ||
+                                            sessionUser?.name?.charAt(0) || (
+                                              <Person />
+                                            )}
+                                        </Avatar>
+                                      }
+                                      sx={{ fontSize: '0.7rem' }}
+                                    >
+                                      {sessionUser?.displayName ||
+                                        sessionUser?.name ||
+                                        'Unknown'}
+                                    </Chip>
+                                  )}
                                 </Box>
+                              </Box>
 
-                                <IconButton
-                                  aria-label={t('chores:swipeActionsLabel')}
-                                  aria-expanded={showMoreInfoId === pauseIndex}
-                                  color='neutral'
-                                  variant='plain'
-                                  size='sm'
-                                  onClick={e => {
-                                    e.stopPropagation()
-                                    if (showMoreInfoId === pauseIndex) {
-                                      setShowMoreInfoId(null)
-                                    } else {
-                                      setShowMoreInfoId(pauseIndex)
-                                    }
-                                  }}
-                                >
-                                  <MoreVert sx={{ fontSize: 18 }} />
-                                </IconButton>
-                              </Card>
-                            </SwipeListItem>
-                          )
-                        })}
-                    </SwipeableList>
-                  </Box>
-                )}
+                              <Typography
+                                level='title-sm'
+                                textColor={
+                                  isOngoing
+                                    ? 'primary.plainColor'
+                                    : 'text.primary'
+                                }
+                                sx={{
+                                  flex: '0 0 auto',
+                                  fontVariantNumeric: 'tabular-nums',
+                                }}
+                              >
+                                {formatDuration(realTimeDuration)}
+                              </Typography>
 
-                {(!timerData.pauseLog || timerData.pauseLog.length === 0) && (
+                              <IconButton
+                                aria-label={t('chores:swipeActionsLabel')}
+                                aria-expanded={showMoreInfoId === pauseIndex}
+                                color='neutral'
+                                variant='plain'
+                                size='sm'
+                                onClick={e => {
+                                  e.stopPropagation()
+                                  setShowMoreInfoId(
+                                    showMoreInfoId === pauseIndex
+                                      ? null
+                                      : pauseIndex,
+                                  )
+                                }}
+                              >
+                                <MoreVert sx={{ fontSize: 18 }} />
+                              </IconButton>
+                            </Box>
+                          </SwipeListItem>
+                        )
+                      })}
+                  </SwipeableList>
+                </Sheet>
+              ) : (
+                <Sheet sx={{ ...surfaceSx, p: 2 }}>
                   <EmptyState
                     size='sm'
-                    icon={<AccessTime />}
+                    icon={<TimerIcon />}
                     title={t('emptySessionsTitle')}
                     description={t('emptySessionsDescription')}
                   />
-                )}
-              </Box>
-            ) : (
-              <Box>
-                {/* Editing view */}
-                <Box
-                  sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 2,
-                  }}
-                >
-                  {/* Session Editor */}
-                  <Box>
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        mb: 2,
-                      }}
-                    >
-                      <Typography level='body-md' sx={{ fontWeight: 'bold' }}>
-                        {t('sessions')}
-                      </Typography>
-                      <Button
-                        size='sm'
-                        variant='outlined'
-                        startDecorator={<Add />}
-                        onClick={() => addPauseLogEntry(timerData.id)}
+                </Sheet>
+              )}
+            </>
+            {isEditing && (
+              <ResponsiveModal
+                open
+                onClose={() => !loading && cancelEditingSession(timerData.id)}
+                title={t('common:edit')}
+                size='lg'
+                footer={
+                  <ModalActions
+                    secondary={{
+                      label: t('common:cancel'),
+                      disabled: loading,
+                      onClick: () => cancelEditingSession(timerData.id),
+                    }}
+                    primary={{
+                      label: t('saveChanges'),
+                      loading,
+                      onClick: () => saveSession(timerData.id),
+                    }}
+                  />
+                }
+              >
+                {editingSessions[timerData.id].pauseLog.map(
+                  (pause, pauseIndex) =>
+                    pauseIndex === editingPauseIndex && (
+                      <Box
+                        key={pauseIndex}
+                        sx={{
+                          borderTop: pauseIndex === 0 ? 'none' : '1px solid',
+                          borderColor: 'divider',
+                          px: { xs: 2, sm: 2.5 },
+                          py: 2,
+                        }}
                       >
-                        {t('addSession')}
-                      </Button>
-                    </Box>
-
-                    {editingSessions[timerData.id].pauseLog.map(
-                      (pause, pauseIndex) => (
-                        <Card
-                          key={pauseIndex}
-                          variant='soft'
-                          sx={{ mb: 2, p: 2 }}
+                        <Box
+                          sx={{
+                            alignItems: 'center',
+                            display: 'flex',
+                            gap: 1,
+                            justifyContent: 'space-between',
+                            mb: 1.5,
+                          }}
                         >
+                          <Typography level='title-sm'>
+                            {t('timeline.sessionNumber', {
+                              number: pauseIndex + 1,
+                            })}
+                          </Typography>
                           <Box
                             sx={{
-                              display: 'flex',
-                              justifyContent: 'space-between',
                               alignItems: 'center',
-                              mb: 2,
+                              display: 'flex',
+                              gap: 1,
                             }}
                           >
-                            <Typography
-                              level='body-md'
-                              sx={{ fontWeight: 'bold' }}
-                            >
-                              {t('timeline.sessionNumber', {
-                                number: pauseIndex + 1,
-                              })}
-                            </Typography>
-                            <Button
+                            <Chip
                               size='sm'
-                              variant='outlined'
-                              color='danger'
-                              onClick={() =>
-                                deletePauseLogEntry(timerData.id, pauseIndex)
-                              }
+                              variant='soft'
+                              color='neutral'
+                              sx={{ fontVariantNumeric: 'tabular-nums' }}
                             >
-                              <Delete />
-                            </Button>
+                              {formatDuration(pause.duration)}
+                            </Chip>
                           </Box>
+                        </Box>
 
-                          <Box
-                            sx={{
-                              display: 'grid',
-                              gridTemplateColumns:
-                                'repeat(auto-fit, minmax(250px, 1fr))',
-                              gap: 2,
-                            }}
-                          >
-                            <FormControl size='sm'>
-                              <Typography
-                                level='body-sm'
-                                sx={{ fontWeight: 'bold', mb: 1 }}
-                              >
-                                {t('startTime')}
-                              </Typography>
-                              <Input
-                                type='datetime-local'
-                                value={moment(pause.start).format(
-                                  'YYYY-MM-DDTHH:mm:ss',
-                                )}
-                                onChange={e =>
-                                  updatePauseLogEntry(
-                                    timerData.id,
-                                    pauseIndex,
-                                    'start',
-                                    new Date(e.target.value).toISOString(),
-                                  )
-                                }
-                              />
-                            </FormControl>
+                        <Box
+                          sx={{
+                            display: 'grid',
+                            gap: 1.5,
+                            gridTemplateColumns: {
+                              xs: 'minmax(0, 1fr)',
+                              sm: 'repeat(2, minmax(0, 1fr))',
+                            },
+                          }}
+                        >
+                          <FormControl size='sm'>
+                            <FormLabel>{t('startTime')}</FormLabel>
+                            <Input
+                              type='datetime-local'
+                              slotProps={{ input: { step: 1 } }}
+                              value={
+                                pause.start
+                                  ? moment(pause.start).format(
+                                      'YYYY-MM-DDTHH:mm:ss',
+                                    )
+                                  : ''
+                              }
+                              onChange={e =>
+                                updatePauseLogEntry(
+                                  timerData.id,
+                                  pauseIndex,
+                                  'start',
+                                  e.target.value
+                                    ? new Date(e.target.value).toISOString()
+                                    : '',
+                                )
+                              }
+                            />
+                          </FormControl>
 
-                            <FormControl size='sm'>
-                              <Typography
-                                level='body-sm'
-                                sx={{ fontWeight: 'bold', mb: 1 }}
-                              >
-                                {t('endTime')}
-                              </Typography>
-                              <Input
-                                type='datetime-local'
-                                value={
-                                  pause.end
-                                    ? moment(pause.end).format(
-                                        'YYYY-MM-DDTHH:mm:ss',
-                                      )
-                                    : ''
-                                }
-                                onChange={e =>
-                                  updatePauseLogEntry(
-                                    timerData.id,
-                                    pauseIndex,
-                                    'end',
-                                    e.target.value
-                                      ? new Date(e.target.value).toISOString()
-                                      : null,
-                                  )
-                                }
-                              />
-                              <FormHelperText>{t('leaveEmpty')}</FormHelperText>
-                            </FormControl>
-
-                            <Box>
-                              <Typography
-                                level='body-sm'
-                                sx={{ fontWeight: 'bold', mb: 1 }}
-                              >
-                                {t('timeline.durationAutoCalculated')}
-                              </Typography>
-                              <Typography
-                                level='body-sm'
-                                sx={{
-                                  p: 1.5,
-                                  bgcolor: 'background.surface',
-                                  borderRadius: 'sm',
-                                  border: '1px solid',
-                                  borderColor: 'divider',
-                                }}
-                              >
-                                {formatDuration(pause.duration)} (
-                                {pause.duration}s)
-                              </Typography>
-                            </Box>
-                          </Box>
-                        </Card>
-                      ),
-                    )}
-                  </Box>
-                </Box>
-              </Box>
+                          <FormControl size='sm'>
+                            <FormLabel>{t('endTime')}</FormLabel>
+                            <Input
+                              type='datetime-local'
+                              slotProps={{ input: { step: 1 } }}
+                              value={
+                                pause.end
+                                  ? moment(pause.end).format(
+                                      'YYYY-MM-DDTHH:mm:ss',
+                                    )
+                                  : ''
+                              }
+                              onChange={e =>
+                                updatePauseLogEntry(
+                                  timerData.id,
+                                  pauseIndex,
+                                  'end',
+                                  e.target.value
+                                    ? new Date(e.target.value).toISOString()
+                                    : null,
+                                )
+                              }
+                            />
+                            <FormHelperText>{t('leaveEmpty')}</FormHelperText>
+                          </FormControl>
+                        </Box>
+                      </Box>
+                    ),
+                )}
+              </ResponsiveModal>
             )}
           </Box>
         </Box>
       )}
 
-      {/* Floating Timer Control Button */}
-      {!loading && timerData && (
-        <ScrollHideFab
-          sx={{
-            ...getSafeBottomStyles({ bottom: 0, padding: 16 }),
-            [viewportMedia.mobile]: {
-              bottom: getSafeBottom(56, 16),
-            },
-          }}
-        >
-          <IconButton
-            color={isTimerRunning() ? 'warning' : 'primary'}
-            variant='solid'
-            onClick={isTimerRunning() ? handlePauseTimer : handleStartTimer}
-            loading={timerActionLoading}
-            disabled={
-              loading || timerActionLoading || Boolean(timerRestriction)
-            }
-            sx={{
-              width: 56,
-              height: 56,
-              borderRadius: '50%',
-              boxShadow: 'lg',
-              transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-              transform: timerActionLoading ? 'scale(0.95)' : 'scale(1)',
-              animation: isTimerRunning()
-                ? 'pulse-warning 2s infinite'
-                : 'pulse-primary 2s infinite',
-              '&:hover': {
-                transform: 'scale(1.1)',
-                boxShadow: 'xl',
-              },
-              '&:active': {
-                transform: 'scale(0.95)',
-              },
-              '--Timer-actionGlow':
-                'color-mix(in srgb, var(--joy-palette-primary-solidBg) 30%, transparent)',
-              '--Timer-actionRing':
-                'color-mix(in srgb, var(--joy-palette-primary-solidBg) 70%, transparent)',
-              '@keyframes pulse-primary': {
-                '0%': {
-                  boxShadow:
-                    '0 4px 12px var(--Timer-actionGlow), 0 0 0 0 var(--Timer-actionRing)',
-                },
-                '70%': {
-                  boxShadow:
-                    '0 4px 12px var(--Timer-actionGlow), 0 0 0 10px transparent',
-                },
-                '100%': {
-                  boxShadow:
-                    '0 4px 12px var(--Timer-actionGlow), 0 0 0 0 transparent',
-                },
-              },
-              '@keyframes pulse-warning': {
-                '0%': {
-                  boxShadow:
-                    '0 4px 12px rgba(255, 152, 0, 0.3), 0 0 0 0 rgba(255, 152, 0, 0.7)',
-                },
-                '70%': {
-                  boxShadow:
-                    '0 4px 12px rgba(255, 152, 0, 0.3), 0 0 0 10px rgba(255, 152, 0, 0)',
-                },
-                '100%': {
-                  boxShadow:
-                    '0 4px 12px rgba(255, 152, 0, 0.3), 0 0 0 0 rgba(255, 152, 0, 0)',
-                },
-              },
-            }}
-            title={isTimerRunning() ? 'Pause Timer' : 'Start Timer'}
-          >
-            {isTimerRunning() ? (
-              <PauseCircle sx={{ fontSize: 24 }} />
-            ) : (
-              <PlayArrow sx={{ fontSize: 24 }} />
-            )}
-          </IconButton>
-        </ScrollHideFab>
-      )}
+      {confirmConfig?.isOpen && <ConfirmationModal config={confirmConfig} />}
     </Container>
   )
 }

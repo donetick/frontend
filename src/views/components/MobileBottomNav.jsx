@@ -61,8 +61,10 @@ const HIDDEN_ROUTES = [
   '/search',
 ]
 
+// The editor owns the bottom edge with its own save/cancel footer. The timer
+// view does not, so it keeps the bar and stays a normal page.
 const isTaskDetailRoute = pathname =>
-  /^\/chores\/(create|[^/]+\/(?:edit|timer))$/.test(pathname)
+  /^\/chores\/(create|[^/]+\/edit)$/.test(pathname)
 
 const isItemActive = (item, pathname) => {
   if (item.id === 'tasks') {

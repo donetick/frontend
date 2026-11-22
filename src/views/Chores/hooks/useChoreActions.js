@@ -290,33 +290,18 @@ export const useChoreActions = ({
           break
 
         case 'start': {
-          const startedChore = { ...chore, status: 1 }
           try {
-            await startChore.mutateAsync(chore.id)
-            queryClient.cancelQueries({ queryKey: ['chores'] })
-            queryClient.setQueryData(['chores', false], oldData => {
-              if (!oldData?.res) return oldData
-              return {
-                ...oldData,
-                res: oldData.res.map(c =>
-                  c.id === chore.id ? startedChore : c,
-                ),
-              }
-            })
-            updateChoreInState(startedChore, 'started', {
+            const data = await startChore.mutateAsync(chore.id)
+            updateChoreInState({ ...chore, ...data.res }, 'started', {
               skipInvalidation: true,
             })
           } catch (error) {
             if (isNetworkError(error)) {
-              const previousStatus = chore.status
               const cmdId = await commandQueue.enqueue(
                 CommandType.START_CHORE,
                 chore.id,
                 { id: chore.id },
               )
-              updateChoreInState(startedChore, 'started', {
-                skipInvalidation: true,
-              })
               queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
               showSuccess({
                 message: "You're offline — start will sync when back online",
@@ -325,11 +310,6 @@ export const useChoreActions = ({
                   queryClient.invalidateQueries({
                     queryKey: ['pendingCommands'],
                   })
-                  updateChoreInState(
-                    { ...chore, status: previousStatus },
-                    previousStatus === 2 ? 'paused' : 'started',
-                    { skipInvalidation: true },
-                  )
                 },
               })
             } else {
@@ -343,33 +323,18 @@ export const useChoreActions = ({
         }
 
         case 'pause': {
-          const pausedChore = { ...chore, status: 2 }
           try {
-            await pauseChore.mutateAsync(chore.id)
-            queryClient.cancelQueries({ queryKey: ['chores'] })
-            queryClient.setQueryData(['chores', false], oldData => {
-              if (!oldData?.res) return oldData
-              return {
-                ...oldData,
-                res: oldData.res.map(c =>
-                  c.id === chore.id ? pausedChore : c,
-                ),
-              }
-            })
-            updateChoreInState(pausedChore, 'paused', {
+            const data = await pauseChore.mutateAsync(chore.id)
+            updateChoreInState({ ...chore, ...data.res }, 'paused', {
               skipInvalidation: true,
             })
           } catch (error) {
             if (isNetworkError(error)) {
-              const previousStatus = chore.status
               const cmdId = await commandQueue.enqueue(
                 CommandType.PAUSE_CHORE,
                 chore.id,
                 { id: chore.id },
               )
-              updateChoreInState(pausedChore, 'paused', {
-                skipInvalidation: true,
-              })
               queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
               showSuccess({
                 message: "You're offline — pause will sync when back online",
@@ -378,11 +343,6 @@ export const useChoreActions = ({
                   queryClient.invalidateQueries({
                     queryKey: ['pendingCommands'],
                   })
-                  updateChoreInState(
-                    { ...chore, status: previousStatus },
-                    previousStatus === 2 ? 'paused' : 'started',
-                    { skipInvalidation: true },
-                  )
                 },
               })
             } else {

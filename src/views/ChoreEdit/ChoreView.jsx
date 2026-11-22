@@ -34,7 +34,7 @@ import {
 } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
 import moment from 'moment'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
@@ -46,10 +46,7 @@ import { useThemeSkin } from '../../contexts/ThemeSkinContext'
 import { useChorePermissions } from '../../hooks/useChorePermissions'
 import { useDescriptionHtml } from '../../hooks/useDescriptionHtml'
 import { usePendingCommands } from '../../hooks/usePendingCommands'
-import {
-  useChoreDetails,
-  useChoreHistory,
-} from '../../queries/ChoreQueries.jsx'
+import { useChore, useChoreHistory } from '../../queries/ChoreQueries.jsx'
 import {
   useChoreTimer,
   useDeleteTimeSession,
@@ -59,11 +56,11 @@ import {
 } from '../../queries/TimeQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
 import { useNotification } from '../../service/NotificationProvider'
+import { ChoreStatus, notInCompletionWindow } from '../../utils/Chores.jsx'
 import {
-  ChoreHistoryStatus,
-  ChoreStatus,
-  notInCompletionWindow,
-} from '../../utils/Chores.jsx'
+  choreTimerFields,
+  summarizeChoreHistory,
+} from '../../utils/ChoreSummary'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
 import { commandQueue, CommandType } from '../../utils/CommandQueue'
 import {
@@ -74,7 +71,6 @@ import {
   ApproveChore,
   ArchiveChore,
   DeleteChore,
-  GetChoreDetailById,
   MarkChoreComplete,
   NudgeChore,
   RejectChore,
@@ -129,16 +125,24 @@ const getNFCUrl = choreId =>
     : `${window.location.origin}/chores/${choreId}`
 
 const ChoreView = () => {
+  const { choreId } = useParams()
   const { t } = useTranslation('chores')
   const { fmt } = useLocalization()
   const { skin } = useThemeSkin()
   const completionColor = skin === 'default' ? 'success' : 'primary'
-  const [chore, setChore] = useState({})
+  const [choreRecord, setChore] = useState({})
+  const { data: choreHistoryData } = useChoreHistory(choreId)
+  const chore = useMemo(
+    () => ({
+      ...choreRecord,
+      ...summarizeChoreHistory(choreHistoryData?.res || []),
+    }),
+    [choreRecord, choreHistoryData],
+  )
   const permissions = useChorePermissions(chore)
   const navigate = useNavigate()
   const [performers, setPerformers] = useState([])
   const [infoCards, setInfoCards] = useState([])
-  const { choreId } = useParams()
   const [note, setNote] = useState(null)
   const queryClient = useQueryClient()
   const { showError, showSuccess, showUndo } = useNotification()
@@ -178,19 +182,11 @@ const ChoreView = () => {
     data: choreData,
     isError: isChoreError,
     isLoading: isChoreLoading,
-  } = useChoreDetails(choreId)
-  const { data: choreHistoryData } = useChoreHistory(choreId)
+  } = useChore(choreId)
 
   const { data: pendingCmds } = usePendingCommands(choreId)
 
-  const choreHistory = choreHistoryData?.res || []
-  const historyCompletionCount = choreHistory.filter(historyEntry => {
-    const status = Number(historyEntry?.status)
-    return status === ChoreHistoryStatus.COMPLETED
-  }).length
-  const completionCount = choreHistoryData
-    ? historyCompletionCount
-    : chore.totalCompletedCount || 0
+  const completionCount = chore.totalCompletedCount || 0
 
   const startChore = useStartChore()
   const pauseChore = usePauseChore()
@@ -286,6 +282,14 @@ const ChoreView = () => {
       })
       .catch(error => showError({ message: error.message }))
   }
+  const refreshTask = () =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['chores'] }),
+      queryClient.invalidateQueries({ queryKey: ['chore', choreId] }),
+      queryClient.invalidateQueries({ queryKey: ['choreHistory', choreId] }),
+      queryClient.invalidateQueries({ queryKey: ['choreTimer', choreId] }),
+    ])
+
   const handleTaskCompletion = async () => {
     try {
       const resp = await MarkChoreComplete(
@@ -300,12 +304,7 @@ const ChoreView = () => {
         const data = await resp.json()
         setNote(null)
         setChore(data.res)
-        queryClient.invalidateQueries({ queryKey: ['chores'] })
-        const detailResp = await GetChoreDetailById(choreId)
-        if (detailResp.ok) {
-          const detailData = await detailResp.json()
-          setChore(detailData.res)
-        }
+        await refreshTask()
         showSuccess({
           title: t('choreView.taskCompleted'),
           message: t('choreView.taskCompletedMessage'),
@@ -313,12 +312,7 @@ const ChoreView = () => {
             try {
               const undoResponse = await UndoChoreAction(choreId)
               if (undoResponse.ok) {
-                const detailResponse = await GetChoreDetailById(choreId)
-                if (detailResponse.ok) {
-                  const detailData = await detailResponse.json()
-                  setChore(detailData.res)
-                  queryClient.invalidateQueries({ queryKey: ['chores'] })
-                }
+                await refreshTask()
                 showUndo({
                   title: t('choreView.undoSuccessful'),
                   message: t('choreView.taskCompletionUndone'),
@@ -360,6 +354,7 @@ const ChoreView = () => {
           points: chore.points || 0,
           pending: true,
         })
+        queryClient.invalidateQueries({ queryKey: ['choreHistory', choreId] })
         queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
         showSuccess({
           message: t('choreView.offlineComplete'),
@@ -382,19 +377,14 @@ const ChoreView = () => {
       if (response.ok) {
         const data = await response.json()
         setChore(data.res)
-        queryClient.invalidateQueries({ queryKey: ['chores'] })
+        await refreshTask()
         showSuccess({
           message: t('choreView.skipTask'),
           undoAction: async () => {
             try {
               const undoResponse = await UndoChoreAction(choreId)
               if (undoResponse.ok) {
-                const detailResponse = await GetChoreDetailById(choreId)
-                if (detailResponse.ok) {
-                  const detailData = await detailResponse.json()
-                  setChore(detailData.res)
-                  queryClient.invalidateQueries({ queryKey: ['chores'] })
-                }
+                await refreshTask()
                 showUndo({
                   title: t('choreView.undoSuccessful'),
                   message: t('choreView.taskSkipUndone'),
@@ -435,7 +425,6 @@ const ChoreView = () => {
     }
   }
   const handleChoreStart = () => {
-    const startedChore = { ...chore, status: ChoreStatus.ACTIVE }
     startChore.mutate(choreId, {
       onSuccess: data => {
         const newChore = {
@@ -446,20 +435,17 @@ const ChoreView = () => {
       },
       onError: async error => {
         if (isNetworkError(error)) {
-          const previousStatus = chore.status
           const cmdId = await commandQueue.enqueue(
             CommandType.START_CHORE,
             choreId,
             { id: choreId },
           )
-          setChore(startedChore)
           queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
           showSuccess({
             message: t('choreView.offlineStart'),
             undoAction: async () => {
               await commandQueue.cancel(cmdId)
               queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
-              setChore({ ...chore, status: previousStatus })
             },
           })
           return
@@ -474,7 +460,6 @@ const ChoreView = () => {
   }
 
   const handleChorePause = () => {
-    const pausedChore = { ...chore, status: ChoreStatus.PAUSED }
     pauseChore.mutate(choreId, {
       onSuccess: data => {
         const newChore = {
@@ -485,20 +470,17 @@ const ChoreView = () => {
       },
       onError: async error => {
         if (isNetworkError(error)) {
-          const previousStatus = chore.status
           const cmdId = await commandQueue.enqueue(
             CommandType.PAUSE_CHORE,
             choreId,
             { id: choreId },
           )
-          setChore(pausedChore)
           queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
           showSuccess({
             message: t('choreView.offlinePause'),
             undoAction: async () => {
               await commandQueue.cancel(cmdId)
               queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
-              setChore({ ...chore, status: previousStatus })
             },
           })
           return
@@ -572,7 +554,7 @@ const ChoreView = () => {
       const response = await action(choreId)
       const data = await response.json()
       setChore(data.res)
-      queryClient.invalidateQueries({ queryKey: ['chores'] })
+      await refreshTask()
     } catch (error) {
       showError({ message: error.message })
     }
@@ -964,7 +946,7 @@ const ChoreView = () => {
                   (chore.status === ChoreStatus.PAUSED &&
                     notInCompletionWindow(chore))
                 }
-                chore={chore}
+                chore={{ ...chore, ...choreTimerFields(choreTimer?.res) }}
                 handleAction={action => {
                   if (action === 'pause') {
                     handleChorePause()

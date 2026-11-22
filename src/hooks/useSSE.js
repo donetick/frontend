@@ -107,7 +107,7 @@ export const useSSE = () => {
             const newChore = eventData.data.chore
 
             // Update individual chore cache
-            queryClient.setQueryData(['chore', newChore.id], {
+            queryClient.setQueryData(['chore', String(newChore.id)], {
               res: newChore,
             })
 
@@ -135,24 +135,23 @@ export const useSSE = () => {
             }
             const updatedChore = eventData.data.chore
 
-            // Update individual chore cache
-            queryClient.setQueryData(['chore', updatedChore.id], oldData => {
-              if (!oldData) return { res: updatedChore }
-              return { res: { ...oldData.res, ...updatedChore } }
-            })
+            // Query keys always carry the id as a string (it comes from the
+            // route params), so normalize before touching the cache.
+            const choreKey = String(updatedChore.id)
 
-            // If chore update then also refetch chore details:
-            if (
-              eventData.type === 'chore.updated' ||
-              eventData.type === 'chore.status'
-            ) {
-              queryClient.invalidateQueries({
-                queryKey: ['choreDetails', updatedChore.id],
-              })
-              queryClient.refetchQueries({
-                queryKey: ['choreDetails', updatedChore.id],
-              })
-            }
+            // Update individual chore cache so the open detail view reflects
+            // the change while the refetch below is in flight.
+            queryClient.setQueryData(['chore', choreKey], oldData =>
+              oldData ? { res: { ...oldData.res, ...updatedChore } } : oldData,
+            )
+            // Timer fields and history no longer come from a detail response.
+            queryClient.invalidateQueries({ queryKey: ['chore', choreKey] })
+            queryClient.invalidateQueries({
+              queryKey: ['choreTimer', choreKey],
+            })
+            queryClient.invalidateQueries({
+              queryKey: ['choreHistory', choreKey],
+            })
 
             // Update chores list cache - add debugging
             queryClient.setQueryData(['chores', false], oldData => {
@@ -231,23 +230,24 @@ export const useSSE = () => {
           case 'subtask.updated':
           case 'subtask.completed':
             queryClient.setQueryData(
-              ['choreDetails', String(eventData.data.choreId)], // this should be string to match the query key type which is param in the url in choreView
+              ['chore', String(eventData.data.choreId)],
               oldData => {
                 if (!oldData) return oldData
-                console.log('Old choreDetails data:', oldData)
 
                 // Update the specific subtask within the chore details
                 const newChoreData = { ...oldData.res }
-                newChoreData.subTasks = newChoreData.subTasks.map(subtask => {
-                  if (subtask.id === eventData.data.subtaskId) {
-                    return {
-                      ...subtask,
-                      completedAt: eventData.data.completedAt,
-                      completedBy: eventData.data.user.id,
+                newChoreData.subTasks = (newChoreData.subTasks || []).map(
+                  subtask => {
+                    if (subtask.id === eventData.data.subtaskId) {
+                      return {
+                        ...subtask,
+                        completedAt: eventData.data.completedAt,
+                        completedBy: eventData.data.user.id,
+                      }
                     }
-                  }
-                  return subtask
-                })
+                    return subtask
+                  },
+                )
                 return { res: newChoreData }
               },
             )

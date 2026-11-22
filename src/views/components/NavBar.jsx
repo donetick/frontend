@@ -50,6 +50,8 @@ import SyncStatusIndicator from './SyncStatusIndicator'
 const COMPACT_NAV_WIDTH = 60
 const EXPANDED_NAV_WIDTH = 232
 const PUBLIC_PAGES = ['/landing', '/privacy', '/terms']
+// Entry points of the app: there is no parent to go back to from here.
+const ROOT_PAGES = ['/', '/home', '/chores']
 const NAVBAR_TITLE_KEYS = {
   '/activities': 'navigation.activities',
   '/archived': 'navigation.archived',
@@ -203,69 +205,65 @@ const NavBar = () => {
     },
   ]
 
-  const getMenuIcon = () => {
-    const menuButton = (
-      <IconButton
-        aria-label={t('navigation.openMenu', { defaultValue: 'Open menu' })}
-        size='md'
-        variant='plain'
-        onClick={() => setDrawerOpen(true)}
-        sx={{ borderRadius: 'md', minHeight: 44, minWidth: 44 }}
-      >
-        <MenuRounded />
-      </IconButton>
-    )
+  const isNative = Capacitor.isNativePlatform()
+  // A filtered /chores view is reached from somewhere else, so it is a child
+  // page even though its path is a root one.
+  const isRootPage =
+    ROOT_PAGES.includes(location.pathname) && !searchParams.get('filterId')
+  const showBack = !isRootPage
+  // Back replaces the menu rather than joining it. A root page has nothing to
+  // go back to, so it shows the menu instead -- except on a native phone,
+  // where the bottom nav's "More" already opens the same drawer.
+  const showMenu = !showBack && !(isNative && isMobile)
 
-    if (location.pathname === '/search') {
-      return (
+  const navigateBack = () => {
+    // Keep the native shortcut out of a filtered task list back to home.
+    if (location.pathname === '/chores') {
+      navigate('/')
+      return
+    }
+    // react-router tracks the entry index; 0 means this is the first entry of
+    // the session (deep link, PWA cold start), where going back would leave
+    // the app, so fall back to the task list instead.
+    if (window.history.state?.idx > 0) navigate(-1)
+    else navigate('/chores', { replace: true })
+  }
+
+  const backLabel =
+    location.pathname === '/search'
+      ? t('backFromSearch')
+      : searchParams.get('from') === 'calendar'
+        ? t('backToCalendar')
+        : t('back')
+
+  const renderLeadingAction = () => (
+    <>
+      {showBack && (
         <IconButton
           size='md'
           variant='plain'
-          onClick={() => {
-            if (window.history.state?.idx > 0) navigate(-1)
-            else navigate('/chores', { replace: true })
-          }}
-          aria-label={t('backFromSearch')}
-          title={t('back')}
+          onClick={navigateBack}
+          aria-label={backLabel}
+          title={backLabel}
           sx={{ borderRadius: 'md', minHeight: 44, minWidth: 44 }}
         >
           <ArrowBack className='rtl-flip' />
         </IconButton>
-      )
-    }
-
-    if (!Capacitor.isNativePlatform()) return menuButton
-
-    if (
-      ['/', '/home', '/chores'].includes(location.pathname) &&
-      !searchParams.get('filterId')
-    ) {
-      return isMobile ? null : menuButton
-    }
-
-    return (
-      <IconButton
-        size='md'
-        variant='plain'
-        onClick={() =>
-          location.pathname === '/chores' ? navigate('/') : navigate(-1)
-        }
-        aria-label={
-          searchParams.get('from') === 'calendar'
-            ? t('backToCalendar')
-            : t('back')
-        }
-        title={
-          searchParams.get('from') === 'calendar'
-            ? t('backToCalendar')
-            : t('back')
-        }
-        sx={{ borderRadius: 'md', minHeight: 44, minWidth: 44 }}
-      >
-        <ArrowBack className='rtl-flip' />
-      </IconButton>
-    )
-  }
+      )}
+      {showMenu && (
+        <IconButton
+          aria-label={t('navigation.openMenu', { defaultValue: 'Open menu' })}
+          title={t('navigation.openMenu', { defaultValue: 'Open menu' })}
+          size='md'
+          variant='plain'
+          onClick={() => setDrawerOpen(true)}
+          sx={{ borderRadius: 'md', minHeight: 44, minWidth: 44 }}
+        >
+          <MenuRounded />
+        </IconButton>
+      )}
+    </>
+  )
 
   const navigation = (closeOnSelect, compact = false) => (
     <List
@@ -602,7 +600,7 @@ const NavBar = () => {
               '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
             }}
           >
-            {getMenuIcon()}
+            {renderLeadingAction()}
             {dynamicNavBarConfig?.selector ? (
               <NavBarResourceSwitcher
                 selector={dynamicNavBarConfig.selector}

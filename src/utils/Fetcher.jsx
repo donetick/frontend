@@ -161,12 +161,6 @@ const GetChoreByID = id => {
     headers: HEADERS(),
   })
 }
-const GetChoreDetailById = id => {
-  return Fetch(`/chores/${id}/details`, {
-    method: 'GET',
-    headers: HEADERS(),
-  })
-}
 const MarkChoreComplete = (id, body, completedDate, performer) => {
   var markChoreURL = `/chores/${id}/do`
 
@@ -1279,7 +1273,6 @@ export {
   GetChildUsers,
   GetChoreAttachments,
   GetChoreByID,
-  GetChoreDetailById,
   GetChoreHistory,
   GetChores,
   GetChoresHistory,

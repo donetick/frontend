@@ -76,7 +76,7 @@ function LabelModal({ isOpen, label, onClose }) {
         } else {
           queryClient.invalidateQueries({ queryKey: ['labels'] })
           queryClient.invalidateQueries({ queryKey: ['chores'] })
-          queryClient.invalidateQueries({ queryKey: ['choreDetails'] })
+          queryClient.invalidateQueries({ queryKey: ['chore'] })
           queryClient.invalidateQueries({ queryKey: ['chore'] })
           onClose()
         }

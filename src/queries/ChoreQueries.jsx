@@ -1,8 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { track } from '../analytics'
 import { networkManager } from '../hooks/NetworkManager'
+import { usePendingCommandsMap } from '../hooks/usePendingCommands'
 import { appendChoreToSection } from '../utils/BoardOrdering'
 import { commandQueue, CommandType } from '../utils/CommandQueue'
 import {
@@ -13,7 +14,6 @@ import {
   DeleteChoreHistory,
   GetChoreAttachments,
   GetChoreByID,
-  GetChoreDetailById,
   GetChoreHistory,
   GetChoresHistory,
   GetChoresNew,
@@ -27,7 +27,10 @@ import {
 import { cacheChoreImages } from '../utils/ImageCache'
 import { offlineDB } from '../utils/OfflineDB'
 import { isOfflineFeatureEnabled } from '../utils/OfflineFeatureToggle'
-import { mergePendingCreates } from '../utils/PendingChores'
+import {
+  applyPendingChoreCommands,
+  mergePendingCreates,
+} from '../utils/PendingChores'
 import { syncEngine } from '../utils/SyncEngine'
 
 // Effectively "can this action be queued offline?" — the offline feature must
@@ -64,7 +67,18 @@ const buildOfflineChore = task => ({
 })
 
 export const useChores = (includeArchive = false, { enabled = true } = {}) => {
+  const { data: pending } = usePendingCommandsMap()
+  const select = useCallback(
+    data => ({
+      ...data,
+      res: data.res.map(chore =>
+        applyPendingChoreCommands(chore, pending?.[String(chore.id)]),
+      ),
+    }),
+    [pending],
+  )
   return useQuery({
+    select,
     queryKey: ['chores', includeArchive],
     networkMode: 'always',
     refetchOnWindowFocus: true,
@@ -256,10 +270,13 @@ export const useUpdateChore = () => {
             ),
           }
         })
-        queryClient.setQueryData(['chore', updatedChore.id], oldData => {
-          if (!oldData) return { res: pendingChore }
-          return { ...oldData, res: pendingChore }
-        })
+        queryClient.setQueryData(
+          ['chore', String(updatedChore.id)],
+          oldData => {
+            if (!oldData) return { res: pendingChore }
+            return { ...oldData, res: pendingChore }
+          },
+        )
         return pendingChore
       }
 
@@ -303,7 +320,7 @@ export const useUpdateChore = () => {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['chores'] })
       queryClient.invalidateQueries({
-        queryKey: ['choreHistory', variables.id],
+        queryKey: ['choreHistory', String(variables.id)],
       })
       queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
     },
@@ -341,44 +358,56 @@ export const useChoresHistory = (initialLimit, includeMembers) => {
   return { data, error, isLoading, handleLimitChange }
 }
 
-export const useChoreDetails = choreId => {
-  return useQuery({
-    queryKey: ['choreDetails', choreId],
-    refetchOnWindowFocus: true,
-    queryFn: async () => {
-      let response
-      try {
-        response = await GetChoreDetailById(choreId)
-      } catch {
-        response = null
-      }
-
-      if (response && response.ok) {
-        return await response.json()
-      }
-
-      if (response && (response.status === 403 || response.status === 404)) {
-        // Server says this chore is gone/inaccessible (e.g. its project
-        // turned private) — purge the stale cache instead of serving it
-        await offlineDB.deleteChores([choreId]).catch(() => {})
-        throw new Error('Chore is no longer accessible')
-      }
-
-      // Network/server error — fall back to cached chore (without timer details)
-      const cached = await offlineDB.getChore(choreId)
-      if (cached) {
-        return { res: cached }
-      }
-      throw new Error('Chore detail not available offline')
-    },
-  })
+// Local placeholders don't mark partial sync records as fresh or overwrite
+// newer network responses. Keep each placeholder scoped to its task.
+const useLocalChoreData = (choreId, history = false) => {
+  const [cached, setCached] = useState(null)
+  useEffect(() => {
+    let cancelled = false
+    if (!choreId || !isOfflineFeatureEnabled()) return
+    const load = async () => {
+      const res = history
+        ? await offlineDB.getHistoryByChore(choreId)
+        : await offlineDB.getChore(choreId)
+      if (history && !res?.length && !(await offlineDB.getLastSyncTime()))
+        return
+      if (!cancelled && res) setCached({ choreId, history, data: { res } })
+    }
+    load().catch(err => console.error('Failed to read local task data:', err))
+    return () => {
+      cancelled = true
+    }
+  }, [choreId, history])
+  return cached?.choreId === choreId && cached?.history === history
+    ? cached.data
+    : undefined
 }
 
 export const useChore = choreId => {
   const queryClient = useQueryClient()
+  const localData = useLocalChoreData(choreId)
+  const placeholderData = useCallback(() => {
+    const fromList = queryClient
+      .getQueriesData({ queryKey: ['chores'] })
+      .flatMap(([, data]) => data?.res || [])
+      .find(chore => String(chore.id) === String(choreId))
+    return fromList ? { res: { ...localData?.res, ...fromList } } : localData
+  }, [queryClient, localData, choreId])
+  const { data: pending } = usePendingCommandsMap()
+  const select = useCallback(
+    data => ({
+      ...data,
+      res: applyPendingChoreCommands(data.res, pending?.[String(choreId)]),
+    }),
+    [pending, choreId],
+  )
 
   return useQuery({
-    queryKey: ['chore', choreId],
+    select,
+    queryKey: ['chore', String(choreId)],
+    enabled: !!choreId,
+    placeholderData,
+    refetchOnWindowFocus: true,
     queryFn: async () => {
       if (!choreId) {
         throw new Error('Chore ID is required to fetch chore details')
@@ -395,7 +424,9 @@ export const useChore = choreId => {
         const data = await response.json()
         // Fire-and-forget: store this chore's images (incl. attachments,
         // which only appear in detail responses) for offline use
-        if (data?.res) cacheChoreImages(data.res)
+        if (data?.res) {
+          cacheChoreImages(data.res)
+        }
         return data
       }
 
@@ -412,9 +443,6 @@ export const useChore = choreId => {
         return { res: cached }
       }
       throw new Error('Chore not available offline')
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['chores'] })
     },
   })
 }
@@ -442,8 +470,10 @@ export const useUnArchiveChore = () => {
 }
 
 export const useChoreHistory = choreId => {
+  const localData = useLocalChoreData(choreId, true)
   return useQuery({
-    queryKey: ['choreHistory', choreId],
+    placeholderData: localData,
+    queryKey: ['choreHistory', String(choreId)],
     queryFn: async () => {
       if (!choreId) {
         throw new Error('Chore ID is required to fetch history')
@@ -487,7 +517,7 @@ export const useUpdateChoreHistory = () => {
   return useMutation({
     mutationFn: async ({ choreId, historyData, historyId }) => {
       const applyOptimisticUpdate = async () => {
-        queryClient.setQueryData(['choreHistory', choreId], oldData => {
+        queryClient.setQueryData(['choreHistory', String(choreId)], oldData => {
           if (!oldData?.res) return oldData
           return {
             ...oldData,
@@ -538,7 +568,9 @@ export const useUpdateChoreHistory = () => {
     },
     onSuccess: (data, { choreId }) => {
       if (!data?.queued) {
-        queryClient.invalidateQueries({ queryKey: ['choreHistory', choreId] })
+        queryClient.invalidateQueries({
+          queryKey: ['choreHistory', String(choreId)],
+        })
       }
       queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
     },
@@ -551,7 +583,7 @@ export const useDeleteChoreHistory = () => {
   return useMutation({
     mutationFn: async ({ choreId, historyId }) => {
       const applyOptimisticDelete = async () => {
-        queryClient.setQueryData(['choreHistory', choreId], oldData => {
+        queryClient.setQueryData(['choreHistory', String(choreId)], oldData => {
           if (!oldData?.res) return oldData
           return {
             ...oldData,
@@ -597,7 +629,9 @@ export const useDeleteChoreHistory = () => {
     },
     onSuccess: (data, { choreId }) => {
       if (!data?.queued) {
-        queryClient.invalidateQueries({ queryKey: ['choreHistory', choreId] })
+        queryClient.invalidateQueries({
+          queryKey: ['choreHistory', String(choreId)],
+        })
       }
       queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
     },
@@ -675,10 +709,12 @@ export const useMarkChoreComplete = () => {
         throw error
       }
     },
-    onSuccess: (_, { choreId }) => {
+    onSuccess: (_, { choreId: rawId }) => {
+      const choreId = String(rawId)
       queryClient.invalidateQueries({ queryKey: ['chores'] })
       queryClient.invalidateQueries({ queryKey: ['choreHistory', choreId] })
-      queryClient.invalidateQueries({ queryKey: ['choreDetails', choreId] })
+      queryClient.invalidateQueries({ queryKey: ['chore', choreId] })
+      queryClient.invalidateQueries({ queryKey: ['choreTimer', choreId] })
       queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
     },
   })
@@ -725,10 +761,12 @@ export const useSkipChore = () => {
         throw error
       }
     },
-    onSuccess: (_, choreId) => {
+    onSuccess: (_, rawId) => {
+      const choreId = String(rawId)
       queryClient.invalidateQueries({ queryKey: ['chores'] })
       queryClient.invalidateQueries({ queryKey: ['choreHistory', choreId] })
-      queryClient.invalidateQueries({ queryKey: ['choreDetails', choreId] })
+      queryClient.invalidateQueries({ queryKey: ['chore', choreId] })
+      queryClient.invalidateQueries({ queryKey: ['choreTimer', choreId] })
       queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
     },
   })
@@ -739,10 +777,12 @@ export const useApproveChore = () => {
 
   return useMutation({
     mutationFn: ApproveChore,
-    onSuccess: (_, choreId) => {
+    onSuccess: (_, rawId) => {
+      const choreId = String(rawId)
       queryClient.invalidateQueries({ queryKey: ['chores'] })
       queryClient.invalidateQueries({ queryKey: ['choreHistory', choreId] })
-      queryClient.invalidateQueries({ queryKey: ['choreDetails', choreId] })
+      queryClient.invalidateQueries({ queryKey: ['chore', choreId] })
+      queryClient.invalidateQueries({ queryKey: ['choreTimer', choreId] })
     },
   })
 }
@@ -752,10 +792,12 @@ export const useRejectChore = () => {
 
   return useMutation({
     mutationFn: RejectChore,
-    onSuccess: (_, choreId) => {
+    onSuccess: (_, rawId) => {
+      const choreId = String(rawId)
       queryClient.invalidateQueries({ queryKey: ['chores'] })
       queryClient.invalidateQueries({ queryKey: ['choreHistory', choreId] })
-      queryClient.invalidateQueries({ queryKey: ['choreDetails', choreId] })
+      queryClient.invalidateQueries({ queryKey: ['chore', choreId] })
+      queryClient.invalidateQueries({ queryKey: ['choreTimer', choreId] })
     },
   })
 }
