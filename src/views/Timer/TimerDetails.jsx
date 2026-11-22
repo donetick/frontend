@@ -43,7 +43,7 @@ import SwipeListItem, {
 import { viewportMedia } from '../../constants/responsive'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useChorePermissions } from '../../hooks/useChorePermissions'
-import { useChoreDetails } from '../../queries/ChoreQueries'
+import { useChore } from '../../queries/ChoreQueries'
 import {
   useChoreTimer,
   usePauseChore,
@@ -70,7 +70,7 @@ const isNetworkError = err =>
 const TimerDetails = () => {
   const { t } = useTranslation(['timer', 'chores'])
   const { choreId } = useParams()
-  const { data: choreData } = useChoreDetails(choreId)
+  const { data: choreData } = useChore(choreId)
   const permissions = useChorePermissions(choreData?.res)
   const { fmt } = useLocalization()
   const [timerData, setTimerData] = useState(null)
@@ -100,7 +100,7 @@ const TimerDetails = () => {
 
   // Update timerData when choreTimer data changes
   useEffect(() => {
-    if (choreTimer?.res) {
+    if (choreTimer) {
       setTimerData(choreTimer.res)
     }
   }, [choreTimer])

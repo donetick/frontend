@@ -14,11 +14,16 @@ const NO_COMMANDS = []
 const usePendingCommandsQuery = select =>
   useQuery({
     queryKey: ['pendingCommands', 'byEntity'],
+    // This query reads local storage, so it must not pause while offline.
+    networkMode: 'always',
     queryFn: () => commandQueue.getPendingGroupedByEntity(),
     refetchInterval: 2000, // Poll since commands change outside React
     staleTime: 0,
     select,
   })
+
+// Shared persisted queue snapshot for projecting pending task state in queries.
+export const usePendingCommandsMap = () => usePendingCommandsQuery()
 
 // Hook to get pending commands for a specific chore (for showing pending badges/undo)
 export const usePendingCommands = choreId => {

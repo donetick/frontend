@@ -1,6 +1,19 @@
 import { reorderedChoresAfter } from './BoardOrdering'
 import { commandQueue, CommandType } from './CommandQueue'
 
+// Keep the server/cache snapshot untouched: cancellation must reveal its
+// original status again. The last queued timer command wins, in queue order.
+export const applyPendingChoreCommands = (chore, commands = []) => {
+  if (!chore) return chore
+  let status = chore.status
+  for (const command of commands) {
+    if (String(command.entityId) !== String(chore.id)) continue
+    if (command.commandType === CommandType.START_CHORE) status = 1
+    if (command.commandType === CommandType.PAUSE_CHORE) status = 2
+  }
+  return status === chore.status ? chore : { ...chore, status }
+}
+
 // Chores created while offline only exist in the command queue until they are
 // replayed, so every read path has to fold them back into the list it returns
 // (minus any that were deleted again before replaying).
