@@ -45,13 +45,13 @@ import {
   MenuItem,
   Typography,
 } from '@mui/joy'
-import { useMediaQuery } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
 import AppModal from '../../components/common/AppModal'
 import { useChorePermissions } from '../../hooks/useChorePermissions'
+import { useResponsiveQuery } from '../../hooks/useResponsiveQuery'
 import { notInCompletionWindow } from '../../utils/Chores'
 import LABEL_COLORS, {
   getTextColorFromBackgroundColor,
@@ -177,7 +177,7 @@ const ChoreActionMenu = ({
   const navigate = useNavigate()
   const { data: projects = [] } = useProjects()
   // Phone-only condition (matches AddTaskModal.jsx) — tablets/desktop keep the Menu
-  const isSmallScreen = useMediaQuery(theme => theme.breakpoints.down('sm'))
+  const isSmallScreen = useResponsiveQuery('small')
 
   useEffect(() => {
     try {

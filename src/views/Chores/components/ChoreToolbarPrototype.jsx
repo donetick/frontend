@@ -57,6 +57,7 @@ import ActiveFilterChips from '../../../components/common/filter/ActiveFilterChi
 import ItemPrivacyField from '../../../components/common/ItemPrivacyField'
 import KeyboardShortcutHint from '../../../components/common/KeyboardShortcutHint'
 import SortAndFilterMenu from '../../../components/common/SortAndFilterMenu'
+import { viewportMedia } from '../../../constants/responsive'
 import { PAYWALL_REASON, usePaywall } from '../../../contexts/PaywallContext'
 import { useUserProfile } from '../../../queries/UserQueries'
 import { FILTER_COLORS } from '../../../utils/Colors'
@@ -672,7 +673,7 @@ const ChoreToolbar = ({
             <Box
               sx={{
                 display: 'none',
-                '@media (min-width: 1024px)': { display: 'inline-flex' },
+                [viewportMedia.desktopNav]: { display: 'inline-flex' },
               }}
             >
               <ProjectSelector

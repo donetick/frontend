@@ -1,9 +1,10 @@
 import { FilterAlt, Star } from '@mui/icons-material'
 import { Box, Sheet, Typography } from '@mui/joy'
-import useMediaQuery from '@mui/material/useMediaQuery'
 import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+
+import { useResponsiveQuery } from '../../../hooks/useResponsiveQuery'
 
 // Two rows of two on mobile, same reasoning as ProjectStrip: a fifth filter
 // would push the section past the list above it, and the header already
@@ -19,7 +20,7 @@ const GRID_LIMIT_DESKTOP = 6
 const FilterStrip = ({ filters }) => {
   const { t } = useTranslation('common')
   const navigate = useNavigate()
-  const isDesktop = useMediaQuery('(min-width:769px)')
+  const isDesktop = useResponsiveQuery('aboveMobile')
   const gridLimit = isDesktop ? GRID_LIMIT_DESKTOP : GRID_LIMIT_MOBILE
 
   return (

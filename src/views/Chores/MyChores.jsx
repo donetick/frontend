@@ -23,7 +23,6 @@ import {
   IconButton,
   Typography,
 } from '@mui/joy'
-import { useMediaQuery } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -31,10 +30,12 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import EmptyState from '../../components/common/EmptyState'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
+import { viewportMedia } from '../../constants/responsive'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useNavBarTitle } from '../../contexts/NavBarTitleContext'
 import { TEMPLATE_ENTRY_POINT } from '../../data/taskTemplates'
 import { useFilter } from '../../hooks/useFilter'
+import { useResponsiveQuery } from '../../hooks/useResponsiveQuery'
 import { useChores } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
@@ -129,7 +130,7 @@ const MyChores = () => {
     isLoading: isUserProfileLoading,
   } = useUserProfile()
   const { t } = useTranslation('chores')
-  const isLargeScreen = useMediaQuery(theme => theme.breakpoints.up('md'))
+  const isLargeScreen = useResponsiveQuery('mediumUp')
   const { showError, showSuccess, showUndo, showWarning } = useNotification()
   const queryClient = useQueryClient()
   const { impersonatedUser } = useImpersonateUser()
@@ -1666,7 +1667,7 @@ const MyChores = () => {
           sx={{
             bottom: getSafeBottom(10, 10),
             display: isMultiSelectMode ? 'none' : undefined,
-            '@media (max-width: 768px)': {
+            [viewportMedia.mobile]: {
               bottom: getSafeBottom(66, 10),
             },
           }}

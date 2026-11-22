@@ -37,6 +37,7 @@ import { TrailingSwipeActions as TrailingActions } from '../../components/common
 import SwipeListItem, {
   SWIPE_COMMIT_THRESHOLD,
 } from '../../components/common/SwipeListItem'
+import { viewportMedia } from '../../constants/responsive'
 import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
 import { useChores } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
@@ -700,7 +701,7 @@ const FilterView = () => {
       <ScrollHideFab
         sx={{
           ...getSafeBottomStyles({ bottom: 0, padding: 16 }),
-          '@media (max-width: 768px)': {
+          [viewportMedia.mobile]: {
             bottom: getSafeBottom(56, 16),
           },
         }}

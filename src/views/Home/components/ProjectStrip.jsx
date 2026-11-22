@@ -1,9 +1,9 @@
 import { Box, Sheet, Typography } from '@mui/joy'
-import useMediaQuery from '@mui/material/useMediaQuery'
 import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
+import { useResponsiveQuery } from '../../../hooks/useResponsiveQuery'
 import { getIconComponent } from '../../../utils/ProjectIcons'
 import { ProjectAccessIcon } from '../../Projects/ProjectVisibilityField'
 import { DEFAULT_PROJECT_ID } from '../useHomeSummary'
@@ -29,7 +29,7 @@ const ProjectStrip = ({ projects }) => {
   // comes from the same string the task list and the project picker use.
   const { t } = useTranslation(['common', 'chores'])
   const navigate = useNavigate()
-  const isDesktop = useMediaQuery('(min-width:769px)')
+  const isDesktop = useResponsiveQuery('aboveMobile')
   const gridLimit = isDesktop ? GRID_LIMIT_DESKTOP : GRID_LIMIT_MOBILE
 
   /**

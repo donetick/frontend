@@ -31,7 +31,6 @@ import {
   Sheet,
   Typography,
 } from '@mui/joy'
-import useMediaQuery from '@mui/material/useMediaQuery'
 import moment from 'moment'
 import PropTypes from 'prop-types'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -39,7 +38,9 @@ import { useTranslation } from 'react-i18next'
 
 import AppModal from '../../../components/common/AppModal'
 import KeyboardShortcutHint from '../../../components/common/KeyboardShortcutHint'
+import { viewportMedia } from '../../../constants/responsive'
 import { useThemeSkin } from '../../../contexts/ThemeSkinContext'
+import { useResponsiveQuery } from '../../../hooks/useResponsiveQuery'
 import LABEL_COLORS, {
   getTextColorFromBackgroundColor,
 } from '../../../utils/Colors'
@@ -300,7 +301,7 @@ const MultiSelectToolbar = ({
   const completionColor = skin === 'default' ? 'success' : 'primary'
   // Same phone-only condition ChoreActionMenu and AddTaskModal use: tablets and
   // desktops keep the menu, only phones get the sheet.
-  const isSmallScreen = useMediaQuery('(max-width:600px)')
+  const isSmallScreen = useResponsiveQuery('compact')
   const [editOpen, setEditOpen] = useState(false)
   const [dueDatePickerOpen, setDueDatePickerOpen] = useState(false)
   const [dueMenuAnchor, setDueMenuAnchor] = useState(null)
@@ -612,7 +613,7 @@ const MultiSelectToolbar = ({
           // modals — the sheet this bar opens has to cover it.
           zIndex: 102,
           '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
-          '@media (max-width: 768px)': {
+          [viewportMedia.mobile]: {
             bottom: getSafeBottom(68, 4),
           },
         }}

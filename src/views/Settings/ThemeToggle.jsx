@@ -12,6 +12,7 @@ import { THEME_PRESETS } from '@/constants/themePresets'
 import { useThemeSkin } from '@/contexts/ThemeSkinContext'
 import useStickyState from '@/hooks/useStickyState'
 
+import { viewportMedia } from '../../constants/responsive'
 import AppearancePreview from './AppearancePreview'
 import SettingsSection from './SettingsSection'
 import ThemeSkinPicker from './ThemeSkinPicker'
@@ -101,7 +102,7 @@ const ThemeToggle = () => {
                   fontWeight: 600,
                   alignItems: 'center',
                   '& .MuiRadio-label': { overflowWrap: 'anywhere' },
-                  '@media (max-width: 359px)': {
+                  [viewportMedia.narrow]: {
                     flexDirection: 'column',
                     gap: 0.5,
                     textAlign: 'center',

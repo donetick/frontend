@@ -11,6 +11,8 @@ import {
 import { Box, Button, Card, Container, Grid, Typography } from '@mui/joy'
 import { useNavigate } from 'react-router-dom'
 
+import { viewportMedia } from '../../constants/responsive'
+
 function StartOptionCard({ button, description, icon: Icon, index, title }) {
   return (
     <Card
@@ -59,7 +61,7 @@ function StartOptionCard({ button, description, icon: Icon, index, title }) {
           transition: 'opacity 0.4s ease',
           pointerEvents: 'none',
         },
-        '@media (max-width: 600px)': {
+        [viewportMedia.compact]: {
           '&:active': {
             transform: 'scale(0.98)',
           },

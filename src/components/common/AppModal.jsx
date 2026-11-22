@@ -1,8 +1,9 @@
 import { Close } from '@mui/icons-material'
 import { Box, Divider, IconButton, Modal, Sheet, Typography } from '@mui/joy'
-import useMediaQuery from '@mui/material/useMediaQuery'
 import { forwardRef, useId } from 'react'
 import { useTranslation } from 'react-i18next'
+
+import { useResponsiveQuery } from '../../hooks/useResponsiveQuery'
 
 const WIDTH_BY_SIZE = {
   sm: 400,
@@ -46,7 +47,7 @@ const AppModal = forwardRef(
   ) => {
     const { t } = useTranslation('common')
     const generatedId = useId()
-    const detectedMobile = useMediaQuery('(max-width:768px)')
+    const detectedMobile = useResponsiveQuery('mobile')
     const isMobile = isMobileProp ?? detectedMobile
     const titleId = title ? `${generatedId}-title` : undefined
     const descriptionId = description ? `${generatedId}-description` : undefined

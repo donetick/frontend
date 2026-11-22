@@ -39,7 +39,6 @@ import {
   Textarea,
   Typography,
 } from '@mui/joy'
-import useMediaQuery from '@mui/material/useMediaQuery'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { useTranslation } from 'react-i18next'
@@ -48,6 +47,7 @@ import AppModal from '../../components/common/AppModal'
 import ModalActions from '../../components/common/ModalActions'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext'
 import { useLocalization } from '../../contexts/LocalizationContext'
+import { useResponsiveQuery } from '../../hooks/useResponsiveQuery'
 import { useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { CompleteSubTask } from '../../utils/Fetcher'
@@ -445,7 +445,7 @@ const SubTasks = ({
   const [expandedIds, setExpandedIds] = useState(new Set())
   const [editor, setEditor] = useState(null)
   const [editorText, setEditorText] = useState('')
-  const isSmallScreen = useMediaQuery(theme => theme.breakpoints.down('sm'))
+  const isSmallScreen = useResponsiveQuery('small')
   const { data: userProfile } = useUserProfile()
   const { impersonatedUser } = useImpersonateUser()
   const inputRefs = useRef({})

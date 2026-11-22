@@ -1,3 +1,12 @@
+const MARKETING_HOSTNAMES = ['www.donetick.com', 'donetick.com']
+
+// Eligibility is shared by navigation and settings; visibility also depends
+// on the current route and is published by useMobileBottomNavVisible.
+export const isMobileBottomNavEligible = (
+  isMobile,
+  hostname = typeof window === 'undefined' ? '' : window.location.hostname,
+) => isMobile && !MARKETING_HOSTNAMES.includes(hostname)
+
 // Pool of destinations the mobile bottom nav can be configured to show.
 // `to` matches the routes used by the desktop NavBar drawer; `action`
 // marks slots with special behavior instead of a route (search, more).

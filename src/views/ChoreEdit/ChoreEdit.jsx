@@ -73,9 +73,11 @@ import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import NumberInput from '../../components/common/NumberInput'
 import PermissionDeniedModal from '../../components/common/PermissionDeniedModal'
 import NotificationTemplate from '../../components/NotificationTemplate.jsx'
+import { viewportMedia } from '../../constants/responsive'
 import { usePageShortcutScope } from '../../contexts/KeyboardShortcutScopeContext'
 import { usePaywall } from '../../contexts/PaywallContext'
 import { useDocumentScanner } from '../../hooks/useDocumentScanner'
+import { useResponsiveQuery } from '../../hooks/useResponsiveQuery'
 import {
   useArchiveChore,
   useChore,
@@ -159,6 +161,7 @@ const ChoreEdit = () => {
   // currently owns the keyboard — see KeyboardShortcutScopeContext.
   const isPageShortcutActive = usePageShortcutScope()
   const singlePageEditor = useSinglePageTaskEditor()
+  const isSmallUp = useResponsiveQuery('smallUp')
   const location = useLocation()
   const [createAnother, setCreateAnother] = useState(
     location.state?.createAnother === true,
@@ -1082,8 +1085,7 @@ const ChoreEdit = () => {
     setWizardStep(next)
     wizardBodyRef.current?.scrollTo({ top: 0 })
     requestAnimationFrame(() => {
-      if (window.matchMedia('(min-width:600px)').matches)
-        window.scrollTo({ top: 0, behavior: 'instant' })
+      if (isSmallUp) window.scrollTo({ top: 0, behavior: 'instant' })
     })
   }
   const assignmentSummary = anyone
@@ -1139,7 +1141,7 @@ const ChoreEdit = () => {
         p: 0,
         maxWidth: 'none !important',
         minHeight: { sm: 'calc(100dvh - 56px)' },
-        '@media (min-width: 1024px)': { minHeight: '100dvh' },
+        [viewportMedia.desktopNav]: { minHeight: '100dvh' },
         '& .task-editor-grid h4, & .task-editor-grid h5': {
           fontSize: 14,
           fontWeight: 500,
@@ -1205,7 +1207,7 @@ const ChoreEdit = () => {
           },
           minHeight: { sm: 'calc(100dvh - 56px)' },
           overflow: 'hidden',
-          '@media (min-width: 1024px)': {
+          [viewportMedia.desktopNav]: {
             height: '100dvh',
             maxHeight: '100dvh',
             minHeight: '100dvh',

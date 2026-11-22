@@ -29,14 +29,15 @@ import {
   Tooltip,
   Typography,
 } from '@mui/joy'
-import useMediaQuery from '@mui/material/useMediaQuery'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 
 import DoneTickLogo from '../../assets/logo.svg'
 import UserProfileAvatar from '../../components/UserProfileAvatar'
+import { viewportMedia } from '../../constants/responsive'
 import { useNavBarTitleContext } from '../../contexts/NavBarTitleContext'
+import { useResponsiveQuery } from '../../hooks/useResponsiveQuery'
 import { useScrollDirection } from '../../hooks/useScrollDirection'
 import { useGlobalSearch } from '../../search/GlobalSearchContext'
 import { apiClient } from '../../utils/ApiClient'
@@ -85,8 +86,8 @@ const NavBar = () => {
   const [desktopExpanded, setDesktopExpanded] = useState(
     () => window.localStorage.getItem('desktopNavExpanded') === 'true',
   )
-  const isMobile = useMediaQuery('(max-width:768px)')
-  const isDesktop = useMediaQuery('(min-width:1024px)')
+  const isMobile = useResponsiveQuery('mobile')
+  const isDesktop = useResponsiveQuery('desktopNav')
   const headerHidden = useScrollDirection({ enabled: !isDesktop })
   const mobileHeaderRef = useRef(null)
   const normalizedPath =
@@ -597,7 +598,7 @@ const NavBar = () => {
               transform: headerHidden ? 'translateY(-100%)' : 'translateY(0)',
               transition: 'transform 220ms ease',
               zIndex: 'var(--joy-zIndex-popup)',
-              '@media (min-width: 1024px)': { display: 'none' },
+              [viewportMedia.desktopNav]: { display: 'none' },
               '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
             }}
           >
@@ -636,7 +637,7 @@ const NavBar = () => {
             size='sm'
             sx={{
               '--Drawer-horizontalSize': 'min(72vw, 248px)',
-              '@media (min-width: 1024px)': { display: 'none' },
+              [viewportMedia.desktopNav]: { display: 'none' },
               // iOS WebKit hides the panel on the next open if the blurred
               // backdrop is still fading out when the route view transition
               // snapshots the page, so drop the blur as soon as it closes.

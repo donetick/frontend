@@ -1,10 +1,11 @@
 import { Add, DocumentScanner, MicNone } from '@mui/icons-material'
 import { Box, IconButton, Sheet, Typography } from '@mui/joy'
-import useMediaQuery from '@mui/material/useMediaQuery'
 import PropTypes from 'prop-types'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { viewportMedia } from '../../../constants/responsive'
+import { useResponsiveQuery } from '../../../hooks/useResponsiveQuery'
 import { useScrollDirection } from '../../../hooks/useScrollDirection'
 import { localAIService } from '../../../service/LocalAIService'
 import { voiceInputService } from '../../../service/VoiceInputService'
@@ -20,7 +21,7 @@ const CaptureBar = ({ onCapture }) => {
   const { t } = useTranslation('common')
   const [voiceReady, setVoiceReady] = useState(false)
   const [scanReady, setScanReady] = useState(false)
-  const isMobile = useMediaQuery('(max-width:768px)')
+  const isMobile = useResponsiveQuery('mobile')
   const hidden = useScrollDirection({ enabled: isMobile })
 
   useEffect(() => {
@@ -54,7 +55,7 @@ const CaptureBar = ({ onCapture }) => {
         transition: 'transform 220ms ease, opacity 220ms ease',
         zIndex: 100,
         '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
-        '@media (max-width: 768px)': {
+        [viewportMedia.mobile]: {
           bottom: getSafeBottom(68, 4),
         },
       }}

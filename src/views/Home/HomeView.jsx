@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
 import EmptyState from '../../components/common/EmptyState'
+import { viewportMedia } from '../../constants/responsive'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext'
 import { useChores } from '../../queries/ChoreQueries'
 import { useNotification } from '../../service/NotificationProvider'
@@ -393,7 +394,7 @@ const HomeView = () => {
         pb: getSafeBottomPadding(CAPTURE_CLEARANCE),
         pt: 1,
         px: { xs: 2, sm: 3 },
-        '@media (max-width: 768px)': {
+        [viewportMedia.mobile]: {
           pb: getSafeBottomPadding(CAPTURE_CLEARANCE + 7),
         },
       }}

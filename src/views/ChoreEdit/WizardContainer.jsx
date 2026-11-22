@@ -1,8 +1,9 @@
 import { Container, Modal } from '@mui/joy'
-import { useMediaQuery } from '@mui/material'
+
+import { useResponsiveQuery } from '../../hooks/useResponsiveQuery'
 
 export default function WizardContainer({ children, onClose, sx, ...props }) {
-  const mobile = useMediaQuery('(max-width:599px)')
+  const mobile = useResponsiveQuery('wizardMobile')
   const content = (
     <Container
       {...props}

@@ -18,7 +18,6 @@ import {
   MenuItem,
   Typography,
 } from '@mui/joy'
-import { useMediaQuery } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
 import * as chrono from 'chrono-node'
 import moment from 'moment'
@@ -33,6 +32,7 @@ import { useQuickAddModalRegistration } from '../../contexts/QuickAddModalContex
 import { useDocumentScanner } from '../../hooks/useDocumentScanner'
 import { useFileUpload } from '../../hooks/useFileUpload'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
+import { useResponsiveQuery } from '../../hooks/useResponsiveQuery'
 import { useCreateChore } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { localAIService } from '../../service/LocalAIService'
@@ -243,7 +243,7 @@ const TaskInput = ({
   const isShortcutScopeActive = useModalShortcutScope(isModalOpen)
   useQuickAddModalRegistration(isModalOpen)
   const { ResponsiveModal } = useResponsiveModal()
-  const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
+  const isMobile = useResponsiveQuery('small')
   const quickAddMoreFields = useQuickAddMoreFields()
   const [showQuickAddMore, setShowQuickAddMore] = useState(false)
   const pickerEmptyDisplay = isMobile ? 'icon' : 'icon-text'

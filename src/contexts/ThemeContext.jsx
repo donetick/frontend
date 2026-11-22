@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { prefixer } from 'stylis'
 import rtlPlugin from 'stylis-plugin-rtl'
 
+import { viewportMedia } from '@/constants/responsive'
 import { applyStartupTheme } from '@/constants/startupTheme'
 import { COLORS, THEME_BACKGROUND } from '@/constants/theme'
 import {
@@ -172,7 +173,7 @@ const themeConfig = {
           ...(ownerState.size === 'md' && {
             minWidth: '40px',
             minHeight: '40px',
-            '@media (max-width: 768px)': {
+            [viewportMedia.mobile]: {
               minWidth: '44px',
               minHeight: '44px',
             },

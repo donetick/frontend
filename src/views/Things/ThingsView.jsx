@@ -40,6 +40,7 @@ import SortAndFilterMenu from '../../components/common/SortAndFilterMenu'
 import SwipeListItem, {
   SWIPE_COMMIT_THRESHOLD,
 } from '../../components/common/SwipeListItem'
+import { viewportMedia } from '../../constants/responsive'
 import { useNotification } from '../../service/NotificationProvider'
 import {
   CreateThing,
@@ -715,7 +716,7 @@ const ThingsView = () => {
       <ScrollHideFab
         sx={{
           ...getSafeBottomStyles({ bottom: 0, padding: 16 }),
-          '@media (max-width: 768px)': {
+          [viewportMedia.mobile]: {
             bottom: getSafeBottom(56, 16),
           },
         }}
