@@ -1,8 +1,11 @@
 import { Close } from '@mui/icons-material'
 import { Box, Divider, IconButton, Modal, Sheet, Typography } from '@mui/joy'
-import useMediaQuery from '@mui/material/useMediaQuery'
 import { forwardRef, useId } from 'react'
 import { useTranslation } from 'react-i18next'
+
+import { MOTION } from '../../constants/motion'
+import { useMotionPresence } from '../../hooks/useMotionPresence'
+import { useResponsiveQuery } from '../../hooks/useResponsiveQuery'
 
 const WIDTH_BY_SIZE = {
   sm: 400,
@@ -39,19 +42,32 @@ const AppModal = forwardRef(
       size = 'md',
       sx,
       title,
-      unmountDelay = 180,
+      unmountDelay = MOTION.exit,
       ...modalProps
     },
     ref,
   ) => {
     const { t } = useTranslation('common')
     const generatedId = useId()
-    const detectedMobile = useMediaQuery('(max-width:768px)')
+    const detectedMobile = useResponsiveQuery('mobile')
     const isMobile = isMobileProp ?? detectedMobile
     const titleId = title ? `${generatedId}-title` : undefined
     const descriptionId = description ? `${generatedId}-description` : undefined
     const isSheet = isMobile && mobilePresentation === 'sheet'
     const isFullscreen = isMobile && mobilePresentation === 'fullscreen'
+    const reduceMotion = useResponsiveQuery('(prefers-reduced-motion: reduce)')
+    const exitDuration = reduceMotion
+      ? Math.min(unmountDelay, MOTION.reduced)
+      : unmountDelay
+    const { entered, present } = useMotionPresence(open, exitDuration)
+    const enterDuration = isSheet ? MOTION.sheet : MOTION.modal
+    const duration = open ? enterDuration : exitDuration
+    const easing = isSheet ? MOTION.easeDrawer : MOTION.easeOut
+    const closedTransform = isSheet
+      ? 'translateY(100%)'
+      : isFullscreen
+        ? 'translateY(12px)'
+        : 'translateY(8px) scale(0.96)'
 
     const handleClose = (event, reason) => {
       if (reason === 'backdropClick' && !closeOnBackdrop) return
@@ -61,12 +77,12 @@ const AppModal = forwardRef(
       // click handler on the element that opened the modal (e.g. a card's
       // own navigate-on-click).
       event?.stopPropagation?.()
-      onClose?.(event, reason)
+      if (open) onClose?.(event, reason)
     }
 
     return (
       <Modal
-        open={open}
+        open={present}
         onClose={handleClose}
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
@@ -87,6 +103,11 @@ const AppModal = forwardRef(
           '& .MuiModal-backdrop': {
             backgroundColor: 'rgba(8, 15, 24, 0.52)',
             backdropFilter: backdropBlur ? 'blur(4px)' : 'none',
+            opacity: entered ? 1 : 0,
+            transition: `opacity ${duration}ms ${MOTION.easeOut}`,
+            '@media (prefers-reduced-motion: reduce)': {
+              transitionDuration: `${MOTION.reduced}ms`,
+            },
           },
         }}
         {...modalProps}
@@ -120,19 +141,14 @@ const AppModal = forwardRef(
             boxShadow: 'lg',
             outline: 0,
             pb: isMobile ? 'env(safe-area-inset-bottom)' : 0,
-            animation: open
-              ? `${isSheet ? 'appSheetEnter' : 'appModalEnter'} ${Math.min(unmountDelay, 300)}ms cubic-bezier(0.2, 0.8, 0.2, 1)`
-              : undefined,
-            '@keyframes appModalEnter': {
-              from: { opacity: 0, transform: 'translateY(8px) scale(0.99)' },
-              to: { opacity: 1, transform: 'translateY(0) scale(1)' },
-            },
-            '@keyframes appSheetEnter': {
-              from: { transform: 'translateY(24px)' },
-              to: { transform: 'translateY(0)' },
-            },
+            opacity: entered ? 1 : 0,
+            transform: entered ? 'none' : closedTransform,
+            transformOrigin: 'center',
+            transition: `opacity ${duration}ms ${MOTION.easeOut}, transform ${duration}ms ${easing}`,
+            pointerEvents: open ? 'auto' : 'none',
             '@media (prefers-reduced-motion: reduce)': {
-              animation: 'none',
+              transform: 'none',
+              transition: `opacity ${MOTION.reduced}ms ${MOTION.easeOut}`,
             },
             ...sx,
           }}

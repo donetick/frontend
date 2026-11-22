@@ -1,4 +1,3 @@
-import useMediaQuery from '@mui/material/useMediaQuery'
 import { useQueryClient } from '@tanstack/react-query'
 import {
   createContext,
@@ -11,6 +10,7 @@ import {
 import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate } from 'react-router-dom'
 
+import { useResponsiveQuery } from '../hooks/useResponsiveQuery'
 import { offlineDB } from '../utils/OfflineDB'
 import { isParentUser } from '../utils/UserHelpers'
 import GlobalSearchPalette from './GlobalSearchPalette'
@@ -38,7 +38,7 @@ export const GlobalSearchProvider = ({ children }) => {
   const { t } = useTranslation('settings')
   const location = useLocation()
   const navigate = useNavigate()
-  const isMobile = useMediaQuery('(max-width:768px)')
+  const isMobile = useResponsiveQuery('mobile')
   const [isOpen, setIsOpen] = useState(false)
   const [initialQuery, setInitialQuery] = useState('')
   const [documents, setDocuments] = useState([])

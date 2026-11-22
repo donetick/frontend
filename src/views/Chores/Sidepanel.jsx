@@ -1,7 +1,7 @@
 import { Box, Sheet } from '@mui/joy'
-import { useMediaQuery } from '@mui/material'
 import { useEffect, useState } from 'react'
 
+import { useResponsiveQuery } from '../../hooks/useResponsiveQuery'
 import { useChoresHistory } from '../../queries/ChoreQueries'
 import { ChoresGrouper } from '../../utils/Chores'
 import { getSidepanelConfig } from '../../utils/SidepanelConfig'
@@ -18,7 +18,7 @@ const Sidepanel = ({
   clearTempFilter,
   tempFilter,
 }) => {
-  const isLargeScreen = useMediaQuery(theme => theme.breakpoints.up('lg'))
+  const isLargeScreen = useResponsiveQuery('largeUp')
   const [dueDatePieChartData, setDueDatePieChartData] = useState([])
   const [sidepanelConfig, setSidepanelConfig] = useState([])
   const {

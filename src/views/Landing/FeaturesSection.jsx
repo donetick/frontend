@@ -16,6 +16,8 @@ import {
 } from '@mui/icons-material'
 import { Box, Card, Container, Grid, Typography, useTheme } from '@mui/joy'
 
+import { viewportMedia } from '../../constants/responsive'
+
 const FeaturesSection = () => {
   const theme = useTheme()
 
@@ -194,7 +196,7 @@ const FeaturesSection = () => {
                   transition: 'opacity 0.4s ease',
                   pointerEvents: 'none',
                 },
-                '@media (max-width: 600px)': {
+                [viewportMedia.compact]: {
                   '&:active': {
                     transform: 'scale(0.98)',
                   },

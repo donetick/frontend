@@ -40,6 +40,7 @@ import { TrailingSwipeActions as TrailingActions } from '../../components/common
 import SwipeListItem, {
   SWIPE_COMMIT_THRESHOLD,
 } from '../../components/common/SwipeListItem'
+import { viewportMedia } from '../../constants/responsive'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useChorePermissions } from '../../hooks/useChorePermissions'
 import { useChoreDetails } from '../../queries/ChoreQueries'
@@ -1373,7 +1374,7 @@ const TimerDetails = () => {
         <ScrollHideFab
           sx={{
             ...getSafeBottomStyles({ bottom: 0, padding: 16 }),
-            '@media (max-width: 768px)': {
+            [viewportMedia.mobile]: {
               bottom: getSafeBottom(56, 16),
             },
           }}

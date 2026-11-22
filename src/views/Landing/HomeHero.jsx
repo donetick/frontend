@@ -11,12 +11,11 @@ import Logo from '@/assets/logo.svg'
 import screenShotMyChore from '@/assets/screenshot-my-chore.png'
 import screenShotMyChoreDark from '@/assets/screenshot-my-chore-dark.png'
 
-import useWindowWidth from '../../hooks/useWindowWidth'
+import { useResponsiveQuery } from '../../hooks/useResponsiveQuery'
 
 const HomeHero = () => {
   const navigate = useNavigate()
-  const windowWidth = useWindowWidth()
-  const windowThreshold = 600
+  const showPreview = useResponsiveQuery('aboveCompact')
   const { mode, setMode } = useColorScheme()
   const HERO_TEXT_THAT = [
     // 'The collaborative task manager that makes household management fair, fun, and effortless.',
@@ -166,7 +165,7 @@ const HomeHero = () => {
           </Box>
         </div>
       </Grid>
-      {windowWidth > windowThreshold && (
+      {showPreview && (
         <Grid item xs={12} md={5}>
           <div className='flex justify-center'>
             <img

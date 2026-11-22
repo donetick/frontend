@@ -30,6 +30,7 @@ import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import EmptyState from '../../components/common/EmptyState'
+import { viewportMedia } from '../../constants/responsive'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import {
   ApproveRedemption,
@@ -567,7 +568,7 @@ const RewardsView = ({ embedded = false, view = 'store' }) => {
         <ScrollHideFab
           sx={{
             ...getSafeBottomStyles({ bottom: 0, padding: 16 }),
-            '@media (max-width: 768px)': {
+            [viewportMedia.mobile]: {
               bottom: getSafeBottom(56, 16),
             },
           }}

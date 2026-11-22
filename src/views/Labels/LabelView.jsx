@@ -34,6 +34,7 @@ import { TrailingSwipeActions as TrailingActions } from '../../components/common
 import SwipeListItem, {
   SWIPE_COMMIT_THRESHOLD,
 } from '../../components/common/SwipeListItem'
+import { viewportMedia } from '../../constants/responsive'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors'
 import { DeleteLabel } from '../../utils/Fetcher'
@@ -487,7 +488,7 @@ const LabelView = () => {
       <ScrollHideFab
         sx={{
           ...getSafeBottomStyles({ bottom: 0, padding: 16 }),
-          '@media (max-width: 768px)': {
+          [viewportMedia.mobile]: {
             bottom: getSafeBottom(56, 16),
           },
         }}

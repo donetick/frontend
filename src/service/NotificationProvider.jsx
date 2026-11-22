@@ -1,9 +1,18 @@
-import { CheckCircle, Error, Info, Undo, Warning } from '@mui/icons-material'
-import { Box, Button, Snackbar, Typography } from '@mui/joy'
+import {
+  CheckCircleRounded,
+  CloseRounded,
+  ErrorRounded,
+  InfoRounded,
+  UndoRounded,
+  WarningRounded,
+} from '@mui/icons-material'
+import { Box, Button, IconButton, Sheet, Typography } from '@mui/joy'
+import PropTypes from 'prop-types'
 import React, { createContext, useContext, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { useThemeSkin } from '../contexts/ThemeSkinContext'
+import { useMobileBottomNavVisible } from '../hooks/useMobileBottomNavVisible'
 
 const NotificationContext = createContext()
 
@@ -15,59 +24,262 @@ export const useError = () => {
   return { showError }
 }
 
+// How long the exit animation runs before the toast leaves the list.
+const EXIT_DURATION_MS = 180
+// Older toasts stay in the list (and keep their timers) but stop rendering,
+// so a burst of notifications never swallows the screen.
+const MAX_VISIBLE = 3
+
 // Notification types configuration; defaultTitle holds an i18n key resolved
 // at render time (this object is module-level, so it can't call useTranslation).
 const NOTIFICATION_TYPES = {
   error: {
     color: 'danger',
-    icon: <Error color='danger' />,
+    icon: ErrorRounded,
     autoHideDuration: 6000,
-    showDismissButton: true,
     defaultTitle: 'notification.error',
   },
   success: {
     color: 'success',
-    icon: <CheckCircle color='success' />,
+    icon: CheckCircleRounded,
     autoHideDuration: 5000,
-    showDismissButton: false,
     defaultTitle: 'notification.success',
   },
   undo: {
     color: 'success',
-    icon: <Undo color='success' />,
+    icon: UndoRounded,
     autoHideDuration: null,
-    showDismissButton: false,
     defaultTitle: 'notification.undoneSuccessfully',
   },
   warning: {
     color: 'warning',
-    icon: <Warning color='warning' />,
+    icon: WarningRounded,
     autoHideDuration: 4000,
-    showDismissButton: false,
     defaultTitle: 'notification.warning',
   },
   info: {
     color: 'primary',
-    icon: <Info color='primary' />,
+    icon: InfoRounded,
     autoHideDuration: 4000,
-    showDismissButton: false,
     defaultTitle: 'notification.information',
   },
   custom: {
     color: 'neutral',
     icon: null,
     autoHideDuration: null,
-    showDismissButton: false,
     defaultTitle: 'notification.title',
   },
+}
+
+// Anchored to the top whenever the mobile bottom bar owns the bottom edge,
+// otherwise it keeps the familiar bottom-right placement.
+const stackPositionSx = atTop =>
+  atTop
+    ? {
+        alignItems: 'stretch',
+        left: '50%',
+        top: 'calc(var(--safe-area-inset-top, 0px) + var(--app-header-offset, 0px) + 10px)',
+        transform: 'translateX(-50%)',
+        transition: 'top 220ms ease',
+        width: 'min(440px, calc(100vw - 20px))',
+      }
+    : {
+        alignItems: 'flex-end',
+        bottom: 'calc(var(--safe-area-inset-bottom, 0px) + 16px)',
+        right: 16,
+        width: 'min(420px, calc(100vw - 32px))',
+      }
+
+const NotificationStack = ({ atTop, children }) => (
+  <Box
+    sx={{
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 1,
+      // Only the toasts themselves should intercept taps.
+      pointerEvents: 'none',
+      position: 'fixed',
+      zIndex: 'var(--joy-zIndex-snackbar, 1400)',
+      ...stackPositionSx(atTop),
+      '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
+    }}
+  >
+    {children}
+  </Box>
+)
+
+NotificationStack.propTypes = {
+  atTop: PropTypes.bool.isRequired,
+  children: PropTypes.node,
+}
+
+const Toast = ({
+  actionLabel,
+  atTop,
+  color,
+  dismissLabel,
+  duration,
+  icon,
+  leaving,
+  message,
+  onAction,
+  onDismiss,
+  title,
+}) => (
+  <Sheet
+    role={color === 'danger' ? 'alert' : 'status'}
+    sx={{
+      alignItems: 'flex-start',
+      animation: `${leaving ? 'donetickToastOut' : 'donetickToastIn'} ${
+        leaving ? EXIT_DURATION_MS : 220
+      }ms cubic-bezier(.22,.61,.36,1) forwards`,
+      bgcolor: 'background.surface',
+      border: '1px solid',
+      borderColor: 'divider',
+      borderRadius: 'xl',
+      boxShadow: '0 14px 34px rgba(0, 0, 0, .16)',
+      display: 'flex',
+      gap: 1.25,
+      overflow: 'hidden',
+      p: 1.25,
+      pointerEvents: 'auto',
+      position: 'relative',
+      width: '100%',
+      '@keyframes donetickToastIn': {
+        from: {
+          opacity: 0,
+          transform: `translateY(${atTop ? '-14px' : '14px'}) scale(.97)`,
+        },
+        to: { opacity: 1, transform: 'translateY(0) scale(1)' },
+      },
+      '@keyframes donetickToastOut': {
+        from: { opacity: 1, transform: 'translateY(0) scale(1)' },
+        to: {
+          opacity: 0,
+          transform: `translateY(${atTop ? '-10px' : '10px'}) scale(.97)`,
+        },
+      },
+      '@keyframes donetickToastProgress': {
+        from: { transform: 'scaleX(1)' },
+        to: { transform: 'scaleX(0)' },
+      },
+      '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
+    }}
+  >
+    {icon && (
+      <Box
+        sx={{
+          // Joy icons read --Icon-color before currentColor, so the bubble has
+          // to hand its tint over explicitly.
+          '--Icon-color': 'currentColor',
+          bgcolor: `${color}.softBg`,
+          borderRadius: '50%',
+          color: `${color}.plainColor`,
+          display: 'grid',
+          flex: '0 0 auto',
+          height: 34,
+          placeItems: 'center',
+          width: 34,
+          '& svg': { fontSize: 19 },
+        }}
+      >
+        {icon}
+      </Box>
+    )}
+
+    <Box sx={{ flex: 1, minWidth: 0, py: 0.25 }}>
+      <Typography level='title-sm' sx={{ textWrap: 'pretty' }}>
+        {title}
+      </Typography>
+      {message && (
+        <Typography
+          level='body-xs'
+          textColor='text.secondary'
+          sx={{ mt: 0.25, textWrap: 'pretty' }}
+        >
+          {message}
+        </Typography>
+      )}
+    </Box>
+
+    {onAction && (
+      <Button
+        size='sm'
+        variant='soft'
+        color={color}
+        onClick={onAction}
+        sx={{ alignSelf: 'center', borderRadius: 'lg', flex: '0 0 auto' }}
+      >
+        {actionLabel}
+      </Button>
+    )}
+
+    <IconButton
+      size='sm'
+      variant='plain'
+      color='neutral'
+      aria-label={dismissLabel}
+      onClick={onDismiss}
+      sx={{
+        borderRadius: '50%',
+        flex: '0 0 auto',
+        minHeight: 28,
+        minWidth: 28,
+        '& svg': { fontSize: 17 },
+      }}
+    >
+      <CloseRounded />
+    </IconButton>
+
+    {duration && !leaving && (
+      <Box
+        aria-hidden='true'
+        sx={{
+          animation: `donetickToastProgress ${duration}ms linear forwards`,
+          bgcolor: `${color}.solidBg`,
+          bottom: 0,
+          height: 2,
+          insetInline: 0,
+          opacity: 0.45,
+          position: 'absolute',
+          transformOrigin: 'left',
+          '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
+        }}
+      />
+    )}
+  </Sheet>
+)
+
+Toast.propTypes = {
+  actionLabel: PropTypes.string,
+  atTop: PropTypes.bool.isRequired,
+  color: PropTypes.string.isRequired,
+  dismissLabel: PropTypes.string.isRequired,
+  duration: PropTypes.number,
+  icon: PropTypes.node,
+  leaving: PropTypes.bool,
+  message: PropTypes.node,
+  onAction: PropTypes.func,
+  onDismiss: PropTypes.func.isRequired,
+  title: PropTypes.node,
 }
 
 export const NotificationProvider = ({ children }) => {
   const { t } = useTranslation('common')
   const { skin } = useThemeSkin()
   const isCustomTheme = skin !== 'default'
-  const notificationTextSx = isCustomTheme ? { color: 'inherit' } : undefined
+  const bottomNavVisible = useMobileBottomNavVisible()
   const [notifications, setNotifications] = useState([])
+
+  const removeNotification = id => {
+    // Flag first so the toast can play its exit animation, then drop it.
+    setNotifications(prev =>
+      prev.map(n => (n.id === id ? { ...n, leaving: true } : n)),
+    )
+    setTimeout(() => {
+      setNotifications(prev => prev.filter(n => n.id !== id))
+    }, EXIT_DURATION_MS)
+  }
 
   const addNotification = notification => {
     const id = Date.now() + Math.random()
@@ -89,10 +301,6 @@ export const NotificationProvider = ({ children }) => {
     }
 
     return id
-  }
-
-  const removeNotification = id => {
-    setNotifications(prev => prev.filter(n => n.id !== id))
   }
 
   const clearAllNotifications = () => {
@@ -172,109 +380,57 @@ export const NotificationProvider = ({ children }) => {
     // Handle custom notifications with components
     if (notification.type === 'custom' && notification.component) {
       return (
-        <Snackbar
+        <Box
           key={notification.id}
-          open={true}
-          onClose={() => removeNotification(notification.id)}
-          anchorOrigin={
-            notification.anchorOrigin || {
-              vertical: 'bottom',
-              horizontal: 'right',
-            }
-          }
-          {...(notification.snackbarProps || {})}
+          sx={{ pointerEvents: 'auto', width: '100%' }}
         >
           {React.cloneElement(notification.component, {
             onClose: () => removeNotification(notification.id),
             ...notification.componentProps,
           })}
-        </Snackbar>
+        </Box>
       )
     }
 
     // Custom skins use one accent for all toast types. Icons and titles still
     // communicate severity without introducing unrelated status colors.
-    const notificationColor = isCustomTheme ? 'primary' : config.color
+    const color = isCustomTheme ? 'primary' : config.color
+    const Icon = config.icon
+    const icon = notification.icon || (Icon ? <Icon /> : undefined)
 
-    // Determine the icon to use
-    const notificationIcon =
-      notification.icon ||
-      (isCustomTheme && config.icon
-        ? React.cloneElement(config.icon, { color: 'inherit' })
-        : config.icon)
-
-    // Determine title and message
-    const title = notification.title || t(config.defaultTitle)
-    const message = notification.message
+    // Determine title and message. A message-only toast reads better as a
+    // single line than as a generic title with the real text beneath it.
+    const title = notification.title || notification.message
+    const message = notification.title ? notification.message : undefined
 
     return (
-      <Snackbar
+      <Toast
         key={notification.id}
-        open={true}
-        color={isCustomTheme ? 'primary' : 'neutral'}
-        autoHideDuration={config.autoHideDuration}
-        onClose={() => removeNotification(notification.id)}
-        startDecorator={notificationIcon}
-        endDecorator={
-          notification.undoAction ? (
-            <Button
-              variant='outlined'
-              color={notificationColor}
-              onClick={() => {
+        atTop={bottomNavVisible}
+        color={color}
+        dismissLabel={t('notification.dismiss')}
+        duration={config.autoHideDuration}
+        icon={icon}
+        leaving={Boolean(notification.leaving)}
+        message={message}
+        title={title || t(config.defaultTitle)}
+        actionLabel={t('notification.undo')}
+        onAction={
+          notification.undoAction
+            ? () => {
                 notification.undoAction()
                 removeNotification(notification.id)
-              }}
-            >
-              {t('notification.undo')}
-            </Button>
-          ) : config.showDismissButton ? (
-            <Button
-              variant='outlined'
-              color={notificationColor}
-              onClick={() => removeNotification(notification.id)}
-            >
-              {t('notification.dismiss')}
-            </Button>
-          ) : null
+              }
+            : undefined
         }
-        anchorOrigin={
-          notification.anchorOrigin || {
-            vertical: 'bottom',
-            horizontal: 'right',
-          }
-        }
-        {...(notification.snackbarProps || {})}
-      >
-        {/* Enhanced structure like ErrorProvider - always show title and message for consistency */}
-        {title && message ? (
-          <Box>
-            <Typography
-              color={notificationColor}
-              level='title-sm'
-              sx={notificationTextSx}
-            >
-              {title}
-            </Typography>
-            <Typography
-              color={notificationColor}
-              level='body-sm'
-              sx={notificationTextSx}
-            >
-              {message}
-            </Typography>
-          </Box>
-        ) : (
-          <Typography
-            color={notificationColor}
-            level='body-md'
-            sx={notificationTextSx}
-          >
-            {message || title || t('notification.title')}
-          </Typography>
-        )}
-      </Snackbar>
+        onDismiss={() => removeNotification(notification.id)}
+      />
     )
   }
+
+  // Newest toast sits closest to the screen edge the stack is anchored to.
+  const visible = notifications.slice(-MAX_VISIBLE)
+  const ordered = bottomNavVisible ? [...visible].reverse() : visible
 
   return (
     <NotificationContext.Provider
@@ -291,7 +447,11 @@ export const NotificationProvider = ({ children }) => {
       }}
     >
       {children}
-      {notifications.map(renderNotification)}
+      {ordered.length > 0 && (
+        <NotificationStack atTop={bottomNavVisible}>
+          {ordered.map(renderNotification)}
+        </NotificationStack>
+      )}
     </NotificationContext.Provider>
   )
 }

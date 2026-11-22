@@ -22,15 +22,16 @@ import {
   Switch,
   Typography,
 } from '@mui/joy'
-import useMediaQuery from '@mui/material/useMediaQuery'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { useResponsiveQuery } from '../../hooks/useResponsiveQuery'
 import {
   BOTTOM_NAV_ITEM_POOL,
   DEFAULT_BOTTOM_NAV_CONFIG,
   getBottomNavConfig,
   getBottomNavHideLabels,
+  isMobileBottomNavEligible,
   MAX_BOTTOM_NAV_ITEMS,
   saveBottomNavConfig,
   saveBottomNavHideLabels,
@@ -44,7 +45,6 @@ import {
   setSinglePageTaskEditor,
   useSinglePageTaskEditor,
 } from '../../utils/TaskEditorPreferences'
-import { isMobileBottomNavEligible } from '../components/MobileBottomNav'
 import SettingsLayout from './SettingsLayout'
 import SettingsReorderList from './SettingsReorderList'
 import SettingsSection from './SettingsSection'
@@ -67,9 +67,9 @@ const ICONS = {
 const LayoutSettings = () => {
   const { t } = useTranslation(['settings', 'common'])
   const singlePageTaskEditor = useSinglePageTaskEditor()
-  const isMobile = useMediaQuery('(max-width:768px)')
+  const isMobile = useResponsiveQuery('mobile')
   const bottomNavEligible = isMobileBottomNavEligible(isMobile)
-  const hasSidepanel = useMediaQuery(theme => theme.breakpoints.up('lg'))
+  const hasSidepanel = useResponsiveQuery('largeUp')
   const [defaultView, setDefaultView] = useState(getDefaultView)
   const [config, setConfig] = useState(() =>
     [...getBottomNavConfig()].sort((a, b) => a.order - b.order),

@@ -24,7 +24,6 @@ import {
   Typography,
   useColorScheme,
 } from '@mui/joy'
-import { useMediaQuery } from '@mui/material'
 import moment from 'moment'
 import PropTypes from 'prop-types'
 import { useState } from 'react'
@@ -32,6 +31,7 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
 import { useImpersonateUser } from '../contexts/ImpersonateUserContext'
+import { useResponsiveQuery } from '../hooks/useResponsiveQuery'
 import useStickyState from '../hooks/useStickyState'
 import { useCircleMembers, useUserProfile } from '../queries/UserQueries'
 import { apiClient } from '../utils/ApiClient'
@@ -55,7 +55,7 @@ const UserProfileAvatar = ({ showDetails = false }) => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false)
   const [themeMode, setThemeMode] = useStickyState(mode, 'themeMode')
-  const isLargeScreen = useMediaQuery(theme => theme.breakpoints.up('lg'))
+  const isLargeScreen = useResponsiveQuery('largeUp')
 
   if (!userProfile) return null
 

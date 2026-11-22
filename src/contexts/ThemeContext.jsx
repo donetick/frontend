@@ -7,6 +7,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { prefixer } from 'stylis'
 import rtlPlugin from 'stylis-plugin-rtl'
 
+import { MOTION } from '@/constants/motion'
+import { viewportMedia } from '@/constants/responsive'
 import { applyStartupTheme } from '@/constants/startupTheme'
 import { COLORS, THEME_BACKGROUND } from '@/constants/theme'
 import {
@@ -19,6 +21,7 @@ import {
   feedbackDecoratorStyles,
   feedbackSurfaceStyles,
 } from '@/utils/feedbackTheme'
+import { popupMotionStyles } from '@/utils/motionStyles'
 import { tintNeutralPalette } from '@/utils/themePalette'
 
 import { useLocalization } from './LocalizationContext'
@@ -146,8 +149,7 @@ const themeConfig = {
           // (ButtonGroup, Input/Select decorators, Card actions) still win.
           borderRadius: `var(--Button-radius, ${CONTROL_RADIUS})`,
           fontWeight: 600,
-          transition:
-            'background-color 140ms ease, border-color 140ms ease, color 140ms ease, box-shadow 140ms ease, transform 100ms ease',
+          transition: `background-color 140ms ease, border-color 140ms ease, color 140ms ease, box-shadow 140ms ease, transform ${MOTION.press}ms ${MOTION.easeOut}`,
           '&:active:not(:disabled)': {
             transform: 'scale(0.98)',
           },
@@ -162,8 +164,7 @@ const themeConfig = {
       styleOverrides: {
         root: ({ ownerState }) => ({
           borderRadius: `var(--IconButton-radius, ${ICON_BUTTON_RADIUS})`,
-          transition:
-            'background-color 140ms ease, border-color 140ms ease, color 140ms ease, transform 100ms ease',
+          transition: `background-color 140ms ease, border-color 140ms ease, color 140ms ease, transform ${MOTION.press}ms ${MOTION.easeOut}`,
           '&:active:not(:disabled)': {
             transform: 'scale(0.96)',
           },
@@ -172,7 +173,7 @@ const themeConfig = {
           ...(ownerState.size === 'md' && {
             minWidth: '40px',
             minHeight: '40px',
-            '@media (max-width: 768px)': {
+            [viewportMedia.mobile]: {
               minWidth: '44px',
               minHeight: '44px',
             },
@@ -202,9 +203,55 @@ const themeConfig = {
           theme.direction === 'rtl' ? buttonGroupRtlGeometry(ownerState) : {},
       },
     },
-    JoySelect: { defaultProps: { slotProps: { listbox: POPUP_LISTBOX } } },
+    JoyMenu: {
+      styleOverrides: { root: popupMotionStyles },
+    },
+    JoySelect: {
+      defaultProps: { slotProps: { listbox: POPUP_LISTBOX } },
+      styleOverrides: { listbox: popupMotionStyles },
+    },
     JoyAutocomplete: {
       defaultProps: { slotProps: { listbox: POPUP_LISTBOX } },
+      styleOverrides: { listbox: popupMotionStyles },
+    },
+    JoyTooltip: {
+      styleOverrides: {
+        root: {
+          ...popupMotionStyles,
+          transitionDuration: `${MOTION.tooltip}ms`,
+          '@media (prefers-reduced-motion: reduce)': {
+            ...popupMotionStyles['@media (prefers-reduced-motion: reduce)'],
+          },
+        },
+      },
+    },
+    JoySnackbar: {
+      styleOverrides: {
+        root: ({ ownerState }) => ({
+          // Replace Joy's restarting keyframes; keep its positioning transform
+          // and built-in delayed unmount / auto-dismiss lifecycle intact.
+          animation: 'none',
+          opacity: ownerState.open ? 1 : 0,
+          translate: ownerState.open
+            ? '0 0'
+            : ownerState.anchorOrigin?.vertical === 'top'
+              ? '0 -12px'
+              : '0 12px',
+          transition: `opacity ${ownerState.animationDuration}ms ${MOTION.easeOut}, translate ${ownerState.animationDuration}ms ${MOTION.easeOut}`,
+          '@starting-style': {
+            opacity: 0,
+            translate:
+              ownerState.anchorOrigin?.vertical === 'top'
+                ? '0 -12px'
+                : '0 12px',
+          },
+          '@media (prefers-reduced-motion: reduce)': {
+            translate: 'none',
+            transition: `opacity ${MOTION.reduced}ms ${MOTION.easeOut}`,
+            '@starting-style': { opacity: 0, translate: 'none' },
+          },
+        }),
+      },
     },
   },
 }
@@ -327,7 +374,12 @@ const getSkinTheme = (skin, direction) => {
               component,
               {
                 styleOverrides: {
-                  root: feedbackSurfaceStyles,
+                  root: props => ({
+                    ...themeConfig.components[
+                      component
+                    ]?.styleOverrides?.root?.(props),
+                    ...feedbackSurfaceStyles(props),
+                  }),
                   startDecorator: feedbackDecoratorStyles,
                 },
               },

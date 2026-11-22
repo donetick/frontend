@@ -15,16 +15,18 @@ import {
   Widgets,
 } from '@mui/icons-material'
 import { Box, Sheet, Typography } from '@mui/joy'
-import useMediaQuery from '@mui/material/useMediaQuery'
 import PropTypes from 'prop-types'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
+import { setMobileBottomNavVisible } from '../../hooks/useMobileBottomNavVisible'
+import { useResponsiveQuery } from '../../hooks/useResponsiveQuery'
 import { useScrollDirection } from '../../hooks/useScrollDirection'
 import {
   getBottomNavHideLabels,
   getEnabledBottomNavItems,
+  isMobileBottomNavEligible,
 } from '../../utils/BottomNavConfig'
 import { OPEN_NAVIGATION_DRAWER_EVENT } from './navigationEvents'
 
@@ -69,13 +71,6 @@ const isItemActive = (item, pathname) => {
   const to = item.to?.startsWith('/') ? item.to : `/${item.to}`
   return pathname === to
 }
-
-const MARKETING_HOSTNAMES = ['www.donetick.com', 'donetick.com']
-
-// Shared with the settings page so the "customize bottom nav" section only
-// shows when the bar itself is eligible to render.
-export const isMobileBottomNavEligible = isMobile =>
-  isMobile && !MARKETING_HOSTNAMES.includes(window.location.hostname)
 
 const NavItem = ({ active, hideLabel, icon, label, onClick, to }) => {
   const content = (
@@ -153,7 +148,7 @@ NavItem.propTypes = {
 
 const MobileBottomNav = () => {
   const { t } = useTranslation('common')
-  const isMobile = useMediaQuery('(max-width:768px)')
+  const isMobile = useResponsiveQuery('mobile')
   const location = useLocation()
   const navigate = useNavigate()
 
@@ -177,6 +172,12 @@ const MobileBottomNav = () => {
     isTaskDetailRoute(location.pathname)
 
   const scrolledAway = useScrollDirection({ enabled: isMobile && !hidden })
+
+  // Toasts anchor to the top while this bar owns the bottom edge.
+  useEffect(() => {
+    setMobileBottomNavVisible(!hidden)
+    return () => setMobileBottomNavVisible(false)
+  }, [hidden])
 
   if (hidden) return null
 

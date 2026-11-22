@@ -1,13 +1,13 @@
 import { Box } from '@mui/joy'
-import useMediaQuery from '@mui/material/useMediaQuery'
 import PropTypes from 'prop-types'
 
+import { useResponsiveQuery } from '../../hooks/useResponsiveQuery'
 import { useScrollDirection } from '../../hooks/useScrollDirection'
 
 // Wraps a page's floating action button(s) so they hide on scroll-down and
 // reappear on scroll-up on mobile, matching MobileBottomNav's behavior.
 const ScrollHideFab = ({ children, sx }) => {
-  const isMobile = useMediaQuery('(max-width:768px)')
+  const isMobile = useResponsiveQuery('mobile')
   const hidden = useScrollDirection({ enabled: isMobile })
 
   return (

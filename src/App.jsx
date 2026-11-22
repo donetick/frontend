@@ -19,6 +19,7 @@ import { registerCapacitorListeners } from './CapacitorListener'
 import PageTransition from './components/animations/PageTransition'
 import GlobalQuickAdd from './components/GlobalQuickAdd'
 import TimezonePrompt from './components/TimezonePrompt'
+import { viewportMedia } from './constants/responsive'
 import { ImpersonateUserProvider } from './contexts/ImpersonateUserContext'
 import { KeyboardShortcutScopeProvider } from './contexts/KeyboardShortcutScopeContext'
 import { NavBarTitleProvider } from './contexts/NavBarTitleContext'
@@ -172,7 +173,7 @@ const AppContent = () => {
                 // sidebar NavBar needs to span the full column height. On
                 // mobile the NavBar isn't a sidebar, so forcing 100dvh here
                 // just leaves blank space below short pages once you scroll.
-                '@media (min-width: 1024px)': {
+                [viewportMedia.desktopNav]: {
                   flexDirection: 'row',
                   minHeight: '100dvh',
                 },

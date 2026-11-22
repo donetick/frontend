@@ -29,22 +29,24 @@ export const QUICK_ADD_FIELDS = [
   {
     id: 'attachments',
     labelKey: 'layout.quickAddSettings.fields.attachments',
-    defaultMore: true,
+    defaultMore: false,
   },
   {
     id: 'notifications',
     labelKey: 'layout.quickAddSettings.fields.notifications',
-    defaultMore: true,
+    defaultMore: false,
   },
   {
     id: 'points',
     labelKey: 'layout.quickAddSettings.fields.points',
-    defaultMore: true,
+    defaultMore: false,
   },
 ]
 
 const STORAGE_KEY = 'quickAddMoreFields'
 const CHANGE_EVENT = 'donetick:quick-add-fields-changed'
+// Nothing is hidden by default: every field ships in the Quick Add row as it
+// did before customization existed, and moving one behind "More" is opt-in.
 const DEFAULT_FIELDS = QUICK_ADD_FIELDS.filter(field => field.defaultMore).map(
   field => field.id,
 )
