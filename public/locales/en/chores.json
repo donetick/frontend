@@ -206,6 +206,7 @@
     "times": "times",
     "details": "Details",
     "createdBy": "Created By",
+    "createdAt": "Created At",
     "na": "N/A",
     "taskCompleted": "Task Completed",
     "taskCompletedMessage": "Your task has been marked as complete",
@@ -1233,6 +1234,13 @@
       "hasNoDueDate": "No Due Date",
       "hasDueDate": "Has Due Date",
       "custom": "Custom"
+    },
+    "createdDate": {
+      "label": "Created Date",
+      "before": "Before date",
+      "during": "During date",
+      "after": "After date",
+      "date": "Date"
     },
     "status": {
       "0": "Active",

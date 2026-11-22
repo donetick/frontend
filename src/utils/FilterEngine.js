@@ -33,6 +33,9 @@ export const evaluateCondition = (chore, condition, context = {}) => {
     case 'dueDate':
       return evaluateDueDate(chore, operator, value)
 
+    case 'createdDate':
+      return evaluateCreatedDate(chore, operator, value)
+
     case 'label':
       return evaluateLabel(chore, operator, value)
 
@@ -232,6 +235,56 @@ const evaluateDueDate = (chore, operator, value) => {
       return dueDate >= new Date(start) && dueDate <= new Date(end)
     }
 
+    default:
+      return false
+  }
+}
+
+const evaluateCreatedDate = (chore, operator, value) => {
+  if (operator === 'anyOf') {
+    const operators = Array.isArray(value) ? value : [value]
+    return operators.some(
+      entry =>
+        entry &&
+        evaluateCreatedDate(
+          chore,
+          typeof entry === 'string' ? entry : entry.operator,
+          typeof entry === 'string' ? null : entry.value,
+        ),
+    )
+  }
+
+  const createdAtValue = chore.createdAt ?? chore.created_at
+  if (
+    createdAtValue == null ||
+    typeof value !== 'string' ||
+    !/^\d{4}-\d{2}-\d{2}$/.test(value)
+  ) {
+    return false
+  }
+
+  const [year, month, day] = value.split('-').map(Number)
+  if (!month || !day) return false
+
+  const startOfDate = new Date(year, month - 1, day)
+  if (
+    startOfDate.getFullYear() !== year ||
+    startOfDate.getMonth() !== month - 1 ||
+    startOfDate.getDate() !== day
+  ) {
+    return false
+  }
+  const startOfNextDate = new Date(year, month - 1, day + 1)
+  const createdAt = new Date(createdAtValue)
+  if (Number.isNaN(createdAt.getTime())) return false
+
+  switch (operator) {
+    case 'before':
+      return createdAt < startOfDate
+    case 'during':
+      return createdAt >= startOfDate && createdAt < startOfNextDate
+    case 'after':
+      return createdAt >= startOfNextDate
     default:
       return false
   }

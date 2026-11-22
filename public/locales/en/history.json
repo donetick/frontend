@@ -176,7 +176,8 @@
     "unknown": "Unknown",
     "membersInvolved": "Members Involved",
     "membersSuffix": "{{count}} members",
-    "lastCompleted": "Last Completed"
+    "lastCompleted": "Last Completed",
+    "createdAt": "Created At"
   },
   "noteViewer": {
     "updatedAt": "Updated at {{date}}"

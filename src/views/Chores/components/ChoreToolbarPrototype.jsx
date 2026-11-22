@@ -67,6 +67,7 @@ import CustomFilterChips from './CustomFilterChips'
 import FilterBuilderContent, {
   CHORE_STATUSES,
   conditionsToSelections,
+  CREATED_DATE_OPTIONS,
   defaultSelections,
   DUE_DATE_OPTIONS,
   POINTS_OPERATORS,
@@ -279,6 +280,7 @@ const ChoreToolbar = ({
       label: t('labels.label'),
       project: t('filterBuilder.project'),
       dueDate: t('filterBuilder.dueDate'),
+      createdDate: t('filterBuilder.createdDate.label'),
       points: t('filterBuilder.points'),
     }
 
@@ -299,6 +301,25 @@ const ChoreToolbar = ({
               .join(' / ')
           : describeDueDate(condition.operator)
       return `${typeLabel}: ${dueDateLabel}`
+    }
+
+    if (condition.type === 'createdDate') {
+      const entries =
+        condition.operator === 'anyOf'
+          ? Array.isArray(condition.value)
+            ? condition.value
+            : []
+          : [{ operator: condition.operator, value: condition.value }]
+      const operators = entries
+        .map(entry =>
+          CREATED_DATE_OPTIONS.some(option => option.value === entry?.operator)
+            ? t(`filterBuilder.createdDate.${entry.operator}`)
+            : entry?.operator,
+        )
+        .filter(Boolean)
+        .join(' / ')
+      const date = entries.find(entry => entry?.value)?.value
+      return `${typeLabel}: ${operators}${date ? ` · ${date}` : ''}`
     }
 
     if (condition.type === 'points') {

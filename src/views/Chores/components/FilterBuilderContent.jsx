@@ -9,7 +9,7 @@ import {
   Stars,
   TaskAlt,
 } from '@mui/icons-material'
-import { Avatar, Box, Button, Chip } from '@mui/joy'
+import { Avatar, Box, Button, Chip, FormControl, FormLabel, Input } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
 
 import NumberInput from '../../../components/common/NumberInput'
@@ -27,6 +27,12 @@ export const DUE_DATE_OPTIONS = [
   { value: 'isDueThisMonth', color: 'neutral' },
   { value: 'hasNoDueDate', color: 'neutral' },
   { value: 'hasDueDate', color: 'neutral' },
+]
+
+export const CREATED_DATE_OPTIONS = [
+  { value: 'before' },
+  { value: 'during' },
+  { value: 'after' },
 ]
 
 export const POINTS_OPERATORS = [
@@ -52,6 +58,7 @@ export const defaultSelections = () => ({
   label: { operator: 'is', values: [] },
   project: { operator: 'is', values: [] },
   dueDate: { operators: [], custom: { mode: 'relative', start: 0, end: 14 } },
+  createdDate: { operators: [], date: '' },
   points: { operator: 'greaterThan', value: 0, active: false },
 })
 
@@ -73,6 +80,15 @@ export const conditionsToSelections = conditions => {
         custom:
           entries.find(entry => entry?.operator === 'custom')?.value ??
           sel.dueDate.custom,
+      }
+    } else if (c.type === 'createdDate') {
+      const entries =
+        c.operator === 'anyOf'
+          ? (Array.isArray(c.value) ? c.value : [c.value]).filter(Boolean)
+          : [{ operator: c.operator, value: c.value }]
+      sel.createdDate = {
+        operators: entries.map(entry => entry.operator).filter(Boolean),
+        date: entries.find(entry => entry?.value)?.value ?? '',
       }
     } else if (c.type === 'points') {
       sel.points = { operator: c.operator, value: c.value ?? 0, active: true }
@@ -120,6 +136,23 @@ export const selectionsToConditions = selections => {
       type: 'dueDate',
       operator: 'anyOf',
       value: dueDateOperators,
+    })
+  }
+  const createdDate = selections.createdDate
+  const createdDateOperators = (createdDate.operators || []).map(operator => ({
+    operator,
+    value: createdDate.date,
+  }))
+  if (createdDate.date && createdDateOperators.length === 1) {
+    conditions.push({
+      type: 'createdDate',
+      ...createdDateOperators[0],
+    })
+  } else if (createdDate.date && createdDateOperators.length > 1) {
+    conditions.push({
+      type: 'createdDate',
+      operator: 'anyOf',
+      value: createdDateOperators,
     })
   }
   if (selections.points.active) {
@@ -222,6 +255,15 @@ const FilterBuilderContent = ({
       })),
     },
     {
+      type: 'createdDate',
+      icon: CalendarMonth,
+      label: t('filterBuilder.createdDate.label'),
+      options: CREATED_DATE_OPTIONS.map(option => ({
+        ...option,
+        label: t(`filterBuilder.createdDate.${option.value}`),
+      })),
+    },
+    {
       type: 'label',
       icon: Label,
       label: t('filterBuilder.labels'),
@@ -277,6 +319,20 @@ const FilterBuilderContent = ({
       }
     })
 
+  const toggleCreatedDate = operator =>
+    onSelectionsChange(prev => {
+      const current = prev.createdDate.operators || []
+      return {
+        ...prev,
+        createdDate: {
+          ...prev.createdDate,
+          operators: current.includes(operator)
+            ? current.filter(value => value !== operator)
+            : [...current, operator],
+        },
+      }
+    })
+
   return (
     <Box sx={{ minWidth: 0 }}>
       {sections
@@ -284,9 +340,11 @@ const FilterBuilderContent = ({
         .map(section => {
           const { options, type } = section
           const isDueDate = type === 'dueDate'
+          const isCreatedDate = type === 'createdDate'
+          const isDateCondition = isDueDate || isCreatedDate
           const selection = selections[type]
           const selected =
-            (isDueDate ? selection.operators : selection.values) || []
+            (isDateCondition ? selection.operators : selection.values) || []
           const summary = selected
             .map(
               value =>
@@ -304,11 +362,13 @@ const FilterBuilderContent = ({
               summary={
                 isDueDate && selected.length > 1
                   ? `${t('filterBuilder.anyOf')} · ${summary}`
-                  : summary
+                  : isCreatedDate && selection.date
+                    ? `${selection.date}${summary ? ` · ${summary}` : ''}`
+                    : summary
               }
               operatorLabels={section.operatorLabels}
               onOperatorChange={
-                isDueDate ? undefined : operator => setOperator(type, operator)
+                isDateCondition ? undefined : operator => setOperator(type, operator)
               }
             >
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
@@ -331,7 +391,9 @@ const FilterBuilderContent = ({
                       onClick={() =>
                         isDueDate
                           ? toggleDueDate(option.value)
-                          : toggleValue(type, option.value)
+                          : isCreatedDate
+                            ? toggleCreatedDate(option.value)
+                            : toggleValue(type, option.value)
                       }
                       slotProps={{ action: { 'aria-pressed': isSelected } }}
                       sx={{ userSelect: 'none', transition: 'all 0.15s ease' }}
@@ -352,7 +414,26 @@ const FilterBuilderContent = ({
                   }
                 />
               )}
-              {selected.length > 0 && (
+              {isCreatedDate && (
+                <FormControl sx={{ mt: 1.5, maxWidth: 240 }}>
+                  <FormLabel>{t('filterBuilder.createdDate.date')}</FormLabel>
+                  <Input
+                    type='date'
+                    value={selection.date}
+                    onChange={event =>
+                      onSelectionsChange(prev => ({
+                        ...prev,
+                        createdDate: {
+                          ...prev.createdDate,
+                          date: event.target.value,
+                        },
+                      }))
+                    }
+                  />
+                </FormControl>
+              )}
+              {(selected.length > 0 ||
+                (isCreatedDate && selection.date !== '')) && (
                 <Button
                   size='sm'
                   variant='plain'
@@ -363,7 +444,9 @@ const FilterBuilderContent = ({
                       ...prev,
                       [type]: isDueDate
                         ? { ...prev[type], operators: [] }
-                        : { ...prev[type], values: [] },
+                        : isCreatedDate
+                          ? { operators: [], date: '' }
+                          : { ...prev[type], values: [] },
                     }))
                   }
                 >
