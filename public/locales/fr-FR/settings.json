@@ -395,7 +395,13 @@
       "description": "Donetick prend en charge le Model Context Protocol (MCP), un standard ouvert qui relie les assistants IA aux applications. Une fois connecté, votre assistant peut consulter vos tâches et agir pour vous : « Qu’est-ce qui est prévu aujourd’hui ? », « Ajoute une tâche pour sortir les poubelles tous les mardis », « Marque la vaisselle comme terminée ».",
       "permissions": "L’assistant utilise votre compte : il voit exactement ce que vous voyez. Chaque modification respecte les mêmes droits d’accès et déclenche les mêmes rappels et webhooks que dans l’application.",
       "docs": "Consulter la documentation MCP",
-      "tools": { "tasks": "Tâches et corvées", "labels": "Étiquettes", "projects": "Projets", "filters": "Filtres", "things": "Objets" }
+      "tools": {
+        "tasks": "Tâches et corvées",
+        "labels": "Étiquettes",
+        "projects": "Projets",
+        "filters": "Filtres",
+        "things": "Objets"
+      }
     },
     "enable": {
       "title": "Activer MCP sur votre serveur",

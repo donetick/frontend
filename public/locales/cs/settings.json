@@ -395,7 +395,13 @@
       "description": "Donetick podporuje Model Context Protocol (MCP), otevřený standard pro propojení AI asistentů s aplikacemi. Po připojení může asistent prohlížet vaše úkoly a spravovat je za vás: „Co mám dnes na programu?“, „Přidej vynášení odpadků každé úterý“, „Označ mytí nádobí jako hotové“.",
       "permissions": "Asistent používá váš účet a vidí přesně to co vy. Pro každou změnu platí stejná oprávnění, připomenutí a webhooky jako v aplikaci.",
       "docs": "Přečíst dokumentaci MCP",
-      "tools": { "tasks": "Úkoly a domácí práce", "labels": "Štítky", "projects": "Projekty", "filters": "Filtry", "things": "Věci" }
+      "tools": {
+        "tasks": "Úkoly a domácí práce",
+        "labels": "Štítky",
+        "projects": "Projekty",
+        "filters": "Filtry",
+        "things": "Věci"
+      }
     },
     "enable": {
       "title": "Zapněte MCP na svém serveru",

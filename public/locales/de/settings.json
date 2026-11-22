@@ -428,7 +428,13 @@
       "description": "Donetick unterstützt das Model Context Protocol (MCP), einen offenen Standard zur Verbindung von KI-Assistenten mit Apps. Nach der Einrichtung kann dein Assistent deine Aufgaben einsehen und für dich erledigen: „Was steht heute an?“, „Erstelle eine Aufgabe zum Müllrausbringen für jeden Dienstag“, „Markiere den Abwasch als erledigt“.",
       "permissions": "Der Assistent nutzt dein Konto und sieht genau das, was du siehst. Für jede Änderung gelten dieselben Berechtigungen, Erinnerungen und Webhooks wie in der App.",
       "docs": "MCP-Dokumentation lesen",
-      "tools": { "tasks": "Aufgaben und Hausarbeit", "labels": "Beschriftungen", "projects": "Projekte", "filters": "Filter", "things": "Dinge" }
+      "tools": {
+        "tasks": "Aufgaben und Hausarbeit",
+        "labels": "Beschriftungen",
+        "projects": "Projekte",
+        "filters": "Filter",
+        "things": "Dinge"
+      }
     },
     "enable": {
       "title": "Auf deinem Server aktivieren",
