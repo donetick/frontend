@@ -1235,6 +1235,13 @@
       "hasDueDate": "Has Due Date",
       "custom": "Custom"
     },
+    "createdDate": {
+      "label": "Created Date",
+      "before": "Before date",
+      "during": "During date",
+      "after": "After date",
+      "date": "Date"
+    },
     "status": {
       "0": "Active",
       "1": "Started",
