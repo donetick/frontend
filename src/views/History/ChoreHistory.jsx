@@ -381,7 +381,7 @@ const ChoreHistory = () => {
       setUserHistory(newUserChoreHistory)
       updateHistoryInfo(choreHistory, newUserChoreHistory, performers)
     }
-  }, [choreHistory, performers])
+  }, [choreHistory, choreData, fmt, performers, t])
 
   const updateHistoryInfo = (histories, userHistories, performers) => {
     // average delay for task completaion from due date:
@@ -459,6 +459,11 @@ const ChoreHistory = () => {
           performers.find(p => p.userId === Number(histories[0].completedBy))
             ?.displayName || t('info.unknown')
         }`,
+      },
+      {
+        icon: <CalendarMonth />,
+        text: t('info.createdAt'),
+        subtext: fmt.dateTime(choreData.res.createdAt),
       },
     ]
 
