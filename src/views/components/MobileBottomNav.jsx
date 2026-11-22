@@ -21,6 +21,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
+import { setMobileBottomNavVisible } from '../../hooks/useMobileBottomNavVisible'
 import { useScrollDirection } from '../../hooks/useScrollDirection'
 import {
   getBottomNavHideLabels,
@@ -177,6 +178,12 @@ const MobileBottomNav = () => {
     isTaskDetailRoute(location.pathname)
 
   const scrolledAway = useScrollDirection({ enabled: isMobile && !hidden })
+
+  // Toasts anchor to the top while this bar owns the bottom edge.
+  useEffect(() => {
+    setMobileBottomNavVisible(!hidden)
+    return () => setMobileBottomNavVisible(false)
+  }, [hidden])
 
   if (hidden) return null
 
