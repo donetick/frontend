@@ -1,5 +1,7 @@
 {
   "shared": "Shared",
+  "hidden": "Hidden",
+  "hiddenDescription": "This label stays out of the way.hidden from regular views and intended for automations and internal organization",
   "delete": {
     "title": "Delete Label",
     "message": "Are you sure you want to delete this label? This will remove the label from all tasks."
@@ -43,6 +45,7 @@
     "saveFailedTitle": "Failed to save label",
     "saveFailedMessage": "Unable to save label. Please try again.",
     "name": "Name",
+    "systemLabelHelper": "This is a system label because its name starts with _. Use it for integrations and automation. Hidden on task cards and details, but available in editors, search, and filter conditions.",
     "editTitle": "Edit Label",
     "addTitle": "Add Label",
     "color": "Color",

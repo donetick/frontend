@@ -1,5 +1,12 @@
 import { Check, PaletteOutlined } from '@mui/icons-material'
-import { Alert, Box, FormControl, FormLabel, Input } from '@mui/joy'
+import {
+  Alert,
+  Box,
+  FormControl,
+  FormHelperText,
+  FormLabel,
+  Input,
+} from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -119,6 +126,9 @@ function LabelModal({ isOpen, label, onClose }) {
           <Input
             fullWidth
             id='labelName'
+            aria-describedby={
+              labelName.startsWith('_') ? 'labelNameHelper' : undefined
+            }
             value={labelName}
             onChange={e => {
               setLabelName(e.target.value)
@@ -127,6 +137,11 @@ function LabelModal({ isOpen, label, onClose }) {
             autoFocus
             sx={{ minHeight: 48, borderRadius: 'md', fontSize: 'lg' }}
           />
+          {labelName.startsWith('_') && (
+            <FormHelperText id='labelNameHelper' sx={{ fontSize: 'xs' }}>
+              {t('modal.systemLabelHelper')}
+            </FormHelperText>
+          )}
         </FormControl>
 
         {error && (

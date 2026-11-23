@@ -38,7 +38,9 @@ import { viewportMedia } from '../../constants/responsive'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors'
 import { DeleteLabel } from '../../utils/Fetcher'
+import { isSystemLabel } from '../../utils/Labels'
 import { getSafeBottom, getSafeBottomStyles } from '../../utils/SafeAreaUtils'
+import HiddenLabelIndicator from '../components/HiddenLabelIndicator'
 import ScrollHideFab from '../components/ScrollHideFab'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import LabelModal from '../Modals/Inputs/LabelModal'
@@ -131,6 +133,7 @@ const LabelCardContent = ({
         >
           {label.name}
         </Typography>
+        {isSystemLabel(label) && <HiddenLabelIndicator />}
       </Box>
       <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
         <ItemAudience

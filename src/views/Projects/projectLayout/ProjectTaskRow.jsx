@@ -26,6 +26,7 @@ import {
   openExternalLink,
   splitTextAtFirstLink,
 } from '../../../utils/ExternalLinks'
+import { visibleLabels } from '../../../utils/Labels'
 import { ChoreActionMenuTrigger } from '../../components/ChoreActionMenu'
 import ChoreStatusChip from '../../components/ChoreStatusChip'
 import PendingBadge from '../../components/PendingBadge'
@@ -67,8 +68,9 @@ const ProjectTaskRow = memo(function ProjectTaskRow({
   const assignee = performers?.find(
     member => member.userId === chore.assignedTo,
   )?.displayName
-  const label = chore.labelsV2?.[0]
-  const extraLabels = Math.max(0, (chore.labelsV2?.length || 0) - 1)
+  const publicLabels = visibleLabels(chore.labelsV2)
+  const label = publicLabels[0]
+  const extraLabels = Math.max(0, publicLabels.length - 1)
   const recurrent =
     chore.frequencyType && !['once', 'no_repeat'].includes(chore.frequencyType)
   const { after, before, link: nameLink } = splitTextAtFirstLink(chore.name)
@@ -238,7 +240,7 @@ const ProjectTaskRow = memo(function ProjectTaskRow({
           <Box
             component='button'
             type='button'
-            title={chore.labelsV2.map(item => item.name).join(', ')}
+            title={publicLabels.map(item => item.name).join(', ')}
             onClick={event => {
               event.stopPropagation()
               onChipClick?.({ label })

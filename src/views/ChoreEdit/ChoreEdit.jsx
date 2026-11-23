@@ -102,6 +102,7 @@ import { imageSourceToFile } from '../../utils/FileConvert'
 import { isPlusAccount, resolvePhotoURL } from '../../utils/Helpers'
 import { getImageSrc, removeCachedImage } from '../../utils/ImageCache'
 import { filterLabels, sortLabels } from '../../utils/LabelPickerOptions'
+import { isSystemLabel } from '../../utils/Labels'
 import Priorities from '../../utils/Priorities.jsx'
 import {
   filterMembersForProject,
@@ -115,6 +116,7 @@ import { useSinglePageTaskEditor } from '../../utils/TaskEditorPreferences'
 import { generateUUID } from '../../utils/UUID'
 import { sortWeekdays } from '../../utils/WeekdayUtils'
 import { useProjectFilter } from '../Chores/hooks/useProjectFilter.js'
+import HiddenLabelIndicator from '../components/HiddenLabelIndicator'
 import LoadingComponent from '../components/Loading.jsx'
 import RichTextEditor from '../components/RichTextEditor.jsx'
 import SubTasks from '../components/SubTask.jsx'
@@ -2343,6 +2345,7 @@ const ChoreEdit = () => {
                           }}
                         />
                         {label.name}
+                        {isSystemLabel(label) && <HiddenLabelIndicator />}
                         {selected && (
                           <Check sx={{ ml: 'auto', fontSize: 18 }} />
                         )}
@@ -2366,6 +2369,7 @@ const ChoreEdit = () => {
                             }}
                           >
                             {label.name}
+                            {isSystemLabel(label) && <HiddenLabelIndicator />}
                           </Chip>
                         )
                       })

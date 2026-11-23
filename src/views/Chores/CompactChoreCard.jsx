@@ -32,6 +32,7 @@ import {
   getFirstLink,
   splitTextAtFirstLink,
 } from '../../utils/ExternalLinks.js'
+import { visibleLabels as getVisibleLabels } from '../../utils/Labels'
 import ChoreActionMenu, {
   ChoreActionMenuTrigger,
 } from '../components/ChoreActionMenu'
@@ -134,10 +135,11 @@ const CompactChoreCard = ({
     descriptionLink && descriptionLink.href !== titleLink?.href
   const showLeadingSlot = showActions || isMultiSelectMode || isDragging
   const showTrailingSlot = showActions && !isMultiSelectMode
-  const visibleLabels = chore.labelsV2?.slice(0, 2) ?? []
+  const publicLabels = getVisibleLabels(chore.labelsV2)
+  const visibleLabels = publicLabels.slice(0, 2)
   const extraLabelCount = Math.max(
     0,
-    (chore.labelsV2?.length ?? 0) - visibleLabels.length,
+    publicLabels.length - visibleLabels.length,
   )
 
   return (
