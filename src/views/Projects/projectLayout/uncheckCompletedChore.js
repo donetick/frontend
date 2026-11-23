@@ -9,8 +9,14 @@ export const uncheckCompletedChore = async (chore, unarchive) => {
   if (chore.lastCompletedDate) {
     try {
       await UndoChoreAction(chore.id)
-    } catch {
-      /* Nothing to undo. Unarchiving alone still restores the task. */
+    } catch (error) {
+      // The undo endpoint uses 400 for several failures. Only its explicit
+      // no-recent-action response means there is nothing available to undo.
+      const noRecentAction =
+        error?.status === 400 &&
+        error?.message ===
+          'No recent action found to undo (actions can only be undone within 5 minutes)'
+      if (!noRecentAction) throw error
     }
   }
   return unarchive(chore.id)
