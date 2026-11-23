@@ -15,8 +15,19 @@ const readSharedViewMode = () => {
   return SHARED_VIEW_MODES.includes(stored) ? stored : 'default'
 }
 
+const projectViewKey = projectId => `choreCardViewMode:project:${projectId}`
+
+const readProjectViewMode = projectId => {
+  const stored = localStorage.getItem(projectViewKey(projectId))
+  return viewModeToProjectView(stored) ? stored : null
+}
+
 export const useChoreViewMode = (projectId = null) => {
-  const [viewMode, setViewMode] = useState(readSharedViewMode)
+  const [viewMode, setViewMode] = useState(() =>
+    projectId === null
+      ? readSharedViewMode()
+      : readProjectViewMode(projectId) || 'default',
+  )
   const lastSyncedProjectIdRef = useRef(null)
   const { data: savedProjectView } = useProjectView(projectId)
   const setProjectViewMutation = useSetProjectView()
@@ -28,9 +39,16 @@ export const useChoreViewMode = (projectId = null) => {
       return
     }
     if (lastSyncedProjectIdRef.current === projectId) return
-    // Don't inherit the previous scope's layout while this project loads.
-    setViewMode(projectViewToViewMode(savedProjectView) || 'default')
-    if (savedProjectView !== null && savedProjectView !== undefined) {
+    // Keep explicit choices across restarts, even offline or when an older
+    // server rejects a layout. Never inherit another scope's layout.
+    const localViewMode = readProjectViewMode(projectId)
+    setViewMode(
+      localViewMode || projectViewToViewMode(savedProjectView) || 'default',
+    )
+    if (
+      localViewMode ||
+      (savedProjectView !== null && savedProjectView !== undefined)
+    ) {
       lastSyncedProjectIdRef.current = projectId
     }
   }, [projectId, savedProjectView])
@@ -50,6 +68,7 @@ export const useChoreViewMode = (projectId = null) => {
       if (projectId !== null) {
         // An explicit choice wins over a saved value still being loaded.
         lastSyncedProjectIdRef.current = projectId
+        localStorage.setItem(projectViewKey(projectId), newMode)
         setProjectViewMutation.mutate({ projectId, view: projectView })
       } else {
         localStorage.setItem('choreCardViewMode', newMode)
