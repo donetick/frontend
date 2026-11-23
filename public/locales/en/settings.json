@@ -244,6 +244,8 @@
     "wantsToJoin": "{{name}} wants to join your circle.",
     "noPendingRequests": "No one is waiting to join right now.",
     "accept": "Accept",
+    "memberLimitReachedTitle": "Your circle is full",
+    "memberLimitReachedMessage": "Your current plan includes {{memberLimit}} active circle members. Upgrade to Plus to accept more.",
     "acceptRequestTitle": "Accept Member Request",
     "acceptRequestMessage": "Are you sure you want to accept {{name}} (username: {{username}}) to join your circle?",
     "requestAccepted": "Accepted request successfully",
@@ -1072,6 +1074,7 @@
     "reasonThingTriggers": "Triggering tasks automatically from a thing changing state is a Plus feature.",
     "reasonProjectLimit": "Your current plan includes {{projectLimit}} projects. Upgrade to Plus to create as many as you need.",
     "reasonQuickFilterLimit": "Your current plan includes {{filterLimit}} saved quick filters. Upgrade to Plus for unlimited filters.",
+    "reasonCircleMemberLimit": "Your current plan includes {{memberLimit}} active circle members. Upgrade to Plus to add more.",
     "reasonFileUpload": "Attaching files and images is a Plus feature. Upgrade to Plus to add photos, scans and documents to your tasks.",
     "reasonCalendarSync": "Subscribing to your tasks from Apple Calendar, Google Calendar, Outlook, or another calendar app is a Plus feature."
   },

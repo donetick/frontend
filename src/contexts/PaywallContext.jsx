@@ -32,6 +32,7 @@ export const PAYWALL_REASON = {
   WEBHOOKS: 'webhooks',
   API_TOKENS: 'api_tokens',
   CHILD_ACCOUNTS: 'child_accounts',
+  CIRCLE_MEMBER_LIMIT: 'circle_member_limit',
 }
 
 const PaywallContext = createContext(null)

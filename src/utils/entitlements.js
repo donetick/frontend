@@ -16,6 +16,11 @@ export const FREE_REMINDER_LIMIT = 1
 export const FREE_PROJECT_LIMIT = 5
 export const FREE_QUICK_FILTER_LIMIT = 2
 
+// Free circles top out at two active members (the account owner plus one).
+// A third active member is a Plus feature, so the admin hits the paywall
+// when accepting a join request would cross this line.
+export const FREE_CIRCLE_MEMBER_LIMIT = 2
+
 const isUnderLimit = (count, limit) => (Number(count) || 0) < limit
 
 // The default project isn't a created project, so it never counts here.
@@ -24,6 +29,11 @@ export const canCreateProject = (projectCount, isPlus) =>
 
 export const canCreateQuickFilter = (filterCount, isPlus) =>
   Boolean(isPlus) || isUnderLimit(filterCount, FREE_QUICK_FILTER_LIMIT)
+
+// `activeMemberCount` should only count already-active members (pending
+// requests haven't consumed a seat yet).
+export const canAddCircleMember = (activeMemberCount, isPlus) =>
+  Boolean(isPlus) || isUnderLimit(activeMemberCount, FREE_CIRCLE_MEMBER_LIMIT)
 
 // Reminder templates are `{ value, unit }` where value is an offset from the
 // due date: 0 = on due, negative = before, positive = after.
