@@ -51,8 +51,12 @@ const routerNavigate = (path, { seedHome = false } = {}) => {
 // Navigate to a chore from a deep link / notification tap. Shared by NFC,
 // local and push notifications so they all get consistent cold-start handling.
 const navigateToChore = (choreId, { autoComplete, isColdStart } = {}) => {
-  if (choreId == null || choreId === '') return
-  const path = `/chores/${choreId}${autoComplete ? '?auto_complete=' + autoComplete : ''}`
+  // The scheme is open to any app on the device, so only a plain numeric id
+  // reaches the router, and `auto_complete` is forwarded as the literal
+  // `true` ChoreView acts on rather than the caller's raw text.
+  const id = String(choreId ?? '')
+  if (!/^\d+$/.test(id)) return
+  const path = `/chores/${id}${autoComplete === 'true' ? '?auto_complete=true' : ''}`
 
   // If we're already on the target page, skip (avoids redundant navigation).
   if (window.location.pathname + window.location.search === path) return
@@ -91,12 +95,17 @@ const handleUrlOpen = (url, isColdStart = false) => {
     (parsedUrl.protocol === 'https:' && parsedUrl.pathname === '/circle/join')
 
   if (isCircleInvite) {
-    setPendingInvite(parsedUrl.searchParams.get('code'))
+    const code = parsedUrl.searchParams.get('code')
+    setPendingInvite(code)
     const needsOnboarding =
       !hasSeenOnboarding() && !localStorage.getItem('token')
-    routerNavigate(
-      needsOnboarding ? '/onboarding' : `/circle/join${parsedUrl.search}`,
-    )
+    // Only the code is carried over. `auto=1` belongs to our own post-auth
+    // redirect (PendingInvite.joinCirclePath); coming from an external link it
+    // would submit the join request without asking.
+    const joinPath = code
+      ? `/circle/join?code=${encodeURIComponent(code)}`
+      : '/circle/join'
+    routerNavigate(needsOnboarding ? '/onboarding' : joinPath)
   } else if (url.startsWith('donetick://chores/add')) {
     // Widget "+" / quick-capture buttons: land on the chore list with the
     // quick-add modal open (MyChores watches for the add_task param and
