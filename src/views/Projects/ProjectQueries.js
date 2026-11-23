@@ -537,7 +537,12 @@ export const useSetProjectView = () => {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async ({ projectId, view }) => {
-      const response = await UpdateProject(projectId, { view })
+      // The server's PUT expects a full project representation, not a
+      // partial patch — sending only { view } fails its validation (400).
+      const project = queryClient
+        .getQueryData(['projects'])
+        ?.find(p => p.id === projectId)
+      const response = await UpdateProject(projectId, { ...project, view })
       if (!response.ok) {
         throw await errorFrom(response, 'Failed to save view preference')
       }

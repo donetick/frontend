@@ -222,6 +222,15 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.NFC" />
 
+    <!-- The ML Kit document scanner (via @capgo/capacitor-document-scanner) declares
+         android:screenOrientation="portrait" on an internal delegate activity, which
+         causes AGP to auto-generate a required android.hardware.screen.portrait
+         uses-feature. Override it as optional so devices without that sensor
+         (tablets, Chrome OS, Android XR, etc.) can still install the app. -->
+    <uses-feature
+        android:name="android.hardware.screen.portrait"
+        android:required="false" />
+
     <!-- Voice task capture -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <!-- Android 11+ package visibility for the system speech recognition service -->
