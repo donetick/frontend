@@ -137,7 +137,7 @@ export const getRecurrentChipText = chore => {
   } else if (chore.frequencyType === 'yearly') {
     return 'Yearly'
   } else if (chore.frequencyType === 'days_of_the_week') {
-    let days = sortWeekdays(metadata.days)
+    let days = sortWeekdays(metadata?.days ?? [])
     if (days.length > 4) {
       const allDays = DAYS.map(
         day => day.charAt(0).toUpperCase() + day.slice(1),
@@ -179,7 +179,7 @@ export const getRecurrentChipText = chore => {
       )} of ${months.join(', ')}`
     }
   } else if (chore.frequencyType === 'interval') {
-    return `Every ${chore.frequency} ${metadata.unit}`
+    return `Every ${chore.frequency} ${metadata?.unit ?? 'days'}`
   } else {
     return chore.frequencyType
   }

@@ -29,10 +29,15 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import { useLocalization } from '../../contexts/LocalizationContext'
+import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
 import { useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { apiClient } from '../../utils/ApiClient'
 import { copyText } from '../../utils/Clipboard'
+import {
+  canAddCircleMember,
+  FREE_CIRCLE_MEMBER_LIMIT,
+} from '../../utils/entitlements'
 import {
   AcceptCircleMemberRequest,
   DeclineCircleMemberRequest,
@@ -76,6 +81,7 @@ const CircleSettings = () => {
   const { showNotification } = useNotification()
   const navigate = useNavigate()
   const { fmt } = useLocalization()
+  const { isPlus, showPaywall } = usePaywall()
   const [searchParams, setSearchParams] = useSearchParams()
 
   const [userCircles, setUserCircles] = useState([])
@@ -172,6 +178,10 @@ const CircleSettings = () => {
   const isAdmin = circleMembers.some(
     member => member.userId === userProfile?.id && member.role === 'admin',
   )
+  const activeMemberCount = circleMembers.filter(
+    member => member.isActive,
+  ).length
+  const canAcceptMoreMembers = canAddCircleMember(activeMemberCount, isPlus)
 
   // Arriving from a "someone wants to join your Circle" push tap
   // (/settings/circle?focus=requests). The section only exists once members
@@ -239,6 +249,10 @@ const CircleSettings = () => {
   }
 
   const acceptRequest = request => {
+    if (!canAcceptMoreMembers) {
+      showPaywall(PAYWALL_REASON.CIRCLE_MEMBER_LIMIT)
+      return
+    }
     showConfirmation(
       t('circleSettings.acceptRequestMessage', {
         name: request.displayName,
@@ -512,6 +526,28 @@ const CircleSettings = () => {
                 )}
               </IconButton>
             </Box>
+
+            {!canAcceptMoreMembers && circleMemberRequests.length > 0 && (
+              <Sheet
+                color='warning'
+                variant='soft'
+                sx={{
+                  ...surfaceSx,
+                  borderColor: 'warning.outlinedBorder',
+                  mb: 1.25,
+                  p: 1.5,
+                }}
+              >
+                <Typography level='body-sm' sx={{ fontWeight: 600 }}>
+                  {t('circleSettings.memberLimitReachedTitle')}
+                </Typography>
+                <Typography level='body-xs' textColor='text.secondary'>
+                  {t('circleSettings.memberLimitReachedMessage', {
+                    memberLimit: FREE_CIRCLE_MEMBER_LIMIT,
+                  })}
+                </Typography>
+              </Sheet>
+            )}
 
             {circleMemberRequests.length === 0 ? (
               <Sheet

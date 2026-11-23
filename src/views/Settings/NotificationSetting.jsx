@@ -8,6 +8,7 @@ import {
   Android,
   Apple,
   ExpandMoreRounded,
+  LockOutlined,
   NotificationsNoneRounded,
   SendRounded,
   SmartphoneRounded,
@@ -36,6 +37,7 @@ import {
   unregisterPushNotifications,
 } from '../../CapacitorListener'
 import { useLocalization } from '../../contexts/LocalizationContext'
+import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
 import {
   useDeviceTokens,
   useNotificationPreferences,
@@ -64,6 +66,13 @@ const rowSx = {
   gap: 2,
   p: { xs: 2, sm: 2.5 },
 }
+const freeProfiles = new Set(['quiet', 'just_in_time'])
+const freeEvents = new Set([
+  'due',
+  'on_assignment',
+  'on_pending_approval',
+  'on_redemption_request',
+])
 const profiles = {
   balanced: 'profileBalanced',
   planner: 'profilePlanner',
@@ -194,6 +203,7 @@ const readPreference = async key => {
 const NotificationSetting = () => {
   const { i18n, t } = useTranslation('settings')
   const { fmt } = useLocalization()
+  const { isPlus, showPaywall } = usePaywall()
   const { showError, showSuccess, showWarning } = useNotification()
   const { data: deviceTokens, refetch: refetchDevices } = useDeviceTokens()
   const {
@@ -445,7 +455,12 @@ const NotificationSetting = () => {
   }
 
   const changeProfile = next => {
-    if (!next || next === profile) return
+    if (!next) return
+    if (!isPlus && !freeProfiles.has(next)) {
+      showPaywall(PAYWALL_REASON.ADVANCED_REMINDERS)
+      return
+    }
+    if (next === profile) return
     // Custom has no defaults of its own: the server resolves it from overrides
     // alone, so posting it bare would mute every event type in one tap. Seed it
     // with the mix currently in effect so "Custom" means "start from here".
@@ -487,14 +502,19 @@ const NotificationSetting = () => {
       description={t(`notifications.${events[eventType]}Label`)}
       checked={Boolean(effective?.[eventType])}
       disabled={savingPreference || !notificationPreference}
-      onChange={() =>
+      onChange={() => {
+        const enabled = !effective?.[eventType]
+        if (enabled && !isPlus && !freeEvents.has(eventType)) {
+          showPaywall(PAYWALL_REASON.ADVANCED_REMINDERS)
+          return
+        }
         savePreference({
           overrides: {
             ...notificationPreference?.overrides,
-            [eventType]: !effective?.[eventType],
+            [eventType]: enabled,
           },
         })
-      }
+      }}
     />
   )
   const registered = deviceTokens?.some(
@@ -594,6 +614,15 @@ const NotificationSetting = () => {
                   {Object.entries(profiles).map(([value, label]) => (
                     <Option key={value} value={value}>
                       {t(`notifications.${label}`)}
+                      {!isPlus && !freeProfiles.has(value) && (
+                        <LockOutlined
+                          sx={{
+                            fontSize: 16,
+                            color: 'text.tertiary',
+                            ml: 'auto',
+                          }}
+                        />
+                      )}
                     </Option>
                   ))}
                 </Select>

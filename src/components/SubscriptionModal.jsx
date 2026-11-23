@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { track } from '../analytics'
 import { useNotification } from '../service/NotificationProvider'
 import {
+  FREE_CIRCLE_MEMBER_LIMIT,
   FREE_PROJECT_LIMIT,
   FREE_QUICK_FILTER_LIMIT,
 } from '../utils/entitlements'
@@ -25,6 +26,7 @@ const REASON_KEYS = {
   quick_filter_limit: 'subscription.reasonQuickFilterLimit',
   file_upload: 'subscription.reasonFileUpload',
   calendar_sync: 'subscription.reasonCalendarSync',
+  circle_member_limit: 'subscription.reasonCircleMemberLimit',
 }
 
 const SubscriptionModal = ({ invoker, onClose, open, reason }) => {
@@ -106,6 +108,7 @@ const SubscriptionModal = ({ invoker, onClose, open, reason }) => {
         // So the limit copy can never drift from the limits themselves.
         projectLimit: FREE_PROJECT_LIMIT,
         filterLimit: FREE_QUICK_FILTER_LIMIT,
+        memberLimit: FREE_CIRCLE_MEMBER_LIMIT,
       })}
       size='lg'
       closeOnBackdrop={!isLoading}
