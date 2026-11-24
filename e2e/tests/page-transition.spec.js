@@ -8,7 +8,7 @@ test.beforeEach(async ({ page }, testInfo) => {
   await expect(page.getByRole('heading', { name: 'Home' })).toBeVisible()
 })
 
-test('route navigation actually runs outgoing and incoming animations', async ({
+test('route navigation uses only a lightweight destination animation', async ({
   page,
 }, testInfo) => {
   const sampled = await page.evaluate(async () => {
@@ -30,16 +30,22 @@ test('route navigation actually runs outgoing and incoming animations', async ({
     expect(sampled.animations).toHaveLength(0)
     expect(sampled.snapshotCount).toBe(0)
   } else {
-    expect(sampled.animations).toHaveLength(2)
+    expect(sampled.animations).toHaveLength(1)
     expect(
       sampled.animations.some(animation => animation.target === 'page-wrapper'),
     ).toBe(true)
     expect(
       sampled.animations.every(animation =>
-        animation.frames.some(frame => frame.filter === 'blur(3px)'),
+        animation.frames.every(
+          frame =>
+            !frame.filter &&
+            !frame.clipPath &&
+            !frame.height &&
+            !frame.transform.includes('scale'),
+        ),
       ),
     ).toBe(true)
-    expect(sampled.snapshotCount).toBe(1)
+    expect(sampled.snapshotCount).toBe(0)
     expect(sampled.liveHomeIds).toBe(0)
   }
   await expect(page.getByRole('heading', { name: 'Projects' })).toBeVisible()
@@ -114,7 +120,7 @@ test('floating controls stay viewport-anchored throughout route entrance', async
   await expect(page.getByTestId('fixture-fab')).toBeInViewport()
 })
 
-test('rapid route changes clean up outgoing snapshots', async ({ page }) => {
+test('rapid route changes clean up entrance animations', async ({ page }) => {
   await page.evaluate(async () => {
     window.navigateFixture('/projects')
     await new Promise(resolve => setTimeout(resolve, 40))
@@ -125,4 +131,68 @@ test('rapid route changes clean up outgoing snapshots', async ({ page }) => {
     .poll(() => page.evaluate(() => document.getAnimations().length))
     .toBe(0)
   await expect(page.locator('body > [aria-hidden="true"]')).toHaveCount(0)
+})
+
+test('disabling transitions cancels motion and preserves split-pane scroll', async ({
+  page,
+}) => {
+  await page.evaluate(() => window.disableTransitionFixture(true))
+  await page.evaluate(() => window.scrollTo({ top: 1000, behavior: 'instant' }))
+  await page.evaluate(async () => {
+    window.navigateFixture('/projects')
+    await new Promise(resolve =>
+      requestAnimationFrame(() => requestAnimationFrame(resolve)),
+    )
+  })
+  expect(await page.evaluate(() => window.scrollY)).toBe(1000)
+  expect(await page.evaluate(() => document.getAnimations().length)).toBe(0)
+})
+
+test('panel navigation animates only incoming transform and opacity at natural height', async ({
+  page,
+}, testInfo) => {
+  const sampled = await page.evaluate(async () => {
+    window.changePanelFixture('second')
+    await new Promise(resolve =>
+      requestAnimationFrame(() => requestAnimationFrame(resolve)),
+    )
+    const content = document.querySelector('[data-testid="panel-content"]')
+    return {
+      height:
+        content.parentElement.parentElement.getBoundingClientRect().height,
+      copies: document.querySelectorAll('[data-testid="panel-content"]').length,
+      frames: document
+        .getAnimations()
+        .map(animation => animation.effect.getKeyframes()),
+    }
+  })
+  expect(sampled.height).toBe(120)
+  expect(sampled.copies).toBe(1)
+  expect(sampled.frames).toHaveLength(
+    testInfo.project.name === 'reduced' ? 0 : 1,
+  )
+  for (const frames of sampled.frames) {
+    for (const frame of frames) {
+      expect(frame.height).toBeUndefined()
+      expect(frame.filter).toBeUndefined()
+      expect(frame.clipPath).toBeUndefined()
+    }
+    expect(frames[0].transform).toBe('translateX(24px)')
+  }
+  await page.evaluate(() => window.changePanelFixture('first'))
+  await expect
+    .poll(() => page.evaluate(() => document.getAnimations().length))
+    .toBe(0)
+  await expect(page.getByTestId('panel-content')).toHaveCount(1)
+})
+
+test('enabling reduced motion cancels an active route entrance', async ({
+  page,
+}) => {
+  await page.evaluate(() => window.navigateFixture('/projects'))
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await expect
+    .poll(() => page.evaluate(() => document.getAnimations().length))
+    .toBe(0)
+  await expect(page.getByRole('heading', { name: 'Projects' })).toBeVisible()
 })
