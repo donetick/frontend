@@ -1,17 +1,22 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { MemoryRouter, Route, Routes, useNavigate } from 'react-router-dom'
 import PageTransition from '../../src/components/animations/PageTransition'
+import PanelTransition from '../../src/components/animations/PanelTransition'
 import CaptureBar from '../../src/views/Home/components/CaptureBar'
 import ScrollHideFab from '../../src/views/components/ScrollHideFab'
 
 function Fixture() {
   const navigate = useNavigate()
+  const [disabled, setDisabled] = useState(false)
+  const [panel, setPanel] = useState('first')
   window.navigateFixture = navigate
+  window.disableTransitionFixture = setDisabled
+  window.changePanelFixture = setPanel
   return (
     <>
       <nav>Stationary navigation</nav>
-      <PageTransition>
+      <PageTransition disabled={disabled}>
         <Routes>
           <Route
             path='/'
@@ -36,6 +41,14 @@ function Fixture() {
           />
         </Routes>
       </PageTransition>
+      <PanelTransition active panelKey={panel} backwards={panel === 'first'}>
+        <div
+          data-testid='panel-content'
+          style={{ height: panel === 'first' ? 40 : 120 }}
+        >
+          {panel}
+        </div>
+      </PanelTransition>
     </>
   )
 }
