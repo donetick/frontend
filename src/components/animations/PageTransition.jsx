@@ -1,135 +1,160 @@
 import './PageTransition.css'
 
-import { useLayoutEffect, useRef, useState } from 'react'
-import { flushSync } from 'react-dom'
+import PropTypes from 'prop-types'
+import { Component, createRef } from 'react'
 import { useLocation } from 'react-router-dom'
 
-// Route hierarchy for determining navigation direction
-const routeHierarchy = {
-  '/': 0,
-  '/home': 0,
-  '/my/chores': 0,
-  '/chores': 1,
-  '/chores/create': 2,
-  '/settings': 1,
-  '/things': 1,
-  '/activities': 1,
-  '/points': 1,
-  '/labels': 1,
-  '/projects': 1,
-  '/login': 0,
-  '/signup': 1,
-  '/landing': 0,
-  '/archived': 1,
-}
+const motionQuery = '(prefers-reduced-motion: reduce)'
+const easing = 'cubic-bezier(0.22, 1, 0.36, 1)'
 
-const getRouteLevel = pathname => {
-  // Check for exact matches first
-  if (routeHierarchy[pathname] !== undefined) {
-    return routeHierarchy[pathname]
+// Capture the outgoing DOM before React updates it. Unlike retaining a second
+// routed tree, a visual snapshot cannot run effects or duplicate subscriptions.
+class RouteReveal extends Component {
+  wrapper = createRef()
+  stop = null
+
+  getSnapshotBeforeUpdate(previous) {
+    if (previous.disabled !== this.props.disabled) this.stop?.()
+    if (previous.pathname === this.props.pathname) return null
+    this.stop?.()
+    const node = this.wrapper.current
+    if (
+      previous.disabled ||
+      this.props.disabled ||
+      !node?.animate ||
+      window.matchMedia(motionQuery).matches
+    )
+      return null
+
+    const rect = node.getBoundingClientRect()
+    const snapshot = node.cloneNode(true)
+    // The copy is purely visual: no focus, accessibility, or duplicate IDs.
+    snapshot.inert = true
+    snapshot.setAttribute('aria-hidden', 'true')
+    snapshot.removeAttribute('id')
+    snapshot
+      .querySelectorAll('[id]')
+      .forEach(element => element.removeAttribute('id'))
+    return { snapshot, rect }
   }
 
-  // Check for dynamic routes (e.g., /chores/123/edit)
-  if (pathname.includes('/chores/') && pathname.includes('/edit')) {
-    return 3
-  }
-  if (pathname.includes('/chores/') && pathname.includes('/history')) {
-    return 3
-  }
-  if (pathname.includes('/chores/') && pathname.includes('/timer')) {
-    return 3
-  }
-  if (
-    pathname.includes('/chores/') &&
-    !pathname.includes('/edit') &&
-    !pathname.includes('/history') &&
-    !pathname.includes('/timer')
-  ) {
-    return 2
-  }
-  if (pathname.includes('/things/')) {
-    return 2
-  }
-  if (pathname.includes('/settings/')) {
-    return 2
-  }
-
-  // Default level
-  return 1
-}
-
-const PageTransition = ({ children }) => {
-  const location = useLocation()
-  const prevLevel = useRef(0)
-  const [displayLocation, setDisplayLocation] = useState(location)
-  const isFirstRender = useRef(true)
-
-  useLayoutEffect(() => {
-    // Skip transition on first render
-    if (isFirstRender.current) {
-      isFirstRender.current = false
-      setDisplayLocation(location)
-      prevLevel.current = getRouteLevel(location.pathname)
-      return
-    }
-
-    // Don't transition if location hasn't actually changed
-    if (location.pathname === displayLocation.pathname) {
-      return
-    }
-
-    const currentLevel = getRouteLevel(location.pathname)
-    const previousLevel = prevLevel.current
-
-    // Determine navigation direction
-    const isBack = currentLevel < previousLevel
-    const isFade =
-      location.pathname.includes('/login') ||
-      location.pathname.includes('/signup') ||
-      location.pathname.includes('/landing') ||
-      location.pathname.includes('/onboarding') ||
-      location.pathname.includes('/get-started') ||
-      location.pathname.includes('/ready') ||
-      location.pathname.includes('/auth/')
-
-    // Apply transition type as data attribute for CSS
-    document.documentElement.dataset.transition = isFade
-      ? 'fade'
-      : isBack
-        ? 'back'
-        : 'forward'
-
-    // Trigger View Transition if supported
-    if (document.startViewTransition) {
-      document.startViewTransition(() => {
-        // flushSync forces React to update the DOM synchronously
-        // This ensures the View Transition captures the actual DOM change
-        flushSync(() => {
-          setDisplayLocation(location)
-        })
-        // Scroll to top after DOM update
-        window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
-      })
-    } else {
-      // Fallback for browsers without View Transitions API
-      setDisplayLocation(location)
+  componentDidUpdate(previous, previousState, captured) {
+    // Reset before paint/entrance motion, even when animations are unavailable
+    // or reduced. Retained split-pane navigation must keep its list position.
+    if (
+      previous.pathname !== this.props.pathname &&
+      !previous.disabled &&
+      !this.props.disabled
+    ) {
       window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
     }
+    if (!captured) return
+    const node = this.wrapper.current
+    const { rect, snapshot } = captured
+    const layer = document.createElement('div')
+    layer.inert = true
+    layer.setAttribute('aria-hidden', 'true')
+    Object.assign(layer.style, {
+      position: 'fixed',
+      top: `${rect.top}px`,
+      left: `${rect.left}px`,
+      width: `${rect.width}px`,
+      height: `${Math.max(0, Math.min(rect.height, window.innerHeight - rect.top))}px`,
+      overflow: 'hidden',
+      pointerEvents: 'none',
+      zIndex: '1',
+    })
+    layer.append(snapshot)
+    document.body.append(layer)
 
-    // Update refs
-    prevLevel.current = currentLevel
-  }, [location, displayLocation.pathname])
+    const outgoing = layer.animate(
+      [
+        {
+          opacity: 1,
+          transform: 'scale(1)',
+          filter: 'blur(0px)',
+          clipPath: 'inset(0 round 0px)',
+        },
+        {
+          opacity: 0,
+          transform: 'translateY(-6px) scale(0.975)',
+          filter: 'blur(3px)',
+          clipPath: 'inset(0 round 20px)',
+        },
+      ],
+      { duration: 220, easing, fill: 'both' },
+    )
+    const incoming = node.animate(
+      [
+        {
+          opacity: 0,
+          transform: 'translateY(10px) scale(0.985)',
+          filter: 'blur(3px)',
+          clipPath: 'inset(0 round 20px)',
+        },
+        {
+          opacity: 1,
+          transform: 'translateY(0) scale(1)',
+          filter: 'blur(0px)',
+          clipPath: 'inset(0 round 0px)',
+        },
+      ],
+      { duration: 340, easing },
+    )
 
+    const preference = window.matchMedia(motionQuery)
+    const stopForReducedMotion = event => {
+      if (event.matches) this.stop?.()
+    }
+    preference.addEventListener('change', stopForReducedMotion)
+    this.stop = () => {
+      outgoing.cancel()
+      incoming.cancel()
+      layer.remove()
+      preference.removeEventListener('change', stopForReducedMotion)
+      this.stop = null
+    }
+    // Resolve cancellation as well as completion during rapid navigation.
+    Promise.allSettled([outgoing.finished, incoming.finished]).then(() => {
+      if (layer.isConnected) this.stop?.()
+    })
+  }
+
+  componentWillUnmount() {
+    this.stop?.()
+  }
+
+  render() {
+    return (
+      <div
+        ref={this.wrapper}
+        className='page-wrapper'
+        style={{ paddingBottom: 'var(--safe-area-inset-bottom, 0px)' }}
+      >
+        {this.props.children}
+      </div>
+    )
+  }
+}
+
+RouteReveal.propTypes = {
+  children: PropTypes.node,
+  disabled: PropTypes.bool,
+  pathname: PropTypes.string.isRequired,
+}
+
+const PageTransition = ({ children, disabled = false }) => {
+  const { pathname } = useLocation()
   return (
-    <div
-      className='page-wrapper'
-      style={{
-        paddingBottom: `var(--safe-area-inset-bottom, 0px)`,
-      }}
-    >
-      {displayLocation.pathname === location.pathname ? children : null}
-    </div>
+    <RouteReveal pathname={pathname} disabled={disabled}>
+      {children}
+    </RouteReveal>
   )
+}
+
+PageTransition.propTypes = {
+  children: PropTypes.node,
+  disabled: PropTypes.bool,
 }
 
 export default PageTransition

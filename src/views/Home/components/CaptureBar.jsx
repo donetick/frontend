@@ -1,5 +1,6 @@
 import { Add, DocumentScanner, MicNone } from '@mui/icons-material'
 import { Box, IconButton, Sheet, Typography } from '@mui/joy'
+import Portal from '@mui/material/Portal'
 import PropTypes from 'prop-types'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -39,101 +40,104 @@ const CaptureBar = ({ onCapture }) => {
     }
   }, [])
 
+  // Route transforms must not become the fixed bar's containing block.
   return (
-    <Box
-      sx={{
-        bottom: getSafeBottom(12, 4),
-        display: 'flex',
-        insetInlineEnd: 0,
-        insetInlineStart: 'var(--app-navigation-width, 0px)',
-        justifyContent: 'center',
-        opacity: hidden ? 0 : 1,
-        pointerEvents: 'none',
-        position: 'fixed',
-        px: 2,
-        transform: hidden ? 'translateY(150px)' : 'translateY(0)',
-        transition: 'transform 220ms ease, opacity 220ms ease',
-        zIndex: 100,
-        '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
-        [viewportMedia.mobile]: {
-          bottom: getSafeBottom(68, 4),
-        },
-      }}
-    >
-      <Sheet
-        variant='outlined'
+    <Portal>
+      <Box
         sx={{
-          alignItems: 'center',
-          borderRadius: '999px',
-          boxShadow: 'lg',
+          bottom: getSafeBottom(12, 4),
           display: 'flex',
-          gap: 0.5,
-          // Matches the Container maxWidth='sm' content column (600 minus the
-          // 2-unit gutters) so the bar lines up with the cards above it.
-          maxWidth: 568,
-          pointerEvents: hidden ? 'none' : 'auto',
-          pl: 2,
-          pr: 0.75,
-          py: 0.75,
-          width: '100%',
+          insetInlineEnd: 0,
+          insetInlineStart: 'var(--app-navigation-width, 0px)',
+          justifyContent: 'center',
+          opacity: hidden ? 0 : 1,
+          pointerEvents: 'none',
+          position: 'fixed',
+          px: 2,
+          transform: hidden ? 'translateY(150px)' : 'translateY(0)',
+          transition: 'transform 220ms ease, opacity 220ms ease',
+          zIndex: 100,
+          '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
+          [viewportMedia.mobile]: {
+            bottom: getSafeBottom(68, 4),
+          },
         }}
       >
-        <Box
-          component='button'
-          type='button'
-          onClick={() => onCapture(null)}
+        <Sheet
+          variant='outlined'
           sx={{
-            background: 'transparent',
-            border: 'none',
-            cursor: 'text',
-            flex: 1,
-            font: 'inherit',
-            minWidth: 0,
-            p: 0,
-            textAlign: 'start',
+            alignItems: 'center',
+            borderRadius: '999px',
+            boxShadow: 'lg',
+            display: 'flex',
+            gap: 0.5,
+            // Matches the Container maxWidth='sm' content column (600 minus the
+            // 2-unit gutters) so the bar lines up with the cards above it.
+            maxWidth: 568,
+            pointerEvents: hidden ? 'none' : 'auto',
+            pl: 2,
+            pr: 0.75,
+            py: 0.75,
+            width: '100%',
           }}
         >
-          <Typography level='body-md' textColor='text.tertiary' noWrap>
-            {t('home.capture.placeholder')}
-          </Typography>
-        </Box>
+          <Box
+            component='button'
+            type='button'
+            onClick={() => onCapture(null)}
+            sx={{
+              background: 'transparent',
+              border: 'none',
+              cursor: 'text',
+              flex: 1,
+              font: 'inherit',
+              minWidth: 0,
+              p: 0,
+              textAlign: 'start',
+            }}
+          >
+            <Typography level='body-md' textColor='text.tertiary' noWrap>
+              {t('home.capture.placeholder')}
+            </Typography>
+          </Box>
 
-        {voiceReady && (
+          {voiceReady && (
+            <IconButton
+              variant='soft'
+              color='neutral'
+              size='sm'
+              onClick={() => onCapture('voice')}
+              aria-label={t('home.capture.voice')}
+              sx={{ borderRadius: '50%' }}
+            >
+              <MicNone sx={{ fontSize: 19 }} />
+            </IconButton>
+          )}
+          {scanReady && (
+            <IconButton
+              variant='soft'
+              color='neutral'
+              size='sm'
+              onClick={() => onCapture('scan')}
+              aria-label={t('home.capture.scan')}
+              sx={{ borderRadius: '50%' }}
+            >
+              <DocumentScanner sx={{ fontSize: 18 }} />
+            </IconButton>
+          )}
           <IconButton
-            variant='soft'
-            color='neutral'
+            variant='solid'
+            color='primary'
             size='sm'
-            onClick={() => onCapture('voice')}
-            aria-label={t('home.capture.voice')}
+            onClick={() => onCapture(null)}
+            aria-label={t('home.capture.add')}
             sx={{ borderRadius: '50%' }}
           >
-            <MicNone sx={{ fontSize: 19 }} />
+            <Add sx={{ fontSize: 20 }} />
           </IconButton>
-        )}
-        {scanReady && (
-          <IconButton
-            variant='soft'
-            color='neutral'
-            size='sm'
-            onClick={() => onCapture('scan')}
-            aria-label={t('home.capture.scan')}
-            sx={{ borderRadius: '50%' }}
-          >
-            <DocumentScanner sx={{ fontSize: 18 }} />
-          </IconButton>
-        )}
-        <IconButton
-          variant='solid'
-          color='primary'
-          size='sm'
-          onClick={() => onCapture(null)}
-          aria-label={t('home.capture.add')}
-          sx={{ borderRadius: '50%' }}
-        >
-          <Add sx={{ fontSize: 20 }} />
-        </IconButton>
-      </Sheet>
-    </Box>
+        </Sheet>
+      </Box>
+    </Portal>
   )
 }
 

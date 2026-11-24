@@ -49,9 +49,12 @@ import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
+import PanelTransition from '../../components/animations/PanelTransition'
 import AppModal from '../../components/common/AppModal'
+import { MOTION } from '../../constants/motion'
 import { useChorePermissions } from '../../hooks/useChorePermissions'
 import { useResponsiveQuery } from '../../hooks/useResponsiveQuery'
+import { useSwipeBack } from '../../hooks/useSwipeBack'
 import { notInCompletionWindow } from '../../utils/Chores'
 import LABEL_COLORS, {
   getTextColorFromBackgroundColor,
@@ -63,6 +66,16 @@ import { useProjects } from '../Projects/ProjectQueries'
 import { ProjectAccessIcon } from '../Projects/ProjectVisibilityField'
 
 const NO_PRIORITY = { name: 'No priority', value: 0, color: 'neutral' }
+
+// Animate opacity only: Popper owns the menu's transform for positioning.
+const menuRevealSx = {
+  animation: `action-menu-reveal ${MOTION.popup}ms ${MOTION.easeOut}`,
+  '@keyframes action-menu-reveal': {
+    from: { opacity: 0 },
+    to: { opacity: 1 },
+  },
+  '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
+}
 
 // Popper's default tethering keeps a popup close to its trigger even when that
 // leaves part of a tall menu off-screen. These modifiers prefer another side,
@@ -222,7 +235,6 @@ const ChoreActionMenu = ({
 
   // Controlled mode renders nothing until a caller targets a chore. Every hook
   // above has already run, so bailing here is safe.
-  if (!chore) return null
 
   const handleMenuOpen = event => {
     event.stopPropagation()
@@ -257,6 +269,19 @@ const ChoreActionMenu = ({
     setShowSchedulePicker(false)
     setSubmenuAnchorEl(null)
   }
+
+  const swipeBackHandlers = useSwipeBack(
+    isSmallScreen &&
+      anchorEl &&
+      (showProjectPicker ||
+        showSectionPicker ||
+        showPriorityPicker ||
+        showSchedulePicker)
+      ? closeDesktopSubmenu
+      : null,
+  )
+
+  if (!chore) return null
 
   const handleChangePriority = priority => {
     onChangePriority?.(priority)
@@ -870,6 +895,16 @@ const ChoreActionMenu = ({
       </MenuItem>
     ))
 
+  const panelKey = showProjectPicker
+    ? 'project'
+    : showSectionPicker
+      ? 'section'
+      : showPriorityPicker
+        ? 'priority'
+        : showSchedulePicker
+          ? 'schedule'
+          : 'actions'
+
   let modalTitle
   if (showProjectPicker) {
     modalTitle = t('actionMenu.moveToProject')
@@ -928,46 +963,56 @@ const ChoreActionMenu = ({
           showHandle
           contentSx={{ px: 0, pb: 1 }}
         >
-          {(showProjectPicker ||
-            showSectionPicker ||
-            showPriorityPicker ||
-            showSchedulePicker) && (
-            <Button
-              variant='plain'
-              color='neutral'
-              size='sm'
-              startDecorator={<ArrowBack fontSize='small' />}
-              onClick={event => {
-                event.stopPropagation()
-                setShowProjectPicker(false)
-                setShowSectionPicker(false)
-                setShowPriorityPicker(false)
-                setShowSchedulePicker(false)
-              }}
-              sx={{ mx: 2, mb: 1 }}
-            >
-              <Typography level='body-sm' fontWeight={600}>
-                {t('common:back')}
-              </Typography>
-            </Button>
-          )}
-          <List
-            sx={{
-              '--ListItem-minHeight': '48px',
-              '--ListItem-radius': '8px',
-              px: 1,
+          <div
+            {...swipeBackHandlers}
+            style={{
+              touchAction: panelKey === 'actions' ? 'auto' : 'pan-y pinch-zoom',
             }}
           >
-            {showProjectPicker
-              ? renderModalProjectPicker()
-              : showSectionPicker
-                ? renderModalSectionPicker()
-                : showPriorityPicker
-                  ? renderModalPriorityPicker()
-                  : showSchedulePicker
-                    ? renderModalSchedulePicker()
-                    : renderModalActionItems()}
-          </List>
+            <PanelTransition
+              panelKey={panelKey}
+              active={Boolean(anchorEl)}
+              backwards={panelKey === 'actions'}
+            >
+              {(showProjectPicker ||
+                showSectionPicker ||
+                showPriorityPicker ||
+                showSchedulePicker) && (
+                <Button
+                  variant='plain'
+                  color='neutral'
+                  size='sm'
+                  startDecorator={<ArrowBack fontSize='small' />}
+                  onClick={event => {
+                    event.stopPropagation()
+                    closeDesktopSubmenu()
+                  }}
+                  sx={{ mx: 2, mb: 1 }}
+                >
+                  <Typography level='body-sm' fontWeight={600}>
+                    {t('common:back')}
+                  </Typography>
+                </Button>
+              )}
+              <List
+                sx={{
+                  '--ListItem-minHeight': '48px',
+                  '--ListItem-radius': '8px',
+                  px: 1,
+                }}
+              >
+                {showProjectPicker
+                  ? renderModalProjectPicker()
+                  : showSectionPicker
+                    ? renderModalSectionPicker()
+                    : showPriorityPicker
+                      ? renderModalPriorityPicker()
+                      : showSchedulePicker
+                        ? renderModalSchedulePicker()
+                        : renderModalActionItems()}
+              </List>
+            </PanelTransition>
+          </div>
         </AppModal>
       ) : (
         <>
@@ -982,6 +1027,7 @@ const ChoreActionMenu = ({
             modifiers={MENU_POSITION_MODIFIERS}
             sx={{
               '--ListItem-minHeight': '36px',
+              ...menuRevealSx,
               minWidth: 244,
               maxWidth: 288,
               // Let the popper use the full desktop viewport. Scrolling is only
@@ -1005,6 +1051,7 @@ const ChoreActionMenu = ({
             modifiers={SUBMENU_POSITION_MODIFIERS}
             sx={{
               '--ListItem-minHeight': '36px',
+              ...menuRevealSx,
               minWidth: 200,
               maxWidth: 272,
               maxHeight: 'calc(100dvh - 24px)',

@@ -426,10 +426,7 @@ export const ChoreFilters = userId => ({
     return chore.assignedTo && chore.assignedTo !== userId
   },
   assigned_to_me_tasks: chore => {
-    return (
-      chore.assignees &&
-      chore.assignees.some(assignee => assignee.userId === userId)
-    )
+    return chore.assignedTo === userId
   },
   created_by_me: chore => {
     return chore.createdBy && chore.createdBy === userId
