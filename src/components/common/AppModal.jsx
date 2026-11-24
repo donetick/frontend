@@ -140,6 +140,7 @@ const AppModal = forwardRef(
             borderBottom: isSheet ? 0 : undefined,
             boxShadow: 'lg',
             outline: 0,
+            pt: isFullscreen ? 'env(safe-area-inset-top)' : 0,
             pb: isMobile ? 'env(safe-area-inset-bottom)' : 0,
             opacity: entered ? 1 : 0,
             transform: entered ? 'none' : closedTransform,
