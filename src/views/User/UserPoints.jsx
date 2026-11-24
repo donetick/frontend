@@ -40,6 +40,7 @@ import {
 import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext.jsx'
 import { useChoresHistory } from '../../queries/ChoreQueries.jsx'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
+import { ChoreHistoryStatus } from '../../utils/Chores.jsx'
 import { isPlusHistoryWindow } from '../../utils/entitlements.js'
 import { RedeemPoints } from '../../utils/Fetcher.jsx'
 import { resolvePhotoURL } from '../../utils/Helpers.jsx'
@@ -163,7 +164,15 @@ const UserPoints = () => {
     () => circleMembersData?.res || [],
     [circleMembersData?.res],
   )
-  const history = useMemo(() => choresHistoryData || [], [choresHistoryData])
+  // Only completed entries count as tasks; started, skipped, rescheduled and
+  // pending-approval entries are also part of the history response.
+  const history = useMemo(
+    () =>
+      (choresHistoryData || []).filter(
+        entry => entry.status === ChoreHistoryStatus.COMPLETED,
+      ),
+    [choresHistoryData],
+  )
   const activeSelectedUser = selectedUser || userProfile?.id
   const currentMembership = circleUsers.find(
     user => user.userId === userProfile?.id,
