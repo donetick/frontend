@@ -3,7 +3,11 @@ import { defineConfig, devices } from '@playwright/test'
 // Standalone, backend-free coverage of the real shared UI primitives.
 export default defineConfig({
   testDir: './tests',
-  testMatch: ['motion.spec.js', 'motion-theme.spec.js'],
+  testMatch: [
+    'motion.spec.js',
+    'motion-theme.spec.js',
+    'page-transition.spec.js',
+  ],
   workers: 1,
   fullyParallel: true,
   use: {

@@ -1,4 +1,5 @@
 import { Box } from '@mui/joy'
+import Portal from '@mui/material/Portal'
 import PropTypes from 'prop-types'
 
 import { useResponsiveQuery } from '../../hooks/useResponsiveQuery'
@@ -10,35 +11,38 @@ const ScrollHideFab = ({ children, sx }) => {
   const isMobile = useResponsiveQuery('mobile')
   const hidden = useScrollDirection({ enabled: isMobile })
 
+  // Keep viewport controls out of transformed route-animation ancestors.
   return (
-    <Box
-      sx={{
-        position: 'fixed',
-        display: 'flex',
-        justifyContent: 'flex-end',
-        gap: 2,
-        zIndex: 100,
-        // Sit just past the desktop navigation rail on whichever side it is
-        // anchored to (inline-start, so the right edge in RTL), and follow it
-        // when it expands so the expanded rail never covers the FAB.
-        insetInlineStart: 'calc(var(--app-navigation-offset, 0px) + 10px)',
-        // translateY alone isn't reliable here: some FABs have relatively
-        // positioned children (secondary buttons, shortcut hints) that
-        // visually overflow the wrapper's own layout box, so a percentage
-        // shift can leave a sliver on screen. Opacity + pointer-events
-        // guarantee it's actually gone, with a generous translate on top
-        // so it also slides out of the way.
-        opacity: hidden ? 0 : 1,
-        pointerEvents: hidden ? 'none' : 'auto',
-        transform: hidden ? 'translateY(150px)' : 'translateY(0)',
-        transition:
-          'transform 220ms ease, opacity 220ms ease, inset-inline-start 200ms ease',
-        '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
-        ...sx,
-      }}
-    >
-      {children}
-    </Box>
+    <Portal>
+      <Box
+        sx={{
+          position: 'fixed',
+          display: 'flex',
+          justifyContent: 'flex-end',
+          gap: 2,
+          zIndex: 100,
+          // Sit just past the desktop navigation rail on whichever side it is
+          // anchored to (inline-start, so the right edge in RTL), and follow it
+          // when it expands so the expanded rail never covers the FAB.
+          insetInlineStart: 'calc(var(--app-navigation-offset, 0px) + 10px)',
+          // translateY alone isn't reliable here: some FABs have relatively
+          // positioned children (secondary buttons, shortcut hints) that
+          // visually overflow the wrapper's own layout box, so a percentage
+          // shift can leave a sliver on screen. Opacity + pointer-events
+          // guarantee it's actually gone, with a generous translate on top
+          // so it also slides out of the way.
+          opacity: hidden ? 0 : 1,
+          pointerEvents: hidden ? 'none' : 'auto',
+          transform: hidden ? 'translateY(150px)' : 'translateY(0)',
+          transition:
+            'transform 220ms ease, opacity 220ms ease, inset-inline-start 200ms ease',
+          '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
+          ...sx,
+        }}
+      >
+        {children}
+      </Box>
+    </Portal>
   )
 }
 

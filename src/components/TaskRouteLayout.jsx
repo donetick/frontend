@@ -44,7 +44,6 @@ export default function TaskRouteLayout() {
   }
 
   const split = large && isTaskRoute(location.pathname) && Boolean(snapshot)
-  const onList = isListRoute(location.pathname)
 
   return (
     <TaskSidePaneContext.Provider value={split}>
@@ -53,13 +52,9 @@ export default function TaskRouteLayout() {
           <LocationContext.Provider
             value={split ? snapshot.locationContext : locationContext}
           >
-            {split ? (
-              snapshot.outlet
-            ) : onList ? (
-              outlet
-            ) : (
-              <PageTransition>{outlet}</PageTransition>
-            )}
+            <PageTransition disabled={split}>
+              {split ? snapshot.outlet : outlet}
+            </PageTransition>
           </LocationContext.Provider>
         </Box>
         {split && (
