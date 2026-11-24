@@ -61,16 +61,10 @@ const evaluateAssignee = (chore, operator, value, context) => {
   const matchesEntry = entry => {
     switch (entry) {
       case 'me':
-        return Boolean(
-          userId &&
-          (String(chore.assignedTo) === String(userId) ||
-            chore.assignees?.some(a => String(a.userId) === String(userId))),
-        )
+        return Boolean(userId && String(chore.assignedTo) === String(userId))
       case 'others':
         return Boolean(
-          userId &&
-          String(chore.assignedTo) !== String(userId) &&
-          !chore.assignees?.some(a => String(a.userId) === String(userId)),
+          userId && String(chore.assignedTo) !== String(userId),
         )
       case 'anyone':
         return true
@@ -83,10 +77,7 @@ const evaluateAssignee = (chore, operator, value, context) => {
           (!chore.assignedTo || String(chore.assignedTo) === String(userId)),
         )
       default:
-        return (
-          String(chore.assignedTo) === String(entry) ||
-          chore.assignees?.some(a => String(a.userId) === String(entry))
-        )
+        return String(chore.assignedTo) === String(entry)
     }
   }
 
