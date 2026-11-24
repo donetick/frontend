@@ -1084,6 +1084,8 @@
     "yesterday": "Včera",
     "noteTitle": "Poznámka – {{choreName}}"
   },
+  "selectTaskNamed": "Vybrat {{name}}",
+  "filterByLabel": "Filtrovat podle štítku {{name}}",
   "tasksForDate": "Úkoly pro {{date}}",
   "createSuggestion": "Vytvořit \"{{value}}\""
 }

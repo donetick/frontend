@@ -1084,6 +1084,8 @@
     "yesterday": "",
     "noteTitle": ""
   },
+  "selectTaskNamed": "{{name}}を選択",
+  "filterByLabel": "ラベル「{{name}}」で絞り込む",
   "tasksForDate": "{{date}} のタスク",
   "createSuggestion": "「{{value}}」を作成"
 }
