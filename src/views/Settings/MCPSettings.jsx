@@ -30,7 +30,7 @@ import { copyText } from '../../utils/Clipboard'
 import { openExternalLink } from '../../utils/ExternalLinks'
 import { CreateLongLiveToken } from '../../utils/Fetcher'
 import { isPlusAccount } from '../../utils/Helpers'
-import TextModal from '../Modals/Inputs/TextModal'
+import APITokenEditor from './APITokenEditor'
 import SettingsLayout from './SettingsLayout'
 import SettingsSection from './SettingsSection'
 
@@ -149,7 +149,7 @@ const MCPSettings = () => {
   // below wait for a definite answer rather than flashing in on cloud.
   const [isCloud, setIsCloud] = useState(null)
   const { showPaywall } = usePaywall()
-  const { showError, showNotification } = useNotification()
+  const { showNotification } = useNotification()
   const [token, setToken] = useState('')
   const [createdToken, setCreatedToken] = useState(null)
   const [isNameModalOpen, setIsNameModalOpen] = useState(false)
@@ -169,17 +169,13 @@ const MCPSettings = () => {
   // reader exactly which part is theirs to replace.
   const secret = token.trim() || TOKEN_PLACEHOLDER
 
-  const handleCreateToken = name => {
-    CreateLongLiveToken(name)
-      .then(response => {
-        if (!response.ok) throw new Error('Unable to create token')
-        return response.json()
-      })
-      .then(data => {
-        setCreatedToken(data.res?.token ?? null)
-        setToken(data.res?.token ?? '')
-      })
-      .catch(() => showError(t('mcp.tokenFailed')))
+  const handleCreateToken = async payload => {
+    const response = await CreateLongLiveToken(payload)
+    const data = await response.json().catch(() => ({}))
+    if (!response.ok) throw new Error(data.error || t('mcp.tokenFailed'))
+    setCreatedToken(data.res?.token ?? null)
+    setToken(data.res?.token ?? '')
+    setIsNameModalOpen(false)
   }
 
   const snippets = {
@@ -455,13 +451,12 @@ const MCPSettings = () => {
         </SettingsSection>
       </Box>
 
-      <TextModal
-        isOpen={isNameModalOpen}
-        title={t('apiTokens.nameModalTitle')}
-        okText={t('apiTokens.generateToken')}
-        onClose={() => setIsNameModalOpen(false)}
-        onSave={handleCreateToken}
-      />
+      {isNameModalOpen && (
+        <APITokenEditor
+          onClose={() => setIsNameModalOpen(false)}
+          onSave={handleCreateToken}
+        />
+      )}
     </SettingsLayout>
   )
 }
