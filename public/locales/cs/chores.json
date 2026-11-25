@@ -1085,5 +1085,55 @@
     "noteTitle": "Poznámka – {{choreName}}"
   },
   "tasksForDate": "Úkoly pro {{date}}",
-  "createSuggestion": "Vytvořit \"{{value}}\""
+  "createSuggestion": "Vytvořit \"{{value}}\"",
+  "dueChip": {
+    "noDueDate": "Bez termínu",
+    "days_one": "{{count}} den",
+    "days_few": "{{count}} dny",
+    "days_many": "{{count}} dne",
+    "days_other": "{{count}} dní"
+  },
+  "repeatChip": {
+    "once": "Jednou",
+    "always": "Vždy",
+    "trigger": "Spouštěč",
+    "daily": "Denně",
+    "adaptive": "Adaptivně",
+    "weekly": "Týdně",
+    "monthly": "Měsíčně",
+    "yearly": "Ročně",
+    "dailyExcept": "Denně kromě {{days}}",
+    "monthlyOn": "Měsíčně dne {{day}}",
+    "monthlyOnExcept": "Měsíčně dne {{day}} kromě {{months}}",
+    "dayOfMonths": "Dne {{day}} v měsících {{months}}",
+    "everyUnit": {
+      "hours": "Každou hodinu",
+      "days": "Každý den",
+      "weeks": "Každý týden",
+      "months": "Každý měsíc",
+      "years": "Každý rok"
+    },
+    "every": {
+      "hours_one": "Každou {{count}} hodinu",
+      "hours_few": "Každé {{count}} hodiny",
+      "hours_many": "Každé {{count}} hodiny",
+      "hours_other": "Každých {{count}} hodin",
+      "days_one": "Každý {{count}} den",
+      "days_few": "Každé {{count}} dny",
+      "days_many": "Každého {{count}} dne",
+      "days_other": "Každých {{count}} dní",
+      "weeks_one": "Každý {{count}} týden",
+      "weeks_few": "Každé {{count}} týdny",
+      "weeks_many": "Každého {{count}} týdne",
+      "weeks_other": "Každých {{count}} týdnů",
+      "months_one": "Každý {{count}} měsíc",
+      "months_few": "Každé {{count}} měsíce",
+      "months_many": "Každého {{count}} měsíce",
+      "months_other": "Každých {{count}} měsíců",
+      "years_one": "Každý {{count}} rok",
+      "years_few": "Každé {{count}} roky",
+      "years_many": "Každého {{count}} roku",
+      "years_other": "Každých {{count}} let"
+    }
+  }
 }

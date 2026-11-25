@@ -718,5 +718,11 @@
       "voice": "Erfassen per Stimme",
       "scan": "An Aufgabe scannen"
     }
+  },
+  "calendar": {
+    "today": "Heute",
+    "tomorrow": "Morgen",
+    "yesterday": "Gestern",
+    "lastWeekday": "Letzten {{day}}"
   }
 }

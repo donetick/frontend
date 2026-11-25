@@ -1085,5 +1085,37 @@
     "noteTitle": ""
   },
   "tasksForDate": "{{date}} のタスク",
-  "createSuggestion": "「{{value}}」を作成"
+  "createSuggestion": "「{{value}}」を作成",
+  "dueChip": {
+    "noDueDate": "期限なし",
+    "days_other": "{{count}}日"
+  },
+  "repeatChip": {
+    "once": "1回のみ",
+    "always": "常時",
+    "trigger": "トリガー",
+    "daily": "毎日",
+    "adaptive": "適応",
+    "weekly": "毎週",
+    "monthly": "毎月",
+    "yearly": "毎年",
+    "dailyExcept": "毎日（{{days}}を除く）",
+    "monthlyOn": "毎月{{day}}日",
+    "monthlyOnExcept": "毎月{{day}}日（{{months}}を除く）",
+    "dayOfMonths": "{{months}}の{{day}}日",
+    "everyUnit": {
+      "hours": "毎時間",
+      "days": "毎日",
+      "weeks": "毎週",
+      "months": "毎月",
+      "years": "毎年"
+    },
+    "every": {
+      "hours_other": "{{count}}時間ごと",
+      "days_other": "{{count}}日ごと",
+      "weeks_other": "{{count}}週間ごと",
+      "months_other": "{{count}}か月ごと",
+      "years_other": "{{count}}年ごと"
+    }
+  }
 }
