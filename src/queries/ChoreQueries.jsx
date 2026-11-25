@@ -328,11 +328,36 @@ export const useUpdateChore = () => {
 }
 
 export const useChoresHistory = (initialLimit, includeMembers) => {
-  const [limit, setLimit] = useState(initialLimit) // Initially, no limit is selected
+  const [limit, setLimit] = useState(initialLimit)
+  const queryClient = useQueryClient()
+
+  useEffect(
+    () =>
+      syncEngine.onSyncStateChange(state => {
+        if (state.lastSync) {
+          queryClient.invalidateQueries({ queryKey: ['choresHistory'] })
+        }
+      }),
+    [queryClient],
+  )
 
   const { data, error, isLoading } = useQuery({
-    queryKey: ['choresHistory', limit],
+    queryKey: ['choresHistory', limit, includeMembers],
+    networkMode: 'always',
     queryFn: async () => {
+      // A history endpoint response is only a time-window slice. Only a fully
+      // drained delta sync proves the local circle-wide history is complete.
+      // Keep user-only requests on the API, which knows the current user ID.
+      if (includeMembers && isOfflineFeatureEnabled()) {
+        try {
+          if (await offlineDB.getKV('history_sync_complete')) {
+            const entries = await offlineDB.getHistoryByDays(limit)
+            return entries.filter(entry => !entry._pendingDelete)
+          }
+        } catch (error) {
+          console.error('Failed to read synced activities:', error)
+        }
+      }
       try {
         const resp = await GetChoresHistory(limit, includeMembers)
         const entries = resp?.res || []
@@ -344,8 +369,10 @@ export const useChoresHistory = (initialLimit, includeMembers) => {
             .catch(err => console.error('Failed to cache chores history:', err))
         }
         return entries
-      } catch {
-        return offlineDB.getHistoryByDays(limit)
+      } catch (error) {
+        if (!isOfflineFeatureEnabled()) throw error
+        const entries = await offlineDB.getHistoryByDays(limit)
+        return entries.filter(entry => !entry._pendingDelete)
       }
     },
     staleTime: 0,
@@ -553,6 +580,16 @@ export const useUpdateChoreHistory = () => {
         if (!response || !response.ok) {
           throw new Error('Failed to update chore history')
         }
+        if (isOfflineFeatureEnabled()) {
+          await offlineDB
+            .updateHistoryEntry(choreId, historyId, {
+              ...historyData,
+              _pendingUpdate: false,
+            })
+            .catch(error =>
+              console.error('Failed to cache history edit:', error),
+            )
+        }
         return response
       } catch (error) {
         if (isNetworkError(error)) {
@@ -572,6 +609,7 @@ export const useUpdateChoreHistory = () => {
           queryKey: ['choreHistory', String(choreId)],
         })
       }
+      queryClient.invalidateQueries({ queryKey: ['choresHistory'] })
       queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
     },
   })
@@ -614,6 +652,13 @@ export const useDeleteChoreHistory = () => {
         if (!response || !response.ok) {
           throw new Error('Failed to delete chore history')
         }
+        if (isOfflineFeatureEnabled()) {
+          await offlineDB
+            .deleteHistoryEntry(historyId)
+            .catch(error =>
+              console.error('Failed to cache history deletion:', error),
+            )
+        }
         return response
       } catch (error) {
         if (isNetworkError(error)) {
@@ -633,6 +678,7 @@ export const useDeleteChoreHistory = () => {
           queryKey: ['choreHistory', String(choreId)],
         })
       }
+      queryClient.invalidateQueries({ queryKey: ['choresHistory'] })
       queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
     },
   })

@@ -524,7 +524,7 @@ const UserActivites = () => {
   const {
     data: choresHistory,
     handleLimitChange: refetchHistory,
-    isChoresHistoryLoading,
+    isLoading: isChoresHistoryLoading,
   } = useChoresHistory(tabValue ? tabValue : 30, true)
   const { data: circleMembersData } = useCircleMembers()
   const [selectedUser, setSelectedUser] = React.useState('all')
