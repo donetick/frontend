@@ -82,14 +82,14 @@ const NavItem = ({ active, hideLabel, icon, label, onClick, to }) => {
           alignItems: 'center',
           bgcolor: active ? 'primary.softBg' : 'transparent',
           borderRadius: 999,
-          color: active ? 'primary.softColor' : 'text.secondary',
+          color: active ? 'primary.plainColor' : 'text.secondary',
           display: 'flex',
           height: 30,
           justifyContent: 'center',
           transition:
             'background-color 180ms ease, color 180ms ease, transform 180ms ease',
           width: 48,
-          '& svg': { fontSize: 23 },
+          '& svg': { color: 'inherit', fontSize: 23 },
         }}
       >
         {icon}
