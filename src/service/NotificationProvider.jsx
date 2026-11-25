@@ -8,7 +8,7 @@ import {
 } from '@mui/icons-material'
 import { Box, Button, IconButton, Sheet, Typography } from '@mui/joy'
 import PropTypes from 'prop-types'
-import React, { createContext, useContext, useState } from 'react'
+import React, { createContext, useContext, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { useThemeSkin } from '../contexts/ThemeSkinContext'
@@ -71,16 +71,14 @@ const NOTIFICATION_TYPES = {
   },
 }
 
-// Anchored to the top whenever the mobile bottom bar owns the bottom edge,
-// otherwise it keeps the familiar bottom-right placement.
-const stackPositionSx = atTop =>
-  atTop
+// Keep the wider centered mobile layout, anchored at the bottom.
+const stackPositionSx = isMobile =>
+  isMobile
     ? {
         alignItems: 'stretch',
         left: '50%',
-        top: 'calc(var(--safe-area-inset-top, 0px) + var(--app-header-offset, 0px) + 10px)',
+        bottom: 'calc(var(--safe-area-inset-bottom, 0px) + 16px)',
         transform: 'translateX(-50%)',
-        transition: 'top 220ms ease',
         width: 'min(440px, calc(100vw - 20px))',
       }
     : {
@@ -90,7 +88,7 @@ const stackPositionSx = atTop =>
         width: 'min(420px, calc(100vw - 32px))',
       }
 
-const NotificationStack = ({ atTop, children }) => (
+const NotificationStack = ({ children, isMobile }) => (
   <Box
     sx={{
       display: 'flex',
@@ -100,7 +98,7 @@ const NotificationStack = ({ atTop, children }) => (
       pointerEvents: 'none',
       position: 'fixed',
       zIndex: 'var(--joy-zIndex-snackbar, 1400)',
-      ...stackPositionSx(atTop),
+      ...stackPositionSx(isMobile),
       '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
     }}
   >
@@ -109,13 +107,97 @@ const NotificationStack = ({ atTop, children }) => (
 )
 
 NotificationStack.propTypes = {
-  atTop: PropTypes.bool.isRequired,
+  isMobile: PropTypes.bool.isRequired,
   children: PropTypes.node,
+}
+
+// Use a separate wrapper so dragging doesn't fight the toast's entry/exit animation.
+const SwipeDismiss = ({ children, disabled, onDismiss }) => {
+  const gesture = useRef(null)
+  const [offset, setOffset] = useState(0)
+  const [dragging, setDragging] = useState(false)
+
+  const reset = () => {
+    gesture.current = null
+    setDragging(false)
+    setOffset(0)
+  }
+
+  return (
+    <Box
+      onPointerDown={event => {
+        if (
+          disabled ||
+          !event.isPrimary ||
+          event.button !== 0 ||
+          event.target.closest(
+            'button, a, input, select, textarea, [role="button"]',
+          )
+        ) {
+          return
+        }
+        gesture.current = {
+          id: event.pointerId,
+          x: event.clientX,
+          y: event.clientY,
+        }
+        event.currentTarget.setPointerCapture(event.pointerId)
+        setDragging(true)
+      }}
+      onPointerMove={event => {
+        const start = gesture.current
+        if (!start || start.id !== event.pointerId) return
+        const dx = event.clientX - start.x
+        const dy = event.clientY - start.y
+        // Leave vertical scrolling alone rather than treating it as dismissal.
+        if (Math.abs(dy) > Math.max(10, Math.abs(dx))) {
+          reset()
+          return
+        }
+        setOffset(dx)
+      }}
+      onPointerUp={event => {
+        const start = gesture.current
+        if (!start || start.id !== event.pointerId) return
+        const dx = event.clientX - start.x
+        const dy = event.clientY - start.y
+        const threshold = Math.min(100, event.currentTarget.clientWidth * 0.3)
+        if (Math.abs(dx) >= threshold && Math.abs(dx) > Math.abs(dy)) {
+          gesture.current = null
+          setDragging(false)
+          setOffset(Math.sign(dx) * event.currentTarget.clientWidth)
+          onDismiss()
+        } else {
+          reset()
+        }
+      }}
+      onPointerCancel={reset}
+      onLostPointerCapture={() => {
+        if (gesture.current) reset()
+      }}
+      sx={{
+        pointerEvents: 'auto',
+        touchAction: 'pan-y',
+        translate: `${offset}px 0`,
+        transition: dragging ? 'none' : 'translate 180ms ease-out',
+        userSelect: dragging ? 'none' : 'auto',
+        width: '100%',
+        '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
+      }}
+    >
+      {children}
+    </Box>
+  )
+}
+
+SwipeDismiss.propTypes = {
+  children: PropTypes.node,
+  disabled: PropTypes.bool,
+  onDismiss: PropTypes.func.isRequired,
 }
 
 const Toast = ({
   actionLabel,
-  atTop,
   color,
   dismissLabel,
   duration,
@@ -148,7 +230,7 @@ const Toast = ({
       '@keyframes donetickToastIn': {
         from: {
           opacity: 0,
-          transform: `translateY(${atTop ? '-14px' : '14px'}) scale(.97)`,
+          transform: 'translateY(14px) scale(.97)',
         },
         to: { opacity: 1, transform: 'translateY(0) scale(1)' },
       },
@@ -156,7 +238,7 @@ const Toast = ({
         from: { opacity: 1, transform: 'translateY(0) scale(1)' },
         to: {
           opacity: 0,
-          transform: `translateY(${atTop ? '-10px' : '10px'}) scale(.97)`,
+          transform: 'translateY(10px) scale(.97)',
         },
       },
       '@keyframes donetickToastProgress': {
@@ -252,7 +334,6 @@ const Toast = ({
 
 Toast.propTypes = {
   actionLabel: PropTypes.string,
-  atTop: PropTypes.bool.isRequired,
   color: PropTypes.string.isRequired,
   dismissLabel: PropTypes.string.isRequired,
   duration: PropTypes.number,
@@ -406,7 +487,6 @@ export const NotificationProvider = ({ children }) => {
     return (
       <Toast
         key={notification.id}
-        atTop={bottomNavVisible}
         color={color}
         dismissLabel={t('notification.dismiss')}
         duration={config.autoHideDuration}
@@ -428,9 +508,8 @@ export const NotificationProvider = ({ children }) => {
     )
   }
 
-  // Newest toast sits closest to the screen edge the stack is anchored to.
+  // Newest toast sits closest to the bottom edge.
   const visible = notifications.slice(-MAX_VISIBLE)
-  const ordered = bottomNavVisible ? [...visible].reverse() : visible
 
   return (
     <NotificationContext.Provider
@@ -447,9 +526,17 @@ export const NotificationProvider = ({ children }) => {
       }}
     >
       {children}
-      {ordered.length > 0 && (
-        <NotificationStack atTop={bottomNavVisible}>
-          {ordered.map(renderNotification)}
+      {visible.length > 0 && (
+        <NotificationStack isMobile={bottomNavVisible}>
+          {visible.map(notification => (
+            <SwipeDismiss
+              key={notification.id}
+              disabled={Boolean(notification.leaving)}
+              onDismiss={() => removeNotification(notification.id)}
+            >
+              {renderNotification(notification)}
+            </SwipeDismiss>
+          ))}
         </NotificationStack>
       )}
     </NotificationContext.Provider>
