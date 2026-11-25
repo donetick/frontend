@@ -221,7 +221,16 @@ class ApiClient {
       console.error('Error during logout', e)
     }
 
-    if (window.location.pathname !== '/login') window.location.href = '/login'
+    // Always force a hard reload, even if already on /login: in-memory auth
+    // state (e.g. AuthProvider's token, live SSE connections) is only seeded
+    // from storage on mount, so staying on the same route without reloading
+    // leaves that state stale (this is exactly the "Use Different Account"
+    // flow, which logs out from the /login page itself).
+    if (window.location.pathname === '/login') {
+      window.location.reload()
+    } else {
+      window.location.href = '/login'
+    }
   }
   async request(endpoint, options = {}) {
     await this.init()
