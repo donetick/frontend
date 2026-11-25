@@ -63,9 +63,7 @@ const evaluateAssignee = (chore, operator, value, context) => {
       case 'me':
         return Boolean(userId && String(chore.assignedTo) === String(userId))
       case 'others':
-        return Boolean(
-          userId && String(chore.assignedTo) !== String(userId),
-        )
+        return Boolean(userId && String(chore.assignedTo) !== String(userId))
       case 'anyone':
         return true
       // Home's "mine" scope: unassigned chores are everyone's to pick up, so
