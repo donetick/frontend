@@ -545,6 +545,8 @@
       "labels": "Labels",
       "filters": "Saved filters",
       "projects": "Projects and board organization",
+      "things": "Things and automations",
+      "rewards": "Rewards and redemptions",
       "account": "Circle and profile",
       "other": "Additional permissions"
     },
@@ -565,7 +567,14 @@
       "filters:delete": "Delete saved filters you are allowed to delete. Does not delete matching tasks.",
       "projects:read": "View projects and sections, and preview access changes. Existing project visibility restrictions still apply.",
       "projects:write": "Create and edit projects, sharing settings, and sections; reorder sections and move tasks on project boards. Does not grant permission to delete projects or sections.",
-      "projects:delete": "Delete projects and sections you are allowed to delete. Tasks are kept, but their organization or inherited access may change."
+      "projects:delete": "Delete projects and sections you are allowed to delete. Tasks are kept, but their organization or inherited access may change.",
+      "things:read": "View your things (connected devices and sensors) and their state history. Cannot change their state or settings.",
+      "things:write": "Create, edit, and delete things, and change their current state. Includes the endpoints integrations use to report a new state.",
+      "rewards:read": "View rewards and redemption requests you're allowed to see. Cannot create, edit, or resolve anything.",
+      "rewards:write": "Create and edit rewards. Does not grant permission to delete rewards, redeem them, or approve/reject redemptions.",
+      "rewards:delete": "Delete rewards you are allowed to delete.",
+      "rewards:redeem": "Redeem a reward on behalf of the token owner, spending their points.",
+      "rewards:approve": "Approve or reject reward redemption requests. The owner must already have the required role."
     },
     "editPermissions": "Edit permissions",
     "savePermissions": "Save permissions",
@@ -607,7 +616,14 @@
       "filters:delete": "Delete saved filters",
       "projects:read": "Read projects and sections",
       "projects:write": "Edit projects, sharing, sections, and boards",
-      "projects:delete": "Delete projects and sections"
+      "projects:delete": "Delete projects and sections",
+      "things:read": "Read things and their history",
+      "things:write": "Create, edit, and change state of things",
+      "rewards:read": "Read rewards and redemptions",
+      "rewards:write": "Create and edit rewards",
+      "rewards:delete": "Delete rewards",
+      "rewards:redeem": "Redeem rewards",
+      "rewards:approve": "Approve or reject redemptions"
     }
   },
   "mcp": {

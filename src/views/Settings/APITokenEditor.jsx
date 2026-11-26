@@ -45,6 +45,17 @@ const SCOPE_GROUPS = [
     key: 'projects',
     scopes: ['projects:read', 'projects:write', 'projects:delete'],
   },
+  { key: 'things', scopes: ['things:read', 'things:write'] },
+  {
+    key: 'rewards',
+    scopes: [
+      'rewards:read',
+      'rewards:write',
+      'rewards:delete',
+      'rewards:redeem',
+      'rewards:approve',
+    ],
+  },
   { key: 'account', scopes: ['circle:read', 'profile:read'] },
 ]
 
