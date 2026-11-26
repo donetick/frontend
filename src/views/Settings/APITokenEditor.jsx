@@ -208,9 +208,7 @@ const APITokenEditor = ({ onClose, onSave, token }) => {
               {t('apiTokens.selectedCount', { count: scopes.length })}
             </Chip>
           </Box>
-        
-      
-        
+
           {!loading && (
             <AccordionGroup
               variant='outlined'
