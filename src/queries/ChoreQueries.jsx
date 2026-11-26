@@ -32,6 +32,8 @@ import {
   mergePendingCreates,
 } from '../utils/PendingChores'
 import { syncEngine } from '../utils/SyncEngine'
+import { withDefaultTimezone } from '../utils/timezone'
+import { useUserProfile } from './UserQueries'
 
 // Effectively "can this action be queued offline?" — the offline feature must
 // be enabled, otherwise there is no command queue to replay it later and the
@@ -64,6 +66,17 @@ const buildOfflineChore = task => ({
   id: 'temp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
   nextDueDate: task.nextDueDate || task.dueDate || null,
   _pendingCreate: true,
+})
+
+// Every create path (editor, quick add, voice/scan, project board) passes
+// through useCreateChore, so defaults for new chores belong here rather than in
+// each producer. Updates never reach it, so existing chores are left alone.
+const normalizeCreatePayload = (task, userProfile) => ({
+  ...task,
+  frequencyMetadata: withDefaultTimezone(
+    task.frequencyMetadata,
+    userProfile?.timezone,
+  ),
 })
 
 export const useChores = (includeArchive = false, { enabled = true } = {}) => {
@@ -176,6 +189,9 @@ export const useDeleteChores = () => {
 }
 export const useCreateChore = () => {
   const queryClient = useQueryClient()
+  // Cache only, never a fetch: the app-level TimezonePrompt and offline
+  // hydration keep the profile loaded.
+  const { data: userProfile } = useUserProfile({ enabled: false })
 
   const queueOfflineCreate = async newTask => {
     const offlineChore = buildOfflineChore(newTask)
@@ -207,7 +223,7 @@ export const useCreateChore = () => {
       // send it to the backend as part of the chore payload.
       const { source, ...taskData } = rawTask
       const newTask = appendChoreToSection(
-        taskData,
+        normalizeCreatePayload(taskData, userProfile),
         queryClient.getQueryData(['chores', false])?.res || [],
       )
       if (isOfflineFeatureEnabled() && !networkManager.isOnline) {
