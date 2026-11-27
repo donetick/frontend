@@ -1,7 +1,12 @@
 import { DAYS } from './WeekdayUtils.js'
 
-export const customRotationEnabled =
-  import.meta.env?.VITE_CUSTOM_ASSIGNMENT_ROTATION === 'true'
+// Plain `random` can hand the task straight back to the same person, so the
+// app only offers the variant that skips the last assignee. Older tasks saved
+// as `random` open as that option.
+export const RANDOM_STRATEGY = 'random_except_last_assigned'
+
+export const normalizeAssignStrategy = strategy =>
+  strategy === 'random' ? RANDOM_STRATEGY : strategy
 
 export const ROTATION_MODES = [
   'default',
@@ -24,7 +29,7 @@ export const isCountedRotation = mode =>
   mode === 'scheduled_occurrences' || mode === 'completions'
 
 export const canConfigureRotation = (strategy, frequencyType, assignees) =>
-  ['round_robin', 'random'].includes(strategy) &&
+  ['round_robin', RANDOM_STRATEGY].includes(strategy) &&
   Boolean(frequencyType) &&
   !['once', 'no_repeat', 'always', 'trigger'].includes(frequencyType) &&
   new Set(assignees.map(({ userId }) => userId)).size > 1

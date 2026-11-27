@@ -149,6 +149,7 @@
       "keep_last_assigned": "Mantener a la misma persona",
       "least_completed": "Menos completadas",
       "random": "Aleatorio",
+      "random_except_last_assigned": "Aleatorio",
       "round_robin": "Rotativo por turnos"
     }
   },
@@ -363,7 +364,7 @@
       "least_completed": "Menos completada",
       "no_assignee": "Sin asignar",
       "random": "Aleatoria",
-      "random_except_last_assigned": "Aleatoria salvo la última asignada",
+      "random_except_last_assigned": "Aleatoria",
       "round_robin": "Turnos rotativos (Round Robin)"
     },
     "subTasks": "Subtareas",

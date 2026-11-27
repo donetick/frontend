@@ -5,6 +5,7 @@ import {
   buildAssignmentRotation,
   canConfigureRotation,
   getNextInRotation,
+  normalizeAssignStrategy,
   reconcileRotationOrder,
 } from '../src/utils/AssignmentRotation.js'
 
@@ -73,7 +74,7 @@ test('sends only the selected calendar anchor and normalizes invalid days', () =
 })
 
 test('keeps a Random timing rule but drops any Round robin order', () => {
-  const overrides = { strategy: 'random' }
+  const overrides = { strategy: 'random_except_last_assigned' }
   assert.deepEqual(
     build(
       { mode: 'week', weekday: 'wednesday', order: [91, 67, 42] },
@@ -120,9 +121,16 @@ test('rejects unsupported strategies, schedules, and undersized pools', () => {
     build({ mode: 'month' }, { strategy: 'keep_last_assigned' }),
     null,
   )
+  assert.equal(build({ mode: 'month' }, { strategy: 'random' }), null)
   assert.equal(canConfigureRotation('round_robin', 'daily', []), false)
   assert.equal(
     canConfigureRotation('round_robin', 'daily', [assignees[0], assignees[0]]),
     false,
   )
+})
+
+test('opens legacy Random tasks as Random excluding the last assignee', () => {
+  assert.equal(normalizeAssignStrategy('random'), 'random_except_last_assigned')
+  assert.equal(normalizeAssignStrategy('round_robin'), 'round_robin')
+  assert.equal(normalizeAssignStrategy(undefined), undefined)
 })

@@ -723,7 +723,7 @@
       "least_assigned": "Least Assigned",
       "least_completed": "Least Completed",
       "keep_last_assigned": "Keep Last Assigned",
-      "random_except_last_assigned": "Random Except Last Assigned",
+      "random_except_last_assigned": "Random",
       "round_robin": "Round Robin",
       "no_assignee": "No Assignee"
     },
@@ -974,6 +974,7 @@
     "strategy": {
       "keep_last_assigned": "Keep same assignee",
       "random": "Random",
+      "random_except_last_assigned": "Random",
       "least_completed": "Least completed",
       "round_robin": "Round robin"
     },

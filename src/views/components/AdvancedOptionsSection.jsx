@@ -23,7 +23,7 @@ import NumberInput from '../../components/common/NumberInput'
 
 const STRATEGY_VALUES = [
   'keep_last_assigned',
-  'random',
+  'random_except_last_assigned',
   'least_completed',
   'round_robin',
 ]

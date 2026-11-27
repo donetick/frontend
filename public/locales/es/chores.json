@@ -723,7 +723,7 @@
       "least_assigned": "Menos Asignada",
       "least_completed": "Menos completada",
       "keep_last_assigned": "Mantener ÚLTIMA Asignada",
-      "random_except_last_assigned": "Aleatoria excepto la Última Asignada",
+      "random_except_last_assigned": "Aleatoria",
       "round_robin": "Turnos Rotativos (Round Robin)",
       "no_assignee": "Sin Asignar"
     },
@@ -974,6 +974,7 @@
     "strategy": {
       "keep_last_assigned": "Mantener la misma persona asignada",
       "random": "Aleatorio",
+      "random_except_last_assigned": "Aleatorio",
       "least_completed": "Menos completadas",
       "round_robin": "Rotativo"
     },

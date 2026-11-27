@@ -91,7 +91,7 @@ import { useNotification } from '../../service/NotificationProvider'
 import {
   buildAssignmentRotation,
   canConfigureRotation,
-  customRotationEnabled,
+  normalizeAssignStrategy,
 } from '../../utils/AssignmentRotation'
 import { canEditChore } from '../../utils/ChoreAccess'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
@@ -138,26 +138,15 @@ import RepeatSection from './RepeatSection'
 import WizardContainer from './WizardContainer'
 import WizardStepper from './WizardStepper'
 
-const STRATEGY_LABELS = {
-  random: 'Random user',
-  least_assigned: 'Least often assigned',
-  least_completed: 'Fewest completions',
-  keep_last_assigned: 'Keep the same user',
-  random_except_last_assigned: 'Random, excluding the last user',
-  round_robin: 'Rotate in order',
-  no_assignee: 'Leave unassigned',
-}
-
 const ASSIGN_STRATEGIES = [
-  'random',
+  'random_except_last_assigned',
   'least_assigned',
   'least_completed',
   'keep_last_assigned',
-  'random_except_last_assigned',
   'round_robin',
   'no_assignee',
 ]
-const DEFAULT_ASSIGN_STRATEGY = ASSIGN_STRATEGIES[3] // keep_last_assigned
+const DEFAULT_ASSIGN_STRATEGY = 'keep_last_assigned'
 const REPEAT_ON_TYPE = ['interval', 'days_of_the_week', 'day_of_the_month']
 
 const NO_DUE_DATE_REQUIRED_TYPE = ['no_repeat', 'once']
@@ -300,17 +289,17 @@ const ChoreEdit = () => {
         ? assignedTo
         : assignableTo[0].userId
 
-  const showRotation =
-    customRotationEnabled &&
-    canConfigureRotation(assignStrategyValue, frequencyType, assignableTo)
-  const assignmentRotation = customRotationEnabled
-    ? buildAssignmentRotation({
-        strategy: assignStrategyValue,
-        frequencyType,
-        assignees: assignableTo,
-        rotation,
-      })
-    : null
+  const showRotation = canConfigureRotation(
+    assignStrategyValue,
+    frequencyType,
+    assignableTo,
+  )
+  const assignmentRotation = buildAssignmentRotation({
+    strategy: assignStrategyValue,
+    frequencyType,
+    assignees: assignableTo,
+    rotation,
+  })
 
   const snapshot = JSON.stringify({
     name,
@@ -660,9 +649,7 @@ const ChoreEdit = () => {
     const assignees = anyone ? [] : assignableTo
     const sendRotation =
       assignmentRotation !== null ||
-      (customRotationEnabled &&
-        newChoreId > 0 &&
-        Boolean(choreData?.res?.assignmentRotation))
+      (newChoreId > 0 && Boolean(choreData?.res?.assignmentRotation))
     // The editor blocks Plus-only reminders on the way in, but a cloned task,
     // a queued offline edit or a task created while subscribed can still carry
     // them — so the plan is enforced once more on the way out.
@@ -915,7 +902,7 @@ const ChoreEdit = () => {
       setPriority(data.res.priority)
       setAssignStrategy(
         data.res.assignStrategy
-          ? data.res.assignStrategy
+          ? normalizeAssignStrategy(data.res.assignStrategy)
           : DEFAULT_ASSIGN_STRATEGY,
       )
       setRotation(data.res.assignmentRotation ?? null)
@@ -1913,18 +1900,10 @@ const ChoreEdit = () => {
 
                   <Box>
                     <Typography level='h4'>
-                      {t(
-                        customRotationEnabled
-                          ? 'assignmentRotation.strategy'
-                          : 'taskEditor.nextAssignment',
-                      )}
+                      {t('assignmentRotation.strategy')}
                     </Typography>
                     <Select
-                      aria-label={t(
-                        customRotationEnabled
-                          ? 'assignmentRotation.strategy'
-                          : 'taskEditor.nextAssignment',
-                      )}
+                      aria-label={t('assignmentRotation.strategy')}
                       value={assignStrategy}
                       onChange={(_, value) => {
                         if (value) setAssignStrategy(value)
@@ -1932,7 +1911,7 @@ const ChoreEdit = () => {
                     >
                       {ASSIGN_STRATEGIES.map(value => (
                         <Option key={value} value={value}>
-                          {STRATEGY_LABELS[value]}
+                          {t(`choreEdit.strategy.${value}`)}
                         </Option>
                       ))}
                     </Select>

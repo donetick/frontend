@@ -35,6 +35,7 @@ import {
   normalizeRotationCount,
   normalizeRotationMonthDay,
   normalizeRotationWeekday,
+  RANDOM_STRATEGY,
   reconcileRotationOrder,
   ROTATION_MODES,
   ROTATION_MONTH_DAYS,
@@ -199,7 +200,8 @@ const RotationSummary = ({ strategy, value }) => {
   if (mode === 'month' && dayOfMonth > 28) {
     parts.push(t('assignmentRotation.shortMonth'))
   }
-  if (strategy === 'random') parts.push(t('assignmentRotation.randomRule'))
+  if (strategy === RANDOM_STRATEGY)
+    parts.push(t('assignmentRotation.randomRule'))
 
   return (
     <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.5 }}>

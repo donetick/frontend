@@ -723,7 +723,7 @@
       "least_assigned": "Najmniej przypisań",
       "least_completed": "Najmniej ukończonych",
       "keep_last_assigned": "Pozostaw ostatnio przypisanego",
-      "random_except_last_assigned": "Losowo oprócz ostatnio przypisanego",
+      "random_except_last_assigned": "Losowo",
       "round_robin": "Kolejno (Round Robin)",
       "no_assignee": "Brak wykonawcy"
     },
@@ -974,6 +974,7 @@
     "strategy": {
       "keep_last_assigned": "Ten sam wykonawca",
       "random": "Losowo",
+      "random_except_last_assigned": "Losowo",
       "least_completed": "Najmniej ukończonych",
       "round_robin": "Kolejno (Round Robin)"
     },

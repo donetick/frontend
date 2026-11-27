@@ -30,6 +30,7 @@
       "keep_last_assigned": "Fiecare sarcină rămâne la responsabilul inițial după finalizare.",
       "round_robin": "Fiecare sarcină începe cu persoana selectată mai sus, apoi este atribuită pe rând persoanelor selectate, în ordine.",
       "random": "Fiecare sarcină începe cu persoana selectată mai sus, apoi este atribuită aleatoriu unei persoane după finalizare.",
+      "random_except_last_assigned": "Fiecare sarcină începe cu persoana selectată mai sus, apoi este atribuită aleatoriu altei persoane decât ultima după finalizare.",
       "least_completed": "Fiecare sarcină începe cu persoana selectată mai sus, apoi este atribuită persoanei cu cele mai puține finalizări."
     },
     "every": "La fiecare",
@@ -979,7 +980,7 @@
       "least_assigned": "Cele mai puține atribuiri",
       "least_completed": "Cele mai puține finalizări",
       "keep_last_assigned": "Păstrează ultimul responsabil",
-      "random_except_last_assigned": "Aleatoriu, cu excepția ultimului responsabil",
+      "random_except_last_assigned": "Aleatoriu",
       "round_robin": "Pe rând",
       "no_assignee": "Fără responsabil"
     },
@@ -1230,6 +1231,7 @@
     "strategy": {
       "keep_last_assigned": "Păstrează același responsabil",
       "random": "Aleatoriu",
+      "random_except_last_assigned": "Aleatoriu",
       "least_completed": "Cele mai puține finalizări",
       "round_robin": "Pe rând"
     },

@@ -30,6 +30,7 @@
       "keep_last_assigned": "Each task stays with its starting assignee after completion.",
       "round_robin": "Each task starts with the person selected above, then rotates through the selected people in order.",
       "random": "Each task starts with the person selected above, then picks a random person after completion.",
+      "random_except_last_assigned": "Each task starts with the person selected above, then picks a random person other than the last one after completion.",
       "least_completed": "Each task starts with the person selected above, then goes to the person with the fewest completions."
     },
     "every": "Every",
@@ -950,12 +951,12 @@
     "assignStrategyDesc": "How to pick the next assignee for the following task?",
     "strategy": {
       "random": "Random",
-      "least_assigned": "Least Assigned",
-      "least_completed": "Least Completed",
-      "keep_last_assigned": "Keep Last Assigned",
-      "random_except_last_assigned": "Random Except Last Assigned",
-      "round_robin": "Round Robin",
-      "no_assignee": "No Assignee"
+      "least_assigned": "Least often assigned",
+      "least_completed": "Fewest completions",
+      "keep_last_assigned": "Keep the same user",
+      "random_except_last_assigned": "Random",
+      "round_robin": "Rotate in order",
+      "no_assignee": "Leave unassigned"
     },
     "startDate": "Start Date",
     "dueDate": "Due Date",
@@ -1206,6 +1207,7 @@
     "strategy": {
       "keep_last_assigned": "Keep same assignee",
       "random": "Random",
+      "random_except_last_assigned": "Random",
       "least_completed": "Least completed",
       "round_robin": "Round robin"
     },

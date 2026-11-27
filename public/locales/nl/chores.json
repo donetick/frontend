@@ -729,7 +729,7 @@
       "least_assigned": "Minst toegewezen",
       "least_completed": "Minst voltooid",
       "keep_last_assigned": "Laatst toegewezen houden",
-      "random_except_last_assigned": "Willekeurig behalve laatst toegewezen",
+      "random_except_last_assigned": "Willekeurig",
       "round_robin": "Om de beurt",
       "no_assignee": "Niemand toegewezen"
     },
@@ -981,6 +981,7 @@
     "strategy": {
       "keep_last_assigned": "Zelfde persoon houden",
       "random": "Willekeurig",
+      "random_except_last_assigned": "Willekeurig",
       "least_completed": "Minst voltooid",
       "round_robin": "Om de beurt"
     },

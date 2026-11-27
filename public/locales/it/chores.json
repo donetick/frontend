@@ -743,7 +743,7 @@
       "least_assigned": "Meno assegnato",
       "least_completed": "Meno completamenti",
       "keep_last_assigned": "Mantieni ultimo assegnatario",
-      "random_except_last_assigned": "Casuale escluso l'ultimo assegnatario",
+      "random_except_last_assigned": "Casuale",
       "round_robin": "A rotazione",
       "no_assignee": "Nessun assegnatario"
     },
@@ -994,6 +994,7 @@
     "strategy": {
       "keep_last_assigned": "Mantieni lo stesso assegnatario",
       "random": "Casuale",
+      "random_except_last_assigned": "Casuale",
       "least_completed": "Meno completamenti",
       "round_robin": "A rotazione"
     },
