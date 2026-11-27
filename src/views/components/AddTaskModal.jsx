@@ -2278,6 +2278,7 @@ const TaskInput = ({
                     assignees={assignees}
                     people={assignableMembers}
                     size='sm'
+                    showOrder={false}
                     assignedTo={assignees[0].userId}
                     value={rotation}
                     onChange={setRotation}

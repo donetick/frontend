@@ -1329,37 +1329,48 @@
   },
   "assignmentRotation": {
     "strategy": "Assignment strategy",
-    "switchAssignee": "Switch assignee",
+    "handOff": "Pass to the next person",
     "modes": {
-      "default": "Use strategy default",
-      "scheduled_occurrences": "After a set number of scheduled occurrences",
-      "completions": "After a set number of completions",
-      "week": "On a day of the week",
-      "month": "On a day of the month"
+      "default": "Every time it's done",
+      "completions": "After a number of completions",
+      "scheduled_occurrences": "After a number of scheduled dates",
+      "week": "Weekly, on a set day",
+      "month": "Monthly, on a set day"
     },
     "countLabel": {
-      "scheduled_occurrences": "Scheduled occurrences per turn",
+      "scheduled_occurrences": "Scheduled dates per turn",
       "completions": "Completions per turn"
+    },
+    "unit": {
+      "completions_one": "completion",
+      "completions_other": "completions",
+      "scheduled_occurrences_one": "scheduled date",
+      "scheduled_occurrences_other": "scheduled dates"
     },
     "weekday": "Day of the week",
     "dayOfMonth": "Day of the month",
-    "shortMonth": "In shorter months, use the last day of the month.",
-    "rules": {
-      "scheduled_occurrences_one": "Switch after {{count}} scheduled occurrence, even if it was missed.",
-      "scheduled_occurrences_other": "Switch after {{count}} scheduled occurrences, even if some were missed.",
-      "completions_one": "Switch after {{count}} completion. Skips don’t count.",
-      "completions_other": "Switch after {{count}} completions. Skips don’t count.",
-      "week": "The first new occurrence scheduled on or after the selected weekday goes to the next person.",
-      "month": "The first new occurrence scheduled on or after the selected day of the month goes to the next person."
+    "dayN": "Day {{day}}",
+    "summary": {
+      "default": "Moves to the next person each time it's done.",
+      "completions_one": "Moves on after each completion. Skips don’t count.",
+      "completions_other": "Moves on after {{count}} completions. Skips don’t count.",
+      "scheduled_occurrences_one": "Moves on after each scheduled date, even if it was missed.",
+      "scheduled_occurrences_other": "Moves on after {{count}} scheduled dates, even if some were missed.",
+      "week": "Moves on with the first date on or after each {{day}}.",
+      "month": "Moves on with the first date on or after day {{day}} of each month."
     },
-    "openTaskStays": "Open occurrences stay with their current assignee.",
-    "customOrder": "Use a custom rotation order",
+    "shortMonth": "Shorter months use their last day.",
+    "openTaskStays": "An occurrence that’s still open stays with its current assignee.",
+    "randomRule": "Each turn goes to someone other than the current assignee.",
+    "order": "Rotation order",
+    "orderHint": "Drag to change who goes next.",
+    "resetOrder": "Reset",
+    "badge": {
+      "now": "Now",
+      "next": "Next"
+    },
     "member": "Member {{id}}",
-    "drag": "Drag to move {{name}}",
-    "up": "Move {{name}} up",
-    "down": "Move {{name}} down",
-    "preview": "{{current}} is assigned now. {{next}} takes the next turn.",
-    "randomRule": "Each switch picks someone other than the current assignee."
+    "drag": "Drag to move {{name}}"
   },
   "taskEditor": {
     "unsaved": "Unsaved",

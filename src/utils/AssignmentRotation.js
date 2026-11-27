@@ -5,8 +5,8 @@ export const customRotationEnabled =
 
 export const ROTATION_MODES = [
   'default',
-  'scheduled_occurrences',
   'completions',
+  'scheduled_occurrences',
   'week',
   'month',
 ]
