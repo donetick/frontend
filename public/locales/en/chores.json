@@ -363,6 +363,8 @@
     "createdDate": "Created Date",
     "updatedDate": "Updated Date",
     "sortAndGroup": "Sort and Group (Ctrl+G)",
+    "sortBy": "Sort By",
+    "orderBy": "Order By",
     "groupBy": "Group By",
     "quickFilters": "Quick Filters",
     "assignedTo": "Assigned to:",

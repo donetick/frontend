@@ -19,23 +19,35 @@
  */
 
 import {
+  ArrowDownward,
   ArrowDropDown,
+  ArrowUpward,
+  AutoAwesome,
   CalendarMonth,
+  Category,
   Check,
   CheckBox,
   CheckBoxOutlineBlank,
   DisplaySettings,
-  FilterList,
+  Edit,
+  EventAvailable,
+  Flag,
   FormatListBulleted,
+  Groups,
+  Label,
+  People,
+  Person,
   Save,
+  Schedule,
+  Settings,
   Sort,
   Tune,
+  Update,
   ViewAgenda,
   ViewComfy,
   ViewKanban,
 } from '@mui/icons-material'
 import {
-  Badge,
   Box,
   Button,
   ButtonGroup,
@@ -55,15 +67,13 @@ import { useTranslation } from 'react-i18next'
 import AppModal from '../../../components/common/AppModal'
 import ActiveFilterChips from '../../../components/common/filter/ActiveFilterChips'
 import ItemPrivacyField from '../../../components/common/ItemPrivacyField'
-import KeyboardShortcutHint from '../../../components/common/KeyboardShortcutHint'
-import SortAndFilterMenu from '../../../components/common/SortAndFilterMenu'
-import { viewportMedia } from '../../../constants/responsive'
+import PageActions from '../../../components/PageActions'
 import { PAYWALL_REASON, usePaywall } from '../../../contexts/PaywallContext'
 import { useUserProfile } from '../../../queries/UserQueries'
 import { FILTER_COLORS } from '../../../utils/Colors'
 import { canCreateQuickFilter } from '../../../utils/entitlements'
 import Priorities from '../../../utils/Priorities'
-import ProjectSelector from '../../components/ProjectSelector'
+import ProjectModal from '../../Modals/Inputs/ProjectModal'
 import CustomFilterChips from './CustomFilterChips'
 import FilterBuilderContent, {
   CHORE_STATUSES,
@@ -74,74 +84,6 @@ import FilterBuilderContent, {
   selectionsToConditions,
 } from './FilterBuilderContent'
 import SearchBar from './SearchBar'
-
-// ─── sub-components for the Display sheet ────────────────────────────────────
-
-const SectionHeader = ({ badge, icon, label }) => (
-  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-    {icon && (
-      <Box
-        sx={{
-          color: 'text.secondary',
-          display: 'flex',
-          alignItems: 'center',
-          '& svg': { fontSize: 18 },
-        }}
-      >
-        {icon}
-      </Box>
-    )}
-    <Typography level='title-sm' fontWeight={600}>
-      {label}
-    </Typography>
-    {badge != null && (
-      <Chip
-        size='sm'
-        variant='solid'
-        color='primary'
-        sx={{ ml: 'auto', fontSize: '0.7rem', height: 20 }}
-      >
-        {badge}
-      </Chip>
-    )}
-  </Box>
-)
-
-const OptionChips = ({ multi, onToggle, options, selected }) => (
-  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-    {options.map(opt => {
-      const isSelected = multi
-        ? (selected || []).includes(opt.value)
-        : selected === opt.value
-      return (
-        <Chip
-          key={opt.value}
-          variant={isSelected ? 'solid' : 'soft'}
-          color={isSelected ? (opt.color ?? 'primary') : 'neutral'}
-          startDecorator={
-            opt.icon != null ? (
-              isSelected ? (
-                <Check sx={{ fontSize: 14 }} />
-              ) : (
-                opt.icon
-              )
-            ) : undefined
-          }
-          onClick={() => onToggle(opt.value)}
-          sx={{
-            py: 0.64,
-            cursor: 'pointer',
-            transition: 'all 0.15s ease',
-            userSelect: 'none',
-            '&:hover': { opacity: 0.85 },
-          }}
-        >
-          {opt.label}
-        </Chip>
-      )
-    })}
-  </Box>
-)
 
 // ─── main component ───────────────────────────────────────────────────────────
 
@@ -247,8 +189,8 @@ const ChoreToolbar = ({
 }) => {
   const { t } = useTranslation('chores')
   const { isPlus, showPaywall } = usePaywall()
+  const [projectSettingsOpen, setProjectSettingsOpen] = useState(false)
   const [filterSheetOpen, setFilterSheetOpen] = useState(false)
-  const [displaySheetOpen, setDisplaySheetOpen] = useState(false)
   const [localSelections, setLocalSelections] = useState(defaultSelections())
   const { data: userProfile } = useUserProfile()
   const [saveFilterShared, setSaveFilterShared] = useState(false)
@@ -591,28 +533,95 @@ const ChoreToolbar = ({
 
   const filterActive = activeFilterId != null || tempConditionCount > 0
 
+  const fieldIconSx = { fontSize: 18 }
+
   const sortOptions = [
-    { value: 'smart', name: t('sort.smart') },
-    { value: 'due_date', name: t('dueDate') },
-    { value: 'priority', name: t('priority') },
-    { value: 'created_date', name: t('sort.createdDate') },
-    { value: 'updated_date', name: t('sort.updatedDate') },
+    {
+      value: 'smart',
+      name: t('sort.smart'),
+      icon: <AutoAwesome sx={fieldIconSx} />,
+    },
+    {
+      value: 'due_date',
+      name: t('dueDate'),
+      icon: <CalendarMonth sx={fieldIconSx} />,
+    },
+    { value: 'priority', name: t('priority'), icon: <Flag sx={fieldIconSx} /> },
+    {
+      value: 'created_date',
+      name: t('sort.createdDate'),
+      icon: <Schedule sx={fieldIconSx} />,
+    },
+    {
+      value: 'updated_date',
+      name: t('sort.updatedDate'),
+      icon: <Update sx={fieldIconSx} />,
+    },
   ]
 
   const groupByOptions = [
-    { value: 'default', name: t('sort.smart') },
-    { value: 'due_date', name: t('dueDate') },
-    { value: 'priority', name: t('priority') },
-    { value: 'labels', name: t('labels.label') },
-    { value: 'created_date', name: t('sort.createdDate') },
-    { value: 'updated_date', name: t('sort.updatedDate') },
+    {
+      value: 'default',
+      name: t('sort.smart'),
+      icon: <AutoAwesome sx={fieldIconSx} />,
+    },
+    {
+      value: 'due_date',
+      name: t('dueDate'),
+      icon: <CalendarMonth sx={fieldIconSx} />,
+    },
+    { value: 'priority', name: t('priority'), icon: <Flag sx={fieldIconSx} /> },
+    {
+      value: 'labels',
+      name: t('labels.label'),
+      icon: <Label sx={fieldIconSx} />,
+    },
+    {
+      value: 'created_date',
+      name: t('sort.createdDate'),
+      icon: <Schedule sx={fieldIconSx} />,
+    },
+    {
+      value: 'updated_date',
+      name: t('sort.updatedDate'),
+      icon: <Update sx={fieldIconSx} />,
+    },
+  ]
+
+  const directionOptions = [
+    {
+      value: 'asc',
+      label: t('common:sortAndFilter.ascending'),
+      icon: <ArrowUpward sx={fieldIconSx} />,
+    },
+    {
+      value: 'desc',
+      label: t('common:sortAndFilter.descending'),
+      icon: <ArrowDownward sx={fieldIconSx} />,
+    },
   ]
 
   const assigneeOptions = [
-    { value: 'anyone', label: t('toolbar.everyone') },
-    { value: 'assigned_to_me', label: t('toolbar.mine') },
-    { value: 'available_for_me', label: t('toolbar.availableToMe') },
-    { value: 'assigned_to_others', label: t('toolbar.others') },
+    {
+      value: 'anyone',
+      label: t('toolbar.everyone'),
+      icon: <Groups sx={fieldIconSx} />,
+    },
+    {
+      value: 'assigned_to_me',
+      label: t('toolbar.mine'),
+      icon: <Person sx={fieldIconSx} />,
+    },
+    {
+      value: 'available_for_me',
+      label: t('toolbar.availableToMe'),
+      icon: <EventAvailable sx={fieldIconSx} />,
+    },
+    {
+      value: 'assigned_to_others',
+      label: t('toolbar.others'),
+      icon: <People sx={fieldIconSx} />,
+    },
   ]
 
   const viewOptions = [
@@ -647,6 +656,63 @@ const ChoreToolbar = ({
       : []),
   ]
 
+  // ── action-menu panels ───────────────────────────────────────────────────────
+  // Sort, order, and group each get their own dedicated panel now, so picking
+  // an option is a complete action — the whole menu closes rather than
+  // staying open for a second pick the way a combined sort+direction panel
+  // would need to.
+
+  // Each option here carries its own identifying icon (a calendar for due
+  // date, a flag for priority, …), so selection is shown via the row's
+  // `selected` highlight rather than displacing that icon with a check mark —
+  // same convention as viewOptions below.
+  const sortByPanelItems = sortOptions.map(option => ({
+    key: `sort-${option.value}`,
+    label: option.name,
+    icon: option.icon,
+    onClick: () => onSortChange(option.value),
+    selected: selectedSort === option.value,
+  }))
+
+  const orderByPanelItems = directionOptions.map(option => ({
+    key: `order-${option.value}`,
+    label: option.label,
+    icon: option.icon,
+    onClick: () => onSortDirectionChange(option.value),
+    selected: sortDirection === option.value,
+  }))
+
+  const groupByPanelItems = groupByOptions.map(option => ({
+    key: `group-${option.value}`,
+    label: option.name,
+    icon: option.icon,
+    onClick: () => onGroupBySelect(option.value),
+    selected: selectedGroupBy === option.value,
+  }))
+
+  const displayPanelItems = [
+    { key: 'view', type: 'header', label: t('actionMenu.view') },
+    ...viewOptions.map(option => ({
+      key: `view-${option.value}`,
+      label: option.label,
+      keepOpen: true,
+      onClick: () => onToggleViewMode?.(option.value),
+      // The view's own icon is what identifies it; a check would displace it.
+      selected: viewMode === option.value,
+      icon: option.icon,
+    })),
+    { key: 'assignee-divider', type: 'divider' },
+    { key: 'assignee', type: 'header', label: t('toolbar.showTasksFor') },
+    ...assigneeOptions.map(option => ({
+      key: `assignee-${option.value}`,
+      label: option.label,
+      icon: option.icon,
+      keepOpen: true,
+      onClick: () => onAssigneeFilterChange?.(option.value),
+      selected: selectedAssigneeFilter === option.value,
+    })),
+  ]
+
   return (
     <>
       {/* ── Row 1: main toolbar ─────────────────────────────────────────────── */}
@@ -667,103 +733,97 @@ const ChoreToolbar = ({
           inputRef={searchInputRef}
         />
 
-        {/* Project selector */}
-        {!filterActive &&
-          projects.filter(p => p.id !== 'default').length > 0 && (
-            <Box
-              sx={{
-                display: 'none',
-                [viewportMedia.desktopNav]: { display: 'inline-flex' },
-              }}
-            >
-              <ProjectSelector
-                selectedProject={selectedProject?.name || 'Default Project'}
-                onProjectSelect={onProjectSelect}
-                showKeyboardShortcuts={showKeyboardShortcuts}
-              />
-            </Box>
-          )}
-
-        {/* Filter */}
-        <Badge
-          badgeContent={totalActiveCount || null}
-          color='primary'
-          size='sm'
-          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-        >
-          <IconButton
-            variant={hasAnyActive ? 'solid' : 'outlined'}
-            color={hasAnyActive ? 'primary' : 'neutral'}
-            size='sm'
-            sx={{ height: 32, width: 32, borderRadius: '50%' }}
-            onClick={openFilterSheet}
-            aria-label={t('toolbar.filters')}
-            title={t('toolbar.filters')}
-          >
-            <Tune />
-          </IconButton>
-        </Badge>
-
-        {/* Sorting and grouping are list-organization controls, so they live
-            together in a dedicated menu rather than under Display. */}
-        <SortAndFilterMenu
-          title={t('sort.sortAndGroup')}
-          icon={<Sort />}
-          sortOptions={sortOptions}
-          selectedSort={selectedSort}
-          onSortChange={onSortChange}
-          sortDirection={sortDirection}
-          onSortDirectionChange={onSortDirectionChange}
-          filterTitle={t('toolbar.groupBy')}
-          filterOptions={groupByOptions}
-          selectedFilter={selectedGroupBy}
-          onFilterChange={onGroupBySelect}
-          isActive={
-            selectedSort !== 'smart' ||
-            sortDirection !== 'asc' ||
-            selectedGroupBy !== 'default'
-          }
+        {/* Switching project is not an overflow action — the page header's
+            resource switcher owns it on both breakpoints. */}
+        <PageActions
+          count={totalActiveCount}
+          panels={{
+            sortBy: { title: t('sort.sortBy'), items: sortByPanelItems },
+            orderBy: { title: t('sort.orderBy'), items: orderByPanelItems },
+            groupBy: { title: t('sort.groupBy'), items: groupByPanelItems },
+            display: {
+              title: t('toolbar.displayOptions'),
+              items: displayPanelItems,
+            },
+          }}
+          actions={[
+            {
+              key: 'filters',
+              icon: <Tune />,
+              label: t('toolbar.filters'),
+              endDecorator: hasAnyActive ? (
+                <Chip size='sm' color='primary'>
+                  {totalActiveCount}
+                </Chip>
+              ) : null,
+              onClick: openFilterSheet,
+            },
+            {
+              key: 'sortBy',
+              icon: <Sort />,
+              label: t('sort.sortBy'),
+              panel: 'sortBy',
+            },
+            {
+              key: 'orderBy',
+              icon:
+                sortDirection === 'desc' ? <ArrowDownward /> : <ArrowUpward />,
+              label: t('sort.orderBy'),
+              panel: 'orderBy',
+            },
+            {
+              key: 'groupBy',
+              icon: <Category />,
+              label: t('sort.groupBy'),
+              panel: 'groupBy',
+            },
+            {
+              key: 'display',
+              icon: <DisplaySettings />,
+              label: t('toolbar.displayOptions'),
+              panel: 'display',
+            },
+            { key: 'divider-select', type: 'divider' },
+            {
+              key: 'multiSelect',
+              icon: isMultiSelectMode ? <CheckBox /> : <CheckBoxOutlineBlank />,
+              label: isMultiSelectMode
+                ? t('archived.exitMultiSelect')
+                : t('archived.enableMultiSelect'),
+              onClick: onToggleMultiSelect,
+            },
+            { key: 'divider-context', type: 'divider' },
+            activeFilterId && {
+              key: 'editFilter',
+              icon: <Edit />,
+              label: t('filterChip.edit'),
+              onClick: () =>
+                onSavedFilterEdit?.(
+                  savedFilters.find(filter => filter.id === activeFilterId),
+                ),
+            },
+            !filterActive &&
+              selectedProject?.id &&
+              selectedProject.id !== 'default' && {
+                key: 'projectSettings',
+                icon: <Settings />,
+                label: t('projects:modal.editTitle'),
+                onClick: () => setProjectSettingsOpen(true),
+              },
+          ]}
         />
-
-        {/* Display */}
-        <IconButton
-          variant='outlined'
-          color='neutral'
-          size='sm'
-          sx={{ height: 32, width: 32, borderRadius: '50%' }}
-          onClick={() => setDisplaySheetOpen(true)}
-          aria-label={t('toolbar.displayOptions')}
-          title={t('toolbar.display')}
-        >
-          <DisplaySettings />
-        </IconButton>
-
-        {/* Multiselect */}
-        <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-          <IconButton
-            variant={isMultiSelectMode ? 'solid' : 'outlined'}
-            color={isMultiSelectMode ? 'primary' : 'neutral'}
-            size='sm'
-            sx={{ height: 32, width: 32, borderRadius: '50%' }}
-            onClick={onToggleMultiSelect}
-            aria-label={
-              isMultiSelectMode ? 'Exit multi-select' : 'Enter multi-select'
-            }
-            title={
-              isMultiSelectMode
-                ? 'Exit multi-select (Ctrl+S)'
-                : 'Multi-select (Ctrl+S)'
-            }
-          >
-            {isMultiSelectMode ? <CheckBox /> : <CheckBoxOutlineBlank />}
-          </IconButton>
-          <KeyboardShortcutHint
-            shortcut='S'
-            show={showKeyboardShortcuts}
-            sx={{ position: 'absolute', top: -8, right: -8, zIndex: 1000 }}
-          />
-        </Box>
       </Box>
+      {projectSettingsOpen && (
+        <ProjectModal
+          isOpen
+          project={selectedProject}
+          onClose={() => setProjectSettingsOpen(false)}
+          onSave={project => {
+            onProjectSelect?.(project)
+            setProjectSettingsOpen(false)
+          }}
+        />
+      )}
 
       {/* ── Row 2: pinned filters quick access ──────────────────────────────── */}
       {/* Stays visible even while a saved filter is active (it self-highlights)
@@ -1000,77 +1060,6 @@ const ChoreToolbar = ({
               </Box>
             </>
           )}
-        </Box>
-      </AppModal>
-
-      {/* ── Display bottom sheet (View + Assignee) ───────────────────────────── */}
-      <AppModal
-        open={displaySheetOpen}
-        isMobile
-        onClose={() => setDisplaySheetOpen(false)}
-        title={
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <DisplaySettings sx={{ fontSize: 20 }} />
-            {t('toolbar.display')}
-          </Box>
-        }
-        footer={
-          <Button
-            onClick={() => setDisplaySheetOpen(false)}
-            sx={{ minWidth: 140 }}
-          >
-            {t('activity.status.done')}
-          </Button>
-        }
-      >
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-          {/* View section */}
-          <SectionHeader label={t('actionMenu.view')} />
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-            {viewOptions.map(opt => (
-              <Chip
-                key={opt.value}
-                variant={viewMode === opt.value ? 'solid' : 'soft'}
-                color={viewMode === opt.value ? 'primary' : 'neutral'}
-                startDecorator={
-                  viewMode === opt.value ? (
-                    <Check sx={{ fontSize: 14 }} />
-                  ) : (
-                    opt.icon
-                  )
-                }
-                onClick={() => onToggleViewMode?.(opt.value)}
-                sx={{
-                  py: 0.64,
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease',
-                  userSelect: 'none',
-                  '&:hover': { opacity: 0.85 },
-                }}
-              >
-                {opt.label}
-              </Chip>
-            ))}
-          </Box>
-
-          {/* Show tasks for section */}
-          <Divider sx={{ my: 2.5 }} />
-          <SectionHeader
-            icon={<FilterList />}
-            label={t('toolbar.showTasksFor')}
-            badge={
-              selectedAssigneeFilter !== 'anyone'
-                ? assigneeOptions.find(o => o.value === selectedAssigneeFilter)
-                    ?.label
-                : null
-            }
-          />
-          <OptionChips
-            options={assigneeOptions}
-            selected={selectedAssigneeFilter}
-            multi={false}
-            onToggle={v => onAssigneeFilterChange?.(v)}
-          />
         </Box>
       </AppModal>
     </>

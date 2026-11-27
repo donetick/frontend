@@ -28,10 +28,10 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import {
-  Badge,
   Box,
   Button,
   Card,
+  Chip,
   Container,
   Grid,
   IconButton,
@@ -48,12 +48,14 @@ import { useParams } from 'react-router-dom'
 import EmptyState from '../../components/common/EmptyState'
 import FilterBar from '../../components/common/FilterBar'
 import PermissionDeniedModal from '../../components/common/PermissionDeniedModal'
-import SortAndFilterMenu from '../../components/common/SortAndFilterMenu'
 import SwipeActionButton from '../../components/common/SwipeActionButton'
 import { TrailingSwipeActions as TrailingActions } from '../../components/common/SwipeActionTray'
 import SwipeListItem, {
   SWIPE_COMMIT_THRESHOLD,
 } from '../../components/common/SwipeListItem'
+import { useSortPanelItems } from '../../components/common/useSortPanelItems'
+import PageActions from '../../components/PageActions'
+import PageHeader from '../../components/PageHeader'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
 import useConfirmationModal from '../../hooks/useConfirmationModal'
@@ -117,6 +119,20 @@ const ChoreHistory = () => {
   )
   const [filterBarOpen, setFilterBarOpen] = useState(false)
   const searchInputRef = useRef(null)
+
+  const sortItems = useSortPanelItems({
+    direction: sortDirection,
+    onChange: setSortBy,
+    onDirectionChange: setSortDirection,
+    options: [
+      { name: t('sort.date'), value: 'date' },
+      { name: t('sort.updatedDate'), value: 'updatedDate' },
+      { name: t('sort.performer'), value: 'name' },
+      { name: t('sort.status'), value: 'status' },
+      { name: t('sort.points'), value: 'points' },
+    ],
+    value: sortBy,
+  })
 
   useEffect(() => {
     localStorage.setItem('choreHistorySortBy', sortBy)
@@ -504,6 +520,7 @@ const ChoreHistory = () => {
 
   return (
     <Container maxWidth='md' sx={{ px: 0 }}>
+      <PageHeader title={choreData?.res?.name} sx={{ px: 2, pt: 2 }} />
       {/* Enhanced Header Section */}
       <Box sx={{ gap: 2, p: 2 }}>
         {/* <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, p: 2 }}> */}
@@ -623,38 +640,34 @@ const ChoreHistory = () => {
               )
             }
           />
-          <SortAndFilterMenu
-            icon={<Sort />}
-            sortOptions={[
-              { name: t('sort.date'), value: 'date' },
-              { name: t('sort.updatedDate'), value: 'updatedDate' },
-              { name: t('sort.performer'), value: 'name' },
-              { name: t('sort.status'), value: 'status' },
-              { name: t('sort.points'), value: 'points' },
+          <PageActions
+            count={activeFilterCount}
+            actions={[
+              {
+                key: 'filters',
+                icon: <Tune />,
+                label: t('common:filterBar.filtersButton'),
+                endDecorator: activeFilterCount ? (
+                  <Chip size='sm' color='primary'>
+                    {activeFilterCount}
+                  </Chip>
+                ) : null,
+                onClick: () => setFilterBarOpen(true),
+              },
+              {
+                key: 'sort',
+                icon: <Sort />,
+                label: t('common:sortAndFilter.sortBy'),
+                panel: 'sort',
+              },
             ]}
-            selectedSort={sortBy}
-            onSortChange={setSortBy}
-            sortDirection={sortDirection}
-            onSortDirectionChange={setSortDirection}
-            isActive={sortBy !== 'date' || sortDirection !== 'desc'}
+            panels={{
+              sort: {
+                title: t('common:sortAndFilter.sortBy'),
+                items: sortItems,
+              },
+            }}
           />
-          <Badge
-            badgeContent={activeFilterCount || null}
-            color='primary'
-            size='sm'
-            anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-          >
-            <IconButton
-              onClick={() => setFilterBarOpen(true)}
-              variant='outlined'
-              color={activeFilterCount > 0 ? 'primary' : 'neutral'}
-              size='sm'
-              sx={{ height: 32, width: 32, borderRadius: '50%', flexShrink: 0 }}
-              aria-label={t('common:filterBar.filtersButton')}
-            >
-              <Tune />
-            </IconButton>
-          </Badge>
         </Box>
         <FilterBar
           filterDefs={filterDefs}

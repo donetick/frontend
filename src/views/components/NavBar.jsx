@@ -37,6 +37,7 @@ import DoneTickLogo from '../../assets/logo.svg'
 import UserProfileAvatar from '../../components/UserProfileAvatar'
 import { viewportMedia } from '../../constants/responsive'
 import { useNavBarTitleContext } from '../../contexts/NavBarTitleContext'
+import { usePageHeaderConfig } from '../../hooks/usePageHeaderConfig'
 import { useResponsiveQuery } from '../../hooks/useResponsiveQuery'
 import { useScrollDirection } from '../../hooks/useScrollDirection'
 import { useGlobalSearch } from '../../search/GlobalSearchContext'
@@ -52,16 +53,6 @@ const EXPANDED_NAV_WIDTH = 232
 const PUBLIC_PAGES = ['/landing', '/privacy', '/terms']
 // Entry points of the app: there is no parent to go back to from here.
 const ROOT_PAGES = ['/', '/home', '/chores']
-const NAVBAR_TITLE_KEYS = {
-  '/activities': 'navigation.activities',
-  '/archived': 'navigation.archived',
-  '/chores': 'navigation.allTasks',
-  '/filters': 'navigation.filters',
-  '/labels': 'navigation.labels',
-  '/points': 'navigation.points',
-  '/projects': 'navigation.projects',
-  '/things': 'navigation.things',
-}
 const SHELL_FREE_PAGES = [
   '/signup',
   '/login',
@@ -76,9 +67,19 @@ const SHELL_FREE_PAGES = [
   '/circle/join',
 ]
 
+const PageActionsTarget = () => {
+  const { getPageActionsTargetRef } = useNavBarTitleContext()
+  return (
+    <Box
+      ref={getPageActionsTargetRef('mobile')}
+      sx={{ alignItems: 'center', display: 'flex' }}
+    />
+  )
+}
+
 const NavBar = () => {
   const { t } = useTranslation('common')
-  const { navBarConfig } = useNavBarTitleContext()
+  const { selector: navBarSelector, title: navbarTitle } = usePageHeaderConfig()
   const { openSearch } = useGlobalSearch()
   const navigate = useNavigate()
   const location = useLocation()
@@ -92,16 +93,6 @@ const NavBar = () => {
   const isDesktop = useResponsiveQuery('desktopNav')
   const headerHidden = useScrollDirection({ enabled: !isDesktop })
   const mobileHeaderRef = useRef(null)
-  const normalizedPath =
-    location.pathname.length > 1
-      ? location.pathname.replace(/\/$/, '')
-      : location.pathname
-  const navbarTitleKey = NAVBAR_TITLE_KEYS[normalizedPath]
-  const supportsDynamicNavBar =
-    normalizedPath === '/chores' || /^\/labels\/[^/]+$/.test(normalizedPath)
-  const dynamicNavBarConfig = supportsDynamicNavBar ? navBarConfig : null
-  const navbarTitle =
-    dynamicNavBarConfig?.title || (navbarTitleKey ? t(navbarTitleKey) : null)
 
   useEffect(() => {
     const handleOpenDrawer = () => setDrawerOpen(true)
@@ -601,9 +592,9 @@ const NavBar = () => {
             }}
           >
             {renderLeadingAction()}
-            {dynamicNavBarConfig?.selector ? (
+            {navBarSelector ? (
               <NavBarResourceSwitcher
-                selector={dynamicNavBarConfig.selector}
+                selector={navBarSelector}
                 title={navbarTitle}
               />
             ) : navbarTitle ? (
@@ -626,6 +617,7 @@ const NavBar = () => {
             )}
             <SyncStatusIndicator />
             <UserProfileAvatar />
+            {!isDesktop && <PageActionsTarget />}
           </Sheet>
 
           <Drawer
