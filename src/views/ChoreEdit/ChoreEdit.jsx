@@ -90,7 +90,9 @@ import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
 import { useNotification } from '../../service/NotificationProvider'
 import {
   buildAssignmentRotation,
-  canConfigureRotation,
+  canConfigureHandOff,
+  canConfigureOrder,
+  isRepeatingFrequency,
   normalizeAssignStrategy,
 } from '../../utils/AssignmentRotation'
 import { canEditChore } from '../../utils/ChoreAccess'
@@ -276,7 +278,11 @@ const ChoreEdit = () => {
   const assignablePerformers = filterMembersForProject(performers, choreProject)
   const assignees = anyone ? assignablePerformers : assignableTo
   const hasSpecificAssignees = !anyone && assignableTo.length > 0
-  const canPickStrategy = hasSpecificAssignees && assignableTo.length > 1
+  const hasMultipleAssignees = hasSpecificAssignees && assignableTo.length > 1
+  // A strategy only picks who gets the *next* occurrence, so a one-time task
+  // has nothing to choose.
+  const isRepeating = isRepeatingFrequency(frequencyType)
+  const canPickStrategy = hasMultipleAssignees && isRepeating
   const assignStrategyValue = !hasSpecificAssignees
     ? 'no_assignee'
     : canPickStrategy
@@ -289,11 +295,22 @@ const ChoreEdit = () => {
         ? assignedTo
         : assignableTo[0].userId
 
-  const showRotation = canConfigureRotation(
+  const showHandOff = canConfigureHandOff(
     assignStrategyValue,
     frequencyType,
     assignableTo,
   )
+  const showRotationOrder = canConfigureOrder(
+    assignStrategyValue,
+    frequencyType,
+    assignableTo,
+  )
+  // Round robin's order list marks and sets who's up now, so it replaces the
+  // separate picker; "Leave unassigned" has nobody to pick.
+  const showAssignedNow =
+    hasMultipleAssignees &&
+    assignStrategyValue !== 'no_assignee' &&
+    !showRotationOrder
   const assignmentRotation = buildAssignmentRotation({
     strategy: assignStrategyValue,
     frequencyType,
@@ -463,10 +480,10 @@ const ChoreEdit = () => {
     }
     if (assignStrategyValue !== 'no_assignee') {
       if (assignees.length === 0) {
-        errors.assignees = 'Choose at least one eligible user'
+        errors.assignees = t('choreEdit.errAssigneesRequired')
       }
       if (assignedToValue === null || assignedToValue < 0) {
-        errors.assignedTo = 'Choose who is assigned to this task'
+        errors.assignedTo = t('choreEdit.errAssignedToRequired')
       }
     }
     if (frequencyType === 'interval' && !frequency > 0) {
@@ -769,6 +786,21 @@ const ChoreEdit = () => {
         const savedAssignees = JSON.parse(defaultAssigneeSetting)
         setAssignableTo(savedAssignees)
       }
+
+      const defaultStrategySetting = localStorage.getItem(
+        'defaultAssignStrategySetting',
+      )
+      if (defaultStrategySetting !== null) {
+        setAssignStrategy(
+          normalizeAssignStrategy(JSON.parse(defaultStrategySetting)),
+        )
+      }
+      const defaultRotationSetting = localStorage.getItem(
+        'defaultAssignmentRotationSetting',
+      )
+      if (defaultRotationSetting !== null) {
+        setRotation(JSON.parse(defaultRotationSetting))
+      }
     }
   }, [])
   useEffect(() => {
@@ -790,9 +822,20 @@ const ChoreEdit = () => {
     const anyoneDirty = anyoneSetting !== JSON.stringify(anyone)
     const assigneeSetting = localStorage.getItem('defaultAssigneeSetting')
     const assigneeDirty = assigneeSetting !== JSON.stringify(assignableTo)
-    const dirty = anyoneDirty || (!anyone && assigneeDirty)
+    // The strategy and rotation only matter once several people share a task.
+    const strategySetting =
+      localStorage.getItem('defaultAssignStrategySetting') ??
+      JSON.stringify(DEFAULT_ASSIGN_STRATEGY)
+    const strategyDirty = strategySetting !== JSON.stringify(assignStrategy)
+    const rotationSetting =
+      localStorage.getItem('defaultAssignmentRotationSetting') ?? 'null'
+    const rotationDirty = rotationSetting !== JSON.stringify(rotation)
+    const dirty =
+      anyoneDirty ||
+      (!anyone && assigneeDirty) ||
+      (hasMultipleAssignees && (strategyDirty || rotationDirty))
     setShowSaveAssigneeDefault(dirty)
-  }, [anyone, assignableTo])
+  }, [anyone, assignableTo, assignStrategy, rotation, hasMultipleAssignees])
 
   // A task in a private or shared project is always private: the project's
   // privacy wins over the task's own setting, so keep the form in sync with the
@@ -1106,12 +1149,12 @@ const ChoreEdit = () => {
   }
   const assignmentSummary = anyone
     ? selectedProjectIsPrivate
-      ? 'Anyone who can see this project'
-      : 'Anyone in your circle'
+      ? t('taskEditor.anyoneInProject')
+      : t('taskEditor.anyoneInCircle')
     : assignablePerformers
         .filter(user => assignableTo.some(a => a.userId === user.userId))
         .map(user => user.displayName)
-        .join(', ') || 'No eligible users selected'
+        .join(', ') || t('taskEditor.noEligibleUsers')
   if (
     (isChoreLoading && choreId) ||
     isUserLabelsLoading ||
@@ -1716,8 +1759,24 @@ const ChoreEdit = () => {
                       <Checkbox
                         checked={anyone}
                         onClick={() => {
-                          setAnyone(!anyone)
-                          setIsPrivate(false)
+                          if (!anyone) {
+                            // An "Anyone" task is visible to everyone who can
+                            // pick it up, so it can't stay private.
+                            setAnyone(true)
+                            setIsPrivate(false)
+                            return
+                          }
+                          // Turning "Anyone" off with nobody picked would leave
+                          // the task with no one; start from the current user.
+                          if (assignableTo.length === 0) {
+                            const me = assignablePerformers.find(
+                              p => p.userId === userProfile?.id,
+                            )
+                            const fallback = me ?? assignablePerformers[0]
+                            if (!fallback) return
+                            setAssignableTo([{ userId: fallback.userId }])
+                          }
+                          setAnyone(false)
                         }}
                         overlay
                         disableIcon
@@ -1826,8 +1885,8 @@ const ChoreEdit = () => {
                   sx={{ mt: 1 }}
                 >
                   {!showSaveAssigneeDefault
-                    ? 'This assignment matches your default for new tasks in this browser.'
-                    : 'Use as default applies this assignment to new tasks in this browser.'}
+                    ? t('taskEditor.assignmentMatchesDefault')
+                    : t('taskEditor.assignmentUseAsDefaultHint')}
                 </Typography>
                 {showSaveAssigneeDefault && (
                   <Box sx={{ mt: 1, display: 'flex', justifyContent: 'start' }}>
@@ -1852,6 +1911,16 @@ const ChoreEdit = () => {
                           'defaultAssigneeSetting',
                           JSON.stringify(assignableTo),
                         )
+                        if (hasMultipleAssignees) {
+                          localStorage.setItem(
+                            'defaultAssignStrategySetting',
+                            JSON.stringify(assignStrategy),
+                          )
+                          localStorage.setItem(
+                            'defaultAssignmentRotationSetting',
+                            JSON.stringify(rotation),
+                          )
+                        }
                         setShowSaveAssigneeDefault(false)
                       }}
                     >
@@ -1870,58 +1939,76 @@ const ChoreEdit = () => {
                 )}
               </Box>
 
-              {assignees.length > 1 && (
-                <Box className='task-properties'>
-                  <Box mb={2}>
-                    <Typography level='h4'>
-                      {t('taskEditor.assignedNow')}
-                    </Typography>
-                    <Select
-                      placeholder={
-                        assignees.length === 0
-                          ? 'No Assignees yet can perform this task'
-                          : 'Select an assignee for this task'
-                      }
-                      disabled={assignees.length === 0}
-                      value={assignedTo > -1 ? assignedTo : null}
-                      onChange={(_, selectedUserId) =>
-                        setAssignedTo(selectedUserId)
-                      }
-                    >
-                      {assignablePerformers
-                        .filter(p => assignees.some(a => a.userId == p.userId))
-                        .map((item, index) => (
-                          <Option value={item.userId} key={item.displayName}>
-                            {item.displayName}
+              {hasMultipleAssignees && (
+                <Box
+                  className='task-properties'
+                  sx={{ display: 'grid', gap: 2 }}
+                >
+                  {canPickStrategy && (
+                    <Box>
+                      <Typography level='h4'>
+                        {t('assignmentRotation.strategy')}
+                      </Typography>
+                      <Select
+                        aria-label={t('assignmentRotation.strategy')}
+                        aria-describedby='assign-strategy-hint'
+                        value={assignStrategy}
+                        onChange={(_, value) => {
+                          if (value) setAssignStrategy(value)
+                        }}
+                      >
+                        {ASSIGN_STRATEGIES.map(value => (
+                          <Option key={value} value={value}>
+                            {t(`choreEdit.strategy.${value}`)}
                           </Option>
                         ))}
-                    </Select>
-                  </Box>
+                      </Select>
+                      <Typography
+                        id='assign-strategy-hint'
+                        level='body-xs'
+                        textColor='text.tertiary'
+                        sx={{ mt: 0.75 }}
+                      >
+                        {t(`assignmentRotation.strategyHint.${assignStrategy}`)}
+                      </Typography>
+                    </Box>
+                  )}
 
-                  <Box>
-                    <Typography level='h4'>
-                      {t('assignmentRotation.strategy')}
-                    </Typography>
-                    <Select
-                      aria-label={t('assignmentRotation.strategy')}
-                      value={assignStrategy}
-                      onChange={(_, value) => {
-                        if (value) setAssignStrategy(value)
-                      }}
-                    >
-                      {ASSIGN_STRATEGIES.map(value => (
-                        <Option key={value} value={value}>
-                          {t(`choreEdit.strategy.${value}`)}
-                        </Option>
-                      ))}
-                    </Select>
-                  </Box>
-                  {showRotation && (
+                  {showAssignedNow && (
+                    <Box>
+                      <Typography level='h4'>
+                        {t('taskEditor.assignedNow')}
+                      </Typography>
+                      <Select
+                        aria-label={t('taskEditor.assignedNow')}
+                        placeholder={t('taskEditor.selectAssignee')}
+                        value={assignedToValue}
+                        onChange={(_, selectedUserId) =>
+                          setAssignedTo(selectedUserId)
+                        }
+                      >
+                        {assignablePerformers
+                          .filter(p =>
+                            assignableTo.some(a => a.userId === p.userId),
+                          )
+                          .map(item => (
+                            <Option value={item.userId} key={item.userId}>
+                              {item.displayName}
+                            </Option>
+                          ))}
+                      </Select>
+                    </Box>
+                  )}
+
+                  {(showHandOff || showRotationOrder) && (
                     <AssignmentRotationFields
                       strategy={assignStrategyValue}
                       assignees={assignableTo}
                       people={assignablePerformers}
                       assignedTo={assignedToValue}
+                      onAssignedToChange={setAssignedTo}
+                      showHandOff={showHandOff}
+                      showOrder={showRotationOrder}
                       value={rotation}
                       onChange={setRotation}
                     />

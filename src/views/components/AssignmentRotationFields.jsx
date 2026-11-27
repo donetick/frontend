@@ -38,6 +38,7 @@ import {
   normalizeRotationWeekday,
   RANDOM_STRATEGY,
   reconcileRotationOrder,
+  rotateToCurrent,
   ROTATION_MODES,
   ROTATION_MONTH_DAYS,
 } from '../../utils/AssignmentRotation'
@@ -252,15 +253,20 @@ const RotationSummary = ({ strategy, value }) => {
 }
 
 /**
- * Hand-off timing plus, for Round robin, the rotation order. `showOrder`
- * is off in Quick Add so the panel keeps to one compact row; the order can
- * still be customised from the full editor.
+ * Hand-off timing plus, for Round robin, the rotation order. The parent
+ * decides which parts apply (see `canConfigureHandOff` / `canConfigureOrder`);
+ * Quick Add turns the order off so the panel keeps to one compact row.
+ * With `onAssignedToChange`, the order starts at whoever has the task now and
+ * dragging someone to the top makes it their turn, which replaces a separate
+ * "Assigned now" picker.
  */
 const AssignmentRotationFields = ({
   assignedTo,
   assignees,
+  onAssignedToChange,
   onChange,
   people,
+  showHandOff = true,
   showOrder = true,
   size = 'md',
   strategy,
@@ -280,7 +286,11 @@ const AssignmentRotationFields = ({
     color: compact ? 'text.primary' : 'text.secondary',
   }
   const hasCustomOrder = Array.isArray(value?.order)
-  const order = reconcileRotationOrder(value?.order, assignees)
+  const savedOrder = reconcileRotationOrder(value?.order, assignees)
+  const startsAtCurrent = Boolean(onAssignedToChange) && assignedTo != null
+  const order = startsAtCurrent
+    ? rotateToCurrent(savedOrder, assignedTo)
+    : savedOrder
   const nextId =
     assignedTo != null ? getNextInRotation(order, assignedTo) : null
   const findPerson = id =>
@@ -289,6 +299,7 @@ const AssignmentRotationFields = ({
   const displayName = id =>
     findPerson(id)?.displayName || t('assignmentRotation.member', { id })
   const showOrderList = showOrder && strategy === 'round_robin'
+  if (!showHandOff && !showOrderList) return null
 
   return (
     <Box
@@ -299,11 +310,15 @@ const AssignmentRotationFields = ({
         ...(compact && { py: 0.75 }),
       }}
     >
-      <Box sx={{ display: 'grid', gap: 0.75 }}>
-        <Typography sx={labelSx}>{t('assignmentRotation.handOff')}</Typography>
-        <HandOffControls value={value} onChange={onChange} size={size} />
-        <RotationSummary strategy={strategy} value={value} />
-      </Box>
+      {showHandOff && (
+        <Box sx={{ display: 'grid', gap: 0.75 }}>
+          <Typography sx={labelSx}>
+            {t('assignmentRotation.handOff')}
+          </Typography>
+          <HandOffControls value={value} onChange={onChange} size={size} />
+          <RotationSummary strategy={strategy} value={value} />
+        </Box>
+      )}
 
       {showOrderList && (
         <Box sx={{ display: 'grid', gap: 0.75 }}>
@@ -334,14 +349,15 @@ const AssignmentRotationFields = ({
             collisionDetection={closestCenter}
             onDragEnd={({ active, over }) => {
               if (!over || active.id === over.id) return
-              onChange({
-                ...value,
-                order: arrayMove(
-                  order,
-                  order.indexOf(active.id),
-                  order.indexOf(over.id),
-                ),
-              })
+              const next = arrayMove(
+                order,
+                order.indexOf(active.id),
+                order.indexOf(over.id),
+              )
+              onChange({ ...value, order: next })
+              if (startsAtCurrent && next[0] !== assignedTo) {
+                onAssignedToChange(next[0])
+              }
             }}
           >
             <SortableContext
@@ -377,7 +393,11 @@ const AssignmentRotationFields = ({
             </SortableContext>
           </DndContext>
           <Typography level='body-xs' textColor='text.tertiary'>
-            {t('assignmentRotation.orderHint')}
+            {t(
+              startsAtCurrent
+                ? 'assignmentRotation.orderHintCurrent'
+                : 'assignmentRotation.orderHint',
+            )}
           </Typography>
         </Box>
       )}

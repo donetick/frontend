@@ -28,11 +28,36 @@ export const normalizeRotationMonthDay = day =>
 export const isCountedRotation = mode =>
   mode === 'scheduled_occurrences' || mode === 'completions'
 
-export const canConfigureRotation = (strategy, frequencyType, assignees) =>
-  ['round_robin', RANDOM_STRATEGY].includes(strategy) &&
-  Boolean(frequencyType) &&
-  !['once', 'no_repeat', 'always', 'trigger'].includes(frequencyType) &&
+const NON_REPEATING_FREQUENCIES = ['once', 'no_repeat']
+// Triggered and always-available tasks repeat, but have no schedule to count
+// occurrences or calendar days against.
+const UNSCHEDULED_FREQUENCIES = ['always', 'trigger']
+
+// Strategies only pick the *next* assignee, so they mean nothing on a task
+// that never comes back.
+export const isRepeatingFrequency = frequencyType =>
+  Boolean(frequencyType) && !NON_REPEATING_FREQUENCIES.includes(frequencyType)
+
+const hasRotationPool = assignees =>
   new Set(assignees.map(({ userId }) => userId)).size > 1
+
+// When the task passes to the next person (every N completions, weekly, …).
+export const canConfigureHandOff = (strategy, frequencyType, assignees) =>
+  ['round_robin', RANDOM_STRATEGY].includes(strategy) &&
+  isRepeatingFrequency(frequencyType) &&
+  !UNSCHEDULED_FREQUENCIES.includes(frequencyType) &&
+  hasRotationPool(assignees)
+
+// Who goes next in Round robin. Unlike the hand-off timing, the order applies
+// to any repeating task.
+export const canConfigureOrder = (strategy, frequencyType, assignees) =>
+  strategy === 'round_robin' &&
+  isRepeatingFrequency(frequencyType) &&
+  hasRotationPool(assignees)
+
+export const canConfigureRotation = (strategy, frequencyType, assignees) =>
+  canConfigureHandOff(strategy, frequencyType, assignees) ||
+  canConfigureOrder(strategy, frequencyType, assignees)
 
 // Keep the user's ordering, drop ineligible IDs, and append new members.
 export const reconcileRotationOrder = (order, assignees) => {
@@ -40,6 +65,13 @@ export const reconcileRotationOrder = (order, assignees) => {
   return [
     ...new Set([...(order ?? []).filter(id => eligible.has(id)), ...eligible]),
   ]
+}
+
+// A rotation is a cycle, so it reads the same starting from whoever has the
+// task now; the editor lists it that way so the top row is always "now".
+export const rotateToCurrent = (order, currentId) => {
+  const index = order.indexOf(currentId)
+  return index > 0 ? [...order.slice(index), ...order.slice(0, index)] : order
 }
 
 export const getNextInRotation = (order, currentId) =>
@@ -56,15 +88,17 @@ export const buildAssignmentRotation = ({
   rotation,
   strategy,
 }) => {
-  if (!rotation || !canConfigureRotation(strategy, frequencyType, assignees)) {
-    return null
-  }
+  if (!rotation) return null
+  const handOff = canConfigureHandOff(strategy, frequencyType, assignees)
+  const orderable = canConfigureOrder(strategy, frequencyType, assignees)
+  if (!handOff && !orderable) return null
 
-  const mode = ROTATION_MODES.includes(rotation.mode)
-    ? rotation.mode
-    : 'default'
+  const mode =
+    handOff && ROTATION_MODES.includes(rotation.mode)
+      ? rotation.mode
+      : 'default'
   const order =
-    strategy === 'round_robin' && Array.isArray(rotation.order)
+    orderable && Array.isArray(rotation.order)
       ? reconcileRotationOrder(rotation.order, assignees)
       : null
   if (mode === 'default' && !order) return null

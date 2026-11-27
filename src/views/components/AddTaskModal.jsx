@@ -44,7 +44,7 @@ import {
 import { voiceInputService } from '../../service/VoiceInputService'
 import {
   buildAssignmentRotation,
-  canConfigureRotation,
+  canConfigureHandOff,
 } from '../../utils/AssignmentRotation'
 import LABEL_COLORS, { TASK_COLOR } from '../../utils/Colors'
 import { sanitizeRemindersForPlan } from '../../utils/entitlements'
@@ -366,7 +366,7 @@ const TaskInput = ({
   const [rotation, setRotation] = useState(null)
   const showRotation =
     !isAnyoneTask &&
-    canConfigureRotation(assignStrategy, frequency?.frequencyType, assignees)
+    canConfigureHandOff(assignStrategy, frequency?.frequencyType, assignees)
   const assignmentRotation = showRotation
     ? buildAssignmentRotation({
         strategy: assignStrategy,

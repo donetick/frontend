@@ -1016,7 +1016,9 @@
     "archive": "Archive",
     "unarchive": "Unarchive",
     "create": "Create",
-    "notificationsFreePlanNote": "Your plan includes a reminder on the due date. Plus adds reminders before it's due and follow-ups after."
+    "notificationsFreePlanNote": "Your plan includes a reminder on the due date. Plus adds reminders before it's due and follow-ups after.",
+    "errAssigneesRequired": "Choose at least one person who can be assigned.",
+    "errAssignedToRequired": "Choose who is assigned to this task."
   },
   "addTask": {
     "descriptionLabel": "Description:",
@@ -1372,7 +1374,16 @@
       "next": "Next"
     },
     "member": "Member {{id}}",
-    "drag": "Drag to move {{name}}"
+    "drag": "Drag to move {{name}}",
+    "strategyHint": {
+      "keep_last_assigned": "The person assigned now keeps it each time it repeats.",
+      "round_robin": "Passes to the next person in the rotation order.",
+      "random_except_last_assigned": "Passes to a random person, never the one who just had it.",
+      "least_assigned": "Passes to whoever has been assigned it the fewest times.",
+      "least_completed": "Passes to whoever has completed it the fewest times.",
+      "no_assignee": "Nobody is assigned. Anyone selected above can pick it up."
+    },
+    "orderHintCurrent": "The person at the top has it now. Drag to change the order or who goes first."
   },
   "taskEditor": {
     "unsaved": "Unsaved",
@@ -1458,6 +1469,12 @@
     "changeAThing": "Change a Thing",
     "inheritedFromSharedProject": "Inherited from the project: only its members can see tasks in it",
     "onlyProjectAudienceAssignable": "Only people who can see the project “{{project}}” can be assigned.",
-    "followsProjectName": "Follows the project “{{project}}”"
+    "followsProjectName": "Follows the project “{{project}}”",
+    "anyoneInProject": "Anyone who can see this project",
+    "anyoneInCircle": "Anyone in your circle",
+    "noEligibleUsers": "No one selected",
+    "selectAssignee": "Select who is assigned",
+    "assignmentMatchesDefault": "This assignment matches your default for new tasks in this browser.",
+    "assignmentUseAsDefaultHint": "Use as default applies these assignment settings to new tasks in this browser."
   }
 }

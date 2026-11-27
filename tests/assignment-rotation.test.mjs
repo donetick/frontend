@@ -3,10 +3,13 @@ import test from 'node:test'
 
 import {
   buildAssignmentRotation,
+  canConfigureHandOff,
+  canConfigureOrder,
   canConfigureRotation,
   getNextInRotation,
   normalizeAssignStrategy,
   reconcileRotationOrder,
+  rotateToCurrent,
 } from '../src/utils/AssignmentRotation.js'
 
 const assignees = [42, 67, 91].map(userId => ({ userId }))
@@ -107,6 +110,12 @@ test('previews the next turn from the current assignee and wraps around', () => 
   assert.equal(getNextInRotation(order, 100), 91)
 })
 
+test('lists the rotation starting from the current assignee', () => {
+  assert.deepEqual(rotateToCurrent([42, 67, 91], 67), [67, 91, 42])
+  assert.deepEqual(rotateToCurrent([42, 67, 91], 42), [42, 67, 91])
+  assert.deepEqual(rotateToCurrent([42, 67, 91], 5), [42, 67, 91])
+})
+
 test('rejects unsupported strategies, schedules, and undersized pools', () => {
   for (const frequencyType of [
     'once',
@@ -125,6 +134,30 @@ test('rejects unsupported strategies, schedules, and undersized pools', () => {
   assert.equal(canConfigureRotation('round_robin', 'daily', []), false)
   assert.equal(
     canConfigureRotation('round_robin', 'daily', [assignees[0], assignees[0]]),
+    false,
+  )
+})
+
+test('allows a Round robin order on unscheduled repeats, but no timing', () => {
+  for (const frequencyType of ['always', 'trigger']) {
+    assert.equal(
+      canConfigureOrder('round_robin', frequencyType, assignees),
+      true,
+    )
+    assert.equal(
+      canConfigureHandOff('round_robin', frequencyType, assignees),
+      false,
+    )
+    assert.deepEqual(
+      build({ mode: 'month', order: [91, 42, 67] }, { frequencyType }),
+      { mode: 'default', order: [91, 42, 67] },
+    )
+  }
+  for (const frequencyType of ['once', 'no_repeat']) {
+    assert.equal(build({ order: [91, 42, 67] }, { frequencyType }), null)
+  }
+  assert.equal(
+    canConfigureOrder('random_except_last_assigned', 'daily', assignees),
     false,
   )
 })
