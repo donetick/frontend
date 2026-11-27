@@ -131,6 +131,19 @@ export default ({ command, mode }) => {
       }),
     ],
 
+    // Dev only: forward /api to the backend so the browser only ever talks to
+    // the vite port (same origin, no CORS, one firewall rule per dev server).
+    // Use with VITE_APP_API_URL= (empty) and set BACKEND_URL per worktree in
+    // .env.development.local, e.g. BACKEND_URL=http://localhost:2022
+    server: {
+      proxy: {
+        '/api': {
+          target: env.BACKEND_URL || 'http://localhost:2021',
+          changeOrigin: true,
+        },
+      },
+    },
+
     resolve: {
       alias: [
         {

@@ -88,6 +88,11 @@ import {
 } from '../../queries/ChoreQueries.jsx'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
 import { useNotification } from '../../service/NotificationProvider'
+import {
+  buildAssignmentRotation,
+  canConfigureRotation,
+  customRotationEnabled,
+} from '../../utils/AssignmentRotation'
 import { canEditChore } from '../../utils/ChoreAccess'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
 import { sanitizeRemindersForPlan } from '../../utils/entitlements'
@@ -116,6 +121,7 @@ import { useSinglePageTaskEditor } from '../../utils/TaskEditorPreferences'
 import { generateUUID } from '../../utils/UUID'
 import { sortWeekdays } from '../../utils/WeekdayUtils'
 import { useProjectFilter } from '../Chores/hooks/useProjectFilter.js'
+import AssignmentRotationFields from '../components/AssignmentRotationFields'
 import HiddenLabelIndicator from '../components/HiddenLabelIndicator'
 import LoadingComponent from '../components/Loading.jsx'
 import RichTextEditor from '../components/RichTextEditor.jsx'
@@ -187,6 +193,7 @@ const ChoreEdit = () => {
   const [assignableTo, setAssignableTo] = useState([])
   const [performers, setPerformers] = useState([])
   const [assignStrategy, setAssignStrategy] = useState(DEFAULT_ASSIGN_STRATEGY)
+  const [rotation, setRotation] = useState(null)
   const [dueDate, setDueDate] = useState(null)
   const [dueDateOnly, setDueDateOnly] = useState(null)
   const [dueTime, setDueTime] = useState(null)
@@ -293,6 +300,18 @@ const ChoreEdit = () => {
         ? assignedTo
         : assignableTo[0].userId
 
+  const showRotation =
+    customRotationEnabled &&
+    canConfigureRotation(assignStrategyValue, frequencyType, assignableTo)
+  const assignmentRotation = customRotationEnabled
+    ? buildAssignmentRotation({
+        strategy: assignStrategyValue,
+        frequencyType,
+        assignees: assignableTo,
+        rotation,
+      })
+    : null
+
   const snapshot = JSON.stringify({
     name,
     description,
@@ -303,6 +322,7 @@ const ChoreEdit = () => {
     assignableTo,
     assignedTo,
     assignStrategy,
+    assignmentRotation,
     dueDate,
     dueDateOnly,
     dueTime,
@@ -638,6 +658,11 @@ const ChoreEdit = () => {
       newChoreId = null
     }
     const assignees = anyone ? [] : assignableTo
+    const sendRotation =
+      assignmentRotation !== null ||
+      (customRotationEnabled &&
+        newChoreId > 0 &&
+        Boolean(choreData?.res?.assignmentRotation))
     // The editor blocks Plus-only reminders on the way in, but a cloned task,
     // a queued offline edit or a task created while subscribed can still carry
     // them — so the plan is enforced once more on the way out.
@@ -657,6 +682,7 @@ const ChoreEdit = () => {
       frequencyMetadata: frequencyMetadata,
       assignedTo: assignedToValue,
       assignStrategy: assignStrategyValue,
+      ...(sendRotation && { assignmentRotation }),
       isRolling: isRolling,
       isActive: isActive,
       notification: isNotificable && planReminders.length > 0,
@@ -892,6 +918,7 @@ const ChoreEdit = () => {
           ? data.res.assignStrategy
           : DEFAULT_ASSIGN_STRATEGY,
       )
+      setRotation(data.res.assignmentRotation ?? null)
       setIsRolling(data.res.isRolling)
       setIsActive(data.res.isActive)
       setSubTasks(data.res.subTasks ? data.res.subTasks : [])
@@ -1886,10 +1913,18 @@ const ChoreEdit = () => {
 
                   <Box>
                     <Typography level='h4'>
-                      {t('taskEditor.nextAssignment')}
+                      {t(
+                        customRotationEnabled
+                          ? 'assignmentRotation.strategy'
+                          : 'taskEditor.nextAssignment',
+                      )}
                     </Typography>
                     <Select
-                      aria-label={t('taskEditor.nextAssignment')}
+                      aria-label={t(
+                        customRotationEnabled
+                          ? 'assignmentRotation.strategy'
+                          : 'taskEditor.nextAssignment',
+                      )}
                       value={assignStrategy}
                       onChange={(_, value) => {
                         if (value) setAssignStrategy(value)
@@ -1902,6 +1937,16 @@ const ChoreEdit = () => {
                       ))}
                     </Select>
                   </Box>
+                  {showRotation && (
+                    <AssignmentRotationFields
+                      strategy={assignStrategyValue}
+                      assignees={assignableTo}
+                      people={assignablePerformers}
+                      assignedTo={assignedToValue}
+                      value={rotation}
+                      onChange={setRotation}
+                    />
+                  )}
                 </Box>
               )}
             </EditorSection>

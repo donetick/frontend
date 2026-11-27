@@ -1327,6 +1327,40 @@
     "yesterday": "Yesterday",
     "noteTitle": "Note - {{choreName}}"
   },
+  "assignmentRotation": {
+    "strategy": "Assignment strategy",
+    "switchAssignee": "Switch assignee",
+    "modes": {
+      "default": "Use strategy default",
+      "scheduled_occurrences": "After a set number of scheduled occurrences",
+      "completions": "After a set number of completions",
+      "week": "On a day of the week",
+      "month": "On a day of the month"
+    },
+    "countLabel": {
+      "scheduled_occurrences": "Scheduled occurrences per turn",
+      "completions": "Completions per turn"
+    },
+    "weekday": "Day of the week",
+    "dayOfMonth": "Day of the month",
+    "shortMonth": "In shorter months, use the last day of the month.",
+    "rules": {
+      "scheduled_occurrences_one": "Switch after {{count}} scheduled occurrence, even if it was missed.",
+      "scheduled_occurrences_other": "Switch after {{count}} scheduled occurrences, even if some were missed.",
+      "completions_one": "Switch after {{count}} completion. Skips don’t count.",
+      "completions_other": "Switch after {{count}} completions. Skips don’t count.",
+      "week": "The first new occurrence scheduled on or after the selected weekday goes to the next person.",
+      "month": "The first new occurrence scheduled on or after the selected day of the month goes to the next person."
+    },
+    "openTaskStays": "Open occurrences stay with their current assignee.",
+    "customOrder": "Use a custom rotation order",
+    "member": "Member {{id}}",
+    "drag": "Drag to move {{name}}",
+    "up": "Move {{name}} up",
+    "down": "Move {{name}} down",
+    "preview": "{{current}} is assigned now. {{next}} takes the next turn.",
+    "randomRule": "Each switch picks someone other than the current assignee."
+  },
   "taskEditor": {
     "unsaved": "Unsaved",
     "closeTaskEditor": "Close task editor",
