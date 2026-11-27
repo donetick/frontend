@@ -16,6 +16,7 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { DragIndicator, InfoOutlined } from '@mui/icons-material'
 import {
+  Avatar,
   Box,
   Button,
   Chip,
@@ -40,9 +41,10 @@ import {
   ROTATION_MODES,
   ROTATION_MONTH_DAYS,
 } from '../../utils/AssignmentRotation'
+import { resolvePhotoURL } from '../../utils/Helpers'
 import { DAYS } from '../../utils/WeekdayUtils'
 
-const RotationRow = ({ badge, id, name, size }) => {
+const RotationRow = ({ badge, id, image, name, size }) => {
   const { t } = useTranslation('chores')
   const {
     attributes,
@@ -83,6 +85,20 @@ const RotationRow = ({ badge, id, name, size }) => {
       >
         <DragIndicator fontSize='small' />
       </IconButton>
+      <Avatar
+        size='sm'
+        src={resolvePhotoURL(image) || undefined}
+        alt=''
+        color='primary'
+        sx={{
+          width: size === 'sm' ? 22 : 26,
+          height: size === 'sm' ? 22 : 26,
+          fontSize: 12,
+          flexShrink: 0,
+        }}
+      >
+        {name?.charAt(0).toUpperCase()}
+      </Avatar>
       <Typography
         level={size === 'sm' ? 'body-sm' : 'body-md'}
         sx={{ flex: 1, overflowWrap: 'anywhere', minWidth: 0 }}
@@ -267,10 +283,11 @@ const AssignmentRotationFields = ({
   const order = reconcileRotationOrder(value?.order, assignees)
   const nextId =
     assignedTo != null ? getNextInRotation(order, assignedTo) : null
+  const findPerson = id =>
+    people.find(person => person.userId === id) ??
+    assignees.find(person => person.userId === id)
   const displayName = id =>
-    people.find(person => person.userId === id)?.displayName ||
-    assignees.find(person => person.userId === id)?.displayName ||
-    t('assignmentRotation.member', { id })
+    findPerson(id)?.displayName || t('assignmentRotation.member', { id })
   const showOrderList = showOrder && strategy === 'round_robin'
 
   return (
@@ -349,6 +366,7 @@ const AssignmentRotationFields = ({
                     key={id}
                     id={id}
                     name={displayName(id)}
+                    image={findPerson(id)?.image}
                     size={size}
                     badge={
                       id === assignedTo ? 'now' : id === nextId ? 'next' : null
