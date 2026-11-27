@@ -786,21 +786,6 @@ const ChoreEdit = () => {
         const savedAssignees = JSON.parse(defaultAssigneeSetting)
         setAssignableTo(savedAssignees)
       }
-
-      const defaultStrategySetting = localStorage.getItem(
-        'defaultAssignStrategySetting',
-      )
-      if (defaultStrategySetting !== null) {
-        setAssignStrategy(
-          normalizeAssignStrategy(JSON.parse(defaultStrategySetting)),
-        )
-      }
-      const defaultRotationSetting = localStorage.getItem(
-        'defaultAssignmentRotationSetting',
-      )
-      if (defaultRotationSetting !== null) {
-        setRotation(JSON.parse(defaultRotationSetting))
-      }
     }
   }, [])
   useEffect(() => {
@@ -822,20 +807,9 @@ const ChoreEdit = () => {
     const anyoneDirty = anyoneSetting !== JSON.stringify(anyone)
     const assigneeSetting = localStorage.getItem('defaultAssigneeSetting')
     const assigneeDirty = assigneeSetting !== JSON.stringify(assignableTo)
-    // The strategy and rotation only matter once several people share a task.
-    const strategySetting =
-      localStorage.getItem('defaultAssignStrategySetting') ??
-      JSON.stringify(DEFAULT_ASSIGN_STRATEGY)
-    const strategyDirty = strategySetting !== JSON.stringify(assignStrategy)
-    const rotationSetting =
-      localStorage.getItem('defaultAssignmentRotationSetting') ?? 'null'
-    const rotationDirty = rotationSetting !== JSON.stringify(rotation)
-    const dirty =
-      anyoneDirty ||
-      (!anyone && assigneeDirty) ||
-      (hasMultipleAssignees && (strategyDirty || rotationDirty))
+    const dirty = anyoneDirty || (!anyone && assigneeDirty)
     setShowSaveAssigneeDefault(dirty)
-  }, [anyone, assignableTo, assignStrategy, rotation, hasMultipleAssignees])
+  }, [anyone, assignableTo])
 
   // A task in a private or shared project is always private: the project's
   // privacy wins over the task's own setting, so keep the form in sync with the
@@ -1911,16 +1885,6 @@ const ChoreEdit = () => {
                           'defaultAssigneeSetting',
                           JSON.stringify(assignableTo),
                         )
-                        if (hasMultipleAssignees) {
-                          localStorage.setItem(
-                            'defaultAssignStrategySetting',
-                            JSON.stringify(assignStrategy),
-                          )
-                          localStorage.setItem(
-                            'defaultAssignmentRotationSetting',
-                            JSON.stringify(rotation),
-                          )
-                        }
                         setShowSaveAssigneeDefault(false)
                       }}
                     >

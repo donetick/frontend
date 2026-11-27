@@ -1475,6 +1475,6 @@
     "noEligibleUsers": "No one selected",
     "selectAssignee": "Select who is assigned",
     "assignmentMatchesDefault": "This assignment matches your default for new tasks in this browser.",
-    "assignmentUseAsDefaultHint": "Use as default applies these assignment settings to new tasks in this browser."
+    "assignmentUseAsDefaultHint": "Use as default applies this assignment to new tasks in this browser."
   }
 }
