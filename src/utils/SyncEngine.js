@@ -327,6 +327,7 @@ class SyncEngine {
     let currentCursor = cursor
     let pages = 0
     let reachedServer = false
+    let fullyDrained = false
 
     while (hasMore && networkManager.deviceOnline) {
       // Bail out if the user logged out (or switched servers) mid-sync —
@@ -392,6 +393,7 @@ class SyncEngine {
       }
 
       hasMore = !!data.hasMore
+      fullyDrained = !hasMore
       // A server reporting hasMore without ever moving the cursor would spin
       // this loop forever — treat a stuck cursor as "no more" instead.
       if (hasMore && !cursorAdvanced) {
@@ -405,6 +407,9 @@ class SyncEngine {
     if (reachedServer) {
       await offlineDB.setSyncCursor(currentCursor)
       await offlineDB.setLastSyncTime(Date.now())
+      if (fullyDrained) {
+        await offlineDB.saveKV('history_sync_complete', true)
+      }
     }
 
     return reachedServer
