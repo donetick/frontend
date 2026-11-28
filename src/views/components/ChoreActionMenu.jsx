@@ -53,9 +53,9 @@ import PanelTransition from '../../components/animations/PanelTransition'
 import AppModal from '../../components/common/AppModal'
 import { MOTION } from '../../constants/motion'
 import { useChorePermissions } from '../../hooks/useChorePermissions'
+import { useInboxLabel } from '../../hooks/useInboxLabel'
 import { useResponsiveQuery } from '../../hooks/useResponsiveQuery'
 import { useSwipeBack } from '../../hooks/useSwipeBack'
-import { useInboxLabel } from '../../hooks/useInboxLabel'
 import { notInCompletionWindow } from '../../utils/Chores'
 import LABEL_COLORS, {
   getTextColorFromBackgroundColor,
@@ -441,52 +441,6 @@ const ChoreActionMenu = ({
       onClick: () => handleQuickSchedule('remove'),
     },
   ].filter(Boolean)
-  
-
-  const priorityItems = [...Priorities, NO_PRIORITY].map(priority => ({
-    key: `priority-${priority.value}`,
-    icon: priority.icon || <Flag />,
-    label: priority.name.trim(),
-    color: priority.color || 'neutral',
-    selected: (currentPriority?.value || 0) === priority.value,
-    onClick: () => onChangePriority?.(priority),
-  }))
-
-  const projectItems = [
-    {
-      key: 'project-default',
-      icon: renderProjectAvatar(LABEL_COLORS[0].value, 'FolderOpen'),
-      label: inboxLabel,
-      selected: !chore.projectId,
-      onClick: () =>
-        onAction?.('moveToProject', chore, {
-          project: { id: null, name: inboxLabel },
-        }),
-    },
-    ...projects.map(project => ({
-      key: `project-${project.id}`,
-      icon: renderProjectAvatar(project.color, project.icon),
-      label: (
-        <>
-          {project.name}
-          <ProjectAccessIcon
-            project={project}
-            sx={{ fontSize: 14, ml: 0.5, verticalAlign: 'text-bottom' }}
-          />
-        </>
-      ),
-      selected: chore.projectId === project.id,
-      onClick: () => onAction?.('moveToProject', chore, { project }),
-    })),
-  ]
-
-  const sectionItems = sections.map(section => ({
-    key: `section-${section.id}`,
-    icon: <ViewColumn />,
-    label: section.name,
-    selected: chore.sectionId === section.id,
-    onClick: () => onAction?.('moveToSection', chore, { section }),
-  }))
 
   // Follow the familiar context-menu hierarchy: navigation first, common task
   // actions next, organization and utilities after that, and destructive
