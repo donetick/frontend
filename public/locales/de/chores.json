@@ -739,7 +739,7 @@
       "least_assigned": "Am seltensten zugewiesen",
       "least_completed": "Am wenigsten abgeschlossen",
       "keep_last_assigned": "Letzte Zuweisung beibehalten",
-      "random_except_last_assigned": "Zufällig, außer zuletzt zugewiesen",
+      "random_except_last_assigned": "Zufällig",
       "round_robin": "Reihum",
       "no_assignee": "Keine Zuweisung"
     },
@@ -990,6 +990,7 @@
     "strategy": {
       "keep_last_assigned": "Gleiche Zuweisung beibehalten",
       "random": "Zufällig",
+      "random_except_last_assigned": "Zufällig",
       "least_completed": "Am wenigsten abgeschlossen",
       "round_robin": "Reihum"
     },

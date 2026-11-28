@@ -723,7 +723,7 @@
       "least_assigned": "Nejméně přiřazovaný",
       "least_completed": "Nejméně dokončující",
       "keep_last_assigned": "Ponechat posledního",
-      "random_except_last_assigned": "Náhodně kromě posledního",
+      "random_except_last_assigned": "Náhodně",
       "round_robin": "Dokola",
       "no_assignee": "Bez řešitele"
     },
@@ -974,6 +974,7 @@
     "strategy": {
       "keep_last_assigned": "Ponechat stejného řešitele",
       "random": "Náhodně",
+      "random_except_last_assigned": "Náhodně",
       "least_completed": "Nejméně dokončující",
       "round_robin": "Dokola"
     },

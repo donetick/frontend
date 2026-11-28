@@ -974,6 +974,7 @@
     "strategy": {
       "keep_last_assigned": "",
       "random": "",
+      "random_except_last_assigned": "",
       "least_completed": "",
       "round_robin": ""
     },

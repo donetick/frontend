@@ -23,7 +23,7 @@ import NumberInput from '../../components/common/NumberInput'
 
 const STRATEGY_VALUES = [
   'keep_last_assigned',
-  'random',
+  'random_except_last_assigned',
   'least_completed',
   'round_robin',
 ]
@@ -140,6 +140,7 @@ export const AdvancedOptionsTrigger = ({
 // Panel — place this as a sibling below the description/subtask sections
 const AdvancedOptionsSection = ({
   assignStrategy,
+  assignmentRotationFields,
   completionWindow,
   deadlineOffset,
   hasAssignees,
@@ -286,6 +287,8 @@ const AdvancedOptionsSection = ({
               </Select>
             </FieldRow>
           )}
+
+          {open && assignmentRotationFields}
 
           {/* Completion window and deadline — only when due date set */}
           {hasDueDate ? (

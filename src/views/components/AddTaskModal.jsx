@@ -1,3 +1,4 @@
+/* eslint max-lines: ["error", { "max": 2050, "skipBlankLines": true, "skipComments": true }] -- Keep the shared Quick Add draft and submission state together. */
 import {
   Add,
   AutoAwesome,
@@ -41,6 +42,10 @@ import {
   sharedItemToFile,
 } from '../../service/ShareTargetService'
 import { voiceInputService } from '../../service/VoiceInputService'
+import {
+  buildAssignmentRotation,
+  canConfigureHandOff,
+} from '../../utils/AssignmentRotation'
 import LABEL_COLORS, { TASK_COLOR } from '../../utils/Colors'
 import { sanitizeRemindersForPlan } from '../../utils/entitlements'
 import { CreateLabel, DeleteDraftAttachment } from '../../utils/Fetcher'
@@ -59,6 +64,7 @@ import AdvancedOptionsSection, {
   AdvancedOptionsTrigger,
 } from './AdvancedOptionsSection'
 import AssigneePickerField from './AssigneePickerField'
+import AssignmentRotationFields from './AssignmentRotationFields'
 import AttachmentPickerField from './AttachmentPickerField'
 import {
   parseAssignees,
@@ -357,6 +363,18 @@ const TaskInput = ({
   const [requireApproval, setRequireApproval] = useState(false)
   const [completionWindow, setCompletionWindow] = useState(-1)
   const [assignStrategy, setAssignStrategy] = useState('keep_last_assigned')
+  const [rotation, setRotation] = useState(null)
+  const showRotation =
+    !isAnyoneTask &&
+    canConfigureHandOff(assignStrategy, frequency?.frequencyType, assignees)
+  const assignmentRotation = showRotation
+    ? buildAssignmentRotation({
+        strategy: assignStrategy,
+        frequencyType: frequency.frequencyType,
+        assignees,
+        rotation,
+      })
+    : null
   const [isPrivate, setIsPrivate] = useState(false)
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [dueDateOnly, setDueDateOnly] = useState(null)
@@ -1342,6 +1360,7 @@ const TaskInput = ({
     setRequireApproval(false)
     setCompletionWindow(-1)
     setAssignStrategy('keep_last_assigned')
+    setRotation(null)
     setIsPrivate(false)
     setShowAdvanced(false)
     setDueDateOnly(null)
@@ -1414,6 +1433,7 @@ const TaskInput = ({
           : null,
       assignedTo: finalAssignedTo,
       assignStrategy: finalAssignStrategy,
+      ...(assignmentRotation && { assignmentRotation }),
       isRolling: false,
       labelsV2: labelsV2,
       priority: priority ? Number(priority) : 0,
@@ -2219,6 +2239,7 @@ const TaskInput = ({
                     requireApproval,
                     completionWindow > -1,
                     deadlineOffset > -1,
+                    assignmentRotation !== null,
                   ].filter(Boolean).length
                 }
                 emptyDisplay={pickerEmptyDisplay}
@@ -2247,7 +2268,21 @@ const TaskInput = ({
               assignStrategy={assignStrategy}
               onAssignStrategyChange={setAssignStrategy}
               hasDueDate={!!dueDate}
-              hasMultipleAssignees={assignees.length > 1}
+              hasMultipleAssignees={!isAnyoneTask && assignees.length > 1}
+              assignmentRotationFields={
+                showRotation && (
+                  <AssignmentRotationFields
+                    strategy={assignStrategy}
+                    assignees={assignees}
+                    people={assignableMembers}
+                    size='sm'
+                    showOrder={false}
+                    assignedTo={assignees[0].userId}
+                    value={rotation}
+                    onChange={setRotation}
+                  />
+                )
+              }
               // Empty assignees still implicitly assigns the current user at
               // create time; only an "Anyone" task truly has no assignee
               hasAssignees={!isAnyoneTask}

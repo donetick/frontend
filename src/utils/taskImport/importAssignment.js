@@ -1,6 +1,8 @@
+import { normalizeAssignStrategy } from '../AssignmentRotation.js'
+
 export const IMPORT_ASSIGN_STRATEGIES = [
   'keep_last_assigned',
-  'random',
+  'random_except_last_assigned',
   'least_completed',
   'round_robin',
 ]
@@ -19,7 +21,8 @@ export function resolveImportAssignment(assignment, userId) {
   }
   const userIds = [...new Set(assignment.userIds)]
   if (!userIds.length) throw new Error('Select at least one assignee.')
-  if (!IMPORT_ASSIGN_STRATEGIES.includes(assignment.strategy))
+  const strategy = normalizeAssignStrategy(assignment.strategy)
+  if (!IMPORT_ASSIGN_STRATEGIES.includes(strategy))
     throw new Error('Unsupported assignment strategy.')
   const assignedTo = assignment.assignedTo ?? userIds[0]
   if (!userIds.includes(assignedTo))
@@ -27,7 +30,6 @@ export function resolveImportAssignment(assignment, userId) {
   return {
     assignees: userIds.map(userId => ({ userId })),
     assignedTo,
-    assignStrategy:
-      userIds.length > 1 ? assignment.strategy : 'keep_last_assigned',
+    assignStrategy: userIds.length > 1 ? strategy : 'keep_last_assigned',
   }
 }

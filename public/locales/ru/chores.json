@@ -723,7 +723,7 @@
       "least_assigned": "Реже назначаемые",
       "least_completed": "Реже выполняющие",
       "keep_last_assigned": "Оставить последнего исполнителя",
-      "random_except_last_assigned": "Случайно, кроме последнего исполнителя",
+      "random_except_last_assigned": "Случайно",
       "round_robin": "По кругу",
       "no_assignee": "Без исполнителя"
     },
@@ -974,6 +974,7 @@
     "strategy": {
       "keep_last_assigned": "Оставить того же исполнителя",
       "random": "Случайный",
+      "random_except_last_assigned": "Случайный",
       "least_completed": "Реже выполняющие",
       "round_robin": "По кругу"
     },

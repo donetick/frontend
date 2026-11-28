@@ -723,7 +723,7 @@
       "least_assigned": "Le moins d'assignations",
       "least_completed": "Le moins de tâches terminées",
       "keep_last_assigned": "Garder la dernière assignation",
-      "random_except_last_assigned": "Aléatoire sauf la dernière assignation",
+      "random_except_last_assigned": "Aléatoire",
       "round_robin": "Tour de rôle",
       "no_assignee": "Aucune personne assignée"
     },
@@ -974,6 +974,7 @@
     "strategy": {
       "keep_last_assigned": "Conserver la même personne assignée",
       "random": "Aléatoire",
+      "random_except_last_assigned": "Aléatoire",
       "least_completed": "Le moins de tâches terminées",
       "round_robin": "Tour de rôle"
     },

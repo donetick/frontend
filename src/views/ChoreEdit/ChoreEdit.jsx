@@ -88,6 +88,13 @@ import {
 } from '../../queries/ChoreQueries.jsx'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
 import { useNotification } from '../../service/NotificationProvider'
+import {
+  buildAssignmentRotation,
+  canConfigureHandOff,
+  canConfigureOrder,
+  isRepeatingFrequency,
+  normalizeAssignStrategy,
+} from '../../utils/AssignmentRotation'
 import { canEditChore } from '../../utils/ChoreAccess'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
 import { sanitizeRemindersForPlan } from '../../utils/entitlements'
@@ -116,6 +123,7 @@ import { useSinglePageTaskEditor } from '../../utils/TaskEditorPreferences'
 import { generateUUID } from '../../utils/UUID'
 import { sortWeekdays } from '../../utils/WeekdayUtils'
 import { useProjectFilter } from '../Chores/hooks/useProjectFilter.js'
+import AssignmentRotationFields from '../components/AssignmentRotationFields'
 import HiddenLabelIndicator from '../components/HiddenLabelIndicator'
 import LoadingComponent from '../components/Loading.jsx'
 import RichTextEditor from '../components/RichTextEditor.jsx'
@@ -132,26 +140,15 @@ import RepeatSection from './RepeatSection'
 import WizardContainer from './WizardContainer'
 import WizardStepper from './WizardStepper'
 
-const STRATEGY_LABELS = {
-  random: 'Random user',
-  least_assigned: 'Least often assigned',
-  least_completed: 'Fewest completions',
-  keep_last_assigned: 'Keep the same user',
-  random_except_last_assigned: 'Random, excluding the last user',
-  round_robin: 'Rotate in order',
-  no_assignee: 'Leave unassigned',
-}
-
 const ASSIGN_STRATEGIES = [
-  'random',
+  'random_except_last_assigned',
   'least_assigned',
   'least_completed',
   'keep_last_assigned',
-  'random_except_last_assigned',
   'round_robin',
   'no_assignee',
 ]
-const DEFAULT_ASSIGN_STRATEGY = ASSIGN_STRATEGIES[3] // keep_last_assigned
+const DEFAULT_ASSIGN_STRATEGY = 'keep_last_assigned'
 const REPEAT_ON_TYPE = ['interval', 'days_of_the_week', 'day_of_the_month']
 
 const NO_DUE_DATE_REQUIRED_TYPE = ['no_repeat', 'once']
@@ -187,6 +184,7 @@ const ChoreEdit = () => {
   const [assignableTo, setAssignableTo] = useState([])
   const [performers, setPerformers] = useState([])
   const [assignStrategy, setAssignStrategy] = useState(DEFAULT_ASSIGN_STRATEGY)
+  const [rotation, setRotation] = useState(null)
   const [dueDate, setDueDate] = useState(null)
   const [dueDateOnly, setDueDateOnly] = useState(null)
   const [dueTime, setDueTime] = useState(null)
@@ -280,7 +278,11 @@ const ChoreEdit = () => {
   const assignablePerformers = filterMembersForProject(performers, choreProject)
   const assignees = anyone ? assignablePerformers : assignableTo
   const hasSpecificAssignees = !anyone && assignableTo.length > 0
-  const canPickStrategy = hasSpecificAssignees && assignableTo.length > 1
+  const hasMultipleAssignees = hasSpecificAssignees && assignableTo.length > 1
+  // A strategy only picks who gets the *next* occurrence, so a one-time task
+  // has nothing to choose.
+  const isRepeating = isRepeatingFrequency(frequencyType)
+  const canPickStrategy = hasMultipleAssignees && isRepeating
   const assignStrategyValue = !hasSpecificAssignees
     ? 'no_assignee'
     : canPickStrategy
@@ -293,6 +295,29 @@ const ChoreEdit = () => {
         ? assignedTo
         : assignableTo[0].userId
 
+  const showHandOff = canConfigureHandOff(
+    assignStrategyValue,
+    frequencyType,
+    assignableTo,
+  )
+  const showRotationOrder = canConfigureOrder(
+    assignStrategyValue,
+    frequencyType,
+    assignableTo,
+  )
+  // Round robin's order list marks and sets who's up now, so it replaces the
+  // separate picker; "Leave unassigned" has nobody to pick.
+  const showAssignedNow =
+    hasMultipleAssignees &&
+    assignStrategyValue !== 'no_assignee' &&
+    !showRotationOrder
+  const assignmentRotation = buildAssignmentRotation({
+    strategy: assignStrategyValue,
+    frequencyType,
+    assignees: assignableTo,
+    rotation,
+  })
+
   const snapshot = JSON.stringify({
     name,
     description,
@@ -303,6 +328,7 @@ const ChoreEdit = () => {
     assignableTo,
     assignedTo,
     assignStrategy,
+    assignmentRotation,
     dueDate,
     dueDateOnly,
     dueTime,
@@ -454,10 +480,10 @@ const ChoreEdit = () => {
     }
     if (assignStrategyValue !== 'no_assignee') {
       if (assignees.length === 0) {
-        errors.assignees = 'Choose at least one eligible user'
+        errors.assignees = t('choreEdit.errAssigneesRequired')
       }
       if (assignedToValue === null || assignedToValue < 0) {
-        errors.assignedTo = 'Choose who is assigned to this task'
+        errors.assignedTo = t('choreEdit.errAssignedToRequired')
       }
     }
     if (frequencyType === 'interval' && !frequency > 0) {
@@ -638,6 +664,9 @@ const ChoreEdit = () => {
       newChoreId = null
     }
     const assignees = anyone ? [] : assignableTo
+    const sendRotation =
+      assignmentRotation !== null ||
+      (newChoreId > 0 && Boolean(choreData?.res?.assignmentRotation))
     // The editor blocks Plus-only reminders on the way in, but a cloned task,
     // a queued offline edit or a task created while subscribed can still carry
     // them — so the plan is enforced once more on the way out.
@@ -657,6 +686,7 @@ const ChoreEdit = () => {
       frequencyMetadata: frequencyMetadata,
       assignedTo: assignedToValue,
       assignStrategy: assignStrategyValue,
+      ...(sendRotation && { assignmentRotation }),
       isRolling: isRolling,
       isActive: isActive,
       notification: isNotificable && planReminders.length > 0,
@@ -889,9 +919,10 @@ const ChoreEdit = () => {
       setPriority(data.res.priority)
       setAssignStrategy(
         data.res.assignStrategy
-          ? data.res.assignStrategy
+          ? normalizeAssignStrategy(data.res.assignStrategy)
           : DEFAULT_ASSIGN_STRATEGY,
       )
+      setRotation(data.res.assignmentRotation ?? null)
       setIsRolling(data.res.isRolling)
       setIsActive(data.res.isActive)
       setSubTasks(data.res.subTasks ? data.res.subTasks : [])
@@ -1092,12 +1123,12 @@ const ChoreEdit = () => {
   }
   const assignmentSummary = anyone
     ? selectedProjectIsPrivate
-      ? 'Anyone who can see this project'
-      : 'Anyone in your circle'
+      ? t('taskEditor.anyoneInProject')
+      : t('taskEditor.anyoneInCircle')
     : assignablePerformers
         .filter(user => assignableTo.some(a => a.userId === user.userId))
         .map(user => user.displayName)
-        .join(', ') || 'No eligible users selected'
+        .join(', ') || t('taskEditor.noEligibleUsers')
   if (
     (isChoreLoading && choreId) ||
     isUserLabelsLoading ||
@@ -1702,8 +1733,24 @@ const ChoreEdit = () => {
                       <Checkbox
                         checked={anyone}
                         onClick={() => {
-                          setAnyone(!anyone)
-                          setIsPrivate(false)
+                          if (!anyone) {
+                            // An "Anyone" task is visible to everyone who can
+                            // pick it up, so it can't stay private.
+                            setAnyone(true)
+                            setIsPrivate(false)
+                            return
+                          }
+                          // Turning "Anyone" off with nobody picked would leave
+                          // the task with no one; start from the current user.
+                          if (assignableTo.length === 0) {
+                            const me = assignablePerformers.find(
+                              p => p.userId === userProfile?.id,
+                            )
+                            const fallback = me ?? assignablePerformers[0]
+                            if (!fallback) return
+                            setAssignableTo([{ userId: fallback.userId }])
+                          }
+                          setAnyone(false)
                         }}
                         overlay
                         disableIcon
@@ -1812,8 +1859,8 @@ const ChoreEdit = () => {
                   sx={{ mt: 1 }}
                 >
                   {!showSaveAssigneeDefault
-                    ? 'This assignment matches your default for new tasks in this browser.'
-                    : 'Use as default applies this assignment to new tasks in this browser.'}
+                    ? t('taskEditor.assignmentMatchesDefault')
+                    : t('taskEditor.assignmentUseAsDefaultHint')}
                 </Typography>
                 {showSaveAssigneeDefault && (
                   <Box sx={{ mt: 1, display: 'flex', justifyContent: 'start' }}>
@@ -1856,52 +1903,80 @@ const ChoreEdit = () => {
                 )}
               </Box>
 
-              {assignees.length > 1 && (
-                <Box className='task-properties'>
-                  <Box mb={2}>
-                    <Typography level='h4'>
-                      {t('taskEditor.assignedNow')}
-                    </Typography>
-                    <Select
-                      placeholder={
-                        assignees.length === 0
-                          ? 'No Assignees yet can perform this task'
-                          : 'Select an assignee for this task'
-                      }
-                      disabled={assignees.length === 0}
-                      value={assignedTo > -1 ? assignedTo : null}
-                      onChange={(_, selectedUserId) =>
-                        setAssignedTo(selectedUserId)
-                      }
-                    >
-                      {assignablePerformers
-                        .filter(p => assignees.some(a => a.userId == p.userId))
-                        .map((item, index) => (
-                          <Option value={item.userId} key={item.displayName}>
-                            {item.displayName}
+              {hasMultipleAssignees && (
+                <Box
+                  className='task-properties'
+                  sx={{ display: 'grid', gap: 2 }}
+                >
+                  {canPickStrategy && (
+                    <Box>
+                      <Typography level='h4'>
+                        {t('assignmentRotation.strategy')}
+                      </Typography>
+                      <Select
+                        aria-label={t('assignmentRotation.strategy')}
+                        aria-describedby='assign-strategy-hint'
+                        value={assignStrategy}
+                        onChange={(_, value) => {
+                          if (value) setAssignStrategy(value)
+                        }}
+                      >
+                        {ASSIGN_STRATEGIES.map(value => (
+                          <Option key={value} value={value}>
+                            {t(`choreEdit.strategy.${value}`)}
                           </Option>
                         ))}
-                    </Select>
-                  </Box>
+                      </Select>
+                      <Typography
+                        id='assign-strategy-hint'
+                        level='body-xs'
+                        textColor='text.tertiary'
+                        sx={{ mt: 0.75 }}
+                      >
+                        {t(`assignmentRotation.strategyHint.${assignStrategy}`)}
+                      </Typography>
+                    </Box>
+                  )}
 
-                  <Box>
-                    <Typography level='h4'>
-                      {t('taskEditor.nextAssignment')}
-                    </Typography>
-                    <Select
-                      aria-label={t('taskEditor.nextAssignment')}
-                      value={assignStrategy}
-                      onChange={(_, value) => {
-                        if (value) setAssignStrategy(value)
-                      }}
-                    >
-                      {ASSIGN_STRATEGIES.map(value => (
-                        <Option key={value} value={value}>
-                          {STRATEGY_LABELS[value]}
-                        </Option>
-                      ))}
-                    </Select>
-                  </Box>
+                  {showAssignedNow && (
+                    <Box>
+                      <Typography level='h4'>
+                        {t('taskEditor.assignedNow')}
+                      </Typography>
+                      <Select
+                        aria-label={t('taskEditor.assignedNow')}
+                        placeholder={t('taskEditor.selectAssignee')}
+                        value={assignedToValue}
+                        onChange={(_, selectedUserId) =>
+                          setAssignedTo(selectedUserId)
+                        }
+                      >
+                        {assignablePerformers
+                          .filter(p =>
+                            assignableTo.some(a => a.userId === p.userId),
+                          )
+                          .map(item => (
+                            <Option value={item.userId} key={item.userId}>
+                              {item.displayName}
+                            </Option>
+                          ))}
+                      </Select>
+                    </Box>
+                  )}
+
+                  {(showHandOff || showRotationOrder) && (
+                    <AssignmentRotationFields
+                      strategy={assignStrategyValue}
+                      assignees={assignableTo}
+                      people={assignablePerformers}
+                      assignedTo={assignedToValue}
+                      onAssignedToChange={setAssignedTo}
+                      showHandOff={showHandOff}
+                      showOrder={showRotationOrder}
+                      value={rotation}
+                      onChange={setRotation}
+                    />
+                  )}
                 </Box>
               )}
             </EditorSection>

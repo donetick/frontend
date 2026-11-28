@@ -30,6 +30,7 @@
       "keep_last_assigned": "Each task stays with its starting assignee after completion.",
       "round_robin": "Each task starts with the person selected above, then rotates through the selected people in order.",
       "random": "Each task starts with the person selected above, then picks a random person after completion.",
+      "random_except_last_assigned": "Each task starts with the person selected above, then picks a random person other than the last one after completion.",
       "least_completed": "Each task starts with the person selected above, then goes to the person with the fewest completions."
     },
     "every": "Every",
@@ -952,12 +953,12 @@
     "assignStrategyDesc": "How to pick the next assignee for the following task?",
     "strategy": {
       "random": "Random",
-      "least_assigned": "Least Assigned",
-      "least_completed": "Least Completed",
-      "keep_last_assigned": "Keep Last Assigned",
-      "random_except_last_assigned": "Random Except Last Assigned",
-      "round_robin": "Round Robin",
-      "no_assignee": "No Assignee"
+      "least_assigned": "Least often assigned",
+      "least_completed": "Fewest completions",
+      "keep_last_assigned": "Keep the same user",
+      "random_except_last_assigned": "Random",
+      "round_robin": "Rotate in order",
+      "no_assignee": "Leave unassigned"
     },
     "startDate": "Start Date",
     "dueDate": "Due Date",
@@ -1017,7 +1018,9 @@
     "archive": "Archive",
     "unarchive": "Unarchive",
     "create": "Create",
-    "notificationsFreePlanNote": "Your plan includes a reminder on the due date. Plus adds reminders before it's due and follow-ups after."
+    "notificationsFreePlanNote": "Your plan includes a reminder on the due date. Plus adds reminders before it's due and follow-ups after.",
+    "errAssigneesRequired": "Choose at least one person who can be assigned.",
+    "errAssignedToRequired": "Choose who is assigned to this task."
   },
   "addTask": {
     "descriptionLabel": "Description:",
@@ -1208,6 +1211,7 @@
     "strategy": {
       "keep_last_assigned": "Keep same assignee",
       "random": "Random",
+      "random_except_last_assigned": "Random",
       "least_completed": "Least completed",
       "round_robin": "Round robin"
     },
@@ -1329,6 +1333,60 @@
     "yesterday": "Yesterday",
     "noteTitle": "Note - {{choreName}}"
   },
+  "assignmentRotation": {
+    "strategy": "Assignment strategy",
+    "handOff": "Pass to the next person",
+    "modes": {
+      "default": "Every time it's done",
+      "completions": "After a number of completions",
+      "scheduled_occurrences": "After a number of scheduled dates",
+      "week": "Weekly, on a set day",
+      "month": "Monthly, on a set day"
+    },
+    "countLabel": {
+      "scheduled_occurrences": "Scheduled dates per turn",
+      "completions": "Completions per turn"
+    },
+    "unit": {
+      "completions_one": "completion",
+      "completions_other": "completions",
+      "scheduled_occurrences_one": "scheduled date",
+      "scheduled_occurrences_other": "scheduled dates"
+    },
+    "weekday": "Day of the week",
+    "dayOfMonth": "Day of the month",
+    "dayN": "Day {{day}}",
+    "summary": {
+      "default": "Moves to the next person each time it's done.",
+      "completions_one": "Moves on after each completion. Skips don’t count.",
+      "completions_other": "Moves on after {{count}} completions. Skips don’t count.",
+      "scheduled_occurrences_one": "Moves on after each scheduled date, even if it was missed.",
+      "scheduled_occurrences_other": "Moves on after {{count}} scheduled dates, even if some were missed.",
+      "week": "Moves on with the first date on or after each {{day}}.",
+      "month": "Moves on with the first date on or after day {{day}} of each month."
+    },
+    "shortMonth": "Shorter months use their last day.",
+    "openTaskStays": "An occurrence that’s still open stays with its current assignee.",
+    "randomRule": "Each turn goes to someone other than the current assignee.",
+    "order": "Rotation order",
+    "orderHint": "Drag to change who goes next.",
+    "resetOrder": "Reset",
+    "badge": {
+      "now": "Now",
+      "next": "Next"
+    },
+    "member": "Member {{id}}",
+    "drag": "Drag to move {{name}}",
+    "strategyHint": {
+      "keep_last_assigned": "The person assigned now keeps it each time it repeats.",
+      "round_robin": "Passes to the next person in the rotation order.",
+      "random_except_last_assigned": "Passes to a random person, never the one who just had it.",
+      "least_assigned": "Passes to whoever has been assigned it the fewest times.",
+      "least_completed": "Passes to whoever has completed it the fewest times.",
+      "no_assignee": "Nobody is assigned. Anyone selected above can pick it up."
+    },
+    "orderHintCurrent": "The person at the top has it now. Drag to change the order or who goes first."
+  },
   "taskEditor": {
     "unsaved": "Unsaved",
     "closeTaskEditor": "Close task editor",
@@ -1413,6 +1471,12 @@
     "changeAThing": "Change a Thing",
     "inheritedFromSharedProject": "Inherited from the project: only its members can see tasks in it",
     "onlyProjectAudienceAssignable": "Only people who can see the project “{{project}}” can be assigned.",
-    "followsProjectName": "Follows the project “{{project}}”"
+    "followsProjectName": "Follows the project “{{project}}”",
+    "anyoneInProject": "Anyone who can see this project",
+    "anyoneInCircle": "Anyone in your circle",
+    "noEligibleUsers": "No one selected",
+    "selectAssignee": "Select who is assigned",
+    "assignmentMatchesDefault": "This assignment matches your default for new tasks in this browser.",
+    "assignmentUseAsDefaultHint": "Use as default applies this assignment to new tasks in this browser."
   }
 }

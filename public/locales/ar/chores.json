@@ -723,7 +723,7 @@
       "least_assigned": "أقل تعيينا",
       "least_completed": "أقل اكتمال",
       "keep_last_assigned": "الحفاظ على آخر تعيين",
-      "random_except_last_assigned": "باستثناء آخر تعيين عشوائي",
+      "random_except_last_assigned": "عشوائي",
       "round_robin": "جولة روبن",
       "no_assignee": "لا يوجد محال إليه"
     },
@@ -974,6 +974,7 @@
     "strategy": {
       "keep_last_assigned": "إبقاء نفس المحال إليه",
       "random": "عشوائي",
+      "random_except_last_assigned": "عشوائي",
       "least_completed": "أقل اكتمال",
       "round_robin": "بالتناوب"
     },
