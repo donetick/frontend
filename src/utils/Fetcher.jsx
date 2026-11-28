@@ -485,13 +485,23 @@ const GetThingHistory = (id, offset) => {
   })
 }
 
-const CreateLongLiveToken = name => {
+const CreateLongLiveToken = payload => {
   return Fetch(`/users/tokens`, {
     method: 'POST',
     headers: HEADERS(),
-    body: JSON.stringify({ name }),
+    body: JSON.stringify(payload),
   })
 }
+const GetAPITokenScopes = () =>
+  Fetch('/users/tokens/scopes', { method: 'GET', headers: HEADERS() })
+
+const UpdateAPIToken = (id, payload) =>
+  Fetch(`/users/tokens/${id}`, {
+    method: 'PUT',
+    headers: HEADERS(),
+    body: JSON.stringify(payload),
+  })
+
 const DeleteLongLiveToken = id => {
   return Fetch(`/users/tokens/${id}`, {
     method: 'DELETE',
@@ -1267,6 +1277,7 @@ export {
   DisconnectBridge,
   GetAllCircleMembers,
   GetAllUsers,
+  GetAPITokenScopes,
   GetArchivedChores,
   GetBridgeStatus,
   GetCalendarURL,
@@ -1338,6 +1349,7 @@ export {
   UnArchiveChore,
   UndoChoreAction,
   UnregisterDeviceToken,
+  UpdateAPIToken,
   UpdateChildPassword,
   UpdateChoreAssignee,
   UpdateChoreHistory,
