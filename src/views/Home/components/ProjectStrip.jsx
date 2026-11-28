@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
+import { useInboxLabel } from '../../../hooks/useInboxLabel'
 import { useResponsiveQuery } from '../../../hooks/useResponsiveQuery'
 import { getIconComponent } from '../../../utils/ProjectIcons'
 import { ProjectAccessIcon } from '../../Projects/ProjectVisibilityField'
@@ -28,6 +29,7 @@ const ProjectStrip = ({ projects }) => {
   // The default project is unnamed everywhere it is synthesized, so its label
   // comes from the same string the task list and the project picker use.
   const { t } = useTranslation(['common', 'chores'])
+  const inboxLabel = useInboxLabel()
   const navigate = useNavigate()
   const isDesktop = useResponsiveQuery('aboveMobile')
   const gridLimit = isDesktop ? GRID_LIMIT_DESKTOP : GRID_LIMIT_MOBILE
@@ -118,9 +120,7 @@ const ProjectStrip = ({ projects }) => {
               textColor='text.primary'
               sx={{ fontSize: 13, width: '100%' }}
             >
-              {project.id === DEFAULT_PROJECT_ID && !project.name
-                ? t('chores:toolbar.defaultProject')
-                : project.name}
+              {project.id === DEFAULT_PROJECT_ID ? inboxLabel : project.name}
               <ProjectAccessIcon
                 project={project}
                 sx={{ fontSize: 12, ml: 0.5, verticalAlign: 'text-bottom' }}

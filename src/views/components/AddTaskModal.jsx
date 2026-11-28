@@ -31,6 +31,7 @@ import { useModalShortcutScope } from '../../contexts/KeyboardShortcutScopeConte
 import { useQuickAddModalRegistration } from '../../contexts/QuickAddModalContext'
 import { useDocumentScanner } from '../../hooks/useDocumentScanner'
 import { useFileUpload } from '../../hooks/useFileUpload'
+import { useInboxLabel } from '../../hooks/useInboxLabel'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 import { useResponsiveQuery } from '../../hooks/useResponsiveQuery'
 import { useCreateChore } from '../../queries/ChoreQueries'
@@ -253,6 +254,7 @@ const TaskInput = ({
   onClose,
 }) => {
   const { t } = useTranslation('chores')
+  const inboxLabel = useInboxLabel()
   // Claims the keyboard while open so background listeners (e.g. the project
   // selector's own Cmd+E) know to stay out of the way — see
   // KeyboardShortcutScopeContext.
@@ -1726,7 +1728,7 @@ const TaskInput = ({
                       }}
                     >
                       {selectedProject.id === 'default'
-                        ? t('addTask.defaultProject')
+                        ? inboxLabel
                         : selectedProject.name}
                     </MenuButton>
                     <Menu
@@ -1750,7 +1752,7 @@ const TaskInput = ({
                               />
                             </ListItemDecorator>
                             {project.id === 'default'
-                              ? t('addTask.defaultProject')
+                              ? inboxLabel
                               : project.name}
                             {project.isPrivate && (
                               <Lock

@@ -16,6 +16,7 @@ import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import useConfirmationModal from '../../hooks/useConfirmationModal'
+import { useInboxLabel } from '../../hooks/useInboxLabel'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { filterMembersForProject } from '../../utils/ProjectAccess'
@@ -34,6 +35,7 @@ export default function BulkTaskImportModal({
   templateTitle,
 }) {
   const { t } = useTranslation('chores')
+  const inboxLabel = useInboxLabel()
   const { ResponsiveModal } = useResponsiveModal()
   const { confirmModalConfig, showConfirmation } = useConfirmationModal()
   const profileQuery = useUserProfile()
@@ -65,7 +67,7 @@ export default function BulkTaskImportModal({
     projectsQuery.isError ||
     (!loading && !profileQuery.data?.id)
   const destinationSummary = [
-    project?.name ?? t('addTask.defaultProject'),
+    project?.name ?? inboxLabel,
     sections.find(section => section.id === sectionId)?.name,
   ]
     .filter(Boolean)
@@ -99,7 +101,7 @@ export default function BulkTaskImportModal({
               }
             }}
           >
-            <Option value='default'>{t('addTask.defaultProject')}</Option>
+            <Option value='default'>{inboxLabel}</Option>
             {projects.map(project => (
               <Option key={project.id} value={project.id}>
                 {project.name}

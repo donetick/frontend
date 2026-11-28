@@ -23,6 +23,7 @@ import { useNavigate } from 'react-router-dom'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import { usePageShortcutScope } from '../../contexts/KeyboardShortcutScopeContext'
 import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
+import { useInboxLabel } from '../../hooks/useInboxLabel'
 import LABEL_COLORS, {
   getTextColorFromBackgroundColor,
 } from '../../utils/Colors'
@@ -38,6 +39,7 @@ const ProjectSelector = ({
   showKeyboardShortcuts = false,
 }) => {
   const { t } = useTranslation('projects')
+  const inboxLabel = useInboxLabel()
   const { data: projects = [], isLoading } = useProjects()
   const { isPlus, showPaywall } = usePaywall()
   const navigate = useNavigate()
@@ -280,7 +282,7 @@ const ProjectSelector = ({
                   }}
                 >
                   {effectiveSelectedProject === 'Default Project'
-                    ? t('chores:toolbar.defaultProject')
+                    ? inboxLabel
                     : effectiveSelectedProject}
                 </Typography>
               </>
@@ -401,7 +403,7 @@ const ProjectSelector = ({
                       : 'var(--joy-palette-text-primary)',
                 }}
               >
-                {t('chores:toolbar.defaultProject')}
+                {inboxLabel}
               </Typography>
               {effectiveSelectedProject === 'Default Project' && (
                 <Check

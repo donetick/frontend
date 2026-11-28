@@ -59,6 +59,7 @@ import KeyboardShortcutHint from '../../../components/common/KeyboardShortcutHin
 import SortAndFilterMenu from '../../../components/common/SortAndFilterMenu'
 import { viewportMedia } from '../../../constants/responsive'
 import { PAYWALL_REASON, usePaywall } from '../../../contexts/PaywallContext'
+import { useInboxLabel } from '../../../hooks/useInboxLabel'
 import { useUserProfile } from '../../../queries/UserQueries'
 import { FILTER_COLORS } from '../../../utils/Colors'
 import { canCreateQuickFilter } from '../../../utils/entitlements'
@@ -246,6 +247,7 @@ const ChoreToolbar = ({
   viewMode = 'default',
 }) => {
   const { t } = useTranslation('chores')
+  const inboxLabel = useInboxLabel()
   const { isPlus, showPaywall } = usePaywall()
   const [filterSheetOpen, setFilterSheetOpen] = useState(false)
   const [displaySheetOpen, setDisplaySheetOpen] = useState(false)
@@ -345,7 +347,7 @@ const ChoreToolbar = ({
         return labels.find(l => l.id === value)?.name || String(value)
       }
       if (condition.type === 'project') {
-        if (value === 'default') return 'Default Project'
+        if (value === 'default') return inboxLabel
         const project = projects.find(p => p.id === value)
         if (!project) return String(value)
         return project.isPrivate ? `🔒 ${project.name}` : project.name

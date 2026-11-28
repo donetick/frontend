@@ -45,6 +45,7 @@ import { useLocalization } from '../../contexts/LocalizationContext'
 import { useThemeSkin } from '../../contexts/ThemeSkinContext'
 import { useChorePermissions } from '../../hooks/useChorePermissions'
 import { useDescriptionHtml } from '../../hooks/useDescriptionHtml'
+import { useInboxLabel } from '../../hooks/useInboxLabel'
 import { usePendingCommands } from '../../hooks/usePendingCommands'
 import { useChore, useChoreHistory } from '../../queries/ChoreQueries.jsx'
 import {
@@ -128,6 +129,7 @@ const getNFCUrl = choreId =>
 const ChoreView = () => {
   const { choreId } = useParams()
   const { t } = useTranslation('chores')
+  const inboxLabel = useInboxLabel()
   const { fmt } = useLocalization()
   const { skin } = useThemeSkin()
   const completionColor = skin === 'default' ? 'success' : 'primary'
@@ -693,7 +695,7 @@ const ChoreView = () => {
         showSuccess({
           title: t('choreView.taskMovedTitle'),
           message: t('choreView.taskMovedMessage', {
-            project: project?.name || t('actionMenu.defaultProject'),
+            project: project?.name || inboxLabel,
           }),
         })
       }

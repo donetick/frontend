@@ -1,5 +1,6 @@
 import { FolderOpen } from '@mui/icons-material'
 
+import { useInboxLabel } from '../../hooks/useInboxLabel'
 import { ProjectAccessIcon } from '../Projects/ProjectVisibilityField'
 import BaseOptionPicker from './BaseOptionPicker'
 
@@ -10,8 +11,9 @@ const ProjectPickerField = ({
   projects = [],
   value = 'default',
 }) => {
+  const inboxLabel = useInboxLabel()
   const options = [
-    { id: 'default', name: 'Default Project', color: '#9CA3AF' },
+    { id: 'default', name: inboxLabel, color: '#9CA3AF' },
     ...projects.map(project => ({
       id: project.id,
       name: project.name,

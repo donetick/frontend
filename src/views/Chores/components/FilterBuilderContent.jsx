@@ -13,6 +13,7 @@ import { Avatar, Box, Button, Chip } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
 
 import NumberInput from '../../../components/common/NumberInput'
+import { useInboxLabel } from '../../../hooks/useInboxLabel'
 import Priorities from '../../../utils/Priorities'
 import { ProjectAccessIcon } from '../../Projects/ProjectVisibilityField'
 import CustomDueDateFields from './CustomDueDateFields'
@@ -143,6 +144,7 @@ const FilterBuilderContent = ({
   selections,
 }) => {
   const { t } = useTranslation('chores')
+  const inboxLabel = useInboxLabel()
   const toggleValue = (type, value) =>
     onSelectionsChange(prev => {
       const current = prev[type].values || []
@@ -249,7 +251,7 @@ const FilterBuilderContent = ({
       label: t('filterBuilder.projects'),
       visible: projects.length > 0,
       options: [
-        { value: 'default', label: t('filterBuilder.defaultProject') },
+        { value: 'default', label: inboxLabel },
         ...projects
           .filter(project => project.id !== 'default')
           .map(project => ({

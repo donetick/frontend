@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
+import { useInboxLabel } from '../../../hooks/useInboxLabel'
+
 export const useProjectFilter = (projects, projectsLoaded = false) => {
   const [, setSearchParams] = useSearchParams()
+  const inboxLabel = useInboxLabel()
   const [selectedProject, setSelectedProject] = useState(() => {
     const saved = localStorage.getItem('selectedProject')
     return saved ? JSON.parse(saved) : null
@@ -11,8 +14,7 @@ export const useProjectFilter = (projects, projectsLoaded = false) => {
   const projectsWithDefault = useMemo(() => {
     const defaultProject = {
       id: 'default',
-      name: 'Default Project',
-      description: 'Your default project workspace',
+      name: inboxLabel,
       color: '#1976d2',
       icon: 'FolderOpen',
     }
@@ -21,8 +23,12 @@ export const useProjectFilter = (projects, projectsLoaded = false) => {
       p => p.id === 'default' || p.name === 'Default Project',
     )
 
-    return hasDefault ? projects : [defaultProject, ...projects]
-  }, [projects])
+    return hasDefault
+      ? projects.map(project =>
+          project.id === 'default' ? { ...project, name: inboxLabel } : project,
+        )
+      : [defaultProject, ...projects]
+  }, [projects, inboxLabel])
 
   const setSelectedProjectWithCache = useCallback(
     project => {

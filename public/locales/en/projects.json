@@ -34,7 +34,7 @@
   "tasks_other": "{{count}} tasks",
   "delete": {
     "title": "Delete Project",
-    "message": "Are you sure you want to delete \"{{name}}\"? This will remove the project but keep all tasks (they'll move to the Default Project)."
+    "message": "Are you sure you want to delete \"{{name}}\"? This will remove the project but keep all tasks (they'll move to your inbox)."
   },
   "loadError": "Failed to load projects. Please try again.",
   "search": {

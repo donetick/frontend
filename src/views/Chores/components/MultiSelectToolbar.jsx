@@ -40,6 +40,7 @@ import AppModal from '../../../components/common/AppModal'
 import KeyboardShortcutHint from '../../../components/common/KeyboardShortcutHint'
 import { viewportMedia } from '../../../constants/responsive'
 import { useThemeSkin } from '../../../contexts/ThemeSkinContext'
+import { useInboxLabel } from '../../../hooks/useInboxLabel'
 import { useResponsiveQuery } from '../../../hooks/useResponsiveQuery'
 import LABEL_COLORS, {
   getTextColorFromBackgroundColor,
@@ -297,6 +298,7 @@ const MultiSelectToolbar = ({
   showKeyboardShortcuts,
 }) => {
   const { t } = useTranslation('chores')
+  const inboxLabel = useInboxLabel()
   const { skin } = useThemeSkin()
   const completionColor = skin === 'default' ? 'success' : 'primary'
   // Same phone-only condition ChoreActionMenu and AddTaskModal use: tablets and
@@ -526,16 +528,14 @@ const MultiSelectToolbar = ({
     <MenuItem
       key='__default'
       onClick={runAndClose(() =>
-        onMoveToProject({ id: null, name: t('multiToolbar.defaultProject') }),
+        onMoveToProject({ id: null, name: inboxLabel }),
       )}
     >
       <ListItemDecorator>
         {renderProjectAvatar(LABEL_COLORS[0].value, 'FolderOpen')}
       </ListItemDecorator>
       <ListItemContent>
-        <Typography level='body-sm'>
-          {t('multiToolbar.defaultProject')}
-        </Typography>
+        <Typography level='body-sm'>{inboxLabel}</Typography>
       </ListItemContent>
     </MenuItem>,
     ...projects.map(project => (

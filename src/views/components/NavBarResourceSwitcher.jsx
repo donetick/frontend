@@ -21,6 +21,7 @@ import { createElement } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
+import { useInboxLabel } from '../../hooks/useInboxLabel'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors'
 import { getIconComponent } from '../../utils/ProjectIcons'
 
@@ -81,6 +82,7 @@ const ResourceAvatar = ({ isSelected, item, type }) => {
 
 const NavBarResourceSwitcher = ({ selector, title }) => {
   const { t } = useTranslation(['common', 'projects', 'chores', 'filters'])
+  const inboxLabel = useInboxLabel()
   const navigate = useNavigate()
   const { items, onSelect, selectedId, type } = selector
   const config = TYPE_CONFIG[type] || TYPE_CONFIG.project
@@ -89,9 +91,7 @@ const NavBarResourceSwitcher = ({ selector, title }) => {
   )
 
   const getItemName = item =>
-    type === 'project' && item.id === 'default'
-      ? t('chores:toolbar.defaultProject')
-      : item.name
+    type === 'project' && item.id === 'default' ? inboxLabel : item.name
 
   const getItemDescription = item => {
     if (type === 'project' && item.id === 'default') {

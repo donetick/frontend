@@ -35,6 +35,7 @@ import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useNavBarTitle } from '../../contexts/NavBarTitleContext'
 import { TEMPLATE_ENTRY_POINT } from '../../data/taskTemplates'
 import { useFilter } from '../../hooks/useFilter'
+import { useInboxLabel } from '../../hooks/useInboxLabel'
 import { useResponsiveQuery } from '../../hooks/useResponsiveQuery'
 import { useChores } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
@@ -130,6 +131,7 @@ const MyChores = () => {
     isLoading: isUserProfileLoading,
   } = useUserProfile()
   const { t } = useTranslation('chores')
+  const inboxLabel = useInboxLabel()
   const isLargeScreen = useResponsiveQuery('mediumUp')
   const { showError, showSuccess, showUndo, showWarning } = useNotification()
   const queryClient = useQueryClient()
@@ -333,9 +335,7 @@ const MyChores = () => {
       ? activeFilter?.name || t('common:navigation.filters')
       : !isDefaultProject
         ? selectedProject.name
-        : hasCustomProjects
-          ? t('toolbar.defaultProject')
-          : t('common:navigation.allTasks')
+        : inboxLabel
   const projectSelector = useMemo(
     () =>
       hasCustomProjects && !activeFilterId && !tempFilter

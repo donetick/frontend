@@ -77,6 +77,7 @@ import { viewportMedia } from '../../constants/responsive'
 import { usePageShortcutScope } from '../../contexts/KeyboardShortcutScopeContext'
 import { usePaywall } from '../../contexts/PaywallContext'
 import { useDocumentScanner } from '../../hooks/useDocumentScanner'
+import { useInboxLabel } from '../../hooks/useInboxLabel'
 import { useResponsiveQuery } from '../../hooks/useResponsiveQuery'
 import {
   useArchiveChore,
@@ -159,6 +160,7 @@ const NO_DUE_DATE_ALLOWED_TYPE = ['trigger', 'always']
 const NOTIFICATION_FORBIDDEN_TYPE = ['trigger', 'always']
 const ChoreEdit = () => {
   const { i18n, t } = useTranslation('chores')
+  const inboxLabel = useInboxLabel()
   // Page-level shortcuts (save/cancel) must defer to whatever modal
   // currently owns the keyboard — see KeyboardShortcutScopeContext.
   const isPageShortcutActive = usePageShortcutScope()
@@ -2228,7 +2230,7 @@ const ChoreEdit = () => {
                       sx={{ minWidth: 0, width: '100%' }}
                     >
                       {/*               id: 'default',
-              name: 'Default Project',
+              name: inboxLabel,
               color: LABEL_COLORS[0].value,
               icon: 'FolderOpen',
                */}
@@ -2260,7 +2262,7 @@ const ChoreEdit = () => {
                               )
                             })()}
                           </Avatar>
-                          {t('choreEdit.defaultProject')}
+                          {inboxLabel}
                         </Box>
                       </Option>
                       {projects.map(project => (

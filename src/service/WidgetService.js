@@ -1,7 +1,9 @@
 import { Capacitor, registerPlugin } from '@capacitor/core'
 
+import i18n from '../i18n/config'
 import { apiClient } from '../utils/ApiClient'
 import { applyFilter } from '../utils/FilterEngine'
+import { isSharedInbox } from '../utils/Inbox'
 
 // Native bridge implemented in ios/App/App/WidgetBridgePlugin.swift and
 // android/.../widget/WidgetBridgePlugin.java. It persists the snapshot in
@@ -144,12 +146,18 @@ export const buildFilterWidgetTasks = (chores, filters, userId) =>
       .slice(0, MAX_FILTER_TASKS),
   )
 
-export const buildWidgetProjects = projects => {
+export const buildWidgetProjects = (projects, members = []) => {
+  const inboxLabel = i18n.t(
+    isSharedInbox(members) ? 'chores:inbox.sharedName' : 'chores:inbox.name',
+  )
   const normalized = (projects || [])
     .filter(project => project?.id != null)
     .map(project => ({
       id: String(project.id),
-      name: project.name || 'Project',
+      name:
+        String(project.id) === 'default'
+          ? inboxLabel
+          : project.name || 'Project',
       color: project.color || '#1976D2',
       icon: project.icon || null,
     }))
@@ -158,7 +166,7 @@ export const buildWidgetProjects = projects => {
   if (!normalized.some(project => project.id === 'default')) {
     normalized.unshift({
       id: 'default',
-      name: 'Default Project',
+      name: inboxLabel,
       color: '#64748B',
       icon: 'FolderOpen',
     })
@@ -202,7 +210,7 @@ const pushSnapshot = async queryClient => {
       lastUpdated: Date.now(),
       tasks: buildWidgetTasks(chores),
       projectTasks: buildProjectWidgetTasks(chores),
-      projects: buildWidgetProjects(projects),
+      projects: buildWidgetProjects(projects, members),
       filterTasks: buildFilterWidgetTasks(chores, filters, userId),
       filters: buildWidgetFilters(filters),
       members: buildWidgetMembers(members),

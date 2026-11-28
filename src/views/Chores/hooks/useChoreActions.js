@@ -3,6 +3,7 @@ import moment from 'moment'
 import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { useInboxLabel } from '../../../hooks/useInboxLabel'
 import {
   useArchiveChore,
   useUnArchiveChore,
@@ -73,6 +74,7 @@ export const useChoreActions = ({
   userProfile,
 }) => {
   const { t } = useTranslation('chores')
+  const inboxLabel = useInboxLabel()
   const queryClient = useQueryClient()
   const archiveChore = useArchiveChore()
   const unarchiveChore = useUnArchiveChore()
@@ -653,7 +655,7 @@ export const useChoreActions = ({
               updateChoreInState(updatedChore, 'moved-to-project')
               showSuccess({
                 title: t('actions.movedTitle'),
-                message: `Task moved to ${project?.name || 'Default Project'}.`,
+                message: `Task moved to ${project?.id && project.id !== 'default' ? project.name : inboxLabel}.`,
               })
             }
           } catch (error) {
@@ -705,6 +707,7 @@ export const useChoreActions = ({
       }
     },
     [
+      inboxLabel,
       impersonatedUser,
       chores,
       setChores,
@@ -1122,7 +1125,7 @@ export const useChoreActions = ({
         targets: getSelectedChoresData(chores),
         perChore: chore => expectOk(SaveChore({ ...chore, projectId })),
         successTitle: 'Tasks Moved',
-        successVerb: `Moved to ${project?.name || 'Default Project'} —`,
+        successVerb: `Moved to ${project?.id && project.id !== 'default' ? project.name : inboxLabel} —`,
         failureVerb: 'moved',
         onSucceeded: succeeded =>
           patchLocalChores(
@@ -1131,7 +1134,7 @@ export const useChoreActions = ({
           ),
       })
     },
-    [getSelectedChoresData, chores, runBulk, patchLocalChores],
+    [getSelectedChoresData, chores, runBulk, patchLocalChores, inboxLabel],
   )
 
   const handleBulkMoveToSection = useCallback(

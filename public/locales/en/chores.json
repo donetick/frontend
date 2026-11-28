@@ -1,5 +1,9 @@
 {
   "title": "Chores",
+  "inbox": {
+    "name": "Inbox",
+    "sharedName": "Shared Inbox"
+  },
   "templateLibrary": {
     "title": "Template Library",
     "progress": "Template setup progress",

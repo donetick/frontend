@@ -37,6 +37,7 @@ import SwipeListItem, {
 } from '../../components/common/SwipeListItem'
 import { viewportMedia } from '../../constants/responsive'
 import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
+import { useInboxLabel } from '../../hooks/useInboxLabel'
 import { useChores } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
@@ -261,6 +262,7 @@ const ProjectCardContent = ({
 
 const ProjectView = () => {
   const { t } = useTranslation(['projects', 'chores'])
+  const inboxLabel = useInboxLabel()
   const { data: projects, isError, isProjectsLoading } = useProjects()
   const { data: userProfile } = useUserProfile()
   const { showError } = useNotification()
@@ -349,10 +351,8 @@ const ProjectView = () => {
   const showDefaultProject = useMemo(() => {
     if (ownershipFilter === 'shared') return false
     if (!searchTerm) return true
-    return t('chores:toolbar.defaultProject')
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase())
-  }, [ownershipFilter, searchTerm, t])
+    return inboxLabel.toLowerCase().includes(searchTerm.toLowerCase())
+  }, [ownershipFilter, searchTerm, inboxLabel])
 
   const handleSearchChange = e => {
     setSearchTerm(e.target.value)
@@ -592,7 +592,7 @@ const ProjectView = () => {
           <ProjectCardContent
             project={{
               id: 'default',
-              name: t('chores:toolbar.defaultProject'),
+              name: inboxLabel,
               description: t('defaultDescription'),
               icon: 'FolderOpen',
               color: '#1976d2',
@@ -604,7 +604,7 @@ const ProjectView = () => {
             onCardClick={() =>
               handleCardClick({
                 id: 'default',
-                name: t('chores:toolbar.defaultProject'),
+                name: inboxLabel,
                 icon: 'FolderOpen',
                 color: '#1976d2',
               })
