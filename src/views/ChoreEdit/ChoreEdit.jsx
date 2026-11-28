@@ -44,8 +44,6 @@ import {
   FormHelperText,
   IconButton,
   Input,
-  List,
-  ListItem,
   Menu,
   MenuButton,
   MenuItem,
@@ -123,6 +121,7 @@ import { useSinglePageTaskEditor } from '../../utils/TaskEditorPreferences'
 import { generateUUID } from '../../utils/UUID'
 import { sortWeekdays } from '../../utils/WeekdayUtils'
 import { useProjectFilter } from '../Chores/hooks/useProjectFilter.js'
+import AssigneeRoster from '../components/AssigneeRoster'
 import AssignmentRotationFields from '../components/AssignmentRotationFields'
 import HiddenLabelIndicator from '../components/HiddenLabelIndicator'
 import LoadingComponent from '../components/Loading.jsx'
@@ -305,12 +304,10 @@ const ChoreEdit = () => {
     frequencyType,
     assignableTo,
   )
-  // Round robin's order list marks and sets who's up now, so it replaces the
-  // separate picker; "Leave unassigned" has nobody to pick.
+  // The roster marks who has the task now once several people share it;
+  // "Leave unassigned" has nobody to mark.
   const showAssignedNow =
-    hasMultipleAssignees &&
-    assignStrategyValue !== 'no_assignee' &&
-    !showRotationOrder
+    hasMultipleAssignees && assignStrategyValue !== 'no_assignee'
   const assignmentRotation = buildAssignmentRotation({
     strategy: assignStrategyValue,
     frequencyType,
@@ -1705,143 +1702,24 @@ const ChoreEdit = () => {
                 >
                   {t('taskEditor.chooseWhoCanBeAssignedThisTask')}
                 </Typography>
-                <Card variant='plain' sx={{ p: 0, bgcolor: 'transparent' }}>
-                  <List
-                    orientation='horizontal'
-                    wrap
-                    sx={{
-                      '--List-gap': '8px',
-                      '--ListItem-radius': '20px',
-                      p: 0,
-                      '& .MuiListItem-root': { minHeight: 36, px: 1.5 },
-                    }}
-                  >
-                    {/* add one for Anyone if no specific assignee is selected */}
-
-                    <ListItem
-                      key={'anyone'}
-                      sx={{
-                        border: '1px solid',
-                        borderColor: anyone
-                          ? 'primary.outlinedBorder'
-                          : 'neutral.outlinedBorder',
-                        bgcolor: anyone
-                          ? 'primary.softBg'
-                          : 'background.surface',
-                      }}
-                    >
-                      <Checkbox
-                        checked={anyone}
-                        onClick={() => {
-                          if (!anyone) {
-                            // An "Anyone" task is visible to everyone who can
-                            // pick it up, so it can't stay private.
-                            setAnyone(true)
-                            setIsPrivate(false)
-                            return
-                          }
-                          // Turning "Anyone" off with nobody picked would leave
-                          // the task with no one; start from the current user.
-                          if (assignableTo.length === 0) {
-                            const me = assignablePerformers.find(
-                              p => p.userId === userProfile?.id,
-                            )
-                            const fallback = me ?? assignablePerformers[0]
-                            if (!fallback) return
-                            setAssignableTo([{ userId: fallback.userId }])
-                          }
-                          setAnyone(false)
-                        }}
-                        overlay
-                        disableIcon
-                        variant='plain'
-                        label={
-                          <Box
-                            sx={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: 0.75,
-                            }}
-                          >
-                            {t('choreEdit.anyone')}
-                            {anyone && <Check sx={{ fontSize: 16 }} />}
-                          </Box>
-                        }
-                      />
-                    </ListItem>
-
-                    {assignablePerformers.map((item, index) => (
-                      <ListItem
-                        key={item.id}
-                        sx={{
-                          border: '1px solid',
-                          borderColor:
-                            !anyone &&
-                            assignableTo.some(a => a.userId === item.userId)
-                              ? 'primary.outlinedBorder'
-                              : 'neutral.outlinedBorder',
-                          bgcolor:
-                            !anyone &&
-                            assignableTo.some(a => a.userId === item.userId)
-                              ? 'primary.softBg'
-                              : 'background.surface',
-                        }}
-                      >
-                        <Checkbox
-                          checked={
-                            !anyone &&
-                            assignableTo.some(a => a.userId == item.userId)
-                          }
-                          onClick={() => {
-                            if (anyone) {
-                              setAnyone(false)
-                              setAssignableTo([{ userId: item.userId }])
-                              return
-                            }
-                            const assignees = assignableTo
-                            const setAssignees = setAssignableTo
-                            if (assignees.some(a => a.userId === item.userId)) {
-                              const newAssignees = assignees.filter(
-                                a => a.userId !== item.userId,
-                              )
-                              setAnyone(newAssignees.length === 0)
-                              setAssignees(newAssignees)
-                            } else {
-                              setAssignees([
-                                ...assignees,
-                                { userId: item.userId },
-                              ])
-                            }
-                          }}
-                          overlay
-                          disableIcon
-                          variant='plain'
-                          label={
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 0.75,
-                              }}
-                            >
-                              <Avatar
-                                sx={{ width: 22, height: 22, fontSize: 12 }}
-                                color='primary'
-                              >
-                                {item.displayName?.charAt(0).toUpperCase()}
-                              </Avatar>
-                              {item.displayName}
-                              {!anyone &&
-                                assignableTo.some(
-                                  a => a.userId === item.userId,
-                                ) && <Check sx={{ fontSize: 16 }} />}
-                            </Box>
-                          }
-                        />
-                      </ListItem>
-                    ))}
-                  </List>
-                </Card>
+                <AssigneeRoster
+                  anyone={anyone}
+                  onAnyoneChange={value => {
+                    // An "Anyone" task is visible to everyone who can pick it
+                    // up, so it can't stay private.
+                    if (value) setIsPrivate(false)
+                    setAnyone(value)
+                  }}
+                  people={assignablePerformers}
+                  selected={assignableTo}
+                  onSelectedChange={setAssignableTo}
+                  assignedTo={assignedToValue}
+                  onAssignedToChange={setAssignedTo}
+                  showNow={showAssignedNow}
+                  orderable={showRotationOrder}
+                  rotation={rotation}
+                  onRotationChange={setRotation}
+                />
                 {selectedProjectIsPrivate && (
                   <Typography
                     level='body-xs'
@@ -1938,41 +1816,13 @@ const ChoreEdit = () => {
                     </Box>
                   )}
 
-                  {showAssignedNow && (
-                    <Box>
-                      <Typography level='h4'>
-                        {t('taskEditor.assignedNow')}
-                      </Typography>
-                      <Select
-                        aria-label={t('taskEditor.assignedNow')}
-                        placeholder={t('taskEditor.selectAssignee')}
-                        value={assignedToValue}
-                        onChange={(_, selectedUserId) =>
-                          setAssignedTo(selectedUserId)
-                        }
-                      >
-                        {assignablePerformers
-                          .filter(p =>
-                            assignableTo.some(a => a.userId === p.userId),
-                          )
-                          .map(item => (
-                            <Option value={item.userId} key={item.userId}>
-                              {item.displayName}
-                            </Option>
-                          ))}
-                      </Select>
-                    </Box>
-                  )}
-
-                  {(showHandOff || showRotationOrder) && (
+                  {showHandOff && (
                     <AssignmentRotationFields
                       strategy={assignStrategyValue}
                       assignees={assignableTo}
                       people={assignablePerformers}
-                      assignedTo={assignedToValue}
-                      onAssignedToChange={setAssignedTo}
-                      showHandOff={showHandOff}
-                      showOrder={showRotationOrder}
+                      showHandOff
+                      showOrder={false}
                       value={rotation}
                       onChange={setRotation}
                     />

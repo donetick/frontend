@@ -1383,7 +1383,14 @@
       "least_completed": "Passes to whoever has completed it the fewest times.",
       "no_assignee": "Nobody is assigned. Anyone selected above can pick it up."
     },
-    "orderHintCurrent": "The person at the top has it now. Drag to change the order or who goes first."
+    "orderHintCurrent": "The person at the top has it now. Drag to change the order or who goes first.",
+    "add": "Add {{name}}",
+    "remove": "Remove {{name}}",
+    "makeCurrent": "Give {{name}} the task now",
+    "anyoneHint": "Anyone who can see it can pick it up",
+    "switchToAnyone": "Anyone",
+    "rosterHintNow": "Tap someone to give them the task now.",
+    "rosterHintOrder": "The person at the top has it now. Drag to change the order, or tap someone to start with them."
   },
   "taskEditor": {
     "unsaved": "Unsaved",
