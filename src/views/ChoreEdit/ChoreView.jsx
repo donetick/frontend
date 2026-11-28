@@ -7,7 +7,6 @@ import {
   Checklist,
   Edit,
   History,
-  MoreVert,
   OpenInFull,
   PeopleAlt,
   Person,
@@ -40,6 +39,11 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import EmptyState from '../../components/common/EmptyState'
 import ExternalLinkChip from '../../components/common/ExternalLinkChip'
+import {
+  PageActionsButton,
+  PageActionsSlot,
+} from '../../components/PageActions'
+import PageHeader from '../../components/PageHeader'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useThemeSkin } from '../../contexts/ThemeSkinContext'
@@ -831,6 +835,28 @@ const ChoreView = () => {
         overflowX: 'hidden',
       }}
     >
+      {/* No title: the task's name already headlines the card below. */}
+      <PageHeader />
+
+      <PageActionsSlot>
+        <ChoreActionMenu
+          chore={chore}
+          hiddenActions={['view']}
+          onAction={handleMenuAction}
+          onNudge={() => setActiveModal('nudge')}
+          onWriteNFC={() => setActiveModal('writeNFC')}
+          onCompleteWithNote={() => setNote('')}
+          onCompleteWithPastDate={() =>
+            setCompletedDate(moment(new Date()).format('YYYY-MM-DDTHH:00:00'))
+          }
+          onChangeAssignee={() => setActiveModal('changeAssignee')}
+          onChangeDueDate={() => setActiveModal('changeDueDate')}
+          onChangePriority={handleUpdatePriority}
+          onDelete={confirmDeleteChore}
+          trigger={<PageActionsButton />}
+        />
+      </PageActionsSlot>
+
       <Box
         sx={{
           display: 'flex',
@@ -1075,38 +1101,6 @@ const ChoreView = () => {
               {t('choreView.edit')}
             </Button>
           )}
-          <ChoreActionMenu
-            chore={chore}
-            hiddenActions={['view']}
-            onAction={handleMenuAction}
-            onNudge={() => setActiveModal('nudge')}
-            onWriteNFC={() => setActiveModal('writeNFC')}
-            onCompleteWithNote={() => setNote('')}
-            onCompleteWithPastDate={() =>
-              setCompletedDate(moment(new Date()).format('YYYY-MM-DDTHH:00:00'))
-            }
-            onChangeAssignee={() => setActiveModal('changeAssignee')}
-            onChangeDueDate={() => setActiveModal('changeDueDate')}
-            onChangePriority={handleUpdatePriority}
-            onDelete={confirmDeleteChore}
-            trigger={
-              <Button
-                size='sm'
-                color='neutral'
-                variant='plain'
-                fullWidth
-                sx={{
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  p: 1,
-                }}
-              >
-                <MoreVert />
-                {t('choreView.more', 'More')}
-              </Button>
-            }
-          />
         </Box>
 
         {chore.description && (

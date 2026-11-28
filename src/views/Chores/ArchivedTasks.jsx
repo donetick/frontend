@@ -9,13 +9,14 @@ import {
   PriorityHigh,
   SearchOff,
   SelectAll,
+  Sort,
   Tune,
   Unarchive,
 } from '@mui/icons-material'
 import {
-  Badge,
   Box,
   Button,
+  Chip,
   Container,
   Divider,
   IconButton,
@@ -32,7 +33,9 @@ import { useNavigate } from 'react-router-dom'
 import EmptyState from '../../components/common/EmptyState'
 import FilterBar from '../../components/common/FilterBar'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
-import SortAndFilterMenu from '../../components/common/SortAndFilterMenu'
+import { useSortPanelItems } from '../../components/common/useSortPanelItems'
+import PageActions from '../../components/PageActions'
+import PageHeader from '../../components/PageHeader'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { usePageShortcutScope } from '../../contexts/KeyboardShortcutScopeContext'
 import { useFilter } from '../../hooks/useFilter'
@@ -218,6 +221,19 @@ const ArchivedTasks = () => {
   const [sortDirection, setSortDirection] = useState(
     () => localStorage.getItem('archivedChoresSortDirection') || 'desc',
   )
+
+  const sortItems = useSortPanelItems({
+    direction: sortDirection,
+    onChange: setSortBy,
+    onDirectionChange: setSortDirection,
+    options: [
+      { name: t('archived.sortArchivedDate'), value: 'archivedAt' },
+      { name: t('archived.sortName'), value: 'name' },
+      { name: t('archived.sortPriority'), value: 'priority' },
+      { name: t('archived.sortDueDate'), value: 'dueDate' },
+    ],
+    value: sortBy,
+  })
 
   useEffect(() => {
     localStorage.setItem('archivedChoresSortBy', sortBy)
@@ -743,6 +759,8 @@ const ArchivedTasks = () => {
         pt: { xs: 0, md: 3 },
       }}
     >
+      <PageHeader />
+
       {/* Header */}
       {/* <Box
         sx={{
@@ -814,76 +832,41 @@ const ArchivedTasks = () => {
           }
         />
 
-        {/* Filter Sheet Trigger */}
-        <Badge
-          badgeContent={activeFilterCount || null}
-          color='primary'
-          size='sm'
-          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-          sx={{ display: 'flex', alignItems: 'center' }}
-        >
-          <IconButton
-            variant={hasActiveFilters ? 'solid' : 'outlined'}
-            color={hasActiveFilters ? 'primary' : 'neutral'}
-            size='sm'
-            sx={{
-              height: 32,
-              width: 32,
-              borderRadius: '50%',
-            }}
-            onClick={() => setIsFilterSheetOpen(true)}
-            title={t('archived.filtersTitle')}
-          >
-            <Tune />
-          </IconButton>
-        </Badge>
-
-        {/* Sort Menu */}
-        <SortAndFilterMenu
-          sortOptions={[
-            { name: t('archived.sortArchivedDate'), value: 'archivedAt' },
-            { name: t('archived.sortName'), value: 'name' },
-            { name: t('archived.sortPriority'), value: 'priority' },
-            { name: t('archived.sortDueDate'), value: 'dueDate' },
-          ]}
-          selectedSort={sortBy}
-          onSortChange={setSortBy}
-          sortDirection={sortDirection}
-          onSortDirectionChange={setSortDirection}
-          isActive={sortBy !== 'archivedAt' || sortDirection !== 'desc'}
-        />
-
-        {/* Multi-select Toggle Button */}
-        <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-          <IconButton
-            variant={isMultiSelectMode ? 'solid' : 'outlined'}
-            color={isMultiSelectMode ? 'primary' : 'neutral'}
-            size='sm'
-            sx={{
-              height: 32,
-              width: 32,
-              borderRadius: '50%',
-            }}
-            onClick={toggleMultiSelectMode}
-            title={
-              isMultiSelectMode
+        <PageActions
+          count={activeFilterCount}
+          actions={[
+            {
+              key: 'filters',
+              icon: <Tune />,
+              label: t('archived.filtersTitle'),
+              endDecorator:
+                activeFilterCount > 0 ? (
+                  <Chip size='sm' color='primary'>
+                    {activeFilterCount}
+                  </Chip>
+                ) : null,
+              onClick: () => setIsFilterSheetOpen(true),
+            },
+            {
+              key: 'sort',
+              icon: <Sort />,
+              label: t('common:sortAndFilter.sortBy'),
+              panel: 'sort',
+            },
+            { key: 'divider-select', type: 'divider' },
+            {
+              key: 'multiSelect',
+              icon: isMultiSelectMode ? <CheckBox /> : <CheckBoxOutlineBlank />,
+              label: isMultiSelectMode
                 ? t('archived.exitMultiSelect')
-                : t('archived.enableMultiSelect')
-            }
-          >
-            {isMultiSelectMode ? <CheckBox /> : <CheckBoxOutlineBlank />}
-          </IconButton>
-          <KeyboardShortcutHint
-            shortcut='S'
-            show={showKeyboardShortcuts}
-            sx={{
-              position: 'absolute',
-              top: -8,
-              right: -8,
-              zIndex: 1000,
-            }}
-          />
-        </Box>
+                : t('archived.enableMultiSelect'),
+              onClick: toggleMultiSelectMode,
+            },
+          ]}
+          panels={{
+            sort: { title: t('common:sortAndFilter.sortBy'), items: sortItems },
+          }}
+        />
       </Box>
 
       <FilterBar

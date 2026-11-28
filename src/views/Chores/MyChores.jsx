@@ -30,6 +30,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import EmptyState from '../../components/common/EmptyState'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
+import PageHeader from '../../components/PageHeader'
 import { viewportMedia } from '../../constants/responsive'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useNavBarTitle } from '../../contexts/NavBarTitleContext'
@@ -1160,6 +1161,8 @@ const MyChores = () => {
         }
         sx={{ px: 1, pt: { xs: 1, md: 3 }, minWidth: 0 }}
       >
+        <PageHeader />
+
         <ChoreToolbar
           enableBoard={isCustomProjectSelected}
           members={membersData?.res || []}

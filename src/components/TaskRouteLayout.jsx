@@ -9,6 +9,7 @@ import {
   useOutlet,
 } from 'react-router-dom'
 
+import { PageActionsRegion } from '../contexts/PageActionsRegionContext'
 import { TaskSidePaneContext } from '../contexts/TaskSidePaneContext'
 import { useResponsiveQuery } from '../hooks/useResponsiveQuery'
 import PageTransition from './animations/PageTransition'
@@ -67,7 +68,9 @@ export default function TaskRouteLayout() {
                 <CloseRounded />
               </IconButton>
             </Box>
-            {outlet}
+            {/* Its own region, so the task's header and actions stay in the
+                pane instead of joining the list's header on the left. */}
+            <PageActionsRegion name='task-pane'>{outlet}</PageActionsRegion>
           </ResizableTaskPane>
         )}
       </Box>
